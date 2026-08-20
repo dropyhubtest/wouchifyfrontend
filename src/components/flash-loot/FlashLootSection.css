@@ -1,0 +1,180 @@
+/* ==========================================================================
+   Flash Loot Deals Section Styles (1920 x 574 Reference Canvas)
+   ========================================================================== */
+
+.flash-loot-section {
+  width: 100%;
+  background-color: var(--color-white);
+  position: relative;
+  overflow: visible;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+}
+
+.flash-loot-canvas {
+  width: 1920px;
+  height: 574px;
+  position: relative;
+  flex-shrink: 0;
+  transform-origin: top center;
+  transform: scale(var(--flash-scale, 1));
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* ==========================================================================
+   1. Section Heading & Red Accent Circle
+   Heading: left: 79px; top: 42px; Poppins 40px/40px 600 weight
+   Red Circle: left: -38px; top: 34px; 75 x 75 (overflow: visible)
+   ========================================================================== */
+
+.flash-loot__header {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 75px;
+  z-index: 2;
+  overflow: visible;
+}
+
+.flash-loot__heading-accent {
+  position: absolute;
+  left: -38px;
+  top: 34px;
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  background-color: var(--color-red);
+  z-index: 0;
+}
+
+.flash-loot__title {
+  position: absolute;
+  left: 79px;
+  top: 42px;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-primary);
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 40px;
+  color: var(--color-black);
+  z-index: 1;
+}
+
+/* ==========================================================================
+   2. Urgent Deal Label Pill
+   Pill: left: 79px; top: 109px; width: 202px; height: 31px; background: #E31E25
+   Text: Poppins 18px 700 weight
+   ========================================================================== */
+
+.flash-loot__urgent-pill {
+  position: absolute;
+  left: 79px;
+  top: 109px;
+  width: 202px;
+  height: 31px;
+  border-radius: 999px;
+  background-color: var(--color-red);
+  color: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family-primary);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 18px;
+  z-index: 2;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   3. Latest Deals CTA Button
+   Position: left: 1630px; top: 72px; 169 x 39 px
+   ========================================================================== */
+
+.flash-loot__cta {
+  position: absolute;
+  left: 1630px;
+  top: 72px;
+  width: 169px;
+  height: 39px;
+  border-radius: 999px;
+  background-color: var(--color-red);
+  color: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family-primary);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 30px;
+  border: none;
+  text-decoration: none;
+  z-index: 2;
+  box-sizing: border-box;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.flash-loot__cta:hover {
+  opacity: 0.92;
+  transform: scale(1.02);
+}
+
+.flash-loot__cta:focus-visible {
+  outline: 3px solid var(--color-red);
+  outline-offset: 4px;
+}
+
+/* ==========================================================================
+   4. Flash Loot Banner Track & Card (684 x 297 px)
+   ========================================================================== */
+
+.flash-loot__track {
+  position: absolute;
+  left: 80px;
+  top: 182px;
+  display: flex;
+  gap: 40px;
+  z-index: 1;
+}
+
+.flash-loot__card {
+  width: 684px;
+  height: 297px;
+  flex: 0 0 684px;
+  border-radius: 20px;
+  overflow: hidden;
+  display: block;
+  background: transparent;
+  cursor: pointer;
+  text-decoration: none;
+  box-sizing: border-box;
+  transition: transform 0.2s ease;
+}
+
+.flash-loot__card:hover {
+  transform: translateY(-2px);
+}
+
+.flash-loot__card:focus-visible {
+  outline: 3px solid var(--color-red);
+  outline-offset: 4px;
+  border-radius: 20px;
+}
+
+.flash-loot__image {
+  width: 684px;
+  height: 297px;
+  display: block;
+  object-fit: contain;
+  border-radius: 20px;
+  pointer-events: none;
+  user-select: none;
+}

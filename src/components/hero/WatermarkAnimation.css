@@ -1,0 +1,72 @@
+/* ==========================================================================
+   Watermark Crossfade Animation Styles
+   ========================================================================== */
+
+.watermark-animation-wrapper {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.watermark-img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+  will-change: opacity;
+}
+
+.watermark-img-state-1 {
+  opacity: 1;
+  animation: watermarkCrossfade1 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.watermark-img-state-2 {
+  opacity: 0;
+  animation: watermarkCrossfade2 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes watermarkCrossfade1 {
+  0%,
+  35% {
+    opacity: 1;
+  }
+  50%,
+  85% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes watermarkCrossfade2 {
+  0%,
+  35% {
+    opacity: 0;
+  }
+  50%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Prefers Reduced Motion: Disable animation and keep State 1 only */
+@media (prefers-reduced-motion: reduce) {
+  .watermark-img-state-1 {
+    opacity: 1 !important;
+    animation: none !important;
+  }
+
+  .watermark-img-state-2 {
+    display: none !important;
+    animation: none !important;
+  }
+}

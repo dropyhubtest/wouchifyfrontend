@@ -1,0 +1,15 @@
+:root {
+  /* Brand Colors */
+  --color-red: #E31E25;
+  --color-navy: #2F368C;
+  --color-navy-dark: #2A3189;
+  --color-lavender: #E5E7FF;
+  --color-peach: #FDE0D1;
+  --color-peach-light: #F9E3D8;
+  --color-black: #000000;
+  --color-gray-dark: #202020;
+  --color-white: #FFFFFF;
+
+  /* Typography */
+  --font-family-primary: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}

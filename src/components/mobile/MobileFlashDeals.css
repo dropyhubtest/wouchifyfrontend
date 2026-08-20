@@ -1,0 +1,95 @@
+/* ==========================================================================
+   Mobile Flash Deals Section
+   ========================================================================== */
+
+.mobile-flash-deals {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  aspect-ratio: 440 / 238;
+  overflow: hidden;
+  background-image: url('../../assets/mobile/flash/mobile-flash-confetti-bg.png');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  box-sizing: border-box;
+}
+
+/* White Overlay to soften confetti background */
+.mobile-flash-deals::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.58);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Content Container Layer Safety */
+.mobile-flash-deals__content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* ==========================================================================
+   Heading Section & Semicircle Accent
+   ========================================================================== */
+
+.mobile-flash-deals__heading {
+  position: absolute;
+  left: 16px;
+  top: 18px;
+  margin: 0;
+  white-space: nowrap;
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 24px;
+  color: #000000;
+  z-index: 2;
+}
+
+/* Navy Partial Semicircle Accent */
+.mobile-flash-deals__accent {
+  position: absolute;
+  left: -7px;
+  top: 23px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #2A3189;
+  z-index: 1;
+}
+
+/* ==========================================================================
+   Flash Banner Link & Image
+   ========================================================================== */
+
+.mobile-flash-banner-link {
+  position: absolute;
+  left: 6.59%;
+  top: 26.89%;
+  width: 86.59%;
+  z-index: 2;
+  display: block;
+  text-decoration: none;
+}
+
+.mobile-flash-banner-link:focus-visible {
+  outline: 2px solid #2A3189;
+  outline-offset: 2px;
+  border-radius: 18px;
+}
+
+.mobile-flash-banner-image {
+  width: 381px;
+  height: 164px;
+  max-width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  border-radius: 18px;
+  cursor: pointer;
+}

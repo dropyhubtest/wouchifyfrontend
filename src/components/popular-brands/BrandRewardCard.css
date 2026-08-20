@@ -1,0 +1,225 @@
+/* ==========================================================================
+   Brand Reward Card Styles (Outer 360 x 360 px, Inner Design Canvas 398 x 398 px)
+   ========================================================================== */
+
+.brand-reward-card {
+  display: block;
+  text-decoration: none;
+  cursor: pointer;
+  color: inherit;
+  width: 360px;
+  height: 360px;
+  position: relative;
+  overflow: hidden;
+  flex: 0 0 360px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.brand-reward-card__design {
+  width: 398px;
+  height: 398px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: scale(0.9045226);
+  transform-origin: top left;
+  background-color: var(--color-peach);
+  border-radius: 20px;
+  overflow: visible;
+  box-shadow:
+    inset 0 4px 7px rgba(117, 83, 67, 0.20),
+    0 4px 4px rgba(0, 0, 0, 0.25);
+  box-sizing: border-box;
+}
+
+.brand-reward-card:hover {
+  transform: translateY(-2px);
+}
+
+.brand-reward-card:focus-visible {
+  outline: 3px solid var(--color-navy-dark);
+  outline-offset: 4px;
+  border-radius: 18px;
+}
+
+/* ==========================================================================
+   1. Discount Badge (left: 235px; top: 18px; width: 116px; height: 96px)
+   ========================================================================== */
+
+.brand-card__discount-badge {
+  position: absolute;
+  left: 235px;
+  top: 18px;
+  width: 116px;
+  height: 96px;
+  border-radius: 50%;
+  background-color: #C4B8B0;
+  color: var(--color-white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.brand-card__discount-number {
+  font-family: var(--font-family-primary);
+  font-size: 45px;
+  font-weight: 700;
+  line-height: 40px;
+  color: var(--color-white);
+  margin-top: -2px;
+}
+
+.brand-card__discount-text {
+  font-family: var(--font-family-primary);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--color-white);
+}
+
+/* ==========================================================================
+   2. White Logo Panel (left: 21px; top: 90px; width: 355px; height: 165px)
+   ========================================================================== */
+
+.brand-card__logo-panel {
+  position: absolute;
+  left: 21px;
+  top: 90px;
+  width: 355px;
+  height: 165px;
+  background-color: var(--color-white);
+  border-radius: 20px;
+  box-sizing: border-box;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.brand-card__logo-image {
+  /* Dynamic styles per brand applied via inline style from logoFrame */
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ==========================================================================
+   3. Navy Reward Strip (left: 0px; top: 276px; width: 355px; height: 122px)
+   ========================================================================== */
+
+.brand-card__reward-strip {
+  position: absolute;
+  left: 0;
+  top: 276px;
+  width: 355px;
+  height: 122px;
+  border-radius: 20px;
+  background-color: var(--color-navy-dark);
+  overflow: hidden;
+  z-index: 1;
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   4. Exact Figma Reward Strip Decorative Lines
+      Top short line: x: 297px, y: 305px, w: 28px, h: 2px, bg: #9498C4
+      Bottom long line: x: 269px, y: 318px, w: 46px, h: 2px, bg: #9498C4
+   ========================================================================== */
+
+.brand-card__reward-line {
+  position: absolute;
+  height: 2px;
+  background-color: #9498C4;
+  border-radius: 1px;
+  pointer-events: none;
+  z-index: 2;
+  display: block;
+}
+
+.brand-card__reward-line--top {
+  left: 297px;
+  top: 305px;
+  width: 28px;
+}
+
+.brand-card__reward-line--bottom {
+  left: 269px;
+  top: 318px;
+  width: 46px;
+}
+
+/* ==========================================================================
+   5. White Reward Circle (left: 31px; top: 291px; width: 92px; height: 92px)
+      Reward Ticket (left: 41px; top: 320px; width: 71px; height: 42px)
+   ========================================================================== */
+
+.brand-card__reward-circle {
+  position: absolute;
+  left: 31px;
+  top: 291px;
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background-color: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  box-sizing: border-box;
+}
+
+.brand-card__reward-ticket {
+  width: 71px;
+  height: 42px;
+  object-fit: contain;
+  display: block;
+}
+
+/* ==========================================================================
+   6. Reward Copy Positions (Fixed Absolute Coordinates)
+      UP TO: left 142px, top 304px
+      Percentage: left var(--percentage-x), top 322px
+      Reward Label: left var(--reward-label-x), top 342px
+   ========================================================================== */
+
+.brand-card__reward-upto {
+  position: absolute;
+  left: 142px;
+  top: 304px;
+  font-family: var(--font-family-primary);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 12px;
+  color: var(--color-white);
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.brand-card__reward-value {
+  position: absolute;
+  left: var(--percentage-x, 138px);
+  top: 322px;
+  font-family: var(--font-family-primary);
+  font-size: 42px;
+  font-weight: 700;
+  line-height: 42px;
+  color: var(--color-white);
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.brand-card__reward-label {
+  position: absolute;
+  left: var(--reward-label-x, 227px);
+  top: 342px;
+  font-family: var(--font-family-primary);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 18px;
+  color: var(--color-white);
+  white-space: nowrap;
+  z-index: 2;
+}

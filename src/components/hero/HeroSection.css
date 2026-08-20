@@ -1,0 +1,360 @@
+/* ==========================================================================
+   Hero Section Styles (1920 x 938 Reference Canvas)
+   ========================================================================== */
+
+.hero-section {
+  width: 100%;
+  background-color: var(--color-white);
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+}
+
+.hero-canvas {
+  width: 1920px;
+  height: 938px;
+  position: relative;
+  flex-shrink: 0;
+  transform-origin: top center;
+  transform: scale(var(--hero-scale, 1));
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   1. Watermark Wrappers (Absolute Canvas Positioning)
+   ========================================================================== */
+
+.hero-watermark-main-wrap {
+  left: 850px;
+  top: 25px;
+  width: 403px;
+  height: 266px;
+}
+
+.hero-watermark-secondary-wrap {
+  left: 1585px;
+  top: 606px;
+  width: 403px;
+  height: 266px;
+}
+
+/* ==========================================================================
+   2. Hero Copy & Typography
+   ========================================================================== */
+
+/* Eyebrow: left: 122px; top: 52px; width: 703px */
+.hero-eyebrow {
+  position: absolute;
+  left: 122px;
+  top: 52px;
+  width: 703px;
+  margin: 0;
+  font-family: var(--font-family-primary);
+  font-weight: 500;
+  font-size: 27px;
+  line-height: 27px;
+  color: var(--color-black);
+  z-index: 2;
+}
+
+/* Live Deals Pill: left: 122px; top: 119px; 292 x 39 */
+.hero-live-deals-pill {
+  position: absolute;
+  left: 122px;
+  top: 119px;
+  width: 292px;
+  height: 39px;
+  background-color: var(--color-peach-light);
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  z-index: 2;
+}
+
+.live-deals-dot {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  background-color: var(--color-red);
+  border-radius: 50%;
+}
+
+.live-deals-text {
+  padding-left: 34px;
+  font-family: var(--font-family-primary);
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 30px;
+  color: var(--color-black);
+}
+
+/* Main H1: 3 lines at left: 122px; top: 178px, 266px, 354px */
+.hero-heading {
+  margin: 0;
+  padding: 0;
+  z-index: 2;
+}
+
+.heading-line {
+  display: block;
+  position: absolute;
+  font-family: var(--font-family-primary);
+  font-weight: 700;
+  font-size: 80px;
+  line-height: 80px;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+}
+
+.heading-line-1 {
+  left: 122px;
+  top: 178px;
+  color: var(--color-navy-dark);
+}
+
+.heading-line-2 {
+  left: 122px;
+  top: 266px;
+  color: var(--color-red);
+}
+
+.heading-line-3 {
+  left: 122px;
+  top: 354px;
+  color: var(--color-navy-dark);
+}
+
+/* Description: left: 122px; top: 487px; width: 982px; Poppins 27px/41px with mixed weights */
+.hero-description {
+  position: absolute;
+  left: 122px;
+  top: 487px;
+  width: 982px;
+  margin: 0;
+  font-family: var(--font-family-primary);
+  font-weight: 400;
+  font-size: 27px;
+  line-height: 41px;
+  color: var(--color-black);
+  z-index: 2;
+}
+
+.desc-highlight {
+  font-weight: 600;
+}
+
+/* Deal Chips: left: 122px, 295px; top: 602px; 161 x 39 */
+.hero-deal-chip {
+  position: absolute;
+  top: 602px;
+  width: 161px;
+  height: 39px;
+  background-color: var(--color-red);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-white);
+  font-family: var(--font-family-primary);
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 30px;
+  box-sizing: border-box;
+  z-index: 2;
+}
+
+.hero-deal-chip-1 {
+  left: 122px;
+}
+
+.hero-deal-chip-2 {
+  left: 295px;
+}
+
+/* Primary CTA Button: left: 122px; top: 685px; 491 x 59 */
+.hero-primary-cta {
+  position: absolute;
+  left: 122px;
+  top: 685px;
+  width: 491px;
+  height: 59px;
+  background-color: var(--color-navy-dark);
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-white);
+  font-family: var(--font-family-primary);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 30px;
+  border: none;
+  cursor: pointer;
+  z-index: 2;
+  transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 14px rgba(42, 49, 137, 0.25);
+}
+
+.hero-primary-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(42, 49, 137, 0.35);
+}
+
+.hero-primary-cta:active {
+  transform: translateY(0);
+}
+
+.hero-primary-cta:focus-visible {
+  outline: 3px solid var(--color-red);
+  outline-offset: 3px;
+}
+
+/* ==========================================================================
+   3. Visual Callouts
+   ========================================================================== */
+
+/* Exclusive Deals Pill: left: 1298px; top: 108px; 183 x 39 */
+.hero-exclusive-pill {
+  position: absolute;
+  left: 1298px;
+  top: 108px;
+  width: 183px;
+  height: 39px;
+  background-color: var(--color-navy);
+  border-radius: 999px;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-white);
+  font-family: var(--font-family-primary);
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1;
+  z-index: 3;
+}
+
+/* Information Card: left: 1124px; top: 550px; 352 x 112 */
+.hero-info-card {
+  position: absolute;
+  left: 1124px;
+  top: 550px;
+  width: 352px;
+  height: 112px;
+  background-color: var(--color-white);
+  border: 1px solid #E2E2E2;
+  border-radius: 20px;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+  box-sizing: border-box;
+  z-index: 3;
+}
+
+.info-card-heading {
+  position: absolute;
+  left: 16px;
+  top: 22px;
+  width: 320px;
+  margin: 0;
+  white-space: nowrap;
+  font-family: var(--font-family-primary);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 20px;
+  color: var(--color-red);
+}
+
+.info-card-body {
+  position: absolute;
+  left: 16px;
+  top: 52px;
+  width: 320px;
+  margin: 0;
+  font-family: var(--font-family-primary);
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--color-black);
+}
+
+/* Grab Deal CTA: left: 1479px; top: 704px; 183 x 39 */
+.hero-grab-deal-cta {
+  position: absolute;
+  left: 1479px;
+  top: 704px;
+  width: 183px;
+  height: 39px;
+  background-color: var(--color-red);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-white);
+  font-family: var(--font-family-primary);
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1;
+  border: none;
+  cursor: pointer;
+  z-index: 3;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.hero-grab-deal-cta:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+.hero-grab-deal-cta:active {
+  transform: translateY(0);
+}
+
+.hero-grab-deal-cta:focus-visible {
+  outline: 3px solid var(--color-navy);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   4. Trust Statistics
+   ========================================================================== */
+
+.hero-trust-stats-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  z-index: 2;
+}
+
+.trust-stat-item {
+  position: static;
+}
+
+.stat-value {
+  position: absolute;
+  font-family: var(--font-family-primary);
+  font-weight: 700;
+  font-size: 80px;
+  line-height: 80px;
+  color: var(--color-red);
+  white-space: nowrap;
+  letter-spacing: -0.02em;
+}
+
+.stat-label {
+  position: absolute;
+  font-family: var(--font-family-primary);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 30px;
+  color: var(--color-gray-dark);
+  white-space: nowrap;
+}

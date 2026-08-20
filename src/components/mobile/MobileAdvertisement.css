@@ -1,0 +1,50 @@
+/* ==========================================================================
+   Mobile Advertisement Section
+   ========================================================================== */
+
+.mobile-advertisement {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  margin-top: 16px;
+  background: #FFFFFF;
+  overflow: visible;
+  box-sizing: border-box;
+}
+
+.mobile-advertisement__link {
+  position: relative;
+  display: block;
+  margin-left: 15px;
+  width: 410px;
+  max-width: calc(100vw - 30px);
+  height: auto;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.mobile-advertisement__link:focus-visible {
+  outline: 2px solid #2A3189;
+  outline-offset: 2px;
+  border-radius: 24px;
+}
+
+.mobile-advertisement__brand-logo {
+  position: absolute;
+  left: 6.68%;
+  top: 18.56%;
+  width: 32.94%;
+  height: auto;
+  display: block;
+  max-width: none;
+  object-fit: initial;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.mobile-advertisement__image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}

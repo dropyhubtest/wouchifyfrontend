@@ -1,0 +1,151 @@
+/* ==========================================================================
+   Popular Brands Section Styles (1920 x 1022 Reference Canvas)
+   ========================================================================== */
+
+.popular-brands-section {
+  width: 100%;
+  background-color: var(--color-white);
+  position: relative;
+  overflow: visible;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+}
+
+.popular-brands-canvas {
+  width: 1920px;
+  height: 1022px;
+  position: relative;
+  flex-shrink: 0;
+  transform-origin: top center;
+  transform: scale(var(--popular-scale, 1));
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* ==========================================================================
+   1. Section Heading & Navy Accent
+   Heading: left: 59px; top: 0; Poppins 40px/40px 600 weight
+   Navy Circle: left: -38px; top: -8px; 75 x 75 (overflow: visible)
+   ========================================================================== */
+
+.popular-brands__header {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 75px;
+  z-index: 2;
+  overflow: visible;
+}
+
+.popular-brands__heading-accent {
+  position: absolute;
+  left: -38px;
+  top: -8px;
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  background-color: var(--color-navy-dark);
+  z-index: 0;
+}
+
+.popular-brands__title {
+  position: absolute;
+  left: 59px;
+  top: 0;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-primary);
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 40px;
+  color: var(--color-black);
+  z-index: 1;
+}
+
+/* ==========================================================================
+   2. Carousel Viewport & Grid Track
+   Viewport: left: 0; top: 121px; width: 1920px; height: 780px; (overflow: hidden)
+   Grid: 2 rows (360px each) x Column Flow (360px width), col gap: 80px, row gap: 60px
+   Padding-left: 120px
+   ========================================================================== */
+
+.popular-brands__viewport {
+  position: absolute;
+  left: 0;
+  top: 121px;
+  width: 1920px;
+  height: 780px;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.popular-brands__track {
+  padding-left: 120px;
+  display: grid;
+  grid-template-rows: 360px 360px;
+  grid-auto-flow: column;
+  grid-auto-columns: 360px;
+  column-gap: 80px;
+  row-gap: 60px;
+  transition: transform 450ms cubic-bezier(0, 0, 0.58, 1);
+  will-change: transform;
+}
+
+/* ==========================================================================
+   3. Navigation Arrows (76 x 76 px)
+      Right arrow: left: 1828px; top: 473px;
+      Left arrow: left: 188px; top: 473px;
+   ========================================================================== */
+
+.popular-brands__arrow {
+  position: absolute;
+  top: 473px;
+  width: 76px;
+  height: 76px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.popular-brands__arrow:hover {
+  transform: scale(1.05);
+}
+
+.popular-brands__arrow:active {
+  transform: scale(0.95);
+}
+
+.popular-brands__arrow:focus-visible {
+  outline: 3px solid var(--color-navy-dark);
+  outline-offset: 4px;
+  border-radius: 50%;
+}
+
+.popular-brands__arrow--left {
+  left: 188px;
+}
+
+.popular-brands__arrow--right {
+  left: 1828px;
+}
+
+/* ==========================================================================
+   4. Prefers Reduced Motion Fallback
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .popular-brands__track {
+    transition: none !important;
+  }
+}

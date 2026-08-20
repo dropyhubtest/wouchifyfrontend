@@ -1,0 +1,93 @@
+/* ==========================================================================
+   Hero Visual Component Styles
+   Single Fixed Shared Red Circle with Moving Transparent Image Track
+   Viewport: left: 1151px; top: -214px; width: 850px; height: 969px;
+   ========================================================================== */
+
+.hero-visual {
+  position: absolute;
+  left: 1151px;
+  top: -214px;
+  width: 850px;
+  height: 969px;
+  overflow: hidden;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   1. Exactly One Fixed Shared Red Circle (Static Background Layer)
+   Figma: left: 127px; top: 310px; width: 586px; height: 586px;
+   ========================================================================== */
+
+.hero-red-circle {
+  position: absolute;
+  left: 127px;
+  top: 310px;
+  width: 586px;
+  height: 586px;
+  border-radius: 50%;
+  background-color: var(--color-red);
+  z-index: 0;
+  opacity: 1;
+  transform: none;
+  box-shadow: 0 10px 30px rgba(227, 30, 37, 0.2);
+}
+
+/* ==========================================================================
+   2. Moving Transparent Image Track (Above Fixed Circle)
+   Track: 1664 x 969; Slides between translateX(0) and translateX(-814px)
+   ========================================================================== */
+
+.hero-person-track {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1664px;
+  height: 969px;
+  z-index: 1;
+  transform: translateX(0);
+  transition: transform 500ms cubic-bezier(1, 0.003, 0, 0.993);
+  will-change: transform;
+}
+
+.hero-person-track.is-man {
+  transform: translateX(-814px);
+}
+
+.hero-person-image {
+  position: absolute;
+  top: 0;
+  max-width: none;
+  object-fit: initial;
+  display: block;
+}
+
+/* Woman Image: left: 0; width: 778px; height: 969px */
+.woman-image {
+  left: 0;
+  width: 778px;
+  height: 969px;
+}
+
+/* Man Image: left: 814px; width: 850px; height: 969px */
+.man-image {
+  left: 814px;
+  width: 850px;
+  height: 969px;
+}
+
+/* ==========================================================================
+   3. Prefers Reduced Motion Fallback
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-person-track {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .man-image {
+    display: none !important;
+  }
+}

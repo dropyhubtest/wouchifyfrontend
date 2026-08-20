@@ -1,0 +1,223 @@
+/* ==========================================================================
+   Shop by Top Stores Section Styles (1920 x 493 Reference Canvas)
+   ========================================================================== */
+
+.top-stores-section {
+  width: 100%;
+  background-color: var(--color-white);
+  position: relative;
+  overflow: visible;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+}
+
+.top-stores-canvas {
+  width: 1920px;
+  height: 493px;
+  position: relative;
+  flex-shrink: 0;
+  transform-origin: top center;
+  transform: scale(var(--stores-scale, 1));
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* ==========================================================================
+   1. Section Heading & Red Accent Circle
+   Heading: left: 79px; top: 0; Poppins 40px/40px 600 weight
+   Red Circle: left: -38px; top: -8px; 75 x 75 (overflow: visible)
+   ========================================================================== */
+
+.top-stores__header {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 75px;
+  z-index: 2;
+  overflow: visible;
+}
+
+.top-stores__heading-accent {
+  position: absolute;
+  left: -38px;
+  top: -8px;
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  background-color: var(--color-red);
+  z-index: 0;
+}
+
+.top-stores__title {
+  position: absolute;
+  left: 79px;
+  top: 0;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-primary);
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 40px;
+  color: var(--color-black);
+  z-index: 1;
+}
+
+/* ==========================================================================
+   2. Go to Stores CTA Button
+   Position: left: 1630px; top: 7px; 169 x 39 px
+   ========================================================================== */
+
+.top-stores__cta {
+  position: absolute;
+  left: 1630px;
+  top: 7px;
+  width: 169px;
+  height: 39px;
+  border-radius: 999px;
+  background-color: var(--color-red);
+  color: var(--color-white);
+  font-family: var(--font-family-primary);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 30px;
+  border: none;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  box-sizing: border-box;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.top-stores__cta:hover {
+  opacity: 0.92;
+  transform: scale(1.02);
+}
+
+.top-stores__cta:focus-visible {
+  outline: 3px solid var(--color-red);
+  outline-offset: 4px;
+}
+
+/* ==========================================================================
+   3. Promo Carousel Viewport & Track
+   Viewport: left: 0; top: 134px; width: 1920px; height: 237px; (overflow: hidden)
+   Track: display: flex, gap: 54px, padding-left: 127px
+   ========================================================================== */
+
+.top-stores__viewport {
+  position: absolute;
+  left: 0;
+  top: 134px;
+  width: 1920px;
+  height: 237px;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.top-stores__track {
+  display: flex;
+  gap: 54px;
+  padding-left: 127px;
+  transition: transform 450ms cubic-bezier(0, 0, 0.58, 1);
+  will-change: transform;
+}
+
+/* ==========================================================================
+   4. Promo Tiles (398 x 237 px, border-radius: 24px clips Figma gray corners)
+   ========================================================================== */
+
+.top-stores__tile {
+  width: 398px;
+  height: 237px;
+  flex: 0 0 398px;
+  border-radius: 24px;
+  overflow: hidden;
+  display: block;
+  background: transparent;
+  cursor: pointer;
+  text-decoration: none;
+  box-sizing: border-box;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.top-stores__tile:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.top-stores__tile:focus-visible {
+  outline: 3px solid var(--color-red);
+  outline-offset: 4px;
+  border-radius: 24px;
+}
+
+.top-stores__image {
+  width: 398px;
+  height: 237px;
+  display: block;
+  object-fit: cover;
+  border-radius: 24px;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ==========================================================================
+   5. Navigation Arrows (46 x 46 px)
+      Right arrow: left: 1858px; top: 216px;
+      Left arrow: left: 45px; top: 216px;
+   ========================================================================== */
+
+.top-stores__arrow {
+  position: absolute;
+  top: 216px;
+  width: 46px;
+  height: 46px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.top-stores__arrow:hover {
+  transform: scale(1.08);
+}
+
+.top-stores__arrow:active {
+  transform: scale(0.92);
+}
+
+.top-stores__arrow:focus-visible {
+  outline: 3px solid var(--color-red);
+  outline-offset: 4px;
+  border-radius: 50%;
+}
+
+.top-stores__arrow--left {
+  left: 45px;
+}
+
+.top-stores__arrow--right {
+  left: 1858px;
+}
+
+/* ==========================================================================
+   6. Prefers Reduced Motion Fallback
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .top-stores__track {
+    transition: none !important;
+  }
+}

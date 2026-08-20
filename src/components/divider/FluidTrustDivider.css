@@ -1,0 +1,122 @@
+/* ==========================================================================
+   Fluid Trust Divider Styles (1920 x 301 Reference Canvas)
+   ========================================================================== */
+
+.fluid-trust-divider {
+  width: 100%;
+  background-color: var(--color-white);
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+  outline: none;
+  cursor: default;
+}
+
+.fluid-trust-divider:focus-visible {
+  outline: 2px solid var(--color-navy-dark);
+  outline-offset: -2px;
+}
+
+.fluid-trust-divider__canvas {
+  width: 1920px;
+  height: 301px;
+  position: relative;
+  flex-shrink: 0;
+  transform-origin: top center;
+  transform: scale(var(--divider-scale, 1));
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   1. Blue Fluid Band Wrapper & Inline SVG Wave Matrix Morph
+   Figma: left: 0; top: 16px; width: 1920px; height: 208px;
+   ========================================================================== */
+
+.fluid-trust-divider__band {
+  position: absolute;
+  left: 0;
+  top: 16px;
+  width: 1920px;
+  height: 208px;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.fluid-trust-divider__wave-svg {
+  position: absolute;
+  inset: 0;
+  width: 1920px;
+  height: 208px;
+  display: block;
+}
+
+/* Default wave geometry */
+.fluid-wave-shape {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  transform: matrix(1, 0, 0, 1, 0, 104);
+  transition: transform 2s cubic-bezier(0, 0, 0.58, 1);
+  will-change: transform;
+}
+
+/* Activated wave geometry */
+.fluid-wave-shape.is-active {
+  transform: matrix(1, 0, 0, 2.261538, 0, -388);
+}
+
+/* ==========================================================================
+   2. Trust Content Overlay (White Poppins Text)
+   Always rendered at opacity: 1 above the SVG wave (z-index: 2).
+   Naturally reveals as the navy wave rises behind it against the white backdrop.
+   ========================================================================== */
+
+.fluid-trust-divider__content {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  opacity: 1;
+  transition: none;
+  pointer-events: none;
+}
+
+.fluid-trust-title {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-primary);
+  font-size: 45px;
+  font-weight: 700;
+  line-height: 45px;
+  color: var(--color-white);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.fluid-trust-subtitle {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-primary);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--color-white);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   3. Prefers Reduced Motion Fallback
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .fluid-wave-shape {
+    transition: none !important;
+    transform: matrix(1, 0, 0, 1, 0, 104) !important;
+  }
+}

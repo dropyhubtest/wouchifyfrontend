@@ -1,0 +1,155 @@
+/* ==========================================================================
+   Mobile Trending Best Sellers Section
+   ========================================================================== */
+
+.mobile-trending-deals {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  background: #E5E7FF;
+  margin-top: 20px;
+  padding-top: 20px;
+  padding-bottom: 24px;
+  overflow: visible;
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   Heading Section
+   ========================================================================== */
+
+.mobile-trending-deals-heading {
+  position: relative;
+  width: 100%;
+  height: 24px;
+  overflow: visible;
+}
+
+.mobile-trending-deals-heading h2 {
+  margin: 0;
+  margin-left: 16px;
+  white-space: nowrap;
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 24px;
+  color: #000000;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Red Partial Semicircle Accent */
+.mobile-trending-deals-heading__accent {
+  position: absolute;
+  left: -7px;
+  top: 5px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #E31E25;
+}
+
+/* ==========================================================================
+   Navy Pill Trending Label
+   ========================================================================== */
+
+.mobile-trending-deals__label-pill {
+  margin-left: 16px;
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #2A3189;
+  gap: 4px;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.mobile-trending__prefix {
+  font-family: 'Poppins', sans-serif;
+  font-size: 10.5px;
+  font-weight: 400;
+  line-height: 14px;
+  color: #D1D4EC;
+  white-space: nowrap;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mobile-trending__highlight {
+  font-family: 'Poppins', sans-serif;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 14px;
+  color: #FFFFFF;
+  white-space: nowrap;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   Carousel Wrapper & Track
+   ========================================================================== */
+
+.mobile-trending-deals__row {
+  margin-top: 24px;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-left: 20px;
+  padding-right: 20px;
+  box-sizing: border-box;
+}
+
+.mobile-trending-deals__row::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-trending-deals__track {
+  display: flex;
+  gap: 14px;
+  width: max-content;
+  padding-bottom: 8px;
+  scroll-snap-type: x mandatory;
+}
+
+/* ==========================================================================
+   Mobile Trending Card (#EFEFEF outer frame with 10px padding)
+   ========================================================================== */
+
+.mobile-trending-card {
+  width: 342px;
+  height: 205px;
+  flex: 0 0 342px;
+  scroll-snap-align: start;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 10px;
+  background: #EFEFEF;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 7px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.mobile-trending-card:focus-visible {
+  outline: 2px solid #2A3189;
+  outline-offset: 2px;
+}
+
+/* Inner Banner Image */
+.mobile-trending-card__image {
+  max-width: 322px;
+  max-height: 193px;
+  width: auto;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  border-radius: 16px;
+  pointer-events: none;
+}

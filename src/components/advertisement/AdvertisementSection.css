@@ -1,0 +1,123 @@
+/* ==========================================================================
+   Advertisement Section Styles (1920 x 865 Reference Canvas)
+   ========================================================================== */
+
+.advertisement-section {
+  width: 100%;
+  background-color: #FFFFFF;
+  position: relative;
+  overflow: visible;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+}
+
+.advertisement-canvas {
+  width: 1920px;
+  height: 865px;
+  position: relative;
+  flex-shrink: 0;
+  transform-origin: top center;
+  transform: scale(var(--advertisement-scale, 1));
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* ==========================================================================
+   1. Section Heading & Navy Accent Circle
+   Heading: left: 79px; top: 0; Poppins 40px/40px 600 weight
+   Navy Circle: left: -38px; top: -8px; 75 x 75 (#2A3189)
+   ========================================================================== */
+
+.advertisement__header {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 75px;
+  z-index: 2;
+  overflow: visible;
+}
+
+.advertisement__heading-accent {
+  position: absolute;
+  left: -38px;
+  top: -8px;
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  background: #2A3189;
+  z-index: 0;
+}
+
+.advertisement__title {
+  position: absolute;
+  left: 79px;
+  top: 0;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 40px;
+  color: #000000;
+  z-index: 1;
+}
+
+/* ==========================================================================
+   2. Advertisement Banner (1713 x 685 px)
+   Position: left: 88px; top: 129px
+   ========================================================================== */
+
+.advertisement__container {
+  position: absolute;
+  left: 88px;
+  top: 129px;
+  width: 1713px;
+  height: 685px;
+  z-index: 1;
+}
+
+.advertisement__banner-link {
+  position: relative;
+  display: block;
+  width: 1713px;
+  height: 685px;
+  text-decoration: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  background: transparent;
+}
+
+.advertisement__banner-link:focus-visible {
+  outline: 3px solid #2A3189;
+  outline-offset: 4px;
+}
+
+.advertisement__brand-logo {
+  position: absolute;
+  left: 121px;
+  top: 82px;
+  width: 596px;
+  height: auto;
+  display: block;
+  max-width: none;
+  object-fit: initial;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.advertisement__banner-image {
+  width: 1713px;
+  height: 685px;
+  display: block;
+  object-fit: contain;
+  cursor: pointer;
+  background: transparent;
+  border-radius: 0;
+  pointer-events: none;
+  user-select: none;
+}

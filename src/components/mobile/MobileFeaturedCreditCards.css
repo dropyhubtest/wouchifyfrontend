@@ -1,0 +1,174 @@
+/* ==========================================================================
+   Mobile Top Featured Credit Cards Section
+   ========================================================================== */
+
+.mobile-featured-credit-cards {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  margin-top: 24px;
+  background: #E5E7FF;
+  padding-top: 20px;
+  padding-bottom: 30px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   Heading Section & Navy Semicircle Accent
+   ========================================================================== */
+
+.mobile-featured-credit-cards-heading {
+  position: relative;
+  width: 100%;
+  height: 24px;
+  overflow: visible;
+}
+
+.mobile-featured-credit-cards-heading h2 {
+  margin: 0;
+  margin-left: 16px;
+  white-space: nowrap;
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 24px;
+  color: #000000;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Navy Partial Semicircle Accent */
+.mobile-featured-credit-cards-heading__accent {
+  position: absolute;
+  left: -7px;
+  top: 5px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #2A3189;
+}
+
+/* ==========================================================================
+   Offer Pill
+   ========================================================================== */
+
+.mobile-featured-credit-cards__pill {
+  margin-left: 16px;
+  margin-top: 8px;
+  width: 174px;
+  height: 20px;
+  border-radius: 999px;
+  background: #2A3189;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.mobile-featured-credit-cards__pill-text {
+  color: #FFFFFF;
+  font-family: 'Poppins', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 12px;
+  white-space: nowrap;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   ICICI Bank Identity Row
+   ========================================================================== */
+
+.mobile-credit-card__bank-row {
+  display: flex;
+  align-items: center;
+  margin-left: 32px;
+  margin-top: 10px;
+}
+
+.mobile-credit-card__bank-mark {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+}
+
+.mobile-credit-card__bank-name {
+  margin-left: -8px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 32px;
+  color: #000000;
+}
+
+/* ==========================================================================
+   Card Artwork Wrapper & Link
+   ========================================================================== */
+
+.mobile-credit-card__art-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: -22px;
+  width: 100%;
+}
+
+.mobile-credit-card__art-link {
+  display: block;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.mobile-credit-card__art-link:focus-visible {
+  outline: 2px solid #2A3189;
+  outline-offset: 2px;
+  border-radius: 16px;
+}
+
+.mobile-credit-card__art-image {
+  width: 273px;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+/* ==========================================================================
+   Offer Description
+   ========================================================================== */
+
+.mobile-credit-card__description {
+  margin-top: 10px;
+  margin-left: 20px;
+  margin-right: 20px;
+  text-align: center;
+  color: #2A3189;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: pre-line;
+}
+
+/* ==========================================================================
+   Pagination Dots
+   ========================================================================== */
+
+.mobile-featured-credit-cards__pagination {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.mobile-featured-credit-cards__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  background: #D9D9D9;
+}
+
+.mobile-featured-credit-cards__dot--active {
+  background: #2A3189;
+}

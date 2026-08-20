@@ -1,0 +1,161 @@
+.mobile-header {
+  position: relative;
+  width: 100%;
+  height: 65px;
+  background: #EEEFFF;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.mobile-header__menu {
+  position: absolute;
+  left: 10px;
+  top: 18px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  margin: 0;
+  padding: 0 6px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  z-index: 2;
+  box-sizing: border-box;
+}
+
+.mobile-header__menu span {
+  display: block;
+  width: 16px;
+  height: 2px;
+  background: #2B2B2B;
+  border-radius: 1px;
+}
+
+.mobile-header__logo {
+  position: absolute;
+  left: 43px;
+  top: 17px;
+  width: 164px;
+  height: auto;
+  max-width: none;
+  display: block;
+  object-fit: initial;
+  margin: 0;
+  padding: 0;
+  transform: none;
+  z-index: 1;
+}
+
+/* Mobile Favorite Action */
+.mobile-header__favorite {
+  position: absolute;
+  right: 16px;
+  top: 20px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.mobile-header__favorite img {
+  width: 24px;
+  height: 24px;
+  display: block;
+  object-fit: contain;
+}
+
+/* Mobile Navigation Drawer Overlay */
+.mobile-drawer-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 998;
+}
+
+.mobile-nav-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  max-width: 80vw;
+  height: 100vh;
+  background: #FFFFFF;
+  z-index: 999;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  animation: slideInLeft 0.2s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.mobile-drawer-header {
+  height: 65px;
+  background: #EEEFFF;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid #D9D9D9;
+}
+
+.mobile-drawer-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2A3189;
+}
+
+.mobile-drawer-close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  color: #000000;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.mobile-drawer-list {
+  list-style: none;
+  margin: 0;
+  padding: 16px 0;
+}
+
+.mobile-drawer-item {
+  margin: 0;
+}
+
+.mobile-drawer-link {
+  display: block;
+  padding: 12px 20px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #000000;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.mobile-drawer-link:hover,
+.mobile-drawer-link.active {
+  background: #F0F2FF;
+  color: #2A3189;
+  font-weight: 600;
+}

@@ -1,0 +1,160 @@
+/* ==========================================================================
+   Recently Added Deals Section Styles (1920 x 482 Reference Canvas)
+   ========================================================================== */
+
+.recent-deals-section {
+  width: 100%;
+  background-color: var(--color-white);
+  position: relative;
+  overflow: visible;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+}
+
+.recent-deals-canvas {
+  width: 1920px;
+  height: 482px;
+  position: relative;
+  flex-shrink: 0;
+  transform-origin: top center;
+  transform: scale(var(--recent-scale, 1));
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* ==========================================================================
+   1. Section Heading & Navy Accent Circle
+   Heading: left: 79px; top: 0; Poppins 40px/40px 600 weight
+   Navy Circle: left: -38px; top: -8px; 75 x 75 (overflow: visible)
+   ========================================================================== */
+
+.recent-deals__header {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 75px;
+  z-index: 2;
+  overflow: visible;
+}
+
+.recent-deals__heading-accent {
+  position: absolute;
+  left: -38px;
+  top: -8px;
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  background-color: var(--color-navy-dark);
+  z-index: 0;
+}
+
+.recent-deals__title {
+  position: absolute;
+  left: 79px;
+  top: 0;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-primary);
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 40px;
+  color: var(--color-black);
+  z-index: 1;
+}
+
+/* ==========================================================================
+   2. Latest Deals CTA Button
+   Position: left: 1630px; top: 10px; 169 x 39 px
+   ========================================================================== */
+
+.recent-deals__cta {
+  position: absolute;
+  left: 1630px;
+  top: 10px;
+  width: 169px;
+  height: 39px;
+  border-radius: 999px;
+  background-color: var(--color-navy-dark);
+  color: var(--color-white);
+  font-family: var(--font-family-primary);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 30px;
+  border: none;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  box-sizing: border-box;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.recent-deals__cta:hover {
+  opacity: 0.92;
+  transform: scale(1.02);
+}
+
+.recent-deals__cta:focus-visible {
+  outline: 3px solid var(--color-navy-dark);
+  outline-offset: 4px;
+}
+
+/* ==========================================================================
+   3. Deal Cards Container & Outer Figma Frame (422 x 261 px)
+   Background: #F7F7F7, Padding: 12px, Shadow: 0 4px 4px rgba(0, 0, 0, 0.20)
+   ========================================================================== */
+
+.recent-deals__cards-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.recent-deals__card {
+  position: absolute;
+  width: 422px;
+  height: 261px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 12px;
+  background: #EFEFEF;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.20);
+  cursor: pointer;
+  text-decoration: none;
+  pointer-events: auto;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.recent-deals__card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.22);
+}
+
+.recent-deals__card:focus-visible {
+  outline: 3px solid var(--color-navy-dark);
+  outline-offset: 4px;
+  border-radius: 20px;
+}
+
+.recent-deals__image {
+  max-width: 398px;
+  max-height: 237px;
+  width: auto;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  border-radius: 16px;
+  pointer-events: none;
+  user-select: none;
+}

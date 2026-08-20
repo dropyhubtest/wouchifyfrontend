@@ -1,0 +1,124 @@
+/* ==========================================================================
+   Announcement Marquee Styles (1920 x 110 Reference Canvas)
+   ========================================================================== */
+
+.announcement-marquee {
+  width: 100%;
+  background-color: transparent;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+}
+
+.announcement-marquee__canvas {
+  width: 1920px;
+  height: 110px;
+  position: relative;
+  flex-shrink: 0;
+  transform-origin: top center;
+  transform: scale(var(--marquee-scale, 1));
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   1. Thin Navy Outline Strip
+   Figma: left: -28px; top: 34px; width: 1982px; height: 36px; border: 1px solid #2A3189;
+   ========================================================================== */
+
+.announcement-marquee__outline {
+  position: absolute;
+  left: -28px;
+  top: 34px;
+  width: 1982px;
+  height: 36px;
+  border: 1px solid var(--color-navy-dark);
+  background-color: transparent;
+  z-index: 0;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   2. Marquee Viewport & Moving Track
+   Track: top: 40px; height: 30px;
+   Animation: Frame 1 (translateX(11px)) <-> Frame 2 (translateX(-868px))
+   ========================================================================== */
+
+.announcement-marquee__viewport {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 110px;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.announcement-marquee__track {
+  position: absolute;
+  left: 0;
+  top: 40px;
+  height: 30px;
+  width: max-content;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  will-change: transform;
+  animation: announcementMarqueeMotion 10s linear infinite alternate;
+}
+
+@keyframes announcementMarqueeMotion {
+  from {
+    transform: translateX(11px);
+  }
+  to {
+    transform: translateX(-868px);
+  }
+}
+
+/* ==========================================================================
+   3. Marquee Item, Ticket Icon, and Typography
+   ========================================================================== */
+
+.announcement-marquee__item {
+  display: flex;
+  align-items: center;
+  height: 30px;
+  flex-shrink: 0;
+}
+
+.announcement-marquee__ticket {
+  display: block;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 23px;
+  max-width: none;
+  object-fit: fill;
+  opacity: 1;
+  visibility: visible;
+  filter: none;
+}
+
+.announcement-marquee__message {
+  font-family: var(--font-family-primary);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 30px;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   4. Prefers Reduced Motion Fallback
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .announcement-marquee__track {
+    animation: none !important;
+    transform: translateX(11px) !important;
+  }
+}

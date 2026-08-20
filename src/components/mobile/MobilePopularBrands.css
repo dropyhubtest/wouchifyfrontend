@@ -1,0 +1,174 @@
+/* ==========================================================================
+   Mobile Most Popular Brands Section
+   ========================================================================== */
+
+.mobile-popular-brands {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  background: #FFFFFF;
+  overflow: visible;
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   Heading Section
+   ========================================================================== */
+
+.mobile-popular-heading {
+  position: relative;
+  width: 100%;
+  height: 24px;
+  margin-top: 16px;
+  overflow: visible;
+}
+
+.mobile-popular-heading h2 {
+  margin: 0;
+  margin-left: 16px;
+  white-space: nowrap;
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 24px;
+  color: #000000;
+}
+
+.mobile-popular-heading__accent {
+  position: absolute;
+  left: -7px;
+  top: 5px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #2A3189;
+}
+
+/* ==========================================================================
+   Row & Scroller Layout
+   ========================================================================== */
+
+.mobile-brands__row {
+  width: 100%;
+  position: relative;
+  overflow: visible;
+}
+
+.mobile-brands__row--1 {
+  margin-top: 4px;
+}
+
+.mobile-brands__row--2 {
+  margin-top: -4px;
+}
+
+.mobile-brands__row-scroller {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-top: 20px;
+  padding-bottom: 6px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.mobile-brands__row-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-brands__track {
+  display: flex;
+  padding-left: min(20px, 4.545vw);
+  padding-right: 0;
+  gap: min(7px, 1.59vw);
+  scroll-snap-type: x mandatory;
+  width: max-content;
+}
+
+/* ==========================================================================
+   Mobile Brand Card (Both Inset & Drop Shadow Applied Directly on Card Element)
+   ========================================================================== */
+
+.mobile-brand-card {
+  width: min(146px, 33.1818vw);
+  height: min(70px, 15.909vw);
+  flex: 0 0 min(146px, 33.1818vw);
+  scroll-snap-align: start;
+  position: relative;
+  background: #FFFFFF;
+  border-radius: min(22px, 5vw);
+  box-shadow:
+    inset 0 4px 6px rgba(0, 0, 0, 0.22),
+    0 5px 10px rgba(0, 0, 0, 0.18);
+  overflow: visible;
+  cursor: pointer;
+  text-decoration: none;
+  display: block;
+  box-sizing: border-box;
+}
+
+.mobile-brand-card:focus-visible {
+  outline: 2px solid #2A3189;
+  outline-offset: 2px;
+}
+
+/* Brand Logo (Directly inside card) */
+.mobile-brand-card__logo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 10px 14px;
+  object-fit: contain;
+  display: block;
+  transform-origin: center;
+  transition: transform 0.2s ease;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Silver Sphere Discount Badge
+   ========================================================================== */
+
+.mobile-brand-card__discount {
+  position: absolute;
+  right: calc(min(42px, 9.55vw) * -0.1);
+  top: calc(min(42px, 9.55vw) * -0.42);
+  width: min(42px, 9.55vw);
+  height: min(42px, 9.55vw);
+  border-radius: 50%;
+  background: linear-gradient(160deg, #D4D4D4 0%, #9E9E9E 100%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.22);
+  z-index: 3;
+  box-sizing: border-box;
+  pointer-events: none;
+  padding-top: 1px;
+}
+
+.mobile-brand-card__discount-percentage {
+  font-family: 'Poppins', sans-serif;
+  font-size: min(14px, 3.18vw);
+  font-weight: 800;
+  line-height: min(13px, 2.95vw);
+  color: #FFFFFF;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.40);
+  letter-spacing: -0.5px;
+}
+
+.mobile-brand-card__discount-off {
+  font-family: 'Poppins', sans-serif;
+  font-size: min(8px, 1.81vw);
+  font-weight: 700;
+  line-height: min(8px, 1.81vw);
+  color: #FFFFFF;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.40);
+  margin-left: min(6px, 1.36vw);
+  margin-top: 0;
+}

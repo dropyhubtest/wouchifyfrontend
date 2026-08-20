@@ -1,0 +1,111 @@
+/* ==========================================================================
+   Mobile Recent Deals Section
+   ========================================================================== */
+
+.mobile-recent-deals {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  background: #FFFFFF;
+  overflow: visible;
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   Heading Section
+   ========================================================================== */
+
+.mobile-recent-deals-heading {
+  position: relative;
+  width: 100%;
+  height: 24px;
+  margin-top: 24px;
+  overflow: visible;
+}
+
+.mobile-recent-deals-heading h2 {
+  margin: 0;
+  margin-left: 16px;
+  white-space: nowrap;
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 24px;
+  color: #000000;
+}
+
+/* Navy Semicircle Accent */
+.mobile-recent-deals-heading__accent {
+  position: absolute;
+  left: -7px;
+  top: 5px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #2A3189;
+}
+
+/* ==========================================================================
+   Horizontal Deal Row Container & Track
+   ========================================================================== */
+
+.mobile-recent-deals__row {
+  margin-top: 16px;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-left: 20px;
+  padding-right: 20px;
+  box-sizing: border-box;
+}
+
+.mobile-recent-deals__row::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-recent-deals__track {
+  display: flex;
+  gap: min(12px, 2.727vw);
+  width: max-content;
+  padding-bottom: 8px;
+}
+
+/* ==========================================================================
+   Mobile Deal Card
+   ========================================================================== */
+
+.mobile-recent-deal-card {
+  width: 162px;
+  height: 101px;
+  flex: 0 0 162px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 5px;
+  background: #EFEFEF;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.mobile-recent-deal-card:focus-visible {
+  outline: 2px solid #2A3189;
+  outline-offset: 2px;
+}
+
+.mobile-recent-deal-card__image {
+  width: 152px;
+  height: 91px;
+  max-width: 152px;
+  max-height: 91px;
+  margin: 0;
+  object-fit: contain;
+  display: block;
+  border-radius: 10px;
+  pointer-events: none;
+}

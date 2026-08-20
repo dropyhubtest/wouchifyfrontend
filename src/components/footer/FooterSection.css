@@ -1,0 +1,372 @@
+/* ==========================================================================
+   Footer Section Styles (1920 x 1332 Reference Canvas)
+   ========================================================================== */
+
+.footer-section {
+  width: 100%;
+  background-color: #FFFFFF;
+  position: relative;
+  overflow: visible;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+}
+
+.footer-canvas {
+  width: 1920px;
+  height: 1332px;
+  position: relative;
+  flex-shrink: 0;
+  transform-origin: top center;
+  transform: scale(var(--footer-scale, 1));
+  box-sizing: border-box;
+  overflow: visible;
+  background-color: #FFFFFF;
+}
+
+/* ==========================================================================
+   1. Footer Top Separator, Logo & Watermark Animation
+   ========================================================================== */
+
+.footer__top-separator {
+  position: absolute;
+  left: 0;
+  top: 165px;
+  width: 1920px;
+  border-top: 2px dashed rgba(227, 30, 37, 0.45);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.footer-logo {
+  position: absolute;
+  left: 0px;
+  top: 178px;
+  width: 847px;
+  height: 438px;
+  display: block;
+  object-fit: contain;
+  z-index: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+.footer-watermark-wrap {
+  position: absolute;
+  left: 1432px;
+  top: 220px;
+  width: 403px;
+  height: 266px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ==========================================================================
+   2. Verified & Instant Deals Pills
+   ========================================================================== */
+
+.footer-tag-pill {
+  position: absolute;
+  top: 637px;
+  width: 161px;
+  height: 39px;
+  border-radius: 999px;
+  background-color: #E31E25;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 20px;
+  z-index: 2;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.footer-tag-pill--verified {
+  left: 122px;
+}
+
+.footer-tag-pill--instant {
+  left: 295px;
+}
+
+/* ==========================================================================
+   3. Footer Columns & Typography
+   ========================================================================== */
+
+.footer-column-heading {
+  position: absolute;
+  top: 745px;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 30px;
+  color: #000000;
+  z-index: 2;
+}
+
+.footer-column-heading--explore {
+  left: 122px;
+}
+
+.footer-column-heading--company {
+  left: 465px;
+}
+
+.footer-column-heading--legal {
+  left: 848px;
+}
+
+.footer-column-heading--stay-updated {
+  left: 1243px;
+}
+
+.footer-link-list {
+  position: absolute;
+  top: 803px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  z-index: 2;
+}
+
+.footer-link-list--explore {
+  left: 122px;
+}
+
+.footer-link-list--company {
+  left: 465px;
+}
+
+.footer-link-list--legal {
+  left: 848px;
+}
+
+.footer-link-item {
+  margin: 0;
+  padding: 0;
+}
+
+.footer-link {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 36px;
+  color: #838181;
+  text-decoration: none;
+  display: inline-block;
+  transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+  color: #E31E25;
+}
+
+.footer-link:focus-visible {
+  outline: 2px solid #E31E25;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.footer-stay-updated-text {
+  position: absolute;
+  left: 1243px;
+  top: 803px;
+  width: 470px;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 36px;
+  color: #838181;
+  z-index: 2;
+}
+
+/* ==========================================================================
+   4. Contact Info & Social Links
+   ========================================================================== */
+
+.footer-contact-item {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  z-index: 2;
+}
+
+.footer-contact-item--email {
+  left: 114px;
+  top: 1069px;
+}
+
+.footer-contact-item--location {
+  left: 110px;
+  top: 1114px;
+}
+
+.footer-contact-icon--email {
+  width: 32px;
+  height: 32px;
+  display: block;
+}
+
+.footer-contact-icon--location {
+  width: 40px;
+  height: 40px;
+  display: block;
+}
+
+.footer-contact-text--email {
+  margin: 0 0 0 10px;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 36px;
+  color: #000000;
+  white-space: nowrap;
+}
+
+.footer-contact-link {
+  color: #000000;
+  text-decoration: none;
+}
+
+.footer-contact-link:hover {
+  color: #E31E25;
+}
+
+.footer-contact-link:focus-visible {
+  outline: 2px solid #E31E25;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.footer-contact-text--location {
+  margin: 0 0 0 6px;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 36px;
+  color: #000000;
+  white-space: nowrap;
+}
+
+.footer-social-link {
+  position: absolute;
+  top: 1039px;
+  width: 78px;
+  height: 78px;
+  display: block;
+  z-index: 2;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.footer-social-link--telegram {
+  left: 1471px;
+}
+
+.footer-social-link--instagram {
+  left: 1587px;
+}
+
+.footer-social-link--whatsapp {
+  left: 1702px;
+}
+
+.footer-social-link:hover {
+  transform: scale(1.08);
+}
+
+.footer-social-link:focus-visible {
+  outline: 3px solid #E31E25;
+  outline-offset: 4px;
+  border-radius: 50%;
+}
+
+.footer-social-icon {
+  width: 78px;
+  height: 78px;
+  display: block;
+  object-fit: contain;
+}
+
+/* ==========================================================================
+   5. Bottom Bar
+   ========================================================================== */
+
+.footer-divider-line {
+  position: absolute;
+  left: 0;
+  top: 1249px;
+  width: 1920px;
+  border: none;
+  border-top: 2px dashed rgba(227, 30, 37, 0.45);
+  margin: 0;
+  padding: 0;
+  z-index: 2;
+}
+
+.footer-copyright {
+  position: absolute;
+  left: 98px;
+  top: 1292px;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 36px;
+  color: #646363;
+  z-index: 2;
+}
+
+.footer-bottom-link {
+  position: absolute;
+  top: 1292px;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 36px;
+  color: #646363;
+  text-decoration: none;
+  z-index: 2;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.footer-bottom-link--privacy-policy {
+  left: 1095px;
+}
+
+.footer-bottom-link--terms-of-use {
+  left: 1316px;
+}
+
+.footer-bottom-link--cookie-policy {
+  left: 1537px;
+}
+
+.footer-bottom-link--contact {
+  left: 1758px;
+}
+
+.footer-bottom-link:hover {
+  color: #E31E25;
+}
+
+.footer-bottom-link:focus-visible {
+  outline: 2px solid #E31E25;
+  outline-offset: 2px;
+  border-radius: 4px;
+}

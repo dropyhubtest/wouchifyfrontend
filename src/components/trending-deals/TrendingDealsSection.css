@@ -1,0 +1,179 @@
+/* ==========================================================================
+   Trending Best Sellers Section Styles (1920 x 507 Reference Canvas)
+   ========================================================================== */
+
+.trending-deals-section {
+  width: 100%;
+  background-color: #E5E7FF;
+  position: relative;
+  overflow: visible;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+}
+
+.trending-deals-canvas {
+  width: 1920px;
+  height: 507px;
+  position: relative;
+  flex-shrink: 0;
+  transform-origin: top center;
+  transform: scale(var(--trending-scale, 1));
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* ==========================================================================
+   1. Section Heading & Navy Accent Circle
+   Heading: left: 79px; top: 41px; Poppins 40px/40px 600 weight
+   Navy Circle: left: -38px; top: 33px; 75 x 75 (overflow: visible)
+   ========================================================================== */
+
+.trending-deals__header {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 100px;
+  z-index: 2;
+  overflow: visible;
+}
+
+.trending-deals__heading-accent {
+  position: absolute;
+  left: -38px;
+  top: 33px;
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  background-color: #000000;
+  z-index: 0;
+}
+
+.trending-deals__title {
+  position: absolute;
+  left: 79px;
+  top: 41px;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-primary);
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 40px;
+  color: var(--color-black);
+  z-index: 1;
+}
+
+/* ==========================================================================
+   2. Trending Label Pill
+   Pill: left: 79px; top: 106px; width: 408px; height: 37px; border-radius: 999px
+   Text: left: 88px; top: 109px; Poppins 20px/30px 600 weight
+   ========================================================================== */
+
+.trending-deals__label-pill {
+  position: absolute;
+  left: 79px;
+  top: 106px;
+  width: 408px;
+  height: 37px;
+  border-radius: 999px;
+  background-color: var(--color-navy-dark);
+  z-index: 1;
+}
+
+.trending-deals__label-text {
+  position: absolute;
+  left: 88px;
+  top: 109px;
+  color: var(--color-white);
+  font-family: var(--font-family-primary);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 30px;
+  white-space: nowrap;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   3. Deal Cards Container & Outer Figma Frame (422 x 261 px)
+   Background: #EFEFEF, Padding: 12px, Shadow: 0 4px 4px rgba(0, 0, 0, 0.20)
+   ========================================================================== */
+
+.trending-deals__cards-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.trending-deals__card {
+  position: absolute;
+  width: 422px;
+  height: 261px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 12px;
+  background: #EFEFEF;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.20);
+  cursor: pointer;
+  text-decoration: none;
+  pointer-events: auto;
+  z-index: 2;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.trending-deals__card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.22);
+}
+
+.trending-deals__card:focus-visible {
+  outline: 3px solid var(--color-navy-dark);
+  outline-offset: 4px;
+  border-radius: 20px;
+}
+
+.trending-deals__image {
+  max-width: 398px;
+  max-height: 239px;
+  width: auto;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  border-radius: 16px;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ==========================================================================
+   4. Rank Badges (98 x 98 px Circle, #2A3189, Poppins 40px 600 weight)
+   Rank 1: left 45px, top 163px
+   Rank 2: left 649px, top 163px
+   ========================================================================== */
+
+.trending-deals__rank-badge {
+  position: absolute;
+  width: 98px;
+  height: 98px;
+  border-radius: 50%;
+  background-color: var(--color-navy-dark);
+  color: var(--color-white);
+  z-index: 3;
+  font-family: var(--font-family-primary);
+  font-size: 40px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+  user-select: none;
+}
