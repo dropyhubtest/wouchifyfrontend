@@ -20,6 +20,12 @@
   padding: 0;
 }
 
+.wouchify-header.wouchify-header--transparent {
+  background-color: transparent;
+  z-index: 30;
+}
+
+
 /* Inner 1920 x 131 Reference Canvas */
 .wouchify-navbar-canvas {
   width: 1920px;
@@ -122,10 +128,8 @@
   width: 61px;
 }
 
-.nav-item-home .nav-link,
 .nav-link.active,
 .nav-link[aria-current="page"] {
-  width: 61px;
   color: var(--color-red);
   font-weight: 800;
 }

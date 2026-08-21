@@ -1,0 +1,163 @@
+/* ==========================================================================
+   StoreCard — Figma-accurate store card (316.22 × 338.53px)
+   ========================================================================== */
+
+.store-card {
+  width: 316.22px;
+  height: 338.53px;
+  border-radius: 25px;
+  background-color: var(--card-bg, #ECF4FF);
+  position: relative;
+  box-sizing: border-box;
+  padding: 20px 34px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  box-shadow:
+    0px 4px 4px rgba(0, 0, 0, 0.25),
+    inset 0px 4px 4px rgba(0, 0, 0, 0.25);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+  cursor: pointer;
+}
+
+.store-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0px 8px 16px rgba(0, 0, 0, 0.18),
+    inset 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+/* White logo panel: ~207 × 78px, 20px radius, centered horizontally */
+.store-card__logo-panel {
+  width: 207px;
+  height: 78px;
+  border-radius: 20px;
+  background-color: var(--color-white, #FFFFFF);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  align-self: center;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.store-card__logo-img {
+  max-width: 86%;
+  max-height: 72%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  transition: transform 200ms ease;
+}
+
+.store-card:hover .store-card__logo-img {
+  transform: scale(1.04);
+}
+
+/* Category: Poppins Regular 12px black placed ABOVE company name */
+.store-card__category {
+  font-family: var(--font-family-primary);
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 16px;
+  color: var(--color-black, #000000);
+  letter-spacing: 0.5px;
+  margin-top: 14px;
+}
+
+/* Store name: Poppins Medium 30px black placed BELOW category */
+.store-card__name {
+  font-family: var(--font-family-primary);
+  font-weight: 500;
+  font-size: 28px;
+  line-height: 34px;
+  color: var(--color-black, #000000);
+  margin: 2px 0 0;
+  padding: 0;
+}
+
+/* Reward badge: Inter Bold 13px black, ~130 × 36px, 10px radius */
+.store-card__reward {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 125px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  background-color: var(--badge-bg, #D3E0F2);
+  font-family: var(--font-family-secondary);
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 36px;
+  color: var(--color-black, #000000);
+  margin-top: 10px;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+/* Description: Inter Medium 13px black */
+.store-card__description {
+  font-family: var(--font-family-secondary);
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--color-black, #000000);
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+/* View Details button: ~151.57 × 35.39px, aligned to the RIGHT side */
+.store-card__details-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 151.57px;
+  height: 35.39px;
+  border-radius: 10px;
+  background-color: #F1ECEC;
+  font-family: var(--font-family-primary);
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 35.39px;
+  color: var(--color-black, #000000);
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  margin-top: auto;
+  align-self: flex-end; /* Align to the right side of the card */
+  box-shadow: inset 0px 4px 4px rgba(0, 0, 0, 0.25);
+  transition: background-color 150ms ease;
+  white-space: nowrap;
+}
+
+.store-card__details-btn:hover {
+  background-color: #E8E2E2;
+}
+
+.store-card__details-btn:focus-visible {
+  outline: 2px solid var(--color-navy, #2F368C);
+  outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  .store-card {
+    width: 100%;
+    height: auto;
+    min-height: 300px;
+    padding: 18px 24px 16px;
+  }
+
+  .store-card__name {
+    font-size: 24px;
+    line-height: 28px;
+  }
+
+  .store-card__details-btn {
+    width: 130px;
+    height: 32px;
+    font-size: 15px;
+  }
+}

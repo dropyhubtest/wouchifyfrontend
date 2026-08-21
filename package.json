@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@fontsource/hachi-maru-pop": "^5.3.0",
+    "@fontsource/inter": "^5.3.0",
     "@fontsource/poppins": "^5.3.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
@@ -21,6 +22,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
     "oxlint": "^1.75.0",
+    "pngjs": "^7.0.0",
     "puppeteer-core": "^25.8.0",
     "typescript": "~6.0.2",
     "vite": "^8.2.0"

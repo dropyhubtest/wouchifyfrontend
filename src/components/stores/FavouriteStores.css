@@ -1,0 +1,171 @@
+/* ==========================================================================
+   FavouriteStores — Section layout matching Figma 1920px canvas
+   ========================================================================== */
+
+.favourite-stores {
+  width: 100%;
+  background-color: var(--color-white, #FFFFFF);
+  position: relative;
+  overflow: visible;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+}
+
+/* Reference 1920px Canvas scaled with --stores-scale */
+.favourite-stores-canvas {
+  width: 1920px;
+  position: relative;
+  flex-shrink: 0;
+  transform-origin: top center;
+  transform: scale(var(--stores-scale, 1));
+  box-sizing: border-box;
+  padding: 64px 0 80px;
+  overflow: visible;
+}
+
+/* ==========================================================================
+   Controls Row — precise Figma positioning (1920px canvas)
+   Heading: x=54, y=804
+   Blue Circle Accent: x=-37, y=796, 75×75 (Figma node 3603:981)
+   Search: x=637, y=803, w=969, h=78 (Figma node 3603:982)
+   Dropdown: x=1659, y=810, w=210, h=64 (Figma node 3603:1071)
+   ========================================================================== */
+
+.favourite-stores__controls {
+  position: relative;
+  width: 1920px;
+  height: 78px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* Heading Group with Figma Blue Semi-Circle Accent */
+.favourite-stores__heading-group {
+  position: absolute;
+  left: 54px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  overflow: visible;
+}
+
+/* Figma node 3603:981: Blue circle beside heading, partially cropped on left screen edge */
+.favourite-stores__heading-accent {
+  position: absolute;
+  left: -91px; /* 54px heading position - 91px = -37px on the 1920px canvas edge */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  background-color: var(--color-navy, #2F368C);
+  border: none;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+}
+
+.favourite-stores__heading {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-family-primary);
+  font-weight: 600;
+  font-size: 40px;
+  line-height: 48px;
+  color: var(--color-black, #000000);
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+}
+
+/* Search occupies x: 637px */
+.favourite-stores__controls .store-search {
+  position: absolute;
+  left: 637px;
+  top: 0;
+}
+
+/* Category dropdown occupies x: 1659px */
+.favourite-stores__controls .store-category-filter {
+  position: absolute;
+  left: 1659px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* ==========================================================================
+   Alphabet Row — 26 circular 57x57px controls on one single horizontal row
+   Figma: starts at x: 135px matching the store card grid
+   ========================================================================== */
+
+.favourite-stores__alphabet-row {
+  margin-top: 36px;
+  padding-left: 135px;
+  padding-right: 104px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* ==========================================================================
+   Store Card Grid — 5 columns, Figma-accurate
+   Card width: 316.22px
+   Column gap: ~27px
+   Grid starts at x ≈ 135px
+   Row gap: ~27px
+   ========================================================================== */
+
+.favourite-stores__grid {
+  display: grid;
+  grid-template-columns: repeat(5, 316.22px);
+  column-gap: 27px;
+  row-gap: 27px;
+  margin-top: 36px;
+  padding-left: 135px;
+  padding-right: 104px;
+  box-sizing: border-box;
+}
+
+/* Card wrapper for staggered entrance animation */
+.favourite-stores__card-wrapper {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 600ms ease, transform 600ms ease;
+  transition-delay: calc(var(--card-index, 0) * 60ms);
+}
+
+.favourite-stores__grid--revealed .favourite-stores__card-wrapper {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Empty state */
+.favourite-stores__empty {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.favourite-stores__empty-text {
+  font-family: var(--font-family-primary);
+  font-weight: 500;
+  font-size: 20px;
+  color: #888;
+  margin: 0;
+}
+
+/* Reduce motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .favourite-stores__card-wrapper {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

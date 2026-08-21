@@ -1,0 +1,71 @@
+/* ==========================================================================
+   StoreAlphabetFilter — 26 × 57×57px circular alphabet controls
+   Figma: A-Z all on one single horizontal row at 1920px desktop
+   Clean dark blue hover on individual letters (no size increase, no ripple trail)
+   ========================================================================== */
+
+.store-alphabet {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  overflow: visible;
+  padding: 8px 0;
+  margin: 0;
+}
+
+.store-alphabet__btn {
+  width: 57px;
+  height: 57px;
+  border-radius: 50%;
+  border: none;
+  outline: none;
+  background-color: var(--color-lavender, #E5E7FF);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family-primary);
+  font-weight: 500;
+  font-size: 23px;
+  line-height: 1;
+  color: var(--color-black, #000000);
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  position: relative;
+  transition: background-color 150ms ease, color 150ms ease;
+  flex-shrink: 0;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Hover state: only the hovered button turns dark blue with white text */
+.store-alphabet__btn:hover {
+  background-color: var(--color-navy, #2F368C);
+  color: var(--color-white, #FFFFFF);
+}
+
+.store-alphabet__btn:focus-visible {
+  outline: 2px solid var(--color-navy, #2F368C);
+  outline-offset: 2px;
+}
+
+/* Active / selected state */
+.store-alphabet__btn--active {
+  background-color: var(--color-navy, #2F368C);
+  color: var(--color-white, #FFFFFF);
+}
+
+@media (max-width: 1200px) {
+  .store-alphabet {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .store-alphabet__btn {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
+}

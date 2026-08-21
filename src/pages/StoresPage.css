@@ -1,0 +1,276 @@
+/* ==========================================================================
+   Stores Page Styles (1920 x 590 Visible Hero Reference Canvas)
+   ========================================================================== */
+
+.stores-page {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  background-color: var(--color-white);
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+/* ==========================================================================
+   1. Header Background Layer (height: 131px, z-index: 10, #EEEFFF)
+      Behind the shopper, provides the exact #EEEFFF header background.
+   ========================================================================== */
+
+.stores-page__header-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #EEEFFF;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   2. Navbar Interactive Content (z-index: 30, above shopper)
+      Links, search, cart and account icons remain clickable.
+   ========================================================================== */
+
+.stores-page__navbar-wrapper {
+  position: relative;
+  z-index: 30;
+  width: 100%;
+}
+
+/* ==========================================================================
+   3. Stores Hero Section (1920 x 590 px Visible Canvas)
+      overflow: visible so the shopper can extend above into navbar area.
+   ========================================================================== */
+
+.stores-hero-section {
+  position: relative;
+  width: 100%;
+  z-index: 15;
+  overflow: visible;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+}
+
+.stores-hero-canvas {
+  width: 1920px;
+  height: 590px;
+  position: relative;
+  flex-shrink: 0;
+  background-color: transparent;
+  transform-origin: top center;
+  transform: scale(var(--stores-scale, 1));
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* ==========================================================================
+   4. Background Artwork Stack & Baseline Clipping (1920 x 590 px clip)
+      Native artwork canvas is 1920 x 611 px, cleanly clipped at 590 px.
+   ========================================================================== */
+
+.stores-hero__art-clip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 590px;
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.stores-hero__art-canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 611px;
+  background-color: #FFF7E1;
+  pointer-events: none;
+}
+
+/* Layer 0.5: Animated Main Watermark (Stores Hero Position: upper-center cream space) */
+.stores-hero__watermark-wrap {
+  position: absolute;
+  left: 480px;
+  top: 35px;
+  width: 580px;
+  height: 383px;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Layer 1: Morphing red wave silhouette SVG (State 1 -> State 2 path interpolation) */
+.stores-hero__wave-animated {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 611px;
+  z-index: 1;
+  pointer-events: none;
+  display: block;
+}
+
+/* Layer 2: Confetti/party texture overlay PNG (z-index: 2, above SVG) */
+.stores-hero__bg-overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 611px;
+  object-fit: fill;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   5. Foreground Visual Assets
+      Layer 3: Cart backdrop circle (left: 833px, top: 25px, 528x528, z-index: 3)
+      Layer 4: Shopping cart        (left: 774px, top: 42px, 643x510, z-index: 4)
+      Layer 5: Shopper visual       (left: 1313px, top: -70px, 607x660, z-index: 5)
+   ========================================================================== */
+
+.stores-hero__cart-backdrop {
+  position: absolute;
+  left: 833px;
+  top: 25px;
+  width: 528px;
+  height: 528px;
+  object-fit: contain;
+  z-index: 3;
+  pointer-events: none;
+  user-select: none;
+}
+
+.stores-hero__cart {
+  position: absolute;
+  left: 774px;
+  top: 42px;
+  width: 643px;
+  height: 510px;
+  object-fit: contain;
+  z-index: 4;
+  pointer-events: none;
+  user-select: none;
+}
+
+.stores-hero__shopper {
+  position: absolute;
+  left: 1313px;
+  top: -70px;
+  width: 607px;
+  height: 660px;
+  object-fit: contain;
+  z-index: 5;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ==========================================================================
+   6. Hero Copy & CTA (z-index: 10)
+   ========================================================================== */
+
+.stores-hero__badge {
+  position: absolute;
+  left: 120px;
+  top: 62px;
+  height: 39px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background-color: #FFFFFF;
+  color: #E31E25;
+  font-family: var(--font-family-primary);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 39px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.stores-hero__heading {
+  position: absolute;
+  left: 120px;
+  top: 120px;
+  margin: 0;
+  padding: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+}
+
+.stores-hero__heading-main {
+  font-family: var(--font-family-primary);
+  font-size: 80px;
+  font-weight: 700;
+  line-height: 80px;
+  color: #FFFFFF;
+}
+
+.stores-hero__heading-sub {
+  font-family: var(--font-family-primary);
+  font-size: 64px;
+  font-weight: 700;
+  line-height: 76px;
+  color: #FFFFFF;
+  white-space: nowrap;
+}
+
+.stores-hero__description {
+  position: absolute;
+  left: 120px;
+  top: 320px;
+  max-width: 580px;
+  width: auto;
+  color: #FFFFFF;
+  font-family: var(--font-family-primary);
+  font-size: 27px;
+  font-weight: 500;
+  line-height: 36px;
+  margin: 0;
+  padding: 0;
+  z-index: 10;
+  white-space: pre-line;
+}
+
+.stores-hero__cta {
+  position: absolute;
+  left: 120px;
+  top: 426px;
+  width: 491px;
+  height: 59px;
+  border-radius: 20px;
+  background-color: #2A3189;
+  color: #FFFFFF;
+  font-family: var(--font-family-primary);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 59px;
+  border: none;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  box-sizing: border-box;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.stores-hero__cta:hover {
+  opacity: 0.92;
+  transform: scale(1.01);
+}
+
+.stores-hero__cta:focus-visible {
+  outline: 3px solid #FFFFFF;
+  outline-offset: 4px;
+  border-radius: 20px;
+}

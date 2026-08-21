@@ -8,8 +8,12 @@ import './Navbar.css'
 
 import { NAV_LINKS } from '../../data/navigation'
 
+export interface NavbarProps {
+  activeNav?: string
+  transparent?: boolean
+}
 
-export const Navbar: React.FC = () => {
+export const Navbar: React.FC<NavbarProps> = ({ activeNav, transparent = false }) => {
   const [searchValue, setSearchValue] = useState('')
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
   const headerScale = useDesktopScale()
@@ -46,7 +50,7 @@ export const Navbar: React.FC = () => {
 
   return (
     <header
-      className="wouchify-header"
+      className={`wouchify-header ${transparent ? 'wouchify-header--transparent' : ''}`}
       role="banner"
       style={
         {
@@ -73,17 +77,21 @@ export const Navbar: React.FC = () => {
         {/* Navigation Row: left: 563px, top: 49px */}
         <nav className="navbar-nav" aria-label="Main Navigation">
           <ul className="nav-list">
-            {NAV_LINKS.map((item) => (
-              <li key={item.id} className={`nav-item nav-item-${item.id}`}>
-                <a
-                  href={item.href}
-                  className={`nav-link ${item.active ? 'active' : ''}`}
-                  {...(item.active ? { 'aria-current': 'page' } : {})}
-                >
-                  {item.name}
-                </a>
-              </li>
-            ))}
+            {NAV_LINKS.map((item) => {
+              const isActive = activeNav ? activeNav.toLowerCase() === item.id.toLowerCase() : Boolean(item.active)
+
+              return (
+                <li key={item.id} className={`nav-item nav-item-${item.id}`}>
+                  <a
+                    href={item.href}
+                    className={`nav-link ${isActive ? 'active' : ''}`}
+                    {...(isActive ? { 'aria-current': 'page' } : {})}
+                  >
+                    {item.name}
+                  </a>
+                </li>
+              )
+            })}
           </ul>
         </nav>
 

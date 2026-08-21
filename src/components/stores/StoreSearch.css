@@ -1,0 +1,81 @@
+/* ==========================================================================
+   StoreSearch — Figma lavender pill search bar (969 × 78px, 50px radius)
+   ========================================================================== */
+
+.store-search {
+  width: 969px;
+  height: 78px;
+  border-radius: 50px;
+  background-color: var(--color-lavender, #E5E7FF);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 36px 0 40px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.store-search__input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: var(--font-family-primary);
+  font-weight: 500;
+  font-size: 25px;
+  line-height: normal;
+  color: var(--color-black, #000000);
+  padding: 0 16px 0 0;
+  margin: 0;
+  height: 100%;
+}
+
+.store-search__input::placeholder {
+  color: var(--color-white, #FFFFFF);
+  opacity: 1;
+  font-family: var(--font-family-primary);
+  font-weight: 500;
+  font-size: 25px;
+}
+
+.store-search__icon {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  color: #000000;
+  display: block;
+}
+
+.store-search:focus-within {
+  outline: 3px solid var(--color-navy, #2F368C);
+  outline-offset: 2px;
+}
+
+@media (max-width: 1600px) {
+  .store-search {
+    width: 100%;
+    max-width: 969px;
+  }
+}
+
+@media (max-width: 768px) {
+  .store-search {
+    width: 100%;
+    height: 56px;
+    border-radius: 28px;
+    padding: 0 20px;
+  }
+
+  .store-search__icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .store-search__input {
+    font-size: 16px;
+  }
+
+  .store-search__input::placeholder {
+    font-size: 16px;
+  }
+}

@@ -27,38 +27,61 @@ export const FooterSection: React.FC = () => {
       style={
         {
           '--footer-scale': sectionScale,
-          height: `${1332 * sectionScale}px`,
+          height: `${1120 * sectionScale}px`,
         } as React.CSSProperties
       }
     >
-      {/* 1920 x 1332 Reference Canvas */}
+      {/* 1920 x 1120 Reference Canvas */}
       <div className="footer-canvas">
-        {/* Top Footer Separator (Dashed Red) */}
-        <div className="footer__top-separator" aria-hidden="true" />
+        {/* Top Footer Separator (Figma elongated Red Dashed Line) */}
+        <svg
+          className="footer__top-separator"
+          width="1920"
+          height="4"
+          viewBox="0 0 1920 4"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <line
+            x1="0"
+            y1="2"
+            x2="1920"
+            y2="2"
+            stroke="#E31E25"
+            strokeWidth="2.5"
+            strokeDasharray="18 16"
+          />
+        </svg>
 
-        {/* Footer Wouchify Logo */}
-        <img
-          src={wouchifyLogo}
-          alt="Wouchify"
-          className="footer-logo"
-          width="847"
-          height="438"
-        />
+        {/* Brand Block with spacious 140px gap from top dashed line */}
+        <div className="footer-brand-block">
+          <img
+            src={wouchifyLogo}
+            alt="Wouchify - Save More Everyday"
+            className="footer-logo"
+          />
+          <p className="footer-brand-description">
+            India&apos;s #1 free deal discovery platform. Verified coupons,
+            <br />
+            loot deals, and rewards - all in one place, zero cost.
+          </p>
+          <div className="footer-pills-row">
+            <div className="footer-tag-pill footer-tag-pill--verified">
+              Verified Deals
+            </div>
+            <div className="footer-tag-pill footer-tag-pill--instant">
+              Instant Deals
+            </div>
+          </div>
+        </div>
 
-        {/* Animated W Watermark */}
+        {/* Animated W Watermark with less gap from top line than the logo */}
         <WatermarkAnimation
           state1Src={watermarkMain}
           state2Src={watermarkMainState2}
           className="footer-watermark-wrap"
         />
-
-        {/* Tags / Pills */}
-        <div className="footer-tag-pill footer-tag-pill--verified">
-          Verified Deals
-        </div>
-        <div className="footer-tag-pill footer-tag-pill--instant">
-          Instant Deals
-        </div>
 
         {/* Footer Navigation Columns */}
         <nav aria-label="Footer Navigation">
@@ -172,7 +195,7 @@ export const FooterSection: React.FC = () => {
           ))}
         </div>
 
-        {/* Bottom Footer Bar */}
+        {/* Bottom Footer Bar (Default Dashed Line) */}
         <hr className="footer-divider-line" aria-hidden="true" />
 
         <p className="footer-copyright">
