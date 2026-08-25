@@ -14,12 +14,14 @@ export const CategoryDirectoryCard: React.FC<CategoryDirectoryCardProps> = ({ it
       title={item.name}
     >
       <div className="category-dir-card__image-area">
-        <img
-          src={item.image}
-          alt={item.name}
-          className="category-dir-card__image"
-          loading="lazy"
-        />
+        {item.image ? (
+          <img
+            src={item.image}
+            alt={item.name}
+            className="category-dir-card__image"
+            loading="lazy"
+          />
+        ) : null}
       </div>
 
       <h4 className="category-dir-card__title">{item.name}</h4>

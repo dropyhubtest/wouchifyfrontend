@@ -1,0 +1,236 @@
+/* ==========================================================================
+   SubCategoriesPage — Native 1920x9956px Figma Canvas Architecture
+   ========================================================================== */
+
+.subcategories-page-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  overflow-x: hidden;
+}
+
+/* Global Shared Navbar Wrapper */
+.subcategories-navbar-wrapper {
+  position: relative;
+  z-index: 30;
+  width: 100%;
+}
+
+/* Main Canvas Container Scaled to 1920px */
+.subcategories-page__main {
+  width: 100%;
+  position: relative;
+  overflow: visible;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+}
+
+.subcategories-page__canvas {
+  width: 1920px;
+  position: relative;
+  flex-shrink: 0;
+  transform-origin: top center;
+  transform: scale(var(--subcategories-scale, 1));
+  box-sizing: border-box;
+  padding: 0 0 60px 0;
+  overflow: visible;
+}
+
+/* Top Section: Back Link & Trending Heading */
+.subcategories-top-bar {
+  position: relative;
+  width: 1920px;
+  height: 48px;
+  margin-top: 40px;
+}
+
+.subcategories-back-link {
+  position: absolute;
+  left: 67px;
+  top: 14px;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 16px;
+  font-weight: 500;
+  color: #111827;
+  text-decoration: none;
+  transition: color 0.15s ease;
+  white-space: nowrap;
+}
+
+.subcategories-back-link:hover {
+  color: var(--color-navy, #2F368C);
+  text-decoration: underline;
+}
+
+.subcategories-trending-heading {
+  position: absolute;
+  left: 748px;
+  top: 0;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 45px;
+  color: #000000;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+}
+
+/* Trending Categories 6-Card Row Container */
+.subcategories-trending-container {
+  margin-top: 46px;
+  width: 1920px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Browse All Toolbar */
+.subcategories-toolbar {
+  width: 1920px;
+  margin-top: 48px;
+  position: relative;
+  box-sizing: border-box;
+  overflow: visible;
+  z-index: 50;
+}
+
+.subcategories-toolbar__controls {
+  position: relative;
+  width: 1920px;
+  height: 78px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  overflow: visible;
+  z-index: 60;
+}
+
+.subcategories-toolbar__heading-group {
+  position: absolute;
+  left: 80px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  overflow: visible;
+}
+
+.subcategories-toolbar__heading-accent {
+  position: absolute;
+  left: -117px; /* 80px - 117px = -37px on the 1920px canvas edge */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  background-color: var(--color-navy, #2F368C);
+  border: none;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+}
+
+.subcategories-toolbar__heading {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-weight: 600;
+  font-size: 40px;
+  line-height: 48px;
+  color: var(--color-black, #000000);
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.subcategories-toolbar__search {
+  position: absolute;
+  left: 373px;
+  top: 0;
+  z-index: 10;
+}
+
+.subcategories-toolbar__search .store-search {
+  width: 1233px !important;
+  max-width: 1233px !important;
+  height: 78px !important;
+  padding: 0 40px 0 44px;
+}
+
+.subcategories-toolbar__dropdown {
+  position: absolute;
+  left: 1659px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1000;
+}
+
+.subcategories-toolbar__alphabet-row {
+  margin-top: 44px;
+  padding-left: 156px;
+  padding-right: 157px;
+  box-sizing: border-box;
+  width: 100%;
+  position: relative;
+  z-index: 5;
+}
+
+/* Subcategories Main Layout */
+.subcategories-directory-layout {
+  display: flex;
+  gap: 125px; /* Sidebar (X: 67px, W: 382px) to Directory (X: 574px) = 125px gap */
+  margin-top: 46px;
+  padding: 0 157px 0 67px;
+  box-sizing: border-box;
+  align-items: flex-start;
+}
+
+.subcategories-sidebar-column {
+  width: 382px;
+  flex-shrink: 0;
+}
+
+.subcategories-directory-column {
+  width: 1189px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.subcategories-letter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 21px;
+}
+
+.subcategories-card-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 220px);
+  gap: 22px;
+  box-sizing: border-box;
+}
+
+.subcategories-card-cell {
+  width: 220px;
+  height: 171px;
+}
+
+.subcategories-empty-state {
+  padding: 80px 0;
+  text-align: center;
+  width: 100%;
+}
+
+.subcategories-empty-state__text {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 20px;
+  color: #888888;
+  margin: 0;
+}

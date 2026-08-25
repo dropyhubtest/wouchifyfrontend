@@ -1,6 +1,6 @@
 /* ==========================================================================
    CategoryDirectoryCard — 220x171px Figma Image-Led Category Tile
-   Uses authentic Figma card background asset (bg box.png) with exact inner & outer shadows
+   Stationary card with authentic Figma bg and inner top/left/right hover color
    ========================================================================== */
 
 .category-dir-card {
@@ -11,26 +11,34 @@
   align-items: center;
   justify-content: center;
   background: url('../../assets/categories/category-card-bg.png') no-repeat center center / 100% 100%;
-  padding: 18px 16px 16px 16px;
+  padding: 14px 12px 14px 12px;
   box-sizing: border-box;
   text-decoration: none;
   border: none;
-  box-shadow: none;
-  transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1),
-              filter 0.16s ease;
+  border-radius: 18px;
+  box-shadow: inset 0 0 0 transparent;
+  transition: box-shadow 200ms ease-out;
   overflow: visible;
   user-select: none;
 }
 
+/* Hover: Inner color along top, left, and right borders */
 .category-dir-card:hover {
-  transform: translateY(-2px);
-  filter: drop-shadow(0px 4px 10px rgba(47, 54, 140, 0.12));
+  box-shadow:
+    inset 0px 4px 10px rgba(176, 178, 221, 0.85),
+    inset 4px 0px 10px rgba(176, 178, 221, 0.75),
+    inset -4px 0px 10px rgba(176, 178, 221, 0.75);
 }
 
-/* Centered image area */
+.category-dir-card:focus-visible {
+  outline: 2px solid var(--color-navy, #2F368C);
+  outline-offset: 2px;
+}
+
+/* Centered image area with enlarged prominence */
 .category-dir-card__image-area {
   width: 100%;
-  height: 80px;
+  height: 98px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -38,8 +46,10 @@
 }
 
 .category-dir-card__image {
-  max-width: 120px;
-  max-height: 74px;
+  max-width: 168px;
+  max-height: 94px;
+  width: auto;
+  height: auto;
   object-fit: contain;
   display: block;
 }
@@ -52,9 +62,9 @@
   line-height: 1.25;
   color: #111827;
   text-align: center;
-  margin: 10px 0 0 0;
+  margin: 8px 0 0 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 90%;
+  max-width: 92%;
 }

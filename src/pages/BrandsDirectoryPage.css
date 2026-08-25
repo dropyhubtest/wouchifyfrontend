@@ -1,0 +1,253 @@
+/* ==========================================================================
+   BrandsDirectoryPage — Native 1920x10199px Figma Canvas Architecture
+   ========================================================================== */
+
+.brands-directory-page-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  overflow-x: hidden;
+}
+
+/* Global Shared Navbar Wrapper */
+.brands-directory-navbar-wrapper {
+  position: relative;
+  z-index: 30;
+  width: 100%;
+}
+
+/* Main Canvas Container Scaled to 1920px */
+.brands-directory-main {
+  width: 100%;
+  position: relative;
+  overflow: visible;
+}
+
+.brands-directory-canvas {
+  width: 1920px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) scale(var(--brands-scale, 1));
+  transform-origin: top center;
+  box-sizing: border-box;
+  overflow: visible;
+  padding-bottom: 80px;
+}
+
+/* Top Area: Back Link & Heading */
+.brands-directory-top-area {
+  width: 100%;
+  position: relative;
+  margin-top: 40px;
+}
+
+.brands-directory-back-link {
+  position: absolute;
+  left: 67px;
+  top: 0;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 16px;
+  font-weight: 500;
+  color: #111827;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.15s ease;
+  z-index: 5;
+}
+
+.brands-directory-back-link:hover {
+  color: var(--color-navy, #2F368C);
+  text-decoration: underline;
+}
+
+.brands-directory-heading {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 32px;
+  font-weight: 700;
+  color: #111827;
+  text-align: center;
+  margin: 29px 0 38px 0;
+  line-height: 1.2;
+}
+
+/* Trending Brands Container */
+.brands-directory-trending-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+/* ==========================================================================
+   Browse All Toolbar Section (Matches Figma 1920px Full Width with X Coordinates)
+   ========================================================================== */
+
+.brands-directory-toolbar {
+  width: 1920px;
+  margin: 80px 0 0 0;
+  padding: 0 51px 0 0;
+  position: relative;
+  overflow: visible;
+  box-sizing: border-box;
+}
+
+.brands-directory-toolbar__controls {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  position: relative;
+}
+
+/* Heading with Navy Semicircle Accent anchored to X: 0 */
+.brands-directory-toolbar__heading-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 373px;
+  flex-shrink: 0;
+}
+
+.brands-directory-toolbar__heading-accent {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 37px;
+  height: 74px;
+  border-radius: 0 37px 37px 0;
+  background-color: var(--color-navy, #2F368C);
+  z-index: 1;
+}
+
+.brands-directory-toolbar__heading {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 32px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+  padding-left: 79px;
+  z-index: 2;
+  position: relative;
+  white-space: nowrap;
+}
+
+/* 1233px Lavender Search Pill (X: 373px to X: 1606px) */
+.brands-directory-toolbar__search {
+  width: 1233px;
+  flex-shrink: 0;
+}
+
+.brands-directory-toolbar__search .store-search {
+  width: 1233px;
+  max-width: 1233px;
+}
+
+/* 210px Dropdown pushed to X: 1659px */
+.brands-directory-toolbar__dropdown {
+  width: 210px;
+  margin-left: 53px;
+  flex-shrink: 0;
+}
+
+/* A–Z Alphabet Row aligned under discovery area */
+.brands-directory-toolbar__alphabet {
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding-left: 67px;
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   Main Layout: Sidebar (382px) + Content Column (1189px)
+   ========================================================================== */
+
+.brands-directory-layout {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 0 67px;
+  margin-top: 46px;
+  gap: 120px;
+  box-sizing: border-box;
+}
+
+.brands-directory-sidebar-column {
+  width: 382px;
+  flex-shrink: 0;
+}
+
+.brands-directory-content-column {
+  width: 1189px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* Alphabet Group Section */
+.brands-directory-group {
+  width: 1189px;
+  display: flex;
+  flex-direction: column;
+  scroll-margin-top: 140px;
+}
+
+/* Letter Bar: 1189x45px with light neutral gray #D9D9D9 and subtle 6px rounded corners */
+.brands-directory-group__letter-bar {
+  width: 1189px;
+  height: 45px;
+  background: #D9D9D9;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding-left: 20px;
+  box-sizing: border-box;
+}
+
+.brands-directory-group__letter-text {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1;
+}
+
+/* 5-Column Grid of 222x170px Brand Logo Cards */
+.brands-directory-group__cards-grid {
+  width: 1189px;
+  display: grid;
+  grid-template-columns: repeat(5, 222px);
+  gap: 20px 20px;
+  margin-top: 21px;
+}
+
+/* Empty State */
+.brands-directory-empty {
+  width: 100%;
+  padding: 60px 0;
+  text-align: center;
+}
+
+.brands-directory-empty__text {
+  font-size: 18px;
+  color: #6B7280;
+  margin-bottom: 20px;
+}
+
+.brands-directory-empty__reset-btn {
+  padding: 10px 24px;
+  border-radius: 999px;
+  background: #2F368C;
+  color: #FFFFFF;
+  border: none;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+}

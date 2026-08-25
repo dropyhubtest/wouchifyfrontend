@@ -12,16 +12,64 @@ interface PopularStoreItem {
   name: string
   logo: string
   slug: string
+  bgColor?: string
+  imgScale?: number
+  objectFit?: 'contain' | 'cover'
 }
 
 const POPULAR_STORES: PopularStoreItem[] = [
-  { name: 'Amazon', logo: amazonLogo, slug: 'amazon' },
-  { name: 'AJIO', logo: ajioLogo, slug: 'ajio' },
-  { name: 'Flipkart', logo: flipkartLogo, slug: 'flipkart' },
-  { name: 'Myntra', logo: myntraLogo, slug: 'myntra' },
-  { name: 'BigBasket', logo: bigbasketLogo, slug: 'bigbasket' },
-  { name: 'Swiggy', logo: swiggyLogo, slug: 'swiggy' },
-  { name: 'Meesho', logo: meeshoLogo, slug: 'meesho' },
+  {
+    name: 'Amazon',
+    logo: amazonLogo,
+    slug: 'amazon',
+    bgColor: '#FFFFFF',
+    objectFit: 'cover',
+  },
+  {
+    name: 'AJIO',
+    logo: ajioLogo,
+    slug: 'ajio',
+    bgColor: '#273B4A',
+    imgScale: 1.08,
+    objectFit: 'cover',
+  },
+  {
+    name: 'Flipkart',
+    logo: flipkartLogo,
+    slug: 'flipkart',
+    bgColor: '#047BD5',
+    objectFit: 'cover',
+  },
+  {
+    name: 'Myntra',
+    logo: myntraLogo,
+    slug: 'myntra',
+    bgColor: '#FFFFFF',
+    objectFit: 'cover',
+  },
+  {
+    name: 'BigBasket',
+    logo: bigbasketLogo,
+    slug: 'bigbasket',
+    bgColor: '#A6CE39', // Exact official BigBasket Guacamole Green
+    imgScale: 0.75,
+    objectFit: 'contain',
+  },
+  {
+    name: 'Swiggy',
+    logo: swiggyLogo,
+    slug: 'swiggy',
+    bgColor: '#FFFFFF',
+    objectFit: 'cover',
+  },
+  {
+    name: 'Meesho',
+    logo: meeshoLogo,
+    slug: 'meesho',
+    bgColor: '#580A46', // Exact official Meesho Jamuni Purple
+    imgScale: 0.72,
+    objectFit: 'contain',
+  },
 ]
 
 export const PopularStores: React.FC = () => {
@@ -34,12 +82,17 @@ export const PopularStores: React.FC = () => {
             key={store.slug}
             href={`/stores#${store.slug}`}
             className="popular-stores-sidebar__circle"
+            style={{ backgroundColor: store.bgColor || '#FFFFFF' }}
             title={store.name}
           >
             <img
               src={store.logo}
               alt={store.name}
               className="popular-stores-sidebar__logo"
+              style={{
+                objectFit: store.objectFit || 'cover',
+                transform: store.imgScale ? `scale(${store.imgScale})` : undefined,
+              }}
               loading="lazy"
             />
           </a>

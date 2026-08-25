@@ -10,14 +10,15 @@ import citiesDealsImg from '../../assets/categories/sidebar/category-cities-deal
 import './CategorySidebar.css'
 
 interface CategorySidebarProps {
-  selectedCategorySlug: string
-  onSelectCategory: (slug: string) => void
+  selectedCategorySlug?: string
+  onSelectCategory?: (slug: string) => void
 }
 
 interface SidebarCategoryItem {
   id: string
   name: string
   slug: string
+  href: string
   image: string
   bgColor: string
   imageWidth: number
@@ -31,17 +32,19 @@ const SIDEBAR_CATEGORIES: SidebarCategoryItem[] = [
     id: 'categories',
     name: 'Categories',
     slug: 'categories',
+    href: '/categories/subcategories',
     image: categoriesImg,
     bgColor: '#D4F7F2',
     imageWidth: 126,
     imageHeight: 122,
     imageLeft: 6,
-    imageTop: -40, // pushed top higher up
+    imageTop: -40,
   },
   {
     id: 'stores',
     name: 'Stores',
     slug: 'stores',
+    href: '/categories/stores',
     image: storesImg,
     bgColor: '#D4F7F2',
     imageWidth: 120,
@@ -53,6 +56,7 @@ const SIDEBAR_CATEGORIES: SidebarCategoryItem[] = [
     id: 'brands',
     name: 'Brands',
     slug: 'brands',
+    href: '/categories/brands',
     image: brandsImg,
     bgColor: '#FCE7F3',
     imageWidth: 118,
@@ -64,6 +68,7 @@ const SIDEBAR_CATEGORIES: SidebarCategoryItem[] = [
     id: 'banks',
     name: 'Banks',
     slug: 'banks',
+    href: '/categories/banks',
     image: banksImg,
     bgColor: '#FEF9C3',
     imageWidth: 122,
@@ -75,6 +80,7 @@ const SIDEBAR_CATEGORIES: SidebarCategoryItem[] = [
     id: 'festivals',
     name: 'Festivals',
     slug: 'festivals',
+    href: '/categories/festivals',
     image: festivalsImg,
     bgColor: '#FEE2E2',
     imageWidth: 126,
@@ -86,6 +92,7 @@ const SIDEBAR_CATEGORIES: SidebarCategoryItem[] = [
     id: 'travelling',
     name: 'Travelling',
     slug: 'travelling',
+    href: '/categories/travelling',
     image: travellingImg,
     bgColor: '#E0F2FE',
     imageWidth: 120,
@@ -97,6 +104,7 @@ const SIDEBAR_CATEGORIES: SidebarCategoryItem[] = [
     id: 'cities-deals',
     name: 'Cities Deals',
     slug: 'cities-deals',
+    href: '/categories/cities-deals',
     image: citiesDealsImg,
     bgColor: '#EBF5FF',
     imageWidth: 120,
@@ -117,18 +125,17 @@ export const CategorySidebar: React.FC<CategorySidebarProps> = ({
           const isSelected = selectedCategorySlug === cat.slug
 
           return (
-            <div
+            <a
               key={cat.id}
+              href={cat.href}
               className={`category-sidebar-item ${isSelected ? 'category-sidebar-item--active' : ''}`}
               style={{ backgroundColor: cat.bgColor }}
-              onClick={() => onSelectCategory(cat.slug)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
+              onClick={() => {
+                if (onSelectCategory) {
                   onSelectCategory(cat.slug)
                 }
               }}
+              title={cat.name}
             >
               {/* 3D illustration pushed right & elevated */}
               <img
@@ -147,15 +154,10 @@ export const CategorySidebar: React.FC<CategorySidebarProps> = ({
               {/* Category Name positioned right next to the illustration */}
               <span className="category-sidebar-item__label">{cat.name}</span>
 
-              {/* White circular arrow button */}
-              <button
-                type="button"
+              {/* White circular arrow indicator */}
+              <span
                 className="category-sidebar-item__arrow"
-                aria-label={`View ${cat.name}`}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onSelectCategory(cat.slug)
-                }}
+                aria-hidden="true"
               >
                 <svg
                   width="14"
@@ -173,8 +175,8 @@ export const CategorySidebar: React.FC<CategorySidebarProps> = ({
                     strokeLinejoin="round"
                   />
                 </svg>
-              </button>
-            </div>
+              </span>
+            </a>
           )
         })}
       </div>

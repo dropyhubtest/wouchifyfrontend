@@ -1,48 +1,59 @@
 .popular-stores-sidebar {
-  margin-top: 32px;
+  margin-top: 40px;
   width: 382px;
   box-sizing: border-box;
 }
 
+/* Big prominent heading matching Figma */
 .popular-stores-sidebar__title {
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 18px;
-  font-weight: 600;
-  color: #111827;
-  margin: 0 0 16px 0;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #000000;
+  margin: 0 0 24px 0;
+  letter-spacing: -0.01em;
 }
 
 .popular-stores-sidebar__grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 18px 24px;
   width: 382px;
+  box-sizing: border-box;
 }
 
 .popular-stores-sidebar__circle {
-  width: 67px;
-  height: 67px;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
   background: #FFFFFF;
-  border: 1px solid #000000;
-  box-shadow: none;
+  border: 1px solid #333333;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   box-sizing: border-box;
   text-decoration: none;
-  transition: transform 0.15s ease;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .popular-stores-sidebar__circle:hover {
-  transform: scale(1.06);
+  transform: scale(1.08);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.popular-stores-sidebar__circle:focus-visible {
+  outline: 2px solid var(--color-navy, #2F368C);
+  outline-offset: 2px;
 }
 
 .popular-stores-sidebar__logo {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   display: block;
 }

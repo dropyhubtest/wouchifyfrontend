@@ -12,3 +12,34 @@
 /* Design Tokens & CSS Reset */
 @import './styles/tokens.css';
 @import './styles/reset.css';
+
+/* ==========================================================================
+   Page Route Transition Animation (Subtle Reveal)
+   Composite-only opacity & micro-translateY for smooth 60fps instant transitions
+   ========================================================================== */
+
+@keyframes pageReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  animation: pageReveal 240ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-transition-wrapper {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}

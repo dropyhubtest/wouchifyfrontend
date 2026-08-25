@@ -1,0 +1,79 @@
+/* ==========================================================================
+   DirectoryLogoCard — Exact 222x170px Store/Brand/Bank/Festival/Travel/City Card
+   Stationary Hover with Top/Left/Right Lavender Inset Shadow
+   ========================================================================== */
+
+.directory-logo-card {
+  width: 222px;
+  height: 170px;
+  background: #FFFFFF;
+  border-radius: 20px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 14px 12px 12px 12px;
+  box-sizing: border-box;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  /* Stationary hover transition */
+  transition: box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: none !important;
+}
+
+.directory-logo-card:hover {
+  /* Inner lavender inset shadow strictly on top, left, and right borders */
+  box-shadow:
+    inset 0px 4px 10px rgba(176, 178, 221, 0.85),
+    inset 4px 0px 10px rgba(176, 178, 221, 0.75),
+    inset -4px 0px 10px rgba(176, 178, 221, 0.75),
+    0px 4px 12px rgba(0, 0, 0, 0.08);
+  transform: none !important;
+}
+
+.directory-logo-card:focus-visible {
+  outline: 2px solid var(--color-navy, #2F368C);
+  outline-offset: 2px;
+}
+
+/* Logo / Image Area: Enlarged container for bolder visual prominence */
+.directory-logo-card__logo-area {
+  width: 188px;
+  height: 98px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.directory-logo-card__logo {
+  max-width: 172px;
+  max-height: 92px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+}
+
+/* Store/Brand/Bank/Festival/Travel/City Name Typography */
+.directory-logo-card__title {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: #111827;
+  text-align: center;
+  margin: 10px 0 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 95%;
+  pointer-events: none;
+}
