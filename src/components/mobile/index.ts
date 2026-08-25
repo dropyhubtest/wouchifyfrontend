@@ -1,4 +1,5 @@
 export { MobileHomePage, default as MobileHomePageDefault } from './MobileHomePage'
+export { MobileStoresPage } from './MobileStoresPage'
 export { MobileHeader } from './MobileHeader'
 export { MobilePromoHero } from './MobilePromoHero'
 export { MobilePopularBrands } from './MobilePopularBrands'
@@ -9,4 +10,5 @@ export { MobileFlashDeals } from './MobileFlashDeals'
 export { MobileAdvertisement } from './MobileAdvertisement'
 export { MobileFeaturedCreditCards } from './MobileFeaturedCreditCards'
 export { MobileFooter } from './MobileFooter'
+
 

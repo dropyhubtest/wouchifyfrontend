@@ -1,0 +1,50 @@
+/* ==========================================================================
+   CategoriesPage — 1920px Canvas Layout matching Figma
+   ========================================================================== */
+
+.categories-page {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  overflow-x: hidden;
+}
+
+.categories-page__navbar-wrapper {
+  position: relative;
+  z-index: 30;
+  width: 100%;
+}
+
+.categories-page__main {
+  width: 100%;
+  position: relative;
+  overflow: visible;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+}
+
+.categories-page__canvas {
+  width: 1920px;
+  position: relative;
+  flex-shrink: 0;
+  transform-origin: top center;
+  transform: scale(var(--categories-scale, 1));
+  box-sizing: border-box;
+  padding: 0 0 40px 0;
+  overflow: visible;
+}
+
+.categories-page__layout {
+  display: flex;
+  gap: 72px;
+  margin-top: 36px;
+  padding: 0 135px 0 104px;
+  box-sizing: border-box;
+  align-items: flex-start;
+}

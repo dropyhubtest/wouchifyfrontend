@@ -1,0 +1,103 @@
+/* ==========================================================================
+   CategoryToolbar — 1920px Canvas Layout matching Figma 3745:964 & 3745:1133
+   ========================================================================== */
+
+.category-toolbar-canvas {
+  width: 1920px;
+  position: relative;
+  box-sizing: border-box;
+  padding: 24px 0 32px 0;
+  overflow: visible;
+  z-index: 50;
+}
+
+/* Controls Row */
+.category-toolbar__controls {
+  position: relative;
+  width: 1920px;
+  height: 78px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  overflow: visible;
+  z-index: 60;
+}
+
+/* Heading Group with Blue Semicircle Accent (x: -37px, y: 653px, 75x75) */
+.category-toolbar__heading-group {
+  position: absolute;
+  left: 80px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  overflow: visible;
+}
+
+.category-toolbar__heading-accent {
+  position: absolute;
+  left: -117px; /* 80px - 117px = -37px on the 1920px canvas edge */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  background-color: var(--color-navy, #2F368C);
+  border: none;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+}
+
+.category-toolbar__heading {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-weight: 600;
+  font-size: 40px;
+  line-height: 48px;
+  color: var(--color-black, #000000);
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+}
+
+/* Search occupies x: 373px, w: 1233px */
+.category-toolbar__search-wrapper {
+  position: absolute;
+  left: 373px;
+  top: 0;
+  z-index: 10;
+}
+
+.category-toolbar__search-wrapper .store-search {
+  width: 1233px !important;
+  max-width: 1233px !important;
+  height: 78px !important;
+  padding: 0 40px 0 44px;
+}
+
+.category-toolbar__search-wrapper .store-search__icon {
+  width: 32px !important;
+  height: 32px !important;
+}
+
+/* Dropdown occupies x: 1659px */
+.category-toolbar__dropdown-wrapper {
+  position: absolute;
+  left: 1659px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1000;
+}
+
+/* Alphabet Filter Row — 26 circular 57x57px controls on one horizontal row */
+.category-toolbar__alphabet-row {
+  margin-top: 36px;
+  padding-left: 135px;
+  padding-right: 104px;
+  box-sizing: border-box;
+  width: 100%;
+  position: relative;
+  z-index: 5;
+}

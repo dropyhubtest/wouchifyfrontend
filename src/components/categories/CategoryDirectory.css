@@ -1,0 +1,19 @@
+.category-directory {
+  flex: 1;
+  min-width: 0;
+}
+
+.category-directory__empty {
+  padding: 60px 20px;
+  text-align: center;
+  background: #F9FAFB;
+  border-radius: 12px;
+  border: 1px dashed #D1D5DB;
+}
+
+.category-directory__empty-text {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 15px;
+  color: #6B7280;
+  margin: 0;
+}

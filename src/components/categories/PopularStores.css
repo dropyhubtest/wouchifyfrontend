@@ -1,0 +1,48 @@
+.popular-stores-sidebar {
+  margin-top: 32px;
+  width: 382px;
+  box-sizing: border-box;
+}
+
+.popular-stores-sidebar__title {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 16px 0;
+}
+
+.popular-stores-sidebar__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 382px;
+}
+
+.popular-stores-sidebar__circle {
+  width: 67px;
+  height: 67px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 1px solid #000000;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-sizing: border-box;
+  text-decoration: none;
+  transition: transform 0.15s ease;
+  overflow: hidden;
+}
+
+.popular-stores-sidebar__circle:hover {
+  transform: scale(1.06);
+}
+
+.popular-stores-sidebar__logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}

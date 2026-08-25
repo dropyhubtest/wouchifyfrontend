@@ -1,0 +1,20 @@
+.category-hero-section {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, #EEEFFF 0%, #FFFFFF 100%);
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.category-hero-canvas {
+  width: 1920px;
+  height: 450px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) scale(var(--categories-scale, 1));
+  transform-origin: top center;
+  cursor: pointer;
+}

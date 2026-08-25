@@ -1,0 +1,103 @@
+/* ==========================================================================
+   CategoryAlphabetSection — 45px Rounded Horizontal Bar with Scroll Animation
+   ========================================================================== */
+
+.category-alphabet-section {
+  margin-bottom: 32px;
+  scroll-margin-top: 100px;
+  width: 100%;
+}
+
+.category-alphabet-section:last-child {
+  margin-bottom: 0px;
+}
+
+/* Normal 45px #ECECEC Rounded Bar matching Rectangle 583 */
+.category-alphabet-bar {
+  width: 100%;
+  max-width: 1188px;
+  height: 45px;
+  background-color: #ECECEC;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  transition: background-color 750ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: background-color;
+}
+
+/* Active Color Variants (Alternating Red and Blue) */
+.category-alphabet-bar--active-red {
+  background-color: var(--color-red, #E31E25) !important;
+}
+
+.category-alphabet-bar--active-blue {
+  background-color: var(--color-navy, #2F368C) !important;
+}
+
+/* Normal Letter (Left position, dark text) */
+.category-alphabet-bar__letter {
+  position: absolute;
+  top: 50%;
+  left: 28px;
+  transform: translateY(-50%);
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1;
+  color: #202020;
+  transition:
+    left 750ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 750ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 600ms ease;
+  will-change: left, transform, color;
+  user-select: none;
+}
+
+/* Active Letter (Centered, white text) */
+.category-alphabet-bar--active-red .category-alphabet-bar__letter,
+.category-alphabet-bar--active-blue .category-alphabet-bar__letter {
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #FFFFFF;
+}
+
+/* Directory Card Grid — 5 columns of 220px cards */
+.category-alphabet-section__grid {
+  display: grid;
+  grid-template-columns: repeat(5, 220px);
+  gap: 22px;
+  width: 1188px;
+}
+
+@media (max-width: 1400px) {
+  .category-alphabet-section__grid {
+    grid-template-columns: repeat(4, 220px);
+    width: auto;
+  }
+}
+
+@media (max-width: 1024px) {
+  .category-alphabet-section__grid {
+    grid-template-columns: repeat(3, 220px);
+    width: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .category-alphabet-section__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+}
+
+/* Accessibility: Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .category-alphabet-bar,
+  .category-alphabet-bar__letter {
+    transition: none !important;
+  }
+}

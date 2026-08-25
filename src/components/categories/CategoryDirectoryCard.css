@@ -1,0 +1,60 @@
+/* ==========================================================================
+   CategoryDirectoryCard — 220x171px Figma Image-Led Category Tile
+   Uses authentic Figma card background asset (bg box.png) with exact inner & outer shadows
+   ========================================================================== */
+
+.category-dir-card {
+  width: 220px;
+  height: 171px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: url('../../assets/categories/category-card-bg.png') no-repeat center center / 100% 100%;
+  padding: 18px 16px 16px 16px;
+  box-sizing: border-box;
+  text-decoration: none;
+  border: none;
+  box-shadow: none;
+  transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1),
+              filter 0.16s ease;
+  overflow: visible;
+  user-select: none;
+}
+
+.category-dir-card:hover {
+  transform: translateY(-2px);
+  filter: drop-shadow(0px 4px 10px rgba(47, 54, 140, 0.12));
+}
+
+/* Centered image area */
+.category-dir-card__image-area {
+  width: 100%;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.category-dir-card__image {
+  max-width: 120px;
+  max-height: 74px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Bold centered category title */
+.category-dir-card__title {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #111827;
+  text-align: center;
+  margin: 10px 0 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90%;
+}

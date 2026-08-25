@@ -5,7 +5,7 @@
 
 .store-category-filter {
   position: relative;
-  z-index: 50;
+  z-index: 1000;
   width: 210px;
 }
 
@@ -25,7 +25,7 @@
 }
 
 .store-category-filter--open .store-category-filter__trigger {
-  border-radius: 35px 35px 0 0;
+  border-radius: 24px 24px 0 0;
   background-color: #E2E6FF;
 }
 
@@ -39,12 +39,15 @@
 }
 
 .store-category-filter__label {
-  font-family: var(--font-family-primary);
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
   font-weight: 500;
-  font-size: 24px;
+  font-size: 19px;
   line-height: 1;
   color: var(--color-black, #000000);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
 }
 
 /* White circular container for the chevron */
@@ -71,34 +74,34 @@
   transform: rotate(180deg);
 }
 
-/* Dropdown menu body — continuous lavender card attached below trigger */
+/* Dropdown menu body — solid lavender card attached below trigger */
 .store-category-filter__menu {
   position: absolute;
   top: 100%;
   left: 0;
   width: 210px;
   background-color: #E2E6FF;
-  border-radius: 0 0 35px 35px;
-  box-shadow: 0px 12px 30px rgba(47, 54, 140, 0.15);
-  padding: 8px 0 20px;
+  border-radius: 0 0 24px 24px;
+  box-shadow: 0px 14px 32px rgba(47, 54, 140, 0.2);
+  padding: 8px 0 16px;
   margin: 0;
   list-style: none;
   overflow: hidden;
-  z-index: 50;
+  z-index: 1000;
   box-sizing: border-box;
 }
 
 .store-category-filter__option {
   display: block;
   width: 100%;
-  padding: 8px 24px;
+  padding: 10px 24px;
   border: none;
   background: transparent;
   cursor: pointer;
   text-align: left;
-  font-family: var(--font-family-primary);
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
   font-weight: 500;
-  font-size: 24px;
+  font-size: 16px;
   line-height: 1.35;
   color: var(--color-black, #000000);
   transition: background-color 120ms ease, color 120ms ease;
@@ -141,7 +144,7 @@
   }
 
   .store-category-filter__label {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .store-category-filter__menu {
@@ -150,7 +153,7 @@
   }
 
   .store-category-filter__option {
-    font-size: 16px;
-    padding: 6px 16px;
+    font-size: 14px;
+    padding: 8px 16px;
   }
 }

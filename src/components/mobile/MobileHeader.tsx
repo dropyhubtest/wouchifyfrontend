@@ -39,6 +39,7 @@ export const MobileHeader = () => {
           src={mobileWouchifyLogo}
           alt="Wouchify"
           width="164"
+          height="48"
         />
       </a>
 
