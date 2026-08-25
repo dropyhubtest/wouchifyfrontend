@@ -1,6 +1,6 @@
 /* ==========================================================================
    CategoryDirectoryCard — 220x171px Figma Image-Led Category Tile
-   Stationary card with authentic Figma bg and inner top/left/right hover color
+   Inside & Outside Border Shadow with Prominent Blue Top/Left/Right Hover Effect
    ========================================================================== */
 
 .category-dir-card {
@@ -10,24 +10,33 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: url('../../assets/categories/category-card-bg.png') no-repeat center center / 100% 100%;
+  background: #FFFFFF;
   padding: 14px 12px 14px 12px;
   box-sizing: border-box;
   text-decoration: none;
-  border: none;
+  border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 18px;
-  box-shadow: inset 0 0 0 transparent;
-  transition: box-shadow 200ms ease-out;
+  /* Shadow outside and inside top/left/right borders (no bottom inside shadow) */
+  box-shadow:
+    0px 4px 10px rgba(0, 0, 0, 0.12),
+    inset 0px 3px 5px rgba(0, 0, 0, 0.14),
+    inset 3px 0px 5px rgba(0, 0, 0, 0.10),
+    inset -3px 0px 5px rgba(0, 0, 0, 0.10);
+  /* Stationary hover transition matching Cities directory cards */
+  transition: box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: visible;
   user-select: none;
+  transform: none !important;
 }
 
-/* Hover: Inner color along top, left, and right borders */
+/* Hover: Increased prominent blue inside shadow on top, left, and right */
 .category-dir-card:hover {
   box-shadow:
-    inset 0px 4px 10px rgba(176, 178, 221, 0.85),
-    inset 4px 0px 10px rgba(176, 178, 221, 0.75),
-    inset -4px 0px 10px rgba(176, 178, 221, 0.75);
+    0px 4px 10px rgba(0, 0, 0, 0.15),
+    inset 0px 8px 10px -2px rgba(47, 54, 140, 0.92),
+    inset 7px 0px 10px -2px rgba(47, 54, 140, 0.85),
+    inset -7px 0px 10px -2px rgba(47, 54, 140, 0.85);
+  transform: none !important;
 }
 
 .category-dir-card:focus-visible {

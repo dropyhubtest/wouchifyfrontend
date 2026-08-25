@@ -30,6 +30,11 @@
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
+  transition: filter 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.category-hero-item:hover .category-hero-item__circle {
+  filter: drop-shadow(0px 8px 24px rgba(47, 54, 140, 0.25));
 }
 
 .category-hero-item__img {
