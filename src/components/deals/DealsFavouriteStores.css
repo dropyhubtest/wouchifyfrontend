@@ -1,0 +1,360 @@
+/* ==========================================================================
+   Deals from Favourite Stores Section (1920px Reference Canvas)
+   Starts at y ≈ 826px matching Figma
+   ========================================================================== */
+
+.deals-favourite-stores {
+  width: 100%;
+  background-color: var(--color-white, #FFFFFF);
+  position: relative;
+  overflow: visible;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 0;
+  padding: 38px 0 0;
+}
+
+.deals-favourite-canvas {
+  width: 1920px;
+  position: relative;
+  flex-shrink: 0;
+  transform-origin: top center;
+  transform: scale(var(--deals-scale, 1));
+  box-sizing: border-box;
+  padding: 0 135px 0 80px;
+  overflow: visible;
+}
+
+/* ==========================================================================
+   Controls Row: Heading with Left Semi-Circle Accent + Search Deals Field
+   ========================================================================== */
+
+.deals-favourite__controls {
+  position: relative;
+  width: 100%;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+.deals-favourite__heading-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: visible;
+}
+
+.deals-favourite__heading-accent {
+  position: absolute;
+  left: -117px; /* 80px - 117px = -37px from 1920px edge */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  background-color: var(--color-navy, #2F368C);
+  border: none;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+}
+
+.deals-favourite__heading {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-weight: 700;
+  font-size: 34px;
+  line-height: 42px;
+  color: var(--color-black, #000000);
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+}
+
+/* Search Deals Input (Pushed to the Right, Height 68px, Soft Lavender with White Placeholder) */
+.deals-favourite__search-box {
+  position: relative;
+  width: 880px;
+  height: 68px;
+  margin-left: auto;
+}
+
+.deals-favourite__search-input {
+  width: 100%;
+  height: 100%;
+  background: #EEF1FE;
+  border: none;
+  border-radius: 999px;
+  padding: 0 65px 0 32px;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 18px;
+  font-weight: 500;
+  color: #000000;
+  outline: none;
+  box-sizing: border-box;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s ease;
+}
+
+.deals-favourite__search-input::placeholder {
+  color: #FFFFFF;
+  opacity: 0.95;
+  font-weight: 500;
+}
+
+.deals-favourite__search-input:focus {
+  box-shadow: 0 0 0 2px rgba(47, 54, 140, 0.35), inset 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.deals-favourite__search-icon-wrap {
+  position: absolute;
+  right: 28px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deals-favourite__search-icon {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+/* ==========================================================================
+   Filter Categories Row (Figma Compact Dropdown Pills: 38px height, 7px radius)
+   ========================================================================== */
+
+.deals-favourite__filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 26px;
+  width: 100%;
+}
+
+.deals-favourite__filter-pill {
+  height: 62px;
+  padding: 0 28px;
+  border-radius: 9px;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 21px;
+  font-weight: 600;
+  color: #000000;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  box-shadow:
+    0px 2px 4px rgba(0, 0, 0, 0.08),
+    inset 0px 3px 4px -1px rgba(0, 0, 0, 0.22),
+    inset 0px 1px 2px rgba(0, 0, 0, 0.12),
+    inset 1px 0px 2px rgba(0, 0, 0, 0.08),
+    inset -1px 0px 2px rgba(0, 0, 0, 0.08);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.deals-favourite__filter-pill:hover {
+  transform: translateY(-1px);
+  filter: brightness(0.98);
+}
+
+.deals-favourite__filter-pill:active {
+  transform: translateY(0);
+}
+
+/* Lavender Pill Theme */
+.deals-favourite__filter-pill--lavender {
+  background: #EFF2FE;
+}
+
+/* Peach Pill Theme */
+.deals-favourite__filter-pill--peach {
+  background: #FFE4CF;
+}
+
+.deals-favourite__filter-label {
+  line-height: 1;
+}
+
+.deals-favourite__filter-chevron {
+  width: 15px;
+  height: 9px;
+  display: block;
+}
+
+/* ==========================================================================
+   Favourite Store Logo Strip (Full Width Single-Line Scrolling without Scrollbar)
+   ========================================================================== */
+
+.deals-favourite__store-strip-wrap {
+  width: 1920px;
+  margin-left: -80px;
+  margin-right: -135px;
+  overflow: visible;
+}
+
+.deals-favourite__store-strip {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 22px;
+  margin-top: 44px;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding: 24px 80px 16px 80px;
+  box-sizing: border-box;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.deals-favourite__store-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.deals-favourite__store-tile {
+  flex: 0 0 200px;
+  width: 200px;
+  height: 94px;
+  background: #FFFFFF;
+  border-radius: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  text-decoration: none;
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.12),
+    inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  padding: 8px 14px;
+  box-sizing: border-box;
+  overflow: visible;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.deals-favourite__store-tile--meesho {
+  background-color: #5B0C43;
+}
+
+.deals-favourite__store-tile:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 24px rgba(0, 0, 0, 0.18),
+    inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Silver Glassmorphism Discount Badge (No border) */
+.deals-favourite__store-badge {
+  position: absolute;
+  right: 10px;
+  top: -18px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(220, 226, 238, 0.75) 0%, rgba(162, 174, 192, 0.80) 50%, rgba(120, 134, 154, 0.85) 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: none;
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.20);
+  z-index: 3;
+  box-sizing: border-box;
+  pointer-events: none;
+  padding-top: 1px;
+}
+
+.deals-favourite__store-badge-percent {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1;
+  color: #FFFFFF;
+  letter-spacing: -0.5px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.50);
+}
+
+.deals-favourite__store-badge-off {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: lowercase;
+  color: #FFFFFF;
+  margin-top: 1px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.50);
+}
+
+.deals-favourite__store-logo-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.deals-favourite__store-logo {
+  max-width: 90%;
+  max-height: 64px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.deals-favourite__store-logo--jiomart {
+  transform: scale(1.32);
+}
+
+.deals-favourite__store-logo--nykaa {
+  transform: scale(1.36);
+}
+
+.deals-favourite__store-logo--bigbasket {
+  transform: scale(1.32);
+}
+
+/* ==========================================================================
+   Deal Cards Grid (2 Big Deal Cards)
+   ========================================================================== */
+
+.deals-favourite__grid {
+  display: flex;
+  align-items: stretch;
+  gap: 36px;
+  margin-top: 44px;
+}
+
+.deals-favourite__empty {
+  width: 100%;
+  text-align: center;
+  padding: 60px 0;
+}
+
+.deals-favourite__empty-text {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 18px;
+  color: #777777;
+}

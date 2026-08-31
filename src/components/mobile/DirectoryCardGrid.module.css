@@ -1,0 +1,71 @@
+.gridContainer {
+  margin-left: 110px;
+  margin-right: 16px;
+  min-height: 400px;
+  box-sizing: border-box;
+}
+
+.letterSection {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+  scroll-margin-top: 20px;
+}
+
+/* Peach Letter Header Bar matching Figma (media_1788156938968.png) */
+.letterHeaderPill {
+  width: 100%;
+  height: 26px;
+  background: var(--color-peach, #FDE0D1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.letterHeaderText {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 12px;
+  row-gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+}
+
+.emptyText {
+  font-size: 14px;
+  color: #666666;
+  margin-bottom: 12px;
+}
+
+.resetBtn {
+  background: var(--color-navy, #2F368C);
+  color: #FFFFFF;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}

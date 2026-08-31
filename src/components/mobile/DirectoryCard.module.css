@@ -1,0 +1,80 @@
+.card {
+  width: 100%;
+  min-height: 78px;
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+  /* Exact desktop shadow: outside drop shadow + inside top/left/right border shadows (no bottom inside shadow) */
+  box-shadow:
+    0px 4px 10px rgba(0, 0, 0, 0.12),
+    inset 0px 3px 5px rgba(0, 0, 0, 0.14),
+    inset 3px 0px 5px rgba(0, 0, 0, 0.10),
+    inset -3px 0px 5px rgba(0, 0, 0, 0.10);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px 8px 4px;
+  box-sizing: border-box;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  content-visibility: auto;
+  contain-intrinsic-size: 96px 78px;
+  transition: box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: visible;
+  position: relative;
+}
+
+/* Hover & Tap: Prominent blue inside shadow on top, left, and right (no bottom inside shadow) */
+.card:hover,
+.card:active {
+  box-shadow:
+    0px 4px 10px rgba(0, 0, 0, 0.15),
+    inset 0px 8px 10px -2px rgba(47, 54, 140, 0.92),
+    inset 7px 0px 10px -2px rgba(47, 54, 140, 0.85),
+    inset -7px 0px 10px -2px rgba(47, 54, 140, 0.85);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--color-navy, #2F368C);
+  outline-offset: 2px;
+}
+
+.logoArea {
+  width: 100%;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  padding: 0 4px;
+  box-sizing: border-box;
+}
+
+.logoImg {
+  max-width: 72px;
+  max-height: 38px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.label {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 9.5px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #000000;
+  text-align: center;
+  margin-top: 4px;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  padding: 0 2px;
+  box-sizing: border-box;
+}

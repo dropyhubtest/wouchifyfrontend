@@ -1,0 +1,91 @@
+/* ==========================================================================
+   Best Selling Deal Picks Section (1920px Reference Canvas)
+   ========================================================================== */
+
+.best-selling-deals-section {
+  width: 100%;
+  background-color: var(--color-white, #FFFFFF);
+  position: relative;
+  overflow: visible;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0 0 60px;
+}
+
+.best-selling-deals-canvas {
+  width: 1920px;
+  position: relative;
+  flex-shrink: 0;
+  transform-origin: top center;
+  transform: scale(var(--deals-scale, 1));
+  box-sizing: border-box;
+  padding: 0 135px 0 80px;
+  overflow: visible;
+}
+
+/* ==========================================================================
+   Header with Red Semi-Circle Accent
+   ========================================================================== */
+
+.best-selling-deals__header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: visible;
+  margin-top: 0;
+}
+
+.best-selling-deals__heading-accent {
+  position: absolute;
+  left: -117px; /* 80px - 117px = -37px from 1920px edge */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  background-color: #E31E25;
+  border: none;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+}
+
+.best-selling-deals__title {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-weight: 700;
+  font-size: 34px;
+  line-height: 42px;
+  color: #E31E25;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.best-selling-deals__top-deals-pill {
+  display: inline-block;
+  background: #2F368C;
+  color: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 16px;
+  border-radius: 999px;
+  margin-top: 6px;
+  user-select: none;
+}
+
+/* ==========================================================================
+   Featured Horizontal Cards Container (Uniform Grid of Deals)
+   ========================================================================== */
+
+.best-selling-deals__cards-container {
+  display: flex;
+  align-items: stretch;
+  gap: 32px;
+  margin-top: 20px;
+  width: 100%;
+}

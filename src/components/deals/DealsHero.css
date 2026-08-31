@@ -1,0 +1,246 @@
+/* ==========================================================================
+   Deals Hero Section (1920 x 657 px Reference Canvas calibrated to Figma)
+   ========================================================================== */
+
+.deals-hero-section {
+  position: relative;
+  width: 100%;
+  z-index: 15;
+  overflow: visible;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+}
+
+.deals-hero-canvas {
+  width: 1920px;
+  height: 657px;
+  position: relative;
+  flex-shrink: 0;
+  background-color: transparent;
+  transform-origin: top center;
+  transform: scale(var(--deals-scale, 1));
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* ==========================================================================
+   Background Artwork Stack (z-index: 1, cleanly behind all foreground images & text)
+   ========================================================================== */
+
+.deals-hero__art-clip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 657px;
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.deals-hero__art-canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 657px;
+  background: #FFF9E9;
+  pointer-events: none;
+}
+
+/* Layer 0.5: Animated Main Watermark (z-index: 0) */
+.deals-hero__watermark-wrap {
+  position: absolute;
+  left: 80px;
+  top: 40px;
+  width: 440px;
+  height: 290px;
+  z-index: 0;
+  opacity: 0.90;
+  pointer-events: none;
+}
+
+/* Layer 1: Navy curved background shape (bg_animation_1) (z-index: 1) */
+.deals-hero__bg-shape {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 657px;
+  object-fit: fill;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Layer 1.5: Confetti / party texture overlay (z-index: 2) */
+.deals-hero__bg-overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 657px;
+  object-fit: fill;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.95;
+}
+
+/* ==========================================================================
+   Foreground 3D Product Group on Red Platform (Pushed Further to Right Side)
+   ========================================================================== */
+
+.deals-hero__products-container {
+  position: absolute;
+  right: -115px;
+  bottom: 0px;
+  width: 1200px;
+  height: 680px;
+  z-index: 5;
+  pointer-events: none;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+
+.deals-hero__product-group {
+  position: absolute;
+  right: 0px;
+  bottom: -15px;
+  width: 1160px;
+  height: auto;
+  max-height: 720px;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.22));
+}
+
+/* ==========================================================================
+   Discount Badges (z-index: 10, above background art and product base)
+   ========================================================================== */
+
+/* 10% rewards badge: Close to the headphones & red gift box */
+.deals-hero__badge-10 {
+  position: absolute;
+  left: 1095px;
+  top: 200px;
+  width: 154px;
+  height: 154px;
+  border-radius: 50%;
+  background: #E31E25;
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 24px rgba(227, 30, 37, 0.42);
+  z-index: 10;
+  user-select: none;
+  pointer-events: none;
+}
+
+.deals-hero__badge-10-num {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -1px;
+}
+
+.deals-hero__badge-10-label {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 1px;
+  letter-spacing: 0.2px;
+}
+
+/* 55% off badge: Shifted further to the right side */
+.deals-hero__badge-55 {
+  position: absolute;
+  left: 1735px;
+  top: 100px;
+  width: 165px;
+  height: 165px;
+  border-radius: 50%;
+  background: #E31E25;
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 24px rgba(227, 30, 37, 0.42);
+  z-index: 10;
+  user-select: none;
+  pointer-events: none;
+}
+
+.deals-hero__badge-55-num {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 58px;
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -1px;
+}
+
+.deals-hero__badge-55-label {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 0px;
+  letter-spacing: 0.2px;
+}
+
+/* ==========================================================================
+   Left Hero Copy & Text Stack (z-index: 15, above background art)
+   ========================================================================== */
+
+.deals-hero__copy {
+  position: absolute;
+  left: 120px;
+  top: 290px;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.deals-hero__top-picks-badge {
+  background: #FFFFFF;
+  color: #2F368C;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 15px;
+  font-weight: 600;
+  padding: 5px 22px;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 12px;
+  user-select: none;
+}
+
+.deals-hero__heading {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 72px;
+  font-weight: 800;
+  line-height: 1;
+  color: #FFFFFF;
+  text-shadow: 0 3px 12px rgba(0, 0, 0, 0.18);
+  margin: 0 0 16px 0;
+  padding: 0;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+}
+
+.deals-hero__verified-pill {
+  background: #E31E25;
+  color: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 15px;
+  font-weight: 600;
+  padding: 7px 22px;
+  border-radius: 999px;
+  user-select: none;
+  box-shadow: 0 4px 14px rgba(227, 30, 37, 0.35);
+  white-space: nowrap;
+}

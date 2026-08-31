@@ -1,0 +1,86 @@
+.trendingSection {
+  width: 100%;
+  margin-top: 10px;
+  margin-bottom: 12px;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+
+.trendingGrid {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.trendingCard {
+  flex: 1;
+  min-width: 0;
+  max-width: 66px;
+  height: 66px;
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  /* Exact multi-border shadow: outside drop shadow + inside top/left/right border shadows (no inside bottom shadow) */
+  box-shadow:
+    0px 4px 10px rgba(0, 0, 0, 0.12),
+    inset 0px 3px 5px rgba(0, 0, 0, 0.14),
+    inset 3px 0px 5px rgba(0, 0, 0, 0.10),
+    inset -3px 0px 5px rgba(0, 0, 0, 0.10);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 2px;
+  box-sizing: border-box;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.15s ease, box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.trendingCard:hover,
+.trendingCard:active {
+  transform: scale(0.96);
+  box-shadow:
+    0px 4px 10px rgba(0, 0, 0, 0.15),
+    inset 0px 6px 8px -2px rgba(47, 54, 140, 0.92),
+    inset 5px 0px 8px -2px rgba(47, 54, 140, 0.85),
+    inset -5px 0px 8px -2px rgba(47, 54, 140, 0.85);
+}
+
+.logoArea {
+  width: 100%;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.logoImg {
+  max-width: 50px;
+  max-height: 34px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.cardLabel {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 8.5px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: #000000;
+  text-align: center;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  padding: 0 2px;
+}

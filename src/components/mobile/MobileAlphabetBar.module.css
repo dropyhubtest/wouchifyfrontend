@@ -1,0 +1,70 @@
+.alphabetWrapper {
+  margin-top: 14px;
+  margin-bottom: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.alphabetScroll {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 14px 8px 14px;
+  box-sizing: border-box;
+  touch-action: pan-x;
+  scroll-behavior: smooth;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.alphabetScroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Continuous overlapping scalloped cloud/wave band matching Figma image 1 */
+.scallopTrack {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  min-width: max-content;
+  padding: 4px 6px;
+}
+
+.scallopItem {
+  width: 42px;
+  height: 48px;
+  border-radius: 24px;
+  background: #EFF2FE;
+  border: none;
+  color: #000000;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-weight: 700;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  outline: none;
+  /* Overlapping lobes create the continuous scalloped wave ribbon */
+  margin-right: -8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  transition: transform 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+  user-select: none;
+}
+
+.scallopItem:hover {
+  background: #E4E9FC;
+}
+
+.scallopItemActive {
+  background: #2F368C !important;
+  color: #FFFFFF !important;
+  z-index: 2;
+  box-shadow: 0 3px 6px rgba(47, 54, 140, 0.25);
+}
+
+.scallopItem:active {
+  transform: scale(0.92);
+}

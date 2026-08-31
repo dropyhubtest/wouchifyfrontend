@@ -1,0 +1,37 @@
+/* ==========================================================================
+   Deals Page Styles (1920px Reference Canvas)
+   ========================================================================== */
+
+.deals-page {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  background-color: var(--color-white, #FFFFFF);
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+/* ==========================================================================
+   1. Header Background Layer (#EEEFFF, height: 131px, z-index: 10)
+   ========================================================================== */
+
+.deals-page__header-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #EEEFFF;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   2. Navbar Interactive Content (z-index: 30)
+   ========================================================================== */
+
+.deals-page__navbar-wrapper {
+  position: relative;
+  z-index: 30;
+  width: 100%;
+}

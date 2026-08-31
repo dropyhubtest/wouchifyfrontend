@@ -1,0 +1,27 @@
+.dividerContainer {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 25px;
+  box-sizing: border-box;
+  margin: 14px 0 10px 0;
+  position: relative;
+  overflow: visible;
+}
+
+.dividerContainerTailed {
+  margin-top: 24px;
+  margin-bottom: 12px;
+}
+
+.svgWave {
+  width: 315px;
+  height: 27px;
+  display: block;
+}
+
+.svgWaveTailed {
+  width: 390px;
+  height: 32px;
+  display: block;
+}

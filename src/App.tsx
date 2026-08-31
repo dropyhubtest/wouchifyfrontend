@@ -1,7 +1,18 @@
 import { useState, useEffect } from 'react'
 import { useMediaQuery } from './hooks/useMediaQuery'
 import { DesktopHomePage } from './components/desktop/DesktopHomePage'
-import { MobileHomePage, MobileStoresPage } from './components/mobile'
+import {
+  MobileHomePage,
+  MobileStoresPage,
+  MobileCategoriesPage,
+  MobileSubCategoriesPage,
+  MobileStoresDirectoryPage,
+  MobileBrandsDirectoryPage,
+  MobileFestivalsDirectoryPage,
+  MobileTravellingDirectoryPage,
+  MobileBanksDirectoryPage,
+  MobileCitiesDealsDirectoryPage,
+} from './components/mobile'
 import { StoresPage } from './pages/StoresPage'
 import { CategoriesPage } from './pages/CategoriesPage'
 import { CategoryDetailPage } from './pages/CategoryDetailPage'
@@ -12,6 +23,7 @@ import { BanksDirectoryPage } from './pages/BanksDirectoryPage'
 import { FestivalsDirectoryPage } from './pages/FestivalsDirectoryPage'
 import { TravellingDirectoryPage } from './pages/TravellingDirectoryPage'
 import { CitiesDealsDirectoryPage } from './pages/CitiesDealsDirectoryPage'
+import { DealsPage } from './pages/DealsPage'
 
 function resolveCurrentPath(): string {
   if (typeof window === 'undefined') return '/'
@@ -90,6 +102,11 @@ function resolveCurrentPath(): string {
     return '/stores'
   }
 
+  // Deals hero/landing page (/deals)
+  if (page === 'deals' || pathname === '/deals' || pathname.startsWith('/deals/')) {
+    return '/deals'
+  }
+
   // Categories landing/detail
   if (page === 'categories') {
     return cat ? `/categories/${cat}` : '/categories'
@@ -151,20 +168,37 @@ export default function App() {
   const isStoresDirectoryRoute = currentPath === '/categories/stores'
   const isSubcategoriesRoute = currentPath === '/categories/subcategories'
   const isStoresRoute = currentPath === '/stores' || currentPath.startsWith('/stores/')
+  const isDealsRoute = currentPath === '/deals' || currentPath.startsWith('/deals/')
   const isCategoriesRoute = currentPath === '/categories' || currentPath.startsWith('/categories/')
 
   const renderContent = () => {
     if (isMobile) {
-      if (
-        isStoresRoute ||
-        isStoresDirectoryRoute ||
-        isBrandsDirectoryRoute ||
-        isBanksDirectoryRoute ||
-        isFestivalsDirectoryRoute ||
-        isTravellingDirectoryRoute ||
-        isCitiesDealsDirectoryRoute
-      ) {
+      if (isCitiesDealsDirectoryRoute) {
+        return <MobileCitiesDealsDirectoryPage />
+      }
+      if (isTravellingDirectoryRoute) {
+        return <MobileTravellingDirectoryPage />
+      }
+      if (isFestivalsDirectoryRoute) {
+        return <MobileFestivalsDirectoryPage />
+      }
+      if (isBanksDirectoryRoute) {
+        return <MobileBanksDirectoryPage />
+      }
+      if (isBrandsDirectoryRoute) {
+        return <MobileBrandsDirectoryPage />
+      }
+      if (isStoresDirectoryRoute) {
+        return <MobileStoresDirectoryPage />
+      }
+      if (isSubcategoriesRoute) {
+        return <MobileSubCategoriesPage />
+      }
+      if (isStoresRoute) {
         return <MobileStoresPage />
+      }
+      if (isCategoriesRoute) {
+        return <MobileCategoriesPage />
       }
       return <MobileHomePage />
     }
@@ -195,6 +229,10 @@ export default function App() {
 
     if (isStoresRoute) {
       return <StoresPage />
+    }
+
+    if (isDealsRoute) {
+      return <DealsPage />
     }
 
     if (isSubcategoriesRoute) {
