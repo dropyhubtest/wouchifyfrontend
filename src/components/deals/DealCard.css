@@ -245,61 +245,61 @@
 }
 
 .deal-card__content--horizontal .deal-card__store-left {
-  gap: 2px;
+  gap: 3px;
 }
 
 .deal-card__content--horizontal .deal-card__store-logo {
-  height: 24px;
-  max-width: 90px;
+  height: 32px;
+  max-width: 110px;
 }
 
 .deal-card__content--horizontal .deal-card__verified-badge {
-  font-size: 8.5px;
-  padding: 2px 7px;
-}
-
-.deal-card__content--horizontal .deal-card__deal-tag {
-  font-size: 9.5px;
+  font-size: 10px;
   padding: 2px 8px;
 }
 
-.deal-card__content--horizontal .deal-card__category {
+.deal-card__content--horizontal .deal-card__deal-tag {
   font-size: 11px;
+  padding: 2px 10px;
+}
+
+.deal-card__content--horizontal .deal-card__category {
+  font-size: 12px;
   font-weight: 700;
-  padding: 3px 12px 3px 18px;
+  padding: 3px 14px 3px 18px;
   margin-left: -18px;
-  margin-top: 4px;
+  margin-top: 6px;
   margin-bottom: 8px;
 }
 
 .deal-card__content--horizontal .deal-card__title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   line-height: 1.35;
-  height: 36px;
+  height: 38px;
   margin: 0 0 8px 0;
 }
 
 .deal-card__content--horizontal .deal-card__price-row {
   margin-bottom: 12px;
-  gap: 8px;
+  gap: 10px;
 }
 
 .deal-card__content--horizontal .deal-card__price {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 800;
 }
 
 .deal-card__content--horizontal .deal-card__original-price {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
-  margin-left: 8px;
+  margin-left: 10px;
 }
 
 .deal-card__content--horizontal .deal-card__grab-btn {
-  height: 40px;
-  border-radius: 10px;
-  font-size: 14px;
+  height: 44px;
+  border-radius: 12px;
+  font-size: 15px;
   font-weight: 700;
   margin-top: auto;
 }

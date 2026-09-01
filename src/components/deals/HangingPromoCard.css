@@ -1,0 +1,260 @@
+/* ==========================================================================
+   Deals Hero Hanging Tags (Solid #94A3B8 3px Strings, Blue 900 Typography, Outer Floating Shadows)
+   ========================================================================== */
+
+.deals-hanging-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 12;
+  user-select: none;
+}
+
+/* ==========================================================================
+   Core Entry & Combined Motion Keyframes
+   ========================================================================== */
+
+/* Core Entry Animation: Drops down from -150% behind navbar threshold */
+.hanging-item {
+  position: absolute;
+  top: 0;
+  transform-origin: top center;
+  animation: tagDrop 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform;
+}
+
+@keyframes tagDrop {
+  0% {
+    transform: translateY(-150%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 70% Off: Anchor slides left/right while rotating */
+.sway-left {
+  transform-origin: top center;
+  animation: swayTranslateLeft 3.2s ease-in-out infinite alternate 0.8s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  will-change: transform;
+}
+
+@keyframes swayTranslateLeft {
+  0% {
+    transform: translateX(-15px) rotate(-12deg);
+  }
+  100% {
+    transform: translateX(15px) rotate(12deg);
+  }
+}
+
+/* ₹300 Off: Opposing start direction */
+.sway-clockwise {
+  transform-origin: top center;
+  animation: swayTranslateClockwise 2.8s ease-in-out infinite alternate 0.8s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  will-change: transform;
+}
+
+@keyframes swayTranslateClockwise {
+  0% {
+    transform: translateX(10px) rotate(10deg);
+  }
+  100% {
+    transform: translateX(-10px) rotate(-10deg);
+  }
+}
+
+/* 25% Rewards: Counter-movement */
+.sway-counter {
+  transform-origin: top center;
+  animation: swayTranslateCounter 2.8s ease-in-out infinite alternate 0.8s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  will-change: transform;
+}
+
+@keyframes swayTranslateCounter {
+  0% {
+    transform: translateX(-12px) rotate(-10deg);
+  }
+  100% {
+    transform: translateX(12px) rotate(10deg);
+  }
+}
+
+/* ==========================================================================
+   Solid String Geometry (#94A3B8 Flat Slate 400)
+   ========================================================================== */
+
+/* Off-white / Silver string close to white (#E2E8F0) */
+.string {
+  width: 3.5px;
+  background-color: #E2E8F0;
+  box-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 0;
+}
+
+/* Tag 1: Left - 70% Off (left: 24%) */
+.item-70 {
+  left: 24%;
+}
+
+/* Tag 2: Center-Left - ₹300 Off (left: 43.5%, z-index: 20 sits on top of Tag 3) */
+.item-300 {
+  left: 43.5%;
+  z-index: 20;
+}
+
+/* Tag 3: Center-Right - 25% Rewards (left: 47.5%, z-index: 10 tucks underneath Tag 2) */
+.item-25 {
+  left: 47.5%;
+  z-index: 10;
+}
+
+/* ==========================================================================
+   Tag Cards Sizing, Explicit Borders, Floating Shadows & Typography
+   ========================================================================== */
+
+/* Tag 1 (70% Off): 110px × 110px circle, top-half inside shadow + bottom-half outside shadow */
+.tag-70 {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: #DC2626;
+  border: 1.5px solid #000000;
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    inset 0px 8px 12px -2px rgba(0, 0, 0, 0.35),
+    0px 14px 28px -4px rgba(0, 0, 0, 0.28),
+    0px 4px 10px rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+  line-height: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.tag-70__val {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 28px;
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1;
+}
+
+.tag-70__sub {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 14px;
+  font-weight: 700;
+  color: #FFFFFF;
+  text-transform: lowercase;
+  letter-spacing: -0.2px;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+/* Tag 2 (₹300 Off): 130px × 110px rounded rectangle, top side inside shadow + 3 sides outside shadow */
+.tag-300 {
+  width: 130px;
+  height: 110px;
+  border-radius: 8px;
+  background: #FFFFFF;
+  border: 1.5px solid #000000;
+  box-shadow:
+    inset 0px 8px 10px -4px rgba(0, 0, 0, 0.28),
+    0px 14px 26px -4px rgba(0, 0, 0, 0.18),
+    4px 8px 16px -2px rgba(0, 0, 0, 0.10),
+    -4px 8px 16px -2px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+  position: relative;
+  z-index: 20;
+}
+
+.tag-300__val {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 30px;
+  font-weight: 800;
+  color: #1E3A8A;
+  line-height: 1;
+}
+
+.tag-300__sub {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 16px;
+  font-weight: 700;
+  color: #1E3A8A;
+  line-height: 1;
+  margin-top: 3px;
+}
+
+/* Tag 3 (25% Rewards): 115px × 115px circle, top-half inside shadow + bottom-half outside shadow */
+.tag-25 {
+  width: 115px;
+  height: 115px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 1.5px solid #000000;
+  box-shadow:
+    inset 0px 8px 12px -2px rgba(0, 0, 0, 0.25),
+    0px 14px 28px -4px rgba(0, 0, 0, 0.20),
+    0px 4px 10px rgba(0, 0, 0, 0.10);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+  position: relative;
+  z-index: 10;
+}
+
+.tag-25__val {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 24px;
+  font-weight: 800;
+  color: #DC2626;
+  line-height: 1;
+}
+
+.tag-25__sub {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 14px;
+  font-weight: 600;
+  color: #DC2626;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+/* Reduced Motion Fallback */
+@media (prefers-reduced-motion: reduce) {
+  .hanging-item,
+  .sway-left,
+  .sway-clockwise,
+  .sway-counter {
+    animation: none !important;
+    transform: none !important;
+  }
+}

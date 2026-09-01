@@ -65,6 +65,8 @@ export interface DealsFavouriteStoreItem {
   logo: string
   discountBadge: string
   badgeBg?: string
+  cardBg?: string
+  logoScale?: number
   href: string
 }
 
@@ -110,6 +112,7 @@ export const DEALS_FAVOURITE_STORES: DealsFavouriteStoreItem[] = [
     name: 'Big Basket',
     slug: 'bigbasket',
     logo: bigbasketLogo,
+    logoScale: 1.35,
     discountBadge: '60% off',
     badgeBg: '#D1E8FF',
     href: '/stores#bigbasket',
@@ -119,6 +122,7 @@ export const DEALS_FAVOURITE_STORES: DealsFavouriteStoreItem[] = [
     name: 'Meesho',
     slug: 'meesho',
     logo: meeshoLogo,
+    cardBg: '#5B0C43',
     discountBadge: '22% off',
     badgeBg: '#D1E8FF',
     href: '/stores#meesho',
@@ -128,6 +132,7 @@ export const DEALS_FAVOURITE_STORES: DealsFavouriteStoreItem[] = [
     name: 'Nykaa',
     slug: 'nykaa',
     logo: nykaaLogo,
+    logoScale: 1.35,
     discountBadge: '10% off',
     badgeBg: '#D1E8FF',
     href: '/stores#nykaa',
@@ -200,6 +205,7 @@ export const DEALS_FAVOURITE_STORES: DealsFavouriteStoreItem[] = [
     name: 'JioMart',
     slug: 'jiomart',
     logo: jiomartLogo,
+    logoScale: 1.3,
     discountBadge: '30% off',
     badgeBg: '#D1E8FF',
     href: '/stores#jiomart',

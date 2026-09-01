@@ -1,68 +1,51 @@
 /* ==========================================================================
-   Mobile Most Popular Brands Section
+   Mobile Brand Tiles Section (Matching MobilePopularBrands exactly)
    ========================================================================== */
 
-.mobile-popular-brands {
+.brandTilesSection {
   position: relative;
   width: 100%;
   max-width: 440px;
   background: #FFFFFF;
   overflow: visible;
   box-sizing: border-box;
+  margin-top: 6px;
+  margin-bottom: 24px;
 }
 
-/* ==========================================================================
-   Heading Section
-   ========================================================================== */
-
-.mobile-popular-heading {
+/* Heading with Left-Clipped Navy Dot */
+.headingRow {
   position: relative;
-  width: 100%;
-  height: 24px;
-  margin-top: 16px;
-  overflow: visible;
+  display: flex;
+  align-items: center;
+  padding-left: 16px;
+  margin-bottom: 6px;
 }
 
-.mobile-popular-heading h2 {
-  margin: 0;
-  margin-left: 16px;
-  white-space: nowrap;
-  font-family: 'Poppins', sans-serif;
-  font-size: 20px;
-  font-weight: 600;
-  line-height: 24px;
-  color: #000000;
-}
-
-.mobile-popular-heading__accent {
+.navyAccentDot {
   position: absolute;
   left: -7px;
-  top: 5px;
+  top: 50%;
+  transform: translateY(-50%);
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #2A3189;
+  background-color: var(--color-navy, #2F368C);
+  pointer-events: none;
 }
 
-/* ==========================================================================
-   Row & Scroller Layout
-   ========================================================================== */
-
-.mobile-brands__row {
-  width: 100%;
-  position: relative;
-  overflow: visible;
+.headingTitle {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 20px;
+  font-weight: 600;
+  color: #000000;
+  margin: 0;
+  padding: 0;
+  letter-spacing: -0.2px;
 }
 
-.mobile-brands__row--1 {
-  margin-top: 4px;
-}
-
-.mobile-brands__row--2 {
-  margin-top: -4px;
-}
-
-.mobile-brands__row-scroller {
+/* Horizontal Row Scrollers */
+.rowScroller {
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
@@ -70,33 +53,33 @@
   padding-bottom: 6px;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  outline: none;
 }
 
-.mobile-brands__row-scroller::-webkit-scrollbar {
+.rowScroller::-webkit-scrollbar {
   display: none;
 }
 
-.mobile-brands__track {
+.track {
   display: flex;
-  padding-left: min(20px, 4.545vw);
-  padding-right: 0;
-  gap: min(7px, 1.59vw);
-  scroll-snap-type: x mandatory;
+  padding-left: 16px;
+  padding-right: 16px;
+  gap: 12px;
   width: max-content;
 }
 
 /* ==========================================================================
-   Mobile Brand Card (Both Inset & Drop Shadow Applied Directly on Card Element)
+   Store Card (Matching media_1788242695913.png & MobilePopularBrands.css)
    ========================================================================== */
 
-.mobile-brand-card {
-  width: min(146px, 33.1818vw);
-  height: min(70px, 15.909vw);
-  flex: 0 0 min(146px, 33.1818vw);
-  scroll-snap-align: start;
+.brandCard {
+  width: 146px;
+  height: 70px;
+  flex: 0 0 146px;
   position: relative;
   background: #FFFFFF;
-  border-radius: min(22px, 5.2vw);
+  border-radius: 20px;
   border: none;
   box-shadow:
     inset 0 6px 10px -2px rgba(0, 0, 0, 0.28),  /* Inner top shadow */
@@ -107,15 +90,21 @@
   text-decoration: none;
   display: block;
   box-sizing: border-box;
+  transition: transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.mobile-brand-card:focus-visible {
-  outline: 2px solid #2A3189;
+.brandCard:active {
+  transform: scale(0.97);
+}
+
+.brandCard:focus-visible {
+  outline: 2px solid var(--color-navy, #2F368C);
   outline-offset: 2px;
 }
 
 /* Brand Logo (Directly inside card) */
-.mobile-brand-card__logo {
+.brandCardLogo {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -124,21 +113,20 @@
   object-fit: contain;
   display: block;
   transform-origin: center;
-  transition: transform 0.2s ease;
   box-sizing: border-box;
   pointer-events: none;
 }
 
 /* ==========================================================================
-   Silver Sphere Discount Badge (Positioned overlapping top-right curve)
+   3D Silver Sphere Discount Badge (Positioned overlapping top-right curve)
    ========================================================================== */
 
-.mobile-brand-card__discount {
+.discountBadge {
   position: absolute;
-  right: min(6px, 1.4vw);
-  top: calc(min(44px, 10vw) * -0.38);
-  width: min(44px, 10vw);
-  height: min(44px, 10vw);
+  right: 6px;
+  top: -16px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #E2E2E2 0%, #BFBFBF 55%, #9E9E9E 100%);
   border: none;
@@ -154,9 +142,9 @@
   padding-top: 1px;
 }
 
-.mobile-brand-card__discount-percentage {
-  font-family: 'Poppins', sans-serif;
-  font-size: min(13px, 3.0vw);
+.discountPercentage {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 13px;
   font-weight: 800;
   line-height: 1;
   color: #FFFFFF;
@@ -164,13 +152,19 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.40);
 }
 
-.mobile-brand-card__discount-off {
-  font-family: 'Poppins', sans-serif;
-  font-size: min(9px, 2.0vw);
+.discountOff {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 9px;
   font-weight: 700;
   line-height: 1;
   text-transform: lowercase;
   color: #FFFFFF;
   margin-top: 1px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.40);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brandCard:active {
+    transform: none;
+  }
 }

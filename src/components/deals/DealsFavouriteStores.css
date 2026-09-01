@@ -12,7 +12,7 @@
   justify-content: center;
   align-items: flex-start;
   margin: 0;
-  padding: 38px 0 0;
+  padding: 0;
 }
 
 .deals-favourite-canvas {
@@ -22,7 +22,7 @@
   transform-origin: top center;
   transform: scale(var(--deals-scale, 1));
   box-sizing: border-box;
-  padding: 0 135px 0 80px;
+  padding: 38px 135px 40px 80px;
   overflow: visible;
 }
 
@@ -230,17 +230,19 @@
 .deals-favourite__store-tile {
   flex: 0 0 200px;
   width: 200px;
-  height: 94px;
+  height: 96px;
   background: #FFFFFF;
-  border-radius: 26px;
+  border-radius: 22px;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   text-decoration: none;
   box-shadow:
-    0 8px 18px rgba(0, 0, 0, 0.12),
-    inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    inset 0 6px 10px -2px rgba(0, 0, 0, 0.28),  /* Inner top shadow */
+    0 10px 24px -3px rgba(0, 0, 0, 0.22),       /* Bottom outer drop shadow */
+    0 4px 12px -1px rgba(0, 0, 0, 0.12);        /* Side outer drop shadow */
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   padding: 8px 14px;
   box-sizing: border-box;
@@ -256,28 +258,27 @@
 .deals-favourite__store-tile:hover {
   transform: translateY(-2px);
   box-shadow:
-    0 12px 24px rgba(0, 0, 0, 0.18),
-    inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    inset 0 4px 6px -1px rgba(0, 0, 0, 0.20),
+    0 12px 24px -2px rgba(0, 0, 0, 0.22),
+    0 4px 8px -1px rgba(0, 0, 0, 0.10);
 }
 
-/* Silver Glassmorphism Discount Badge (No border) */
+/* Perfect Circle 3D Silver Discount Badge (Matching media_1788242343582.png) */
 .deals-favourite__store-badge {
   position: absolute;
-  right: 10px;
+  right: 12px;
   top: -18px;
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(220, 226, 238, 0.75) 0%, rgba(162, 174, 192, 0.80) 50%, rgba(120, 134, 154, 0.85) 100%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: radial-gradient(circle at 35% 35%, #E2E2E2 0%, #BFBFBF 55%, #9E9E9E 100%);
   border: none;
   color: #FFFFFF;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.20);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.28);
   z-index: 3;
   box-sizing: border-box;
   pointer-events: none;
@@ -286,23 +287,23 @@
 
 .deals-favourite__store-badge-percent {
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 800;
   line-height: 1;
   color: #FFFFFF;
-  letter-spacing: -0.5px;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.50);
+  letter-spacing: -0.4px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.40);
 }
 
 .deals-favourite__store-badge-off {
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   line-height: 1;
   text-transform: lowercase;
   color: #FFFFFF;
   margin-top: 1px;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.50);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.40);
 }
 
 .deals-favourite__store-logo-wrapper {

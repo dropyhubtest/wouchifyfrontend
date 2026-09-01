@@ -4,6 +4,7 @@ import { DesktopHomePage } from './components/desktop/DesktopHomePage'
 import {
   MobileHomePage,
   MobileStoresPage,
+  MobileDealsPage,
   MobileCategoriesPage,
   MobileSubCategoriesPage,
   MobileStoresDirectoryPage,
@@ -196,6 +197,9 @@ export default function App() {
       }
       if (isStoresRoute) {
         return <MobileStoresPage />
+      }
+      if (isDealsRoute) {
+        return <MobileDealsPage />
       }
       if (isCategoriesRoute) {
         return <MobileCategoriesPage />

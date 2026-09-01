@@ -11,7 +11,7 @@
   justify-content: center;
   align-items: flex-start;
   margin: 0;
-  padding: 0 0 60px;
+  padding: 0;
 }
 
 .best-selling-deals-canvas {
@@ -21,7 +21,7 @@
   transform-origin: top center;
   transform: scale(var(--deals-scale, 1));
   box-sizing: border-box;
-  padding: 0 135px 0 80px;
+  padding: 30px 135px 60px 80px;
   overflow: visible;
 }
 
@@ -70,11 +70,11 @@
   background: #2F368C;
   color: #FFFFFF;
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
-  padding: 4px 16px;
+  padding: 6px 22px;
   border-radius: 999px;
-  margin-top: 6px;
+  margin-top: 8px;
   user-select: none;
 }
 

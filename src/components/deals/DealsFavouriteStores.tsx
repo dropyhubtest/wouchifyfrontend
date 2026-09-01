@@ -1,13 +1,17 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useRef, useEffect } from 'react'
 import { DealCard } from './DealCard'
 import {
   DEALS_FILTER_CATEGORIES,
   DEALS_FAVOURITE_STORES,
   DEALS_CARD_ITEMS,
 } from '../../data/dealsPage'
+import { useDesktopScale } from '../../hooks/useDesktopScale'
 import './DealsFavouriteStores.css'
 
 export const DealsFavouriteStores: React.FC = () => {
+  const scale = useDesktopScale()
+  const canvasRef = useRef<HTMLDivElement>(null)
+  const [canvasHeight, setCanvasHeight] = useState<number>(1100)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedFilter, setSelectedFilter] = useState<string>('Stores')
 
@@ -29,13 +33,43 @@ export const DealsFavouriteStores: React.FC = () => {
     })
   }, [searchQuery, selectedFilter])
 
+  useEffect(() => {
+    const updateHeight = () => {
+      if (canvasRef.current) {
+        const measured = Math.max(
+          canvasRef.current.scrollHeight,
+          canvasRef.current.offsetHeight,
+          canvasRef.current.getBoundingClientRect().height / (scale || 1)
+        )
+        setCanvasHeight(Math.ceil(measured) + 20)
+      }
+    }
+    updateHeight()
+    const timer = setTimeout(updateHeight, 100)
+
+    const observer = new ResizeObserver(updateHeight)
+    if (canvasRef.current) {
+      observer.observe(canvasRef.current)
+    }
+    window.addEventListener('resize', updateHeight)
+    window.addEventListener('load', updateHeight)
+
+    return () => {
+      clearTimeout(timer)
+      observer.disconnect()
+      window.removeEventListener('resize', updateHeight)
+      window.removeEventListener('load', updateHeight)
+    }
+  }, [filteredDeals.length, scale])
+
   return (
     <section
       className="deals-favourite-stores"
       id="deals-favourite-stores"
       aria-label="Deals from Favourite Stores"
+      style={{ height: `${canvasHeight * scale}px` }}
     >
-      <div className="deals-favourite-canvas">
+      <div className="deals-favourite-canvas" ref={canvasRef}>
         {/* Controls row: Heading with blue accent + Search Deals field (pushed right) */}
         <div className="deals-favourite__controls">
           <div className="deals-favourite__heading-group">
@@ -141,6 +175,7 @@ export const DealsFavouriteStores: React.FC = () => {
                     src={store.logo}
                     alt={store.name}
                     className={`deals-favourite__store-logo deals-favourite__store-logo--${store.id}`}
+                    style={store.logoScale ? { transform: `scale(${store.logoScale})` } : undefined}
                     loading="lazy"
                   />
                 </div>

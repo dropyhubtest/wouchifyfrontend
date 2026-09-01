@@ -1,0 +1,215 @@
+/* ==========================================================================
+   Horizontal Split-Card Pair (Matching media_1788243335858.png bottom section)
+   ========================================================================== */
+
+.horizontalCardPair {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s ease;
+}
+
+.horizontalCardPair:active {
+  transform: scale(0.985);
+}
+
+/* 1. Left Banner Image (Rounded all corners including top-right and bottom-right) */
+.bannerContainer {
+  width: 250px;
+  height: 180px;
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+  background: #000000;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.bannerImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background-color: #000000;
+  display: block;
+}
+
+.bannerOverlay {
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+/* 2. Right Description Card (Rounded corners) */
+.descriptionCard {
+  width: 172px;
+  height: 180px;
+  background: #FFFFFF;
+  border-radius: 16px;
+  padding: 12px 12px 14px 12px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  box-shadow:
+    inset 0 4px 6px -1px rgba(0, 0, 0, 0.18),   /* Top inner shadow */
+    0 6px 14px -2px rgba(0, 0, 0, 0.16),        /* Outer drop shadow */
+    0 2px 6px -1px rgba(0, 0, 0, 0.08);
+}
+
+/* Store Row */
+.storeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.storeLeft {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.storeLogo {
+  height: 18px;
+  max-width: 68px;
+  object-fit: contain;
+  display: block;
+}
+
+.storeName {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 12px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.verifiedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2.5px;
+  background: #F0F2F8;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 8px;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.verifiedDot {
+  width: 3.5px;
+  height: 3.5px;
+  border-radius: 50%;
+  background: #E31E25;
+}
+
+.dealTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: #F0F2F8;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 8.5px;
+  font-weight: 600;
+  color: #374151;
+  align-self: flex-start;
+}
+
+.dealDot {
+  width: 3.5px;
+  height: 3.5px;
+  border-radius: 50%;
+  background: #E31E25;
+}
+
+/* Category Ribbon (Attached flush to left edge) */
+.categoryRibbon {
+  align-self: flex-start;
+  margin-left: -12px;
+  padding: 2px 8px 2px 12px;
+  background: var(--color-navy, #2F368C);
+  color: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  border-radius: 0 3px 3px 0;
+  margin-bottom: 6px;
+}
+
+/* Product Title (Clean, uncropped fit) */
+.productTitle {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #111827;
+  margin: 0 0 4px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-height: 32px;
+}
+
+/* Price Row (37998 bold + 62999 strikethrough with red line) */
+.priceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: auto;
+  margin-bottom: 8px;
+}
+
+.currentPrice {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 18px;
+  font-weight: 800;
+  color: #000000;
+  line-height: 1;
+}
+
+.originalPrice {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #000000;
+  text-decoration: line-through;
+  text-decoration-color: #E31E25;
+  text-decoration-thickness: 1.5px;
+  line-height: 1;
+}
+
+/* Red Grab Deal CTA Button */
+.grabDealBtn {
+  width: 100%;
+  height: 28px;
+  background: var(--color-red, #E31E25);
+  color: #FFFFFF;
+  border-radius: 999px;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 4px rgba(227, 30, 37, 0.25);
+  transition: opacity 0.12s ease;
+}
+
+.horizontalCardPair:hover .grabDealBtn {
+  opacity: 0.95;
+}
