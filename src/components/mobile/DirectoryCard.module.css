@@ -1,5 +1,6 @@
 .card {
   width: 100%;
+  min-width: 0;
   min-height: 78px;
   background: #FFFFFF;
   border: 1px solid rgba(0, 0, 0, 0.06);
@@ -19,10 +20,8 @@
   text-decoration: none;
   cursor: pointer;
   user-select: none;
-  content-visibility: auto;
-  contain-intrinsic-size: 96px 78px;
   transition: box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: visible;
+  overflow: hidden;
   position: relative;
 }
 
@@ -54,7 +53,7 @@
 }
 
 .logoImg {
-  max-width: 72px;
+  max-width: 100%;
   max-height: 38px;
   width: auto;
   height: auto;
