@@ -1,0 +1,348 @@
+/* ==========================================================================
+   LootDealsPage Styles (1920px Reference Canvas)
+   ========================================================================== */
+
+.loot-deals-page {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  background-color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.loot-deals-page__header-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #EEEFFF;
+  z-index: 1;
+}
+
+.loot-deals-page__navbar-wrapper {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+}
+
+/* ==========================================================================
+   Main Loot Deals Section (Search, Tabs, Brand Tiles, Single Card)
+   ========================================================================== */
+
+.loot-deals-main-section {
+  width: 100%;
+  position: relative;
+  overflow: visible;
+  background-color: #FFFFFF;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+  margin-top: 0;
+}
+
+.loot-deals-main-canvas {
+  width: 1920px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) scale(var(--deals-scale, 1));
+  transform-origin: top center;
+  box-sizing: border-box;
+  padding: 40px 60px 30px 60px;
+}
+
+/* Controls Header */
+.loot-deals__controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 30px;
+  box-sizing: border-box;
+}
+
+.loot-deals__heading-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.loot-deals__heading-accent {
+  width: 7px;
+  height: 48px;
+  background: var(--color-navy, #2F368C);
+  border-radius: 4px;
+}
+
+.loot-deals__heading {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 38px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+/* Search Box */
+.loot-deals__search-box {
+  position: relative;
+  width: 480px;
+  height: 52px;
+}
+
+.loot-deals__search-input {
+  width: 100%;
+  height: 100%;
+  background: #EFF1FE;
+  border: 1px solid #D5DBF8;
+  border-radius: 999px;
+  padding: 0 54px 0 24px;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 16px;
+  color: #000000;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.loot-deals__search-input:focus {
+  border-color: var(--color-navy, #2F368C);
+  box-shadow: 0 0 0 3px rgba(47, 54, 140, 0.12);
+}
+
+.loot-deals__search-input::placeholder {
+  color: #7B809A;
+  font-size: 15px;
+}
+
+.loot-deals__search-icon-wrap {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* Filter Tabs Row */
+.loot-deals__filter-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 34px;
+  overflow-x: auto;
+  padding: 4px 0;
+  scrollbar-width: none;
+}
+
+.loot-deals__filter-row::-webkit-scrollbar {
+  display: none;
+}
+
+.loot-deals__filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 22px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  user-select: none;
+}
+
+.loot-deals__filter-pill:hover {
+  transform: translateY(-1px);
+}
+
+.loot-deals__filter-pill--lavender {
+  background-color: #EEEFFF;
+  color: #000000;
+}
+
+.loot-deals__filter-pill--peach {
+  background-color: #FDEBD9;
+  color: #000000;
+}
+
+.loot-deals__filter-label {
+  line-height: 1;
+}
+
+.loot-deals__filter-chevron {
+  display: block;
+}
+
+/* Brand Tiles Strip */
+.loot-deals__store-strip-wrap {
+  width: 100%;
+  margin-bottom: 44px;
+}
+
+.loot-deals__store-strip {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 12px 4px 16px 4px;
+  scrollbar-width: none;
+}
+
+.loot-deals__store-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.loot-deals__store-tile {
+  position: relative;
+  flex-shrink: 0;
+  width: 196px;
+  height: 98px;
+  background: #FFFFFF;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+.loot-deals__store-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.loot-deals__store-tile--meesho {
+  background: #5B0C43;
+}
+
+.loot-deals__store-badge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #D1E8FF;
+  border-radius: 999px;
+  padding: 2px 10px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.loot-deals__store-badge-percent {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.loot-deals__store-badge-off {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 10px;
+  font-weight: 600;
+  color: #000000;
+}
+
+.loot-deals__store-logo-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 48px;
+}
+
+.loot-deals__store-logo {
+  max-width: 110px;
+  max-height: 44px;
+  object-fit: contain;
+}
+
+/* Featured Single Deal Card — Left Aligned, Right Space Preserved */
+.loot-deals__featured-grid {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.loot-deals__single-card-wrap {
+  width: 401px;
+}
+
+/* ==========================================================================
+   Best Selling Deal Picks Section
+   ========================================================================== */
+
+.loot-best-selling-section {
+  width: 100%;
+  position: relative;
+  overflow: visible;
+  background-color: #FFFFFF;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+  margin-top: 40px;
+  margin-bottom: 60px;
+}
+
+.loot-best-selling-canvas {
+  width: 1920px;
+  box-sizing: border-box;
+  padding: 0 60px;
+}
+
+.loot-best-selling__header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.loot-best-selling__heading-accent {
+  width: 7px;
+  height: 44px;
+  background: var(--color-red, #E31E25);
+  border-radius: 4px;
+}
+
+.loot-best-selling__title {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 36px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.loot-best-selling__top-deals-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 18px;
+  background-color: #EEEFFF;
+  color: #000000;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 999px;
+  margin-bottom: 20px;
+}
+
+.loot-best-selling__cards-container {
+  display: flex;
+  gap: 30px;
+  width: 100%;
+  margin-top: 10px;
+}

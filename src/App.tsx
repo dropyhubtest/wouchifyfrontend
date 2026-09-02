@@ -5,6 +5,7 @@ import {
   MobileHomePage,
   MobileStoresPage,
   MobileDealsPage,
+  MobileLootDealsPage,
   MobileCategoriesPage,
   MobileSubCategoriesPage,
   MobileStoresDirectoryPage,
@@ -25,6 +26,8 @@ import { FestivalsDirectoryPage } from './pages/FestivalsDirectoryPage'
 import { TravellingDirectoryPage } from './pages/TravellingDirectoryPage'
 import { CitiesDealsDirectoryPage } from './pages/CitiesDealsDirectoryPage'
 import { DealsPage } from './pages/DealsPage'
+import { LootDealsPage } from './pages/LootDealsPage'
+import { CouponsPage } from './pages/CouponsPage'
 
 function resolveCurrentPath(): string {
   if (typeof window === 'undefined') return '/'
@@ -33,6 +36,7 @@ function resolveCurrentPath(): string {
   const searchParams = new URLSearchParams(window.location.search)
   const page = searchParams.get('page')
   const cat = searchParams.get('category')
+  const type = searchParams.get('type')
 
   // Top priority 1: Cities Deals directory (/categories/cities-deals)
   if (
@@ -96,6 +100,26 @@ function resolveCurrentPath(): string {
     cat === 'subcategories'
   ) {
     return '/categories/subcategories'
+  }
+
+  // Top priority 8: Loot Deals hero/landing page (/loot-deals or /deals?type=flash)
+  if (
+    pathname === '/loot-deals' ||
+    pathname.startsWith('/loot-deals/') ||
+    page === 'loot-deals' ||
+    page === 'loot' ||
+    (pathname === '/deals' && (type === 'flash' || type === 'flash-style' || type === 'loot'))
+  ) {
+    return '/loot-deals'
+  }
+
+  // Coupons landing page (/coupons)
+  if (
+    pathname === '/coupons' ||
+    pathname.startsWith('/coupons/') ||
+    page === 'coupons'
+  ) {
+    return '/coupons'
   }
 
   // Stores hero/landing page (/stores)
@@ -168,6 +192,8 @@ export default function App() {
   const isBrandsDirectoryRoute = currentPath === '/categories/brands'
   const isStoresDirectoryRoute = currentPath === '/categories/stores'
   const isSubcategoriesRoute = currentPath === '/categories/subcategories'
+  const isCouponsRoute = currentPath === '/coupons' || currentPath.startsWith('/coupons/')
+  const isLootDealsRoute = currentPath === '/loot-deals' || currentPath.startsWith('/loot-deals/')
   const isStoresRoute = currentPath === '/stores' || currentPath.startsWith('/stores/')
   const isDealsRoute = currentPath === '/deals' || currentPath.startsWith('/deals/')
   const isCategoriesRoute = currentPath === '/categories' || currentPath.startsWith('/categories/')
@@ -194,6 +220,9 @@ export default function App() {
       }
       if (isSubcategoriesRoute) {
         return <MobileSubCategoriesPage />
+      }
+      if (isLootDealsRoute) {
+        return <MobileLootDealsPage />
       }
       if (isStoresRoute) {
         return <MobileStoresPage />
@@ -229,6 +258,14 @@ export default function App() {
 
     if (isStoresDirectoryRoute) {
       return <StoresDirectoryPage />
+    }
+
+    if (isCouponsRoute) {
+      return <CouponsPage />
+    }
+
+    if (isLootDealsRoute) {
+      return <LootDealsPage />
     }
 
     if (isStoresRoute) {

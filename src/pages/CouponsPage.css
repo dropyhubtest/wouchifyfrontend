@@ -1,0 +1,39 @@
+/* ==========================================================================
+   Coupons Desktop Page Styles
+   ========================================================================== */
+
+.coupons-page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--color-white, #FFFFFF);
+  position: relative;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header Background Layer (#EEEFFF, height: 131px scaled) */
+.coupons-page__header-bg {
+  width: 100%;
+  background-color: #EEEFFF;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.coupons-page__navbar-wrapper {
+  position: relative;
+  z-index: 100;
+  width: 100%;
+}
+
+/* Red Dashed Divider before Footer matching Figma design */
+.coupons-page__red-dashed-divider {
+  width: 100%;
+  max-width: 1920px;
+  margin: 0 auto 40px auto;
+  border-top: 2px dashed #E31E25;
+  opacity: 0.6;
+}

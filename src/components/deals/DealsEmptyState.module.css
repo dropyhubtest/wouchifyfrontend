@@ -1,0 +1,29 @@
+.emptyContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 20px 140px 20px;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  user-select: none;
+}
+
+.emptyTitle {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 24px;
+  font-weight: 600;
+  color: #1A1A24;
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+}
+
+.emptySubtitle {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 16px;
+  font-weight: 400;
+  color: #737373;
+  margin: 0;
+  line-height: 1.4;
+}

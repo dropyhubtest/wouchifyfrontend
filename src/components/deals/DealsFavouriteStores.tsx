@@ -8,7 +8,19 @@ import {
 import { useDesktopScale } from '../../hooks/useDesktopScale'
 import './DealsFavouriteStores.css'
 
-export const DealsFavouriteStores: React.FC = () => {
+export interface DealsFavouriteStoresProps {
+  title?: string
+  searchPlaceholder?: string
+  singleCardMode?: boolean
+  hideCards?: boolean
+}
+
+export const DealsFavouriteStores: React.FC<DealsFavouriteStoresProps> = ({
+  title = 'Deals from Favourite Stores',
+  searchPlaceholder = 'Search Deals',
+  singleCardMode = false,
+  hideCards = false,
+}) => {
   const scale = useDesktopScale()
   const canvasRef = useRef<HTMLDivElement>(null)
   const [canvasHeight, setCanvasHeight] = useState<number>(1100)
@@ -66,25 +78,25 @@ export const DealsFavouriteStores: React.FC = () => {
     <section
       className="deals-favourite-stores"
       id="deals-favourite-stores"
-      aria-label="Deals from Favourite Stores"
+      aria-label={title}
       style={{ height: `${canvasHeight * scale}px` }}
     >
       <div className="deals-favourite-canvas" ref={canvasRef}>
-        {/* Controls row: Heading with blue accent + Search Deals field (pushed right) */}
+        {/* Controls row: Heading with blue accent + Search field (pushed right) */}
         <div className="deals-favourite__controls">
           <div className="deals-favourite__heading-group">
             <div className="deals-favourite__heading-accent" aria-hidden="true" />
-            <h2 className="deals-favourite__heading">Deals from Favourite Stores</h2>
+            <h2 className="deals-favourite__heading">{title}</h2>
           </div>
 
           <div className="deals-favourite__search-box">
             <input
               type="text"
               className="deals-favourite__search-input"
-              placeholder="Search Deals"
+              placeholder={searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              aria-label="Search Deals"
+              aria-label={searchPlaceholder}
             />
             <div className="deals-favourite__search-icon-wrap" aria-hidden="true">
               <svg
@@ -184,18 +196,24 @@ export const DealsFavouriteStores: React.FC = () => {
           </div>
         </div>
 
-        {/* Deal Cards Grid */}
-        <div className="deals-favourite__grid">
-          {filteredDeals.length > 0 ? (
-            filteredDeals.map((deal) => (
-              <DealCard key={deal.id} deal={deal} />
-            ))
-          ) : (
-            <div className="deals-favourite__empty">
-              <p className="deals-favourite__empty-text">No deals found for "{searchQuery}"</p>
-            </div>
-          )}
-        </div>
+        {/* Deal Cards Grid (Optional) */}
+        {!hideCards && (
+          <div className={`deals-favourite__grid ${singleCardMode ? 'deals-favourite__grid--single' : ''}`}>
+            {filteredDeals.length > 0 ? (
+              singleCardMode ? (
+                <DealCard key={filteredDeals[0].id} deal={filteredDeals[0]} />
+              ) : (
+                filteredDeals.map((deal) => (
+                  <DealCard key={deal.id} deal={deal} />
+                ))
+              )
+            ) : (
+              <div className="deals-favourite__empty">
+                <p className="deals-favourite__empty-text">No deals found for "{searchQuery}"</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </section>
   )

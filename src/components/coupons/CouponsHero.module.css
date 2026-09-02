@@ -1,0 +1,390 @@
+/* ==========================================================================
+   CouponsHero Styles (1920 x 657px Reference Canvas)
+   ========================================================================== */
+
+.heroSection {
+  width: 100%;
+  position: relative;
+  overflow: visible;
+  background-color: #FFF9E9;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+  z-index: 5;
+}
+
+.heroCanvas {
+  width: 1920px;
+  height: 657px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) scale(var(--deals-scale, 1));
+  transform-origin: top center;
+  pointer-events: auto;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* Background Artwork Stack (Clipped to Canvas Boundary) */
+.artClip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 657px;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.artCanvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 657px;
+  background-color: #FFF9E9;
+}
+
+/* Layer 1: Red Dynamic Left Wave Shape */
+.redWaveImg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 657px;
+  object-fit: cover;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Layer 2: Big Animated Watermark: Upper center-left (x: 420px, y: 30px, z-index: 5) */
+.watermarkMainWrap {
+  position: absolute;
+  left: 420px;
+  top: 30px;
+  width: 403px;
+  height: 266px;
+  z-index: 5;
+  filter: brightness(1.5) contrast(1.2) drop-shadow(0px 4px 16px rgba(255, 255, 255, 0.35));
+  pointer-events: none;
+}
+
+/* Layer 3: Confetti & Tickets Overlay */
+.bgOverlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 657px;
+  object-fit: fill;
+  opacity: 1;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Small Animated Watermark on bottom-right ticket (x: 1630px, y: 465px, z-index: 25) */
+.watermarkSecondaryWrap {
+  position: absolute;
+  left: 1630px;
+  top: 465px;
+  width: 318px;
+  height: 210px;
+  z-index: 25;
+  filter: brightness(1.6) contrast(1.25) drop-shadow(0px 2px 10px rgba(255, 255, 255, 0.45));
+  pointer-events: none;
+}
+
+/* Left Copy Block - Pushed downwards to top: 56% so only 'Sa' overlaps red background */
+.copyBlock {
+  position: absolute;
+  left: 85px;
+  top: 56%;
+  transform: translateY(-46%);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  z-index: 15;
+  user-select: none;
+}
+
+/* Dark Navy Pill Badge: LOOT DEALS */
+.lootPillBadge {
+  background: #282D78;
+  color: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 17.5px;
+  font-weight: 800;
+  padding: 5px 20px;
+  border-radius: 999px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+  letter-spacing: 0.5px;
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.headline {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 68px;
+  font-weight: 800;
+  line-height: 1.1;
+  margin: 0 0 16px 0;
+  letter-spacing: -0.5px;
+  display: flex;
+  flex-direction: column;
+}
+
+.headlineLine {
+  white-space: nowrap;
+}
+
+/* Solid White for 'Sa' where Red is directly behind */
+.headlineSolid {
+  color: #FFFFFF;
+  text-shadow: 0px 4px 18px rgba(0, 0, 0, 0.25);
+}
+
+/* Barely visible / Faint where Cream is behind (until fill animation happens) */
+.headlineFaint {
+  color: rgba(255, 255, 255, 0.22);
+  text-shadow: none;
+}
+
+.subtitle {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 20px;
+  font-weight: 500;
+  margin: 0 0 34px 0;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.subtitleFaint {
+  color: rgba(255, 255, 255, 0.24);
+  text-shadow: none;
+}
+
+/* Navy CTA button size (491 x 59px) */
+.ctaPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 491px;
+  height: 59px;
+  background-color: #282D78;
+  color: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 18px;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 999px;
+  box-shadow: 0px 6px 20px rgba(40, 45, 120, 0.45);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  box-sizing: border-box;
+}
+
+.ctaPill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0px 8px 24px rgba(40, 45, 120, 0.55);
+}
+
+/* ==========================================================================
+   Hanging Offer Tags Container & Sway Motions (Matching Deals Page)
+   ========================================================================== */
+
+.hangingContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 22;
+  user-select: none;
+}
+
+.hangingItem1 {
+  position: absolute;
+  top: 0;
+  left: 880px;
+  transform-origin: top center;
+  animation: tagDrop 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.hangingItem2 {
+  position: absolute;
+  top: 0;
+  left: 960px;
+  transform-origin: top center;
+  animation: tagDrop 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes tagDrop {
+  0% {
+    transform: translateY(-150%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.swayLeft {
+  transform-origin: top center;
+  animation: swayTranslateLeft 3.2s ease-in-out infinite alternate 0.8s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@keyframes swayTranslateLeft {
+  0% {
+    transform: translateX(-12px) rotate(-8deg);
+  }
+  100% {
+    transform: translateX(12px) rotate(8deg);
+  }
+}
+
+.swayCounter {
+  transform-origin: top center;
+  animation: swayTranslateCounter 2.8s ease-in-out infinite alternate 0.8s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@keyframes swayTranslateCounter {
+  0% {
+    transform: translateX(-10px) rotate(-8deg);
+  }
+  100% {
+    transform: translateX(10px) rotate(8deg);
+  }
+}
+
+/* Silver hanging string */
+.string {
+  width: 3px;
+  background-color: #E2E8F0;
+  box-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 0;
+}
+
+/* 70% Off Circle Tag */
+.tag70 {
+  width: 95px;
+  height: 95px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 3.5px solid #282D78;
+  color: #282D78;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    inset 0px 6px 10px -2px rgba(0, 0, 0, 0.15),
+    0px 10px 24px -4px rgba(40, 45, 120, 0.25);
+  flex-shrink: 0;
+  line-height: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.tag70Val {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 26px;
+  font-weight: 800;
+  color: #282D78;
+  line-height: 1;
+}
+
+.tag70Sub {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 13px;
+  font-weight: 700;
+  color: #282D78;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* 25% Rewards Circle Tag */
+.tag25 {
+  width: 105px;
+  height: 105px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 3.5px solid #E31E25;
+  color: #E31E25;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    inset 0px 6px 10px -2px rgba(0, 0, 0, 0.15),
+    0px 10px 24px -4px rgba(227, 30, 37, 0.25);
+  flex-shrink: 0;
+  line-height: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.tag25Val {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 26px;
+  font-weight: 800;
+  color: #E31E25;
+  line-height: 1;
+}
+
+.tag25Sub {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 12px;
+  font-weight: 700;
+  color: #E31E25;
+  text-transform: lowercase;
+  margin-top: 2px;
+}
+
+/* ==========================================================================
+   Right Illustration Zone: Pushed to bottom (top: 100px) & Left (left: 1090px)
+   ========================================================================== */
+
+.illustrationContainer {
+  position: absolute;
+  left: 1090px;
+  top: 100px;
+  width: 530px;
+  height: 530px;
+  z-index: 20;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circleBackdrop {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.illustrationImg {
+  position: absolute;
+  width: 540px;
+  height: auto;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  object-fit: contain;
+  filter: drop-shadow(0px 16px 28px rgba(0, 0, 0, 0.15));
+}

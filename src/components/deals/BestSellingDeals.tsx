@@ -1,10 +1,25 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { DealCard } from './DealCard'
+import { DealsEmptyState } from './DealsEmptyState'
 import { BEST_SELLING_DEAL_ITEMS } from '../../data/dealsPage'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
 import './BestSellingDeals.css'
 
-export const BestSellingDeals: React.FC = () => {
+export interface BestSellingDealsProps {
+  title?: string
+  topPillText?: string
+  showEmptyState?: boolean
+  emptyStateTitle?: string
+  emptyStateSubtitle?: string
+}
+
+export const BestSellingDeals: React.FC<BestSellingDealsProps> = ({
+  title = 'Best Selling Deal Picks',
+  topPillText = 'Top Deals',
+  showEmptyState = false,
+  emptyStateTitle = 'No loot deals found',
+  emptyStateSubtitle = 'Try adjusting your filters',
+}) => {
   const scale = useDesktopScale()
   const canvasRef = useRef<HTMLDivElement>(null)
   const [canvasHeight, setCanvasHeight] = useState<number>(520)
@@ -36,36 +51,42 @@ export const BestSellingDeals: React.FC = () => {
       window.removeEventListener('resize', updateHeight)
       window.removeEventListener('load', updateHeight)
     }
-  }, [scale])
+  }, [scale, showEmptyState])
 
   return (
     <section
       className="best-selling-deals-section"
-      aria-label="Best Selling Deal Picks"
+      aria-label={title}
       style={{ height: `${canvasHeight * scale}px` }}
     >
       <div className="best-selling-deals-canvas" ref={canvasRef}>
         {/* Section Header with Red Accent */}
         <div className="best-selling-deals__header">
           <div className="best-selling-deals__heading-accent" aria-hidden="true" />
-          <h2 className="best-selling-deals__title">Best Selling Deal Picks</h2>
+          <h2 className="best-selling-deals__title">{title}</h2>
         </div>
 
         {/* Top Deals subtitle pill */}
         <div className="best-selling-deals__top-deals-pill">
-          Top Deals
+          {topPillText}
         </div>
 
-        {/* Featured Horizontal Cards Container */}
-        <div className="best-selling-deals__cards-container">
-          {BEST_SELLING_DEAL_ITEMS.map((deal) => (
-            <DealCard key={deal.id} deal={deal} horizontal={true} />
-          ))}
-        </div>
+        {/* Content: Cards or Empty State */}
+        {showEmptyState ? (
+          <DealsEmptyState
+            title={emptyStateTitle}
+            subtitle={emptyStateSubtitle}
+          />
+        ) : (
+          <div className="best-selling-deals__cards-container">
+            {BEST_SELLING_DEAL_ITEMS.map((deal) => (
+              <DealCard key={deal.id} deal={deal} horizontal={true} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )
 }
 
 export default BestSellingDeals
-

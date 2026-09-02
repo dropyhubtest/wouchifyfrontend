@@ -1,6 +1,7 @@
 export { MobileHomePage, default as MobileHomePageDefault } from './MobileHomePage'
 export { MobileStoresPage } from './MobileStoresPage'
 export { MobileDealsPage } from '../../pages/MobileDealsPage'
+export { MobileLootDealsPage } from '../../pages/MobileLootDealsPage'
 export { MobileCategoriesPage } from '../../pages/MobileCategoriesPage'
 export { MobileSubCategoriesPage } from '../../pages/MobileSubCategoriesPage'
 export { MobileStoresDirectoryPage } from '../../pages/MobileStoresDirectoryPage'
