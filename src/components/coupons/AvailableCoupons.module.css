@@ -9,8 +9,8 @@
   display: flex;
   justify-content: center;
   box-sizing: border-box;
-  padding-bottom: 80px;
-  overflow: hidden;
+  padding-bottom: 20px;
+  overflow: visible;
 }
 
 .canvas {
@@ -21,142 +21,168 @@
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
-  padding: 40px 120px 0 120px;
+  padding: 40px 80px 0 80px;
+  overflow: visible;
 }
 
-/* Header Area */
+/* Header Area with Left Semicircle Accent */
 .header {
   width: 100%;
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  margin-bottom: 40px;
+  margin-bottom: 36px;
   user-select: none;
+  overflow: visible;
 }
 
 .titleRow {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
+  overflow: visible;
+  margin-bottom: 6px;
 }
 
-.titleBullet {
-  width: 16px;
-  height: 16px;
+/* Red Decorative Half Circle at left margin edge */
+.headingAccent {
+  position: absolute;
+  left: -117px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 75px;
+  height: 75px;
   border-radius: 50%;
   background-color: var(--color-red, #E31E25);
-  display: inline-block;
-  flex-shrink: 0;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
 }
 
 .title {
+  position: relative;
+  z-index: 1;
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 28px;
+  font-size: 34px;
   font-weight: 700;
+  line-height: 42px;
   color: var(--color-red, #E31E25);
   margin: 0;
-  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .topPill {
+  display: inline-block;
   background-color: #282D78;
   color: #FFFFFF;
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 13px;
-  font-weight: 700;
-  padding: 5px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 6px 20px;
   border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   margin-top: 4px;
+  user-select: none;
 }
 
-/* Big Coupon Card (1680 x 360) */
+/* Big Coupon Card (Calibrated 1560 x 480) */
 .couponCard {
-  width: 1680px;
-  height: 360px;
+  width: 1560px;
+  height: 480px;
   position: relative;
-  border-radius: 36px;
-  overflow: hidden;
   display: flex;
   align-items: center;
-  box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.06);
   box-sizing: border-box;
+  box-shadow: none !important;
+  filter: none !important;
+  overflow: visible;
+  margin: 0 auto;
 }
 
-.cardBgImg {
+.ticketSvgBg {
   position: absolute;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
-  object-fit: fill;
   z-index: 1;
   pointer-events: none;
+  overflow: visible;
 }
 
-/* Left Portion */
+/* Left Content Area (Width: 1020px) */
 .cardLeft {
   position: relative;
   z-index: 2;
-  width: 63%;
+  width: 1020px;
   height: 100%;
-  padding: 36px 60px;
+  padding: 38px 0 38px 70px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  align-items: flex-start;
   box-sizing: border-box;
 }
 
+/* Wider Logo Box */
 .logoBox {
-  width: 310px;
-  height: 90px;
+  width: 330px;
+  height: 110px;
   background-color: #FFFFFF;
   border-radius: 20px;
-  box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.05);
+  box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.05);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 24px;
+  padding: 4px 14px;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .storeLogo {
-  max-width: 80%;
-  max-height: 70%;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
+  transform: scale(1.1);
 }
 
+/* 10% off: Centered horizontally in middle of left section */
 .discountRow {
+  width: calc(100% - 70px);
   display: flex;
   align-items: baseline;
-  gap: 16px;
-  margin: 10px 0;
+  justify-content: center;
+  gap: 18px;
+  margin: auto 0;
 }
 
 .discountPercent {
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 96px;
+  font-size: 132px;
   font-weight: 900;
   color: #000000;
   line-height: 0.9;
-  letter-spacing: -2px;
+  letter-spacing: -3px;
 }
 
 .discountOff {
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 48px;
-  font-weight: 600;
+  font-size: 54px;
+  font-weight: 400; /* Regular weight */
   color: #000000;
   line-height: 1;
 }
 
+/* Meta Row: Spread across base (Non-bold, larger font size) */
 .metaRow {
+  width: calc(100% - 70px);
   display: flex;
   align-items: center;
-  gap: 48px;
+  justify-content: space-between;
+  padding-right: 30px;
+  box-sizing: border-box;
 }
 
 .metaItem {
@@ -171,72 +197,66 @@
 
 .metaText {
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 20px;
-  font-weight: 600;
-  color: #000000;
+  font-size: 26px;
+  font-weight: 400; /* Removed bold */
+  color: #282D78;
   letter-spacing: 0.2px;
 }
 
-/* Dashed Vertical Divider */
-.dashedDivider {
-  position: relative;
-  z-index: 2;
-  width: 0;
-  height: 72%;
-  border-right: 3px dashed #E5BCA5;
-}
-
-/* Right Portion */
+/* Right Content Area (Width: 540px) */
 .cardRight {
   position: relative;
   z-index: 2;
-  width: 37%;
+  width: calc(1560px - 1020px);
   height: 100%;
-  padding: 40px 60px;
+  padding: 38px 36px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 20px;
+  gap: 18px;
   box-sizing: border-box;
 }
 
+/* USE CODE: Non-bold, larger font size */
 .useCodeLabel {
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 19px;
-  font-weight: 800;
+  font-size: 24px;
+  font-weight: 400; /* Removed bold */
   color: #000000;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
 }
 
 .codeButton {
   width: 330px;
-  height: 64px;
+  height: 72px;
   background-color: #282D78;
+  border: 3px dotted #FFFFFF;
+  border-radius: 18px;
   color: #FFFFFF;
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 800;
   letter-spacing: 2px;
-  border: none;
-  border-radius: 16px;
   cursor: pointer;
-  box-shadow: 0px 6px 20px rgba(40, 45, 120, 0.35);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0px 8px 24px rgba(40, 45, 120, 0.35);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  box-sizing: border-box;
 }
 
 .codeButton:hover {
   transform: translateY(-2px);
-  box-shadow: 0px 8px 24px rgba(40, 45, 120, 0.45);
+  box-shadow: 0px 10px 28px rgba(40, 45, 120, 0.45);
 }
 
 .codeButton:active {
   transform: translateY(0);
 }
 
+/* Copy Code: Non-bold, larger font size */
 .copyAction {
   background: transparent;
   border: none;
@@ -244,21 +264,20 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 19px;
-  font-weight: 700;
-  color: #000000;
   padding: 6px 12px;
   border-radius: 8px;
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition: opacity 0.15s ease;
 }
 
 .copyAction:hover {
   opacity: 0.8;
-  transform: translateY(-1px);
 }
 
 .copyText {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 24px;
+  font-weight: 400; /* Removed bold */
+  color: #000000;
   line-height: 1;
 }
 

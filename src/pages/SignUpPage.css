@@ -1,0 +1,241 @@
+/* ==========================================================================
+   Sign Up / Login Page (1920px Reference Canvas)
+   ========================================================================== */
+
+.signup-page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* 2. Scaled Hero Section Wrapper */
+.signup-page__hero-section {
+  width: 100%;
+  position: relative;
+  overflow: visible;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+  background-color: #FFFFFF;
+}
+
+/* 1920px Reference Canvas */
+.signup-page__canvas {
+  width: 1920px;
+  height: 760px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 40px 80px 0 80px;
+  pointer-events: auto;
+}
+
+/* Big W Watermark on Top-Left (Matching Figma Design) */
+.signup-page__watermark-wrap {
+  position: absolute;
+  top: 15px;
+  left: 170px;
+  width: 360px;
+  height: 238px;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+}
+
+/* Sign-Up / Login Card */
+.signup-page__card {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+  margin-top: 36px;
+}
+
+/* Main Welcome Heading */
+.signup-page__welcome-title {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 42px;
+  font-weight: 500;
+  color: var(--color-red, #E31E25);
+  text-align: center;
+  margin: 0 0 20px 0;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* Form Heading */
+.signup-page__form-title {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 32px;
+  font-weight: 700;
+  color: #000000;
+  text-align: center;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* Helper Text */
+.signup-page__otp-desc {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 16px;
+  font-weight: 400;
+  color: #555555;
+  text-align: center;
+  margin: 0 0 24px 0;
+  white-space: nowrap;
+}
+
+/* Form Container */
+.signup-page__form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Mobile/Email Input */
+.signup-page__input-wrap {
+  width: 530px;
+  height: 72px;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.signup-page__input {
+  width: 100%;
+  height: 100%;
+  border-radius: 18px;
+  border: 1.5px solid #D5D5DF;
+  background-color: #FFFFFF;
+  padding: 0 28px;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 16px;
+  font-weight: 400;
+  color: #111827;
+  outline: none;
+  box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.02);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
+}
+
+.signup-page__input::placeholder {
+  color: #B4B4C0;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.signup-page__input:focus {
+  border-color: var(--color-navy, #2F368C);
+  box-shadow: 0 0 0 3px rgba(47, 54, 140, 0.12);
+}
+
+/* "or" Divider */
+.signup-page__or-divider {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 15px;
+  font-weight: 400;
+  color: #777777;
+  margin: 16px 0;
+  user-select: none;
+}
+
+/* Google Sign-In Circular Button */
+.signup-page__google-btn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: #FFFFFF;
+  border: 1.5px solid #D5D5DF;
+  box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  outline: none;
+  padding: 0;
+}
+
+.signup-page__google-btn:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-navy, #2F368C);
+  box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.signup-page__google-btn:active {
+  transform: translateY(0);
+}
+
+.signup-page__google-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Terms and Privacy Text */
+.signup-page__terms-text {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 14px;
+  font-weight: 400;
+  color: #333333;
+  text-align: center;
+  margin: 20px 0 22px 0;
+  white-space: nowrap;
+  line-height: 1.5;
+}
+
+.signup-page__terms-link {
+  color: #282D78;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.signup-page__terms-link:hover {
+  color: var(--color-red, #E31E25);
+  text-decoration: none;
+}
+
+/* Primary Continue Button */
+.signup-page__submit-btn {
+  width: 330px;
+  height: 58px;
+  border-radius: 14px;
+  background-color: #282D78;
+  color: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 18px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0px 6px 20px rgba(40, 45, 120, 0.3);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  outline: none;
+}
+
+.signup-page__submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0px 8px 24px rgba(40, 45, 120, 0.42);
+  background-color: #1F2466;
+}
+
+.signup-page__submit-btn:active {
+  transform: translateY(0);
+}

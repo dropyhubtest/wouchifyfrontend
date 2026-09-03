@@ -151,11 +151,14 @@ const StoreCard: React.FC<{ store: StoreItem }> = ({ store }) => {
         className="mobile-stores__card" 
         style={{ backgroundColor: store.cardBg }}
       >
-        <div className="mobile-stores__card-logo-container">
+        <div 
+          className="mobile-stores__card-logo-container"
+          style={store.logoPanelBg ? { backgroundColor: store.logoPanelBg } : undefined}
+        >
           <img 
             src={store.logo} 
             alt={store.name} 
-            className="mobile-stores__card-logo"
+            className={`mobile-stores__card-logo mobile-stores__card-logo--${store.id}`}
             style={
               store.mobileLogoWidth && store.mobileLogoHeight
                 ? { width: `${store.mobileLogoWidth}px`, height: `${store.mobileLogoHeight}px`, objectFit: 'contain' }

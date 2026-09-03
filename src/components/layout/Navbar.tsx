@@ -153,8 +153,8 @@ export const Navbar: React.FC<NavbarProps> = ({ activeNav, transparent = false }
           </button>
 
           {/* Account Button: left: 1784px, top: 44px, 38 x 38 */}
-          <button
-            type="button"
+          <a
+            href="/signup"
             className="action-btn account-btn"
             aria-label="Account Profile"
           >
@@ -166,7 +166,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeNav, transparent = false }
               width="38"
               height="38"
             />
-          </button>
+          </a>
         </div>
       </div>
     </header>

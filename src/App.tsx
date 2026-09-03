@@ -6,6 +6,9 @@ import {
   MobileStoresPage,
   MobileDealsPage,
   MobileLootDealsPage,
+  MobileCouponsPage,
+  MobileSignUpPage,
+  MobileTermsPage,
   MobileCategoriesPage,
   MobileSubCategoriesPage,
   MobileStoresDirectoryPage,
@@ -28,6 +31,8 @@ import { CitiesDealsDirectoryPage } from './pages/CitiesDealsDirectoryPage'
 import { DealsPage } from './pages/DealsPage'
 import { LootDealsPage } from './pages/LootDealsPage'
 import { CouponsPage } from './pages/CouponsPage'
+import { SignUpPage } from './pages/SignUpPage'
+import { TermsPage } from './pages/TermsPage'
 
 function resolveCurrentPath(): string {
   if (typeof window === 'undefined') return '/'
@@ -113,6 +118,32 @@ function resolveCurrentPath(): string {
     return '/loot-deals'
   }
 
+  // Sign Up / Login page (/signup or /login)
+  if (
+    pathname === '/signup' ||
+    pathname === '/sign-up' ||
+    pathname === '/login' ||
+    page === 'signup' ||
+    page === 'sign-up' ||
+    page === 'login'
+  ) {
+    return '/signup'
+  }
+
+  // Terms & Conditions page (/terms or /terms-of-use)
+  if (
+    pathname === '/terms' ||
+    pathname === '/terms-and-conditions' ||
+    pathname === '/terms-of-use' ||
+    pathname === '/terms-of-service' ||
+    page === 'terms' ||
+    page === 'terms-and-conditions' ||
+    page === 'terms-of-use' ||
+    page === 'terms-of-service'
+  ) {
+    return '/terms'
+  }
+
   // Coupons landing page (/coupons)
   if (
     pathname === '/coupons' ||
@@ -192,6 +223,12 @@ export default function App() {
   const isBrandsDirectoryRoute = currentPath === '/categories/brands'
   const isStoresDirectoryRoute = currentPath === '/categories/stores'
   const isSubcategoriesRoute = currentPath === '/categories/subcategories'
+  const isSignUpRoute = currentPath === '/signup' || currentPath === '/sign-up' || currentPath === '/login'
+  const isTermsRoute =
+    currentPath === '/terms' ||
+    currentPath === '/terms-and-conditions' ||
+    currentPath === '/terms-of-use' ||
+    currentPath === '/terms-of-service'
   const isCouponsRoute = currentPath === '/coupons' || currentPath.startsWith('/coupons/')
   const isLootDealsRoute = currentPath === '/loot-deals' || currentPath.startsWith('/loot-deals/')
   const isStoresRoute = currentPath === '/stores' || currentPath.startsWith('/stores/')
@@ -223,6 +260,15 @@ export default function App() {
       }
       if (isLootDealsRoute) {
         return <MobileLootDealsPage />
+      }
+      if (isCouponsRoute) {
+        return <MobileCouponsPage />
+      }
+      if (isSignUpRoute) {
+        return <MobileSignUpPage />
+      }
+      if (isTermsRoute) {
+        return <MobileTermsPage />
       }
       if (isStoresRoute) {
         return <MobileStoresPage />
@@ -258,6 +304,14 @@ export default function App() {
 
     if (isStoresDirectoryRoute) {
       return <StoresDirectoryPage />
+    }
+
+    if (isSignUpRoute) {
+      return <SignUpPage />
+    }
+
+    if (isTermsRoute) {
+      return <TermsPage />
     }
 
     if (isCouponsRoute) {

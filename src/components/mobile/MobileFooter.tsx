@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
   MOBILE_FOOTER_LOGO,
   MOBILE_FOOTER_ACCORDIONS,
@@ -9,11 +9,28 @@ import {
 import './MobileFooter.css'
 
 export const MobileFooter: React.FC = () => {
-  const [openAccordion, setOpenAccordion] = useState<string | null>(null)
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+  const navRef = useRef<HTMLElement>(null)
 
-  const toggleAccordion = (id: string) => {
-    setOpenAccordion((prev) => (prev === id ? null : id))
+  const toggleDropdown = (id: string) => {
+    setOpenDropdown((prev) => (prev === id ? null : id))
   }
+
+  // Close dropdown if clicked outside the nav container
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent | TouchEvent) => {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        setOpenDropdown(null)
+      }
+    }
+
+    document.addEventListener('mousedown', handleOutsideClick)
+    document.addEventListener('touchstart', handleOutsideClick)
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick)
+      document.removeEventListener('touchstart', handleOutsideClick)
+    }
+  }, [])
 
   return (
     <footer className="mobile-footer" aria-label="Site Footer">
@@ -26,18 +43,22 @@ export const MobileFooter: React.FC = () => {
       />
       <p className="mobile-footer__description">{MOBILE_FOOTER_LOGO.description}</p>
 
-      {/* Accordions */}
-      <nav className="mobile-footer__accordions" aria-label="Footer Navigation">
+      {/* Accordions / Dropdown Overlay Navigation */}
+      <nav
+        ref={navRef}
+        className="mobile-footer__accordions"
+        aria-label="Footer Navigation"
+      >
         {MOBILE_FOOTER_ACCORDIONS.map((section) => {
-          const isOpen = openAccordion === section.id
+          const isOpen = openDropdown === section.id
           return (
             <div key={section.id} className="mobile-footer-accordion__item">
               <button
                 type="button"
                 className="mobile-footer-accordion__button"
-                onClick={() => toggleAccordion(section.id)}
+                onClick={() => toggleDropdown(section.id)}
                 aria-expanded={isOpen}
-                aria-controls={`footer-accordion-${section.id}`}
+                aria-controls={`footer-dropdown-${section.id}`}
               >
                 <span>{section.title}</span>
                 <span
@@ -48,20 +69,28 @@ export const MobileFooter: React.FC = () => {
                 />
               </button>
 
-              {isOpen && (
-                <div
-                  id={`footer-accordion-${section.id}`}
-                  className="mobile-footer__accordion-panel"
-                >
-                  <ul>
-                    {section.links.map((link) => (
-                      <li key={link.label}>
-                        <a href={link.href}>{link.label}</a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              {/* Seamless 2-Way Dropdown Overlay */}
+              <div
+                id={`footer-dropdown-${section.id}`}
+                className={`mobile-footer__dropdown-overlay ${
+                  isOpen ? 'mobile-footer__dropdown-overlay--open' : ''
+                }`}
+                aria-hidden={!isOpen}
+              >
+                <ul className="mobile-footer__dropdown-list">
+                  {section.links.map((link) => (
+                    <li key={link.label}>
+                      <a
+                        href={link.href}
+                        className="mobile-footer__dropdown-link"
+                        onClick={() => setOpenDropdown(null)}
+                      >
+                        {link.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           )
         })}

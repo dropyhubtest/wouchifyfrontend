@@ -28,12 +28,3 @@
   z-index: 100;
   width: 100%;
 }
-
-/* Red Dashed Divider before Footer matching Figma design */
-.coupons-page__red-dashed-divider {
-  width: 100%;
-  max-width: 1920px;
-  margin: 0 auto 40px auto;
-  border-top: 2px dashed #E31E25;
-  opacity: 0.6;
-}

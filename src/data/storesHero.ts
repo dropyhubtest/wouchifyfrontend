@@ -53,6 +53,7 @@ export interface StoreItem {
   description: string
   cardBg: string
   badgeBg: string
+  logoPanelBg?: string
   mobileCategory?: string
   mobileReward?: string
   mobileDescription?: string
@@ -119,8 +120,8 @@ export const FAVOURITE_STORES: StoreItem[] = [
     mobileCategory: 'GROCERIES',
     mobileReward: 'Upto 20% rewards',
     mobileDescription: 'Daily Fresh groceries',
-    mobileLogoWidth: 61,
-    mobileLogoHeight: 22,
+    mobileLogoWidth: 78,
+    mobileLogoHeight: 28,
   },
   {
     id: 'firstcry',
@@ -167,8 +168,8 @@ export const FAVOURITE_STORES: StoreItem[] = [
     mobileCategory: 'GROCERY',
     mobileReward: 'Upto 5% rewards',
     mobileDescription: 'Everything on Discount',
-    mobileLogoWidth: 60,
-    mobileLogoHeight: 60,
+    mobileLogoWidth: 74,
+    mobileLogoHeight: 36,
   },
   {
     id: 'meesho',
@@ -180,11 +181,12 @@ export const FAVOURITE_STORES: StoreItem[] = [
     description: 'Trending fashion Collections',
     cardBg: '#FFE3F9',
     badgeBg: '#FFB0EA',
+    logoPanelBg: '#580A46',
     mobileCategory: 'FASHION',
     mobileReward: 'Upto 20% off',
     mobileDescription: 'Mega Savings Day',
     mobileLogoWidth: 47,
-    mobileLogoHeight: 26,
+    mobileLogoHeight: 35,
   },
   {
     id: 'myntra',
@@ -215,8 +217,8 @@ export const FAVOURITE_STORES: StoreItem[] = [
     mobileCategory: 'BEAUTY',
     mobileReward: 'Upto 5% rewards',
     mobileDescription: 'Beauty Bonanza',
-    mobileLogoWidth: 58,
-    mobileLogoHeight: 58,
+    mobileLogoWidth: 74,
+    mobileLogoHeight: 30,
   },
   {
     id: 'pepperfry',

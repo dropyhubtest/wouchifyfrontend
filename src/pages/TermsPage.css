@@ -1,0 +1,124 @@
+/* ==========================================================================
+   Terms & Conditions Desktop Page (Poppins Typography & Uniform Line-Height)
+   ========================================================================== */
+
+.terms-page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 2. Main Container (Centered, Natural Document Flow) */
+.terms-page__container {
+  width: 100%;
+  max-width: 1240px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 56px 24px 20px 24px;
+  margin: 0 auto;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Big W Watermark on Top-Left */
+.terms-page__watermark-wrap {
+  position: absolute;
+  top: 15px;
+  left: -40px;
+  width: 320px;
+  height: 210px;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+}
+
+/* Main Title */
+.terms-page__title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: #000000;
+  text-align: center;
+  margin: 10px 0 36px 0;
+  letter-spacing: 0.2px;
+  line-height: 1.25;
+  position: relative;
+  z-index: 2;
+}
+
+/* Document Content Container (1240px line wrap) */
+.terms-page__content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Section */
+.terms-page__section {
+  margin-bottom: 24px;
+}
+
+/* Section Titles with Alternating Blue / Red starting from 1. Introduction */
+.terms-page__section-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 18.5px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  margin: 0 0 8px 0;
+  line-height: 1.35;
+}
+
+/* Odd sections: Navy Blue (1. Introduction, 3. Cashback & Rewards, 5. Missing Cashback, etc.) */
+.terms-page__section:nth-of-type(odd) .terms-page__section-title {
+  color: #282D78;
+}
+
+/* Even sections: Red (2. Membership, 4. Referral Program, 6. Cashback & Withdrawal, etc.) */
+.terms-page__section:nth-of-type(even) .terms-page__section-title {
+  color: var(--color-red, #E31E25);
+}
+
+/* Paragraph with Uniform 1.65 Line-Height in Poppins 500 */
+.terms-page__paragraph {
+  font-family: 'Poppins', sans-serif;
+  font-size: 15.5px;
+  font-weight: 500;
+  color: #111827;
+  letter-spacing: 0.15px;
+  line-height: 1.65;
+  margin: 0 0 6px 0;
+}
+
+/* Bullet List with matching Uniform 1.65 Line-Height */
+.terms-page__list {
+  list-style-type: disc;
+  margin: 4px 0 10px 24px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.terms-page__list li {
+  font-family: 'Poppins', sans-serif;
+  font-size: 15.5px;
+  font-weight: 500;
+  color: #111827;
+  letter-spacing: 0.15px;
+  line-height: 1.65;
+}

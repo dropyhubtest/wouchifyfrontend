@@ -5,8 +5,8 @@
 .deals-hero-section {
   position: relative;
   width: 100%;
-  z-index: 10;
-  overflow: hidden;
+  z-index: 35;
+  overflow: visible;
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -23,8 +23,8 @@
   transform-origin: top center;
   transform: scale(var(--deals-scale, 1));
   box-sizing: border-box;
-  overflow: hidden;
-  z-index: 10;
+  overflow: visible;
+  z-index: 35;
   cursor: default;
 }
 

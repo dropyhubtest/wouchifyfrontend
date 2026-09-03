@@ -36,10 +36,7 @@ export const CouponsPage: React.FC = () => {
       {/* 5. Available Coupons Section (Amazon Coupon Card) */}
       <AvailableCoupons />
 
-      {/* 6. Red Dashed Divider before Footer */}
-      <div className="coupons-page__red-dashed-divider" aria-hidden="true" />
-
-      {/* 7. Global Footer */}
+      {/* 6. Global Footer */}
       <FooterSection />
     </div>
   )

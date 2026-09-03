@@ -46,15 +46,17 @@
 
 .navbar-brand {
   position: absolute;
-  left: 7px;
-  top: -20px;
-  width: 401px;
-  height: 207px;
-  display: block;
+  left: 60px;
+  top: 32px;
+  width: 330px;
+  height: 68px;
+  display: flex;
+  align-items: center;
 }
 
 .navbar-logo-link {
-  display: block;
+  display: flex;
+  align-items: center;
   width: 100%;
   height: 100%;
 }
@@ -66,8 +68,9 @@
 }
 
 .navbar-logo-img {
-  width: 401px;
-  height: 207px;
+  width: auto;
+  height: 100%;
+  max-width: 100%;
   object-fit: contain;
   display: block;
 }

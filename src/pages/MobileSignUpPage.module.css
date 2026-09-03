@@ -1,0 +1,238 @@
+/* ==========================================================================
+   Mobile Sign Up / Login Page (440px Reference Container)
+   ========================================================================== */
+
+.mobileSignUpPage {
+  width: 100%;
+  max-width: 440px;
+  min-height: 100vh;
+  margin: 0 auto;
+  background: #FFFFFF;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 1. Header Bar */
+.headerWrapper {
+  width: 100%;
+  background: #EEEFFF;
+  border-bottom: 1px solid #E8E8F0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  position: relative;
+  z-index: 10;
+}
+
+/* 2. Main Content Area */
+.mainContent {
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 68px 16px 28px 16px;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* Floating Big W Watermark on Top-Right Corner */
+.watermarkWrap {
+  position: absolute;
+  top: 14px;
+  right: -14px;
+  width: 133px;
+  height: 88px;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+}
+
+/* Form Container */
+.formCard {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* Main Welcome Title */
+.welcomeTitle {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: clamp(20px, 5.8vw, 26px);
+  font-weight: 500;
+  color: var(--color-red, #E31E25);
+  text-align: center;
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+  white-space: nowrap;
+  letter-spacing: -0.3px;
+}
+
+/* Subheading */
+.formTitle {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: clamp(18px, 5vw, 22px);
+  font-weight: 700;
+  color: #000000;
+  text-align: center;
+  margin: 0 0 6px 0;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* OTP Description */
+.otpDesc {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 13.5px;
+  font-weight: 400;
+  color: #555555;
+  text-align: center;
+  margin: 0 0 22px 0;
+  white-space: nowrap;
+}
+
+/* Form */
+.form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Input Wrap */
+.inputWrap {
+  width: 100%;
+  max-width: 340px;
+  height: 52px;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.input {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  border: 1.2px solid #C4C4D0;
+  background-color: #FFFFFF;
+  padding: 0 18px;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 13px;
+  font-weight: 400;
+  color: #111827;
+  outline: none;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.02);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
+}
+
+.input::placeholder {
+  color: #A0A0B0;
+  font-size: 13px;
+}
+
+.input:focus {
+  border-color: var(--color-navy, #2F368C);
+  box-shadow: 0 0 0 2.5px rgba(47, 54, 140, 0.12);
+}
+
+/* "or" Divider */
+.orDivider {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 13px;
+  font-weight: 400;
+  color: #666666;
+  margin: 14px 0;
+  user-select: none;
+}
+
+/* Google Sign-In Circular Button */
+.googleBtn {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background-color: #FFFFFF;
+  border: 1.2px solid #D5D5DF;
+  box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  outline: none;
+  padding: 0;
+}
+
+.googleBtn:hover {
+  transform: translateY(-1px);
+  border-color: var(--color-navy, #2F368C);
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.googleBtn:active {
+  transform: translateY(0);
+}
+
+.googleIcon {
+  width: 29px;
+  height: 29px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Terms and Privacy Text */
+.termsText {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: clamp(9.2px, 2.5vw, 11px);
+  font-weight: 400;
+  color: #333333;
+  text-align: center;
+  margin: 16px 4px 18px 4px;
+  line-height: 1.45;
+  width: 100%;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+.termsLink {
+  color: #282D78;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.termsLink:hover {
+  color: var(--color-red, #E31E25);
+}
+
+/* Primary Continue Button */
+.continueBtn {
+  width: 190px;
+  height: 44px;
+  border-radius: 999px;
+  background-color: #282D78;
+  color: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 14.5px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0px 4px 14px rgba(40, 45, 120, 0.28);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  outline: none;
+  margin-bottom: 8px;
+}
+
+.continueBtn:active {
+  transform: scale(0.97);
+}
+
+@media (max-width: 340px) {
+  .welcomeTitle,
+  .termsText {
+    white-space: normal;
+  }
+}

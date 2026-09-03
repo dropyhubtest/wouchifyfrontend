@@ -43,13 +43,37 @@
 }
 
 .store-card__logo-img {
-  max-width: 86%;
-  max-height: 72%;
+  max-width: 88%;
+  max-height: 75%;
   width: auto;
   height: auto;
   object-fit: contain;
   display: block;
   transition: transform 200ms ease;
+}
+
+.store-card__logo-img--bigbasket {
+  max-width: 90%;
+  max-height: 78%;
+  height: 52px;
+}
+
+.store-card__logo-img--jiomart {
+  max-width: 88%;
+  max-height: 82%;
+  height: 58px;
+}
+
+.store-card__logo-img--nykaa {
+  max-width: 90%;
+  max-height: 80%;
+  height: 54px;
+}
+
+.store-card__logo-img--meesho {
+  max-width: 88%;
+  max-height: 78%;
+  height: 50px;
 }
 
 .store-card:hover .store-card__logo-img {

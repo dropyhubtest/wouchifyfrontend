@@ -5,9 +5,13 @@ import styles from './MobileBrandTiles.module.css'
 
 interface MobileBrandTilesProps {
   searchQuery?: string
+  title?: string
 }
 
-export const MobileBrandTiles: React.FC<MobileBrandTilesProps> = ({ searchQuery = '' }) => {
+export const MobileBrandTiles: React.FC<MobileBrandTilesProps> = ({
+  searchQuery = '',
+  title = 'Deals from favourite stores',
+}) => {
   const filteredStores = useMemo(() => {
     const q = searchQuery.trim().toLowerCase()
     if (!q) return DEALS_FAVOURITE_STORES
@@ -63,11 +67,11 @@ export const MobileBrandTiles: React.FC<MobileBrandTilesProps> = ({ searchQuery 
   }
 
   return (
-    <section className={styles.brandTilesSection} aria-label="Deals from favourite stores">
+    <section className={styles.brandTilesSection} aria-label={title}>
       {/* Section Heading with Navy Clipped Dot Accent */}
       <div className={styles.headingRow}>
         <div className={styles.navyAccentDot} aria-hidden="true" />
-        <h2 className={styles.headingTitle}>Deals from favourite stores</h2>
+        <h2 className={styles.headingTitle}>{title}</h2>
       </div>
 
       {/* Row 1 Scroller */}

@@ -12,12 +12,15 @@ export const StoreCard: React.FC<StoreCardProps> = ({ store }) => {
       className="store-card"
       style={{ '--card-bg': store.cardBg, '--badge-bg': store.badgeBg } as React.CSSProperties}
     >
-      {/* White logo panel centered at top */}
-      <div className="store-card__logo-panel">
+      {/* Logo panel centered at top */}
+      <div 
+        className="store-card__logo-panel"
+        style={store.logoPanelBg ? { backgroundColor: store.logoPanelBg } : undefined}
+      >
         <img
           src={store.logo}
           alt={`${store.name} logo`}
-          className="store-card__logo-img"
+          className={`store-card__logo-img store-card__logo-img--${store.id}`}
           loading="lazy"
         />
       </div>

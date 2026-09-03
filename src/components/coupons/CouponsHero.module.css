@@ -46,14 +46,13 @@
   background-color: #FFF9E9;
 }
 
-/* Layer 1: Red Dynamic Left Wave Shape */
-.redWaveImg {
+/* Layer 1: Code-Generated Red Crescent (Apex cuts between 'a' and 'v') */
+.redWaveSvg {
   position: absolute;
   left: 0;
   top: 0;
   width: 1920px;
   height: 657px;
-  object-fit: cover;
   z-index: 1;
   pointer-events: none;
 }
@@ -83,11 +82,11 @@
   pointer-events: none;
 }
 
-/* Small Animated Watermark on bottom-right ticket (x: 1630px, y: 465px, z-index: 25) */
+/* Small Animated Watermark on bottom-right ticket below sneakers (x: 1610px, y: 480px, z-index: 25) */
 .watermarkSecondaryWrap {
   position: absolute;
-  left: 1630px;
-  top: 465px;
+  left: 1610px;
+  top: 480px;
   width: 318px;
   height: 210px;
   z-index: 25;
@@ -95,12 +94,11 @@
   pointer-events: none;
 }
 
-/* Left Copy Block - Pushed downwards to top: 56% so only 'Sa' overlaps red background */
+/* Left Copy Block - Positioned at left: 104px (1% left of previous headline), top: 186px */
 .copyBlock {
   position: absolute;
-  left: 85px;
-  top: 56%;
-  transform: translateY(-46%);
+  left: 104px;
+  top: 186px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -119,49 +117,38 @@
   border-radius: 999px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
   letter-spacing: 0.5px;
-  margin-bottom: 20px;
+  margin-bottom: 8px; /* Decreased gap between pill and headline */
   line-height: 1.2;
 }
 
+/* Headline - Solid Pure White #FFFFFF (No salmon/orange tint) */
 .headline {
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
   font-size: 68px;
   font-weight: 800;
   line-height: 1.1;
-  margin: 0 0 16px 0;
+  color: #FFFFFF;
+  margin: 0 0 18px 0;
   letter-spacing: -0.5px;
   display: flex;
   flex-direction: column;
+  gap: 16px;
+  opacity: 1;
 }
 
 .headlineLine {
   white-space: nowrap;
 }
 
-/* Solid White for 'Sa' where Red is directly behind */
-.headlineSolid {
-  color: #FFFFFF;
-  text-shadow: 0px 4px 18px rgba(0, 0, 0, 0.25);
-}
-
-/* Barely visible / Faint where Cream is behind (until fill animation happens) */
-.headlineFaint {
-  color: rgba(255, 255, 255, 0.22);
-  text-shadow: none;
-}
-
+/* Subtitle - Solid Pure White #FFFFFF */
 .subtitle {
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
   font-size: 20px;
   font-weight: 500;
+  color: #FFFFFF;
   margin: 0 0 34px 0;
   letter-spacing: 0.3px;
   white-space: nowrap;
-}
-
-.subtitleFaint {
-  color: rgba(255, 255, 255, 0.24);
-  text-shadow: none;
 }
 
 /* Navy CTA button size (491 x 59px) */
@@ -189,7 +176,7 @@
 }
 
 /* ==========================================================================
-   Hanging Offer Tags Container & Sway Motions (Matching Deals Page)
+   Hanging Promotional Tags (Heights, Gap & Counter-Phase Sway)
    ========================================================================== */
 
 .hangingContainer {
@@ -204,92 +191,74 @@
   user-select: none;
 }
 
-.hangingItem1 {
+/* Shared tag wrapper setup */
+.couponsTagItem {
   position: absolute;
   top: 0;
-  left: 880px;
   transform-origin: top center;
-  animation: tagDrop 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.hangingItem2 {
-  position: absolute;
-  top: 0;
-  left: 960px;
-  transform-origin: top center;
-  animation: tagDrop 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes tagDrop {
-  0% {
-    transform: translateY(-150%);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.swayLeft {
-  transform-origin: top center;
-  animation: swayTranslateLeft 3.2s ease-in-out infinite alternate 0.8s;
+  will-change: transform;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-@keyframes swayTranslateLeft {
+/* Tag 1 (70% Off): Shifts right while rotating clockwise, then alternates */
+.couponsTag70 {
+  left: 50.5%;
+  animation: swayClockwiseWithTranslate 3s ease-in-out infinite alternate;
+}
+
+@keyframes swayClockwiseWithTranslate {
   0% {
-    transform: translateX(-12px) rotate(-8deg);
+    transform: translateX(10px) rotate(9deg);
   }
   100% {
-    transform: translateX(12px) rotate(8deg);
+    transform: translateX(-10px) rotate(-9deg);
   }
 }
 
-.swayCounter {
-  transform-origin: top center;
-  animation: swayTranslateCounter 2.8s ease-in-out infinite alternate 0.8s;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+/* Tag 2 (25% Rewards): Opposing direction - shifts left while rotating counter-clockwise */
+.couponsTag25 {
+  left: 54.5%;
+  animation: swayCounterWithTranslate 3s ease-in-out infinite alternate;
 }
 
-@keyframes swayTranslateCounter {
+@keyframes swayCounterWithTranslate {
   0% {
-    transform: translateX(-10px) rotate(-8deg);
+    transform: translateX(-10px) rotate(-9deg);
   }
   100% {
-    transform: translateX(10px) rotate(8deg);
+    transform: translateX(10px) rotate(9deg);
   }
 }
 
-/* Silver hanging string */
+/* Solid slate vertical line */
 .string {
-  width: 3px;
-  background-color: #E2E8F0;
-  box-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
+  width: 2px;
+  background-color: #94A3B8;
   flex-shrink: 0;
   position: relative;
   z-index: 0;
 }
 
-/* 70% Off Circle Tag */
+/* Tag 1 (70% Off Circle) */
 .tag70 {
   width: 95px;
   height: 95px;
   border-radius: 50%;
   background: #FFFFFF;
-  border: 3.5px solid #282D78;
+  border: 2px solid #CBD5E1;
   color: #282D78;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow:
-    inset 0px 6px 10px -2px rgba(0, 0, 0, 0.15),
-    0px 10px 24px -4px rgba(40, 45, 120, 0.25);
+  /* Dual Shadow: Pronounced Inset bevel depth + hanging drop shadow */
+  box-shadow: 
+    inset 0px 4px 10px rgba(0, 0, 0, 0.25),
+    inset 0px 2px 4px rgba(0, 0, 0, 0.15),
+    inset 0px -2px 6px rgba(0, 0, 0, 0.08),
+    0px 10px 24px -4px rgba(0, 0, 0, 0.14);
   flex-shrink: 0;
   line-height: 1;
   position: relative;
@@ -313,21 +282,24 @@
   margin-top: 2px;
 }
 
-/* 25% Rewards Circle Tag */
+/* Tag 2 (25% Rewards Circle) */
 .tag25 {
   width: 105px;
   height: 105px;
   border-radius: 50%;
   background: #FFFFFF;
-  border: 3.5px solid #E31E25;
+  border: 2px solid #CBD5E1;
   color: #E31E25;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow:
-    inset 0px 6px 10px -2px rgba(0, 0, 0, 0.15),
-    0px 10px 24px -4px rgba(227, 30, 37, 0.25);
+  /* Dual Shadow: Pronounced Inset bevel depth + hanging drop shadow */
+  box-shadow: 
+    inset 0px 4px 10px rgba(0, 0, 0, 0.25),
+    inset 0px 2px 4px rgba(0, 0, 0, 0.15),
+    inset 0px -2px 6px rgba(0, 0, 0, 0.08),
+    0px 10px 24px -4px rgba(0, 0, 0, 0.14);
   flex-shrink: 0;
   line-height: 1;
   position: relative;
@@ -352,39 +324,55 @@
 }
 
 /* ==========================================================================
-   Right Illustration Zone: Pushed to bottom (top: 100px) & Left (left: 1090px)
+   Right Hero Graphic (Scaled Down 20% & Lowered to Baseline)
    ========================================================================== */
 
 .illustrationContainer {
   position: absolute;
-  left: 1090px;
-  top: 100px;
-  width: 530px;
-  height: 530px;
+  left: 1180px;
+  bottom: 0px;
+  width: 495px;
+  height: 522px; /* +1% height calibration */
   z-index: 20;
   pointer-events: none;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
+  overflow: visible;
 }
 
+/* White Circle Backdrop: Expanded radius with dual shadows */
 .circleBackdrop {
   position: absolute;
-  width: 500px;
-  height: 500px;
+  bottom: 12px;
+  width: 456px; /* Increased circle diameter/radius */
+  height: 456px;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
   background: #FFFFFF;
-  box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 
+    inset 0px 4px 16px rgba(0, 0, 0, 0.08),
+    0px 20px 40px -10px rgba(0, 0, 0, 0.12);
+  z-index: 1;
 }
 
+/* Model Image: +1% scale */
 .illustrationImg {
-  position: absolute;
-  width: 540px;
+  position: relative;
+  width: 450px; /* Scaled up by 1% from 445px */
   height: auto;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 0px;
+  z-index: 2;
   object-fit: contain;
-  filter: drop-shadow(0px 16px 28px rgba(0, 0, 0, 0.15));
+  filter: drop-shadow(0px 14px 24px rgba(0, 0, 0, 0.14));
+}
+
+/* Reduced Motion Fallback */
+@media (prefers-reduced-motion: reduce) {
+  .couponsTag70,
+  .couponsTag25 {
+    animation: none !important;
+    transform: none !important;
+  }
 }
