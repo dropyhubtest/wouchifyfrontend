@@ -96,7 +96,7 @@ export const TRENDING_BANKS: TrendingBank[] = [
     id: 'trending-hdfc-bank',
     name: 'HDFC Bank',
     slug: 'hdfc-bank',
-    logo: getBankLogo('American_Express.png'), // Exact Figma asset match
+    logo: getBankLogo('HDFC_Bank.png'),
     href: '/banks/hdfc-bank',
     active: true,
     sortOrder: 3,

@@ -44,13 +44,40 @@ export const ExclusiveLootSection: React.FC = () => {
               className="exclusive-loot__card"
               aria-label={`View ${deal.title} exclusive deal`}
             >
-              <img
-                src={deal.image}
-                alt={deal.alt}
-                className="exclusive-loot__image"
-                width="684"
-                height="296"
-              />
+              {/* Left Image Area */}
+              <div className="exclusive-loot__media">
+                <img
+                  src={deal.image}
+                  alt={deal.title}
+                  className="exclusive-loot__product-img"
+                  width="300"
+                  height="296"
+                />
+                <div className="exclusive-loot__discount-badge" aria-label={`${deal.discount} off`}>
+                  <span className="exclusive-loot__discount-val">{deal.discount}</span>
+                  <span className="exclusive-loot__discount-txt">off!</span>
+                </div>
+              </div>
+
+              {/* Right Content Area */}
+              <div className="exclusive-loot__details">
+                <div className="exclusive-loot__top-row">
+                  <span className="exclusive-loot__tag">{deal.category}</span>
+                  <img
+                    src={deal.storeLogo}
+                    alt={deal.storeName}
+                    className="exclusive-loot__store-logo"
+                  />
+                </div>
+                <h3 className="exclusive-loot__card-title">{deal.title}</h3>
+                <div className="exclusive-loot__price-group">
+                  <span className="exclusive-loot__price">₹{deal.currentPrice}</span>
+                  <span className="exclusive-loot__original-price">₹{deal.originalPrice}</span>
+                </div>
+                <div className="exclusive-loot__cta-row">
+                  <span className="exclusive-loot__grab-btn">Grab deal!!</span>
+                </div>
+              </div>
             </a>
           ))}
         </div>

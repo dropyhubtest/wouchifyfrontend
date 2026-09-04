@@ -1,7 +1,7 @@
 import mobileHeroAjio from '../assets/mobile/mobile-hero-ajio.png'
-import promoAmazon from '../assets/store-promos/store-promo-amazon.png'
-import promoFlipkart from '../assets/store-promos/store-promo-flipkart.png'
-import promoFirstcry from '../assets/store-promos/store-promo-firstcry.png'
+import promoAmazon from '../assets/store-promos/amazon_banner.png'
+import promoFlipkart from '../assets/store-promos/filpkart_banner.png'
+import promoFirstcry from '../assets/store-promos/firtcry_banner.png'
 
 export interface MobilePromo {
   id: string

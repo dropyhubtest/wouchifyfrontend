@@ -53,17 +53,19 @@
 
 .logoArea {
   width: 100%;
-  height: 38px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   flex-shrink: 0;
+  padding: 2px 4px;
+  box-sizing: border-box;
 }
 
 .logoImg {
-  max-width: 50px;
-  max-height: 34px;
+  max-width: 44px;
+  max-height: 28px;
   width: auto;
   height: auto;
   object-fit: contain;
@@ -72,15 +74,16 @@
 
 .cardLabel {
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 8.5px;
+  font-size: 8px;
   font-weight: 600;
-  line-height: 1.1;
+  line-height: 1.15;
   color: #000000;
   text-align: center;
   margin-top: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
+  overflow: visible;
+  text-overflow: unset;
   max-width: 100%;
-  padding: 0 2px;
+  padding: 0 1px;
 }

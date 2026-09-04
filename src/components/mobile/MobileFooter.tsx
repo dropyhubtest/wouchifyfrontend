@@ -146,7 +146,7 @@ export const MobileFooter: React.FC = () => {
         ))}
       </div>
 
-      {/* Bottom Dashed Separator */}
+      {/* Bottom Dotted Separator */}
       <div className="mobile-footer__bottom-separator" aria-hidden="true" />
 
       {/* Copyright */}

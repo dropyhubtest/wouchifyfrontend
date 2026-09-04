@@ -145,12 +145,20 @@
 .mobile-stores__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 19px;
-  row-gap: 18px;
+  column-gap: 14px;
+  row-gap: 16px;
   margin-top: 12px;
-  padding: 0 23px 36px 23px; /* 36px bottom padding ensures generous gap before footer */
+  padding: 0 16px 36px 16px; /* 36px bottom padding ensures generous gap before footer */
   box-sizing: border-box;
   width: 100%;
+}
+
+@media (min-width: 400px) {
+  .mobile-stores__grid {
+    column-gap: 19px;
+    row-gap: 18px;
+    padding: 0 23px 36px 23px;
+  }
 }
 
 .mobile-stores__no-results {
@@ -203,88 +211,110 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  padding: 3px 6px;
+  box-sizing: border-box;
 }
 
 .mobile-stores__card-logo {
-  max-width: 100%;
-  max-height: 100%;
+  max-width: 88%;
+  max-height: 82%;
   object-fit: contain;
+  display: block;
 }
 
 .mobile-stores__card-category {
   position: absolute;
-  left: 16px;
-  top: 52px;
+  left: 12px;
+  right: 10px;
+  top: 50px;
   font-family: 'Poppins', sans-serif;
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 400;
   letter-spacing: 0.3px;
   text-transform: uppercase;
   color: #000000;
   line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .mobile-stores__card-name {
   position: absolute;
-  left: 16px;
-  top: 64px;
+  left: 12px;
+  right: 10px;
+  top: 63px;
   font-family: 'Poppins', sans-serif;
-  font-size: 25px;
+  font-size: 21px;
   font-weight: 500;
-  line-height: 28px;
+  line-height: 25px;
   color: #000000;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .mobile-stores__card-name--long {
-  font-size: 15px;
-  line-height: 18px;
-  top: 68px;
+  font-size: 13.5px;
+  line-height: 16px;
+  top: 67px;
 }
 
 .mobile-stores__card-badge {
   position: absolute;
-  left: 13px;
-  top: 111px;
-  width: 83px;
+  left: 11px;
+  top: 109px;
+  max-width: calc(100% - 22px);
+  min-width: 74px;
   height: 17px;
   border-radius: 4px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-family: 'Inter', sans-serif;
-  font-size: 8px;
+  font-size: 7.5px;
   font-weight: 700;
-  padding: 0 2px;
+  padding: 0 4px;
   box-sizing: border-box;
   color: #000000;
   text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .mobile-stores__card-desc {
   position: absolute;
-  left: 16px;
-  top: 135px;
+  left: 12px;
+  right: 8px;
+  top: 133px;
   font-family: 'Inter', sans-serif;
-  font-size: 10px;
+  font-size: 8px;
   font-weight: 500;
-  line-height: 12px;
+  line-height: 11px;
   color: #000000;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .mobile-stores__card-btn {
   position: absolute;
-  right: 14px;
+  right: 12px;
   top: 160px;
-  width: 93px;
+  width: 88px;
   height: 19px;
   background: #F1ECEC;
   border: none;
   border-radius: 3px;
   box-shadow: inset 0px 2px 2px rgba(0,0,0,0.25);
   font-family: 'Poppins', sans-serif;
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 500;
   display: flex;
   align-items: center;

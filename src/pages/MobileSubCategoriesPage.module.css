@@ -96,6 +96,9 @@
   cursor: pointer;
   padding: 4px 6px;
   border-radius: 4px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
   transition: color 0.15s ease, background-color 0.15s ease;
 }
 
@@ -113,21 +116,21 @@
   text-align: center;
 }
 
-/* Main Directory Structure: Left 76px navigation rail + Right 3-col grid */
+/* Main Directory Structure: Left navigation rail + Right 3-col grid */
 .directorySection {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
   width: 100%;
   margin-top: 4px;
-  padding: 0 10px 0 0;
+  padding: 0 clamp(4px, 1.5vw, 10px) 0 0;
   box-sizing: border-box;
-  gap: 10px;
+  gap: clamp(6px, 1.8vw, 10px);
   position: relative;
 }
 
 .railWrapper {
-  width: 76px;
+  width: clamp(58px, 17.5vw, 76px);
   flex-shrink: 0;
   position: sticky;
   top: 10px;

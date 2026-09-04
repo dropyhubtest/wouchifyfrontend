@@ -120,8 +120,8 @@ export const FAVOURITE_STORES: StoreItem[] = [
     mobileCategory: 'GROCERIES',
     mobileReward: 'Upto 20% rewards',
     mobileDescription: 'Daily Fresh groceries',
-    mobileLogoWidth: 78,
-    mobileLogoHeight: 28,
+    mobileLogoWidth: 64,
+    mobileLogoHeight: 18,
   },
   {
     id: 'firstcry',
@@ -168,8 +168,8 @@ export const FAVOURITE_STORES: StoreItem[] = [
     mobileCategory: 'GROCERY',
     mobileReward: 'Upto 5% rewards',
     mobileDescription: 'Everything on Discount',
-    mobileLogoWidth: 74,
-    mobileLogoHeight: 36,
+    mobileLogoWidth: 46,
+    mobileLogoHeight: 23,
   },
   {
     id: 'meesho',
@@ -185,8 +185,8 @@ export const FAVOURITE_STORES: StoreItem[] = [
     mobileCategory: 'FASHION',
     mobileReward: 'Upto 20% off',
     mobileDescription: 'Mega Savings Day',
-    mobileLogoWidth: 47,
-    mobileLogoHeight: 35,
+    mobileLogoWidth: 42,
+    mobileLogoHeight: 24,
   },
   {
     id: 'myntra',
@@ -217,8 +217,8 @@ export const FAVOURITE_STORES: StoreItem[] = [
     mobileCategory: 'BEAUTY',
     mobileReward: 'Upto 5% rewards',
     mobileDescription: 'Beauty Bonanza',
-    mobileLogoWidth: 74,
-    mobileLogoHeight: 30,
+    mobileLogoWidth: 58,
+    mobileLogoHeight: 20,
   },
   {
     id: 'pepperfry',

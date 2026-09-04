@@ -114,10 +114,12 @@
 .top-stores__viewport {
   position: absolute;
   left: 0;
-  top: 134px;
+  top: 118px;
   width: 1920px;
-  height: 237px;
+  height: 275px;
   overflow: hidden;
+  padding-top: 16px;
+  box-sizing: border-box;
   z-index: 1;
 }
 
@@ -134,6 +136,7 @@
    ========================================================================== */
 
 .top-stores__tile {
+  position: relative;
   width: 398px;
   height: 237px;
   flex: 0 0 398px;
@@ -144,12 +147,13 @@
   cursor: pointer;
   text-decoration: none;
   box-sizing: border-box;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .top-stores__tile:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
 }
 
 .top-stores__tile:focus-visible {
@@ -158,14 +162,188 @@
   border-radius: 24px;
 }
 
-.top-stores__image {
+.top-stores__bg-image {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 398px;
   height: 237px;
   display: block;
   object-fit: cover;
   border-radius: 24px;
+  z-index: 1;
   pointer-events: none;
   user-select: none;
+}
+
+/* 1. Top Reward Badges */
+.top-stores__reward-badge {
+  position: absolute;
+  top: 14px;
+  height: 28px;
+  border-radius: 999px;
+  background: #FFFFFF;
+  color: #000000;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  z-index: 4;
+  pointer-events: none;
+  user-select: none;
+}
+
+.top-stores__reward-badge--top-right {
+  right: 16px;
+}
+
+.top-stores__reward-badge--top-left {
+  left: 18px;
+}
+
+.top-stores__wouchify-logo-img {
+  height: 14px;
+  width: auto;
+  max-width: 48px;
+  object-fit: contain;
+  display: block;
+  margin-right: 2px;
+  flex-shrink: 0;
+}
+
+/* 2. Center Brand Logo Overlays */
+.top-stores__brand-logo {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* AJIO */
+.top-stores__brand-logo--ajio {
+  right: 28px;
+  top: 45%;
+  transform: translateY(-50%);
+}
+
+.top-stores__ajio-brand {
+  display: inline-flex;
+  align-items: baseline;
+  letter-spacing: 2px;
+}
+
+.top-stores__ajio-main {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 42px;
+  font-weight: 500;
+  color: #26384C;
+}
+
+.top-stores__ajio-dot {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 36px;
+  font-weight: 400;
+  color: #8BA0BA;
+  margin: 0 1px;
+}
+
+.top-stores__ajio-sub {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 32px;
+  font-weight: 300;
+  color: #8BA0BA;
+}
+
+/* Amazon */
+.top-stores__brand-logo--amazon {
+  left: 36px;
+  top: 48%;
+  transform: translateY(-50%);
+}
+
+.top-stores__logo-img--amazon {
+  width: 175px;
+  height: auto;
+  max-height: 90px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Flipkart */
+.top-stores__brand-logo--flipkart {
+  right: 28px;
+  top: 45%;
+  transform: translateY(-50%);
+}
+
+.top-stores__logo-img--flipkart {
+  width: 180px;
+  height: auto;
+  max-height: 75px;
+  object-fit: contain;
+  display: block;
+}
+
+/* FirstCry */
+.top-stores__brand-logo--firstcry {
+  right: 32px;
+  top: 42%;
+  transform: translateY(-50%);
+}
+
+.top-stores__firstcry-wrapper {
+  background: #FFFFFF;
+  border-radius: 50%;
+  width: 136px;
+  height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.top-stores__logo-img--firstcry {
+  width: 102px;
+  height: auto;
+  max-height: 52px;
+  object-fit: contain;
+  display: block;
+}
+
+/* 3. Bottom CTA Buttons */
+.top-stores__cta-badge {
+  position: absolute;
+  bottom: 16px;
+  height: 30px;
+  border-radius: 999px;
+  background: #FFFFFF;
+  color: #000000;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 16px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.14);
+  z-index: 4;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.top-stores__tile:hover .top-stores__cta-badge {
+  transform: scale(1.04);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+.top-stores__cta-badge--bottom-right {
+  right: 16px;
+}
+
+.top-stores__cta-badge--bottom-left {
+  left: 18px;
 }
 
 /* ==========================================================================

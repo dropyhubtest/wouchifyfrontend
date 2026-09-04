@@ -65,7 +65,7 @@ export const MOBILE_POPULAR_BRANDS_ROW_1: MobileBrandItem[] = [
     slug: 'bigbasket',
     logoSrc: bigbasketLogo,
     discount: 25,
-    mobileLogoScale: 1.50,
+    mobileLogoScale: 1.0,
   },
   {
     id: 'firstcry',
@@ -89,7 +89,7 @@ export const MOBILE_POPULAR_BRANDS_ROW_1: MobileBrandItem[] = [
     slug: 'jiomart',
     logoSrc: jiomartLogo,
     discount: 30,
-    mobileLogoScale: 1.50,
+    mobileLogoScale: 0.95,
   },
   {
     id: 'zivame',
@@ -108,7 +108,7 @@ export const MOBILE_POPULAR_BRANDS_ROW_2: MobileBrandItem[] = [
     slug: 'nykaa',
     logoSrc: nykaaLogo,
     discount: 10,
-    mobileLogoScale: 1.30,
+    mobileLogoScale: 1.0,
   },
   {
     id: 'myntra',

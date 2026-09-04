@@ -44,13 +44,40 @@ export const FlashLootSection: React.FC = () => {
               className="flash-loot__card"
               aria-label={`View ${deal.title} flash deal`}
             >
-              <img
-                src={deal.image}
-                alt={deal.alt}
-                className="flash-loot__image"
-                width="684"
-                height="297"
-              />
+              {/* Left Image Area */}
+              <div className="flash-loot__media">
+                <img
+                  src={deal.image}
+                  alt={deal.title}
+                  className="flash-loot__product-img"
+                  width="300"
+                  height="297"
+                />
+                <div className="flash-loot__discount-badge" aria-label={`${deal.discount} off`}>
+                  <span className="flash-loot__discount-val">{deal.discount}</span>
+                  <span className="flash-loot__discount-txt">off!</span>
+                </div>
+              </div>
+
+              {/* Right Content Area */}
+              <div className="flash-loot__details">
+                <div className="flash-loot__top-row">
+                  <span className="flash-loot__tag">{deal.category}</span>
+                  <img
+                    src={deal.storeLogo}
+                    alt={deal.storeName}
+                    className="flash-loot__store-logo"
+                  />
+                </div>
+                <h3 className="flash-loot__card-title">{deal.title}</h3>
+                <div className="flash-loot__price-group">
+                  <span className="flash-loot__price">₹{deal.currentPrice}</span>
+                  <span className="flash-loot__original-price">₹{deal.originalPrice}</span>
+                </div>
+                <div className="flash-loot__cta-row">
+                  <span className="flash-loot__grab-btn">Grab deal!!</span>
+                </div>
+              </div>
             </a>
           ))}
         </div>

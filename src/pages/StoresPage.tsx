@@ -53,8 +53,8 @@ function power2InOut(t: number): number {
   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
 }
 
-const MORPH_DURATION = 4000 // 4.0s slow, deliberate morph
-const HOLD_DURATION = 7000 // 7.0s hold on State 2
+const MORPH_DURATION = 3600 // 3.6s (10% faster deliberate morph)
+const HOLD_DURATION = 6300 // 6.3s (10% faster hold on State 2)
 
 type AnimationState = 'idle' | 'morphingToActive' | 'active' | 'morphingToNormal'
 

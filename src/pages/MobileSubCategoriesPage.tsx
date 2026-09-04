@@ -72,15 +72,6 @@ export const MobileSubCategoriesPage: React.FC = () => {
     return new Set(groupedLetterSections.map((g) => g.letter))
   }, [groupedLetterSections])
 
-  const handleBack = (e: React.MouseEvent) => {
-    e.preventDefault()
-    if (window.history.length > 1) {
-      window.history.back()
-    } else {
-      window.location.href = '/categories'
-    }
-  }
-
   const handleResetSearch = () => {
     setSearchInput('')
     setDebouncedSearch('')
@@ -110,14 +101,13 @@ export const MobileSubCategoriesPage: React.FC = () => {
 
       {/* Sub-header row: « Back left + "Trending Categories" centered */}
       <div className={styles.subHeaderRow}>
-        <button
-          type="button"
+        <a
+          href="/categories"
           className={styles.backButton}
-          onClick={handleBack}
           aria-label="Back to Categories"
         >
           &laquo; Back
-        </button>
+        </a>
         <h1 className={styles.subHeaderTitle}>Trending Categories</h1>
       </div>
 

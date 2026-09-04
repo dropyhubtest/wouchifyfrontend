@@ -6,7 +6,7 @@ import accountIcon from '../../assets/navbar/account.svg'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
 import './Navbar.css'
 
-import { NAV_LINKS } from '../../data/navigation'
+import { NAV_LINKS, resolveActiveNav } from '../../data/navigation'
 
 export interface NavbarProps {
   activeNav?: string
@@ -78,7 +78,8 @@ export const Navbar: React.FC<NavbarProps> = ({ activeNav, transparent = false }
         <nav className="navbar-nav" aria-label="Main Navigation">
           <ul className="nav-list">
             {NAV_LINKS.map((item) => {
-              const isActive = activeNav ? activeNav.toLowerCase() === item.id.toLowerCase() : Boolean(item.active)
+              const currentActive = resolveActiveNav(activeNav)
+              const isActive = currentActive === item.id.toLowerCase()
 
               return (
                 <li key={item.id} className={`nav-item nav-item-${item.id}`}>

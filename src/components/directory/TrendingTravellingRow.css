@@ -49,16 +49,18 @@
 
 .trending-travel-card__image-wrap {
   width: 100%;
-  height: 120px;
+  height: 110px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  padding: 4px 14px;
+  box-sizing: border-box;
 }
 
 .trending-travel-card__image {
-  max-width: 210px;
-  max-height: 116px;
+  max-width: 185px;
+  max-height: 92px;
   width: auto;
   height: auto;
   object-fit: contain;
@@ -67,14 +69,15 @@
 
 .trending-travel-card__title {
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 17px;
+  font-size: 14.5px;
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.25;
   color: #111827;
   text-align: center;
-  margin-top: 10px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 90%;
+  margin-top: 6px;
+  white-space: normal;
+  word-break: break-word;
+  overflow: visible;
+  text-overflow: unset;
+  max-width: 95%;
 }

@@ -76,15 +76,6 @@ export const MobileBrandsDirectoryPage: React.FC = () => {
     }))
   }, [])
 
-  const handleBack = (e: React.MouseEvent) => {
-    e.preventDefault()
-    if (window.history.length > 1) {
-      window.history.back()
-    } else {
-      window.location.href = '/categories'
-    }
-  }
-
   const handleResetSearch = () => {
     setSearchInput('')
     setDebouncedSearch('')
@@ -111,14 +102,13 @@ export const MobileBrandsDirectoryPage: React.FC = () => {
       </div>
 
       <div className={styles.subHeaderRow}>
-        <button
-          type="button"
+        <a
+          href="/categories"
           className={styles.backButton}
-          onClick={handleBack}
           aria-label="Back to Categories"
         >
           &laquo; Back
-        </button>
+        </a>
         <h1 className={styles.subHeaderTitle}>Trending Brands</h1>
       </div>
 

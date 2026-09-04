@@ -1,11 +1,16 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import mobileWouchifyLogo from '../../assets/mobile/wouchify-mobile-cropped-v2.png'
 import favoriteIcon from '../../assets/mobile/navigation/favorite.svg'
-import { NAV_LINKS } from '../../data/navigation'
+import { NAV_LINKS, resolveActiveNav } from '../../data/navigation'
 import './MobileHeader.css'
 
-export const MobileHeader = () => {
+export interface MobileHeaderProps {
+  activeNav?: string
+}
+
+export const MobileHeader: React.FC<MobileHeaderProps> = ({ activeNav }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const currentActiveNav = resolveActiveNav(activeNav)
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -75,18 +80,21 @@ export const MobileHeader = () => {
               </button>
             </div>
             <ul className="mobile-drawer-list">
-              {NAV_LINKS.map((item) => (
-                <li key={item.id} className="mobile-drawer-item">
-                  <a
-                    href={item.href}
-                    className={`mobile-drawer-link ${item.active ? 'active' : ''}`}
-                    onClick={() => setIsMenuOpen(false)}
-                    {...(item.active ? { 'aria-current': 'page' } : {})}
-                  >
-                    {item.name}
-                  </a>
-                </li>
-              ))}
+              {NAV_LINKS.map((item) => {
+                const isActive = currentActiveNav === item.id.toLowerCase()
+                return (
+                  <li key={item.id} className="mobile-drawer-item">
+                    <a
+                      href={item.href}
+                      className={`mobile-drawer-link ${isActive ? 'active' : ''}`}
+                      onClick={() => setIsMenuOpen(false)}
+                      {...(isActive ? { 'aria-current': 'page' } : {})}
+                    >
+                      {item.name}
+                    </a>
+                  </li>
+                )
+              })}
             </ul>
           </nav>
         </>
