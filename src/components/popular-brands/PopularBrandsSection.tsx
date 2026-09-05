@@ -6,7 +6,7 @@ import { useDesktopScale } from '../../hooks/useDesktopScale'
 import { BrandRewardCard } from './BrandRewardCard'
 import './PopularBrandsSection.css'
 
-const COLUMN_STEP_PX = 440 // 360px card width + 80px column gap
+const COLUMN_STEP_PX = 380 // 300px card width + 80px column gap
 const TOTAL_COLUMNS = Math.ceil(POPULAR_BRANDS_CAROUSEL.length / 2) // 12 columns
 const VISIBLE_COLUMNS = 4
 const MAX_STEP = Math.max(0, TOTAL_COLUMNS - VISIBLE_COLUMNS) // 8 steps
@@ -47,7 +47,7 @@ export const PopularBrandsSection: React.FC = () => {
       style={
         {
           '--popular-scale': sectionScale,
-          height: `${1022 * sectionScale}px`,
+          height: `${902 * sectionScale}px`,
         } as React.CSSProperties
       }
     >

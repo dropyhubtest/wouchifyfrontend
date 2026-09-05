@@ -20,7 +20,7 @@ export const CouponsPage: React.FC = () => {
 
       {/* 2. Top Navigation (COUPONS = active/red) */}
       <div className="coupons-page__navbar-wrapper">
-        <Navbar activeNav="coupons" transparent={true} />
+        <Navbar activeNav="coupons" />
       </div>
 
       {/* 3. Hero — Coupons Hero */}

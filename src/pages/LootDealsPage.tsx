@@ -20,7 +20,7 @@ export const LootDealsPage: React.FC = () => {
 
       {/* 2. Top Navigation (LOOT DEALS = active/red) */}
       <div className="loot-deals-page__navbar-wrapper">
-        <Navbar activeNav="loot-deals" transparent={true} />
+        <Navbar activeNav="loot-deals" />
       </div>
 
       {/* 3. Hero — Loot Deals Hero */}

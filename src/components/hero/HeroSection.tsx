@@ -9,6 +9,49 @@ import { TRUST_STATISTICS } from '../../data/heroData'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
 import './HeroSection.css'
 
+const AnimatedStatValue: React.FC<{ targetValueString: string, style?: React.CSSProperties }> = ({ targetValueString, style }) => {
+  const [currentValue, setCurrentValue] = React.useState(0)
+  
+  const match = targetValueString.match(/^(\d+)(.*)$/)
+  const targetNumber = match ? parseInt(match[1], 10) : 0
+  const suffix = match ? match[2] : targetValueString
+
+  React.useEffect(() => {
+    if (targetNumber === 0 && suffix === targetValueString) return
+
+    let startTime: number
+    let animationFrameId: number
+    const duration = 2000 // 2 seconds
+
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp
+      const progress = timestamp - startTime
+      const percentage = Math.min(progress / duration, 1)
+      
+      const easeOut = 1 - Math.pow(1 - percentage, 3)
+      setCurrentValue(Math.floor(easeOut * targetNumber))
+      
+      if (progress < duration) {
+        animationFrameId = requestAnimationFrame(animate)
+      }
+    }
+    
+    animationFrameId = requestAnimationFrame(animate)
+
+    return () => cancelAnimationFrame(animationFrameId)
+  }, [targetNumber, suffix, targetValueString])
+
+  if (targetNumber === 0 && suffix === targetValueString) {
+    return <span className="stat-value" style={style}>{targetValueString}</span>
+  }
+
+  return (
+    <span className="stat-value" style={style}>
+      {currentValue}{suffix}
+    </span>
+  )
+}
+
 export const HeroSection: React.FC = () => {
   const heroScale = useDesktopScale()
 
@@ -112,12 +155,10 @@ export const HeroSection: React.FC = () => {
         <ul className="hero-trust-stats-list" aria-label="Trust Statistics">
           {TRUST_STATISTICS.map((stat) => (
             <li key={stat.id} className={`trust-stat-item stat-${stat.id}`}>
-              <span
-                className="stat-value"
-                style={{ left: `${stat.valueLeft}px`, top: `${stat.valueTop}px` }}
-              >
-                {stat.value}
-              </span>
+              <AnimatedStatValue 
+                targetValueString={stat.value}
+                style={{ left: `${stat.valueLeft}px`, top: `${stat.valueTop}px` }} 
+              />
               <span
                 className="stat-label"
                 style={{ left: `${stat.labelLeft}px`, top: `${stat.labelTop}px` }}

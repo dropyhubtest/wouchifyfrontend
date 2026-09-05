@@ -153,9 +153,9 @@ export const StoresPage: React.FC = () => {
         aria-hidden="true"
       />
 
-      {/* 2. Transparent Navbar (z-index: 30) */}
+      {/* 2. Top Navigation (STORES = active/red) */}
       <div className="stores-page__navbar-wrapper">
-        <Navbar activeNav="stores" transparent={true} />
+        <Navbar activeNav="stores" />
       </div>
 
       {/* 3. Stores Hero Section (1920 x 590 px Visible Canvas, overflow-visible for shopper) */}

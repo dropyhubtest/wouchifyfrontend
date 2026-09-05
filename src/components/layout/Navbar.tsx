@@ -49,16 +49,23 @@ export const Navbar: React.FC<NavbarProps> = ({ activeNav, transparent = false }
   }
 
   return (
-    <header
-      className={`wouchify-header ${transparent ? 'wouchify-header--transparent' : ''}`}
-      role="banner"
-      style={
-        {
-          '--header-scale': headerScale,
-          height: `${131 * headerScale}px`,
-        } as React.CSSProperties
-      }
-    >
+    <>
+      {!transparent && (
+        <div 
+          aria-hidden="true" 
+          style={{ height: `${131 * headerScale}px`, width: '100%', flexShrink: 0 }} 
+        />
+      )}
+      <header
+        className={`wouchify-header ${transparent ? 'wouchify-header--transparent' : ''}`}
+        role="banner"
+        style={
+          {
+            '--header-scale': headerScale,
+            height: `${131 * headerScale}px`,
+          } as React.CSSProperties
+        }
+      >
       {/* 1920 x 131 Figma Reference Canvas */}
       <div className="wouchify-navbar-canvas">
         {/* Logo Layer: left: 7px, top: -20px, 401 x 207 (optically centered visible artwork) */}
@@ -171,6 +178,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeNav, transparent = false }
         </div>
       </div>
     </header>
+    </>
   )
 }
 

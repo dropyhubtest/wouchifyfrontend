@@ -7,9 +7,11 @@
 .hero-visual {
   position: absolute;
   left: 1151px;
-  top: -214px;
+  top: -50px;
   width: 850px;
   height: 969px;
+  transform: scale(0.85);
+  transform-origin: top center;
   overflow: hidden;
   z-index: 2;
   pointer-events: none;

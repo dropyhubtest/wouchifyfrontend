@@ -117,18 +117,26 @@
   top: 118px;
   width: 1920px;
   height: 275px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   padding-top: 16px;
   box-sizing: border-box;
   z-index: 1;
+  scroll-behavior: smooth;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.top-stores__viewport::-webkit-scrollbar {
+  display: none;
 }
 
 .top-stores__track {
   display: flex;
   gap: 54px;
   padding-left: 127px;
-  transition: transform 450ms cubic-bezier(0, 0, 0.58, 1);
-  will-change: transform;
+  padding-right: 127px;
+  width: max-content;
 }
 
 /* ==========================================================================
@@ -347,55 +355,5 @@
 }
 
 /* ==========================================================================
-   5. Navigation Arrows (46 x 46 px)
-      Right arrow: left: 1858px; top: 216px;
-      Left arrow: left: 45px; top: 216px;
-   ========================================================================== */
-
-.top-stores__arrow {
-  position: absolute;
-  top: 216px;
-  width: 46px;
-  height: 46px;
-  border: none;
-  background: transparent;
-  padding: 0;
-  cursor: pointer;
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-.top-stores__arrow:hover {
-  transform: scale(1.08);
-}
-
-.top-stores__arrow:active {
-  transform: scale(0.92);
-}
-
-.top-stores__arrow:focus-visible {
-  outline: 3px solid var(--color-red);
-  outline-offset: 4px;
-  border-radius: 50%;
-}
-
-.top-stores__arrow--left {
-  left: 45px;
-}
-
-.top-stores__arrow--right {
-  left: 1858px;
-}
-
-/* ==========================================================================
    6. Prefers Reduced Motion Fallback
    ========================================================================== */
-
-@media (prefers-reduced-motion: reduce) {
-  .top-stores__track {
-    transition: none !important;
-  }
-}

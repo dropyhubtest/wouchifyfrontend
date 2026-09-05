@@ -17,9 +17,9 @@ export const DealsPage: React.FC = () => {
         aria-hidden="true"
       />
 
-      {/* 2. Transparent Navbar with DEALS active */}
+      {/* 2. Top Navigation */}
       <div className="deals-page__navbar-wrapper">
-        <Navbar activeNav="deals" transparent={true} />
+        <Navbar activeNav="deals" />
       </div>
 
       {/* 3. Static Layered Deals Hero Section */}

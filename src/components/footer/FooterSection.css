@@ -41,6 +41,19 @@
   pointer-events: none;
 }
 
+@keyframes dashMarquee {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -34;
+  }
+}
+
+.footer__top-separator line {
+  animation: dashMarquee 1s linear infinite;
+}
+
 /* W Watermark sits higher up with less gap (~30px) from top line than the logo */
 .footer-watermark-wrap {
   position: absolute;
@@ -59,7 +72,8 @@
 .footer-brand-block {
   position: absolute;
   left: 122px;
-  top: 200px; /* 140px clear visual gap from the top dashed line */
+  top: 200px;
+  /* 140px clear visual gap from the top dashed line */
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -110,7 +124,17 @@
   line-height: 1;
   box-sizing: border-box;
   white-space: nowrap;
-  pointer-events: none;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.footer-tag-pill:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 
+    0 10px 20px rgba(227, 30, 37, 0.4),
+    0 0 15px rgba(227, 30, 37, 0.3);
+  background-color: #c8181f;
 }
 
 /* ==========================================================================
@@ -176,6 +200,7 @@
 }
 
 .footer-link {
+  position: relative;
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
   font-size: 24px;
   font-weight: 500;
@@ -183,11 +208,31 @@
   color: #838181;
   text-decoration: none;
   display: inline-block;
-  transition: color 0.15s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.footer-link::before {
+  content: "";
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  transform: translateY(-50%) scaleY(0);
+  width: 4px;
+  height: 70%;
+  background-color: #E31E25;
+  border-radius: 4px;
+  opacity: 0;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .footer-link:hover {
   color: #E31E25;
+  transform: translateX(12px);
+}
+
+.footer-link:hover::before {
+  opacity: 1;
+  transform: translateY(-50%) scaleY(1);
 }
 
 .footer-link:focus-visible {
@@ -257,10 +302,33 @@
 .footer-contact-link {
   color: #000000;
   text-decoration: none;
+  position: relative;
+  display: inline-block;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.footer-contact-link::before {
+  content: "";
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  transform: translateY(-50%) scaleY(0);
+  width: 4px;
+  height: 70%;
+  background-color: #E31E25;
+  border-radius: 4px;
+  opacity: 0;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .footer-contact-link:hover {
   color: #E31E25;
+  transform: translateX(10px);
+}
+
+.footer-contact-link:hover::before {
+  opacity: 1;
+  transform: translateY(-50%) scaleY(1);
 }
 
 .footer-contact-link:focus-visible {
@@ -286,7 +354,8 @@
   height: 78px;
   display: block;
   z-index: 2;
-  transition: opacity 0.15s ease;
+  border-radius: 50%;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .footer-social-link--telegram {
@@ -302,7 +371,11 @@
 }
 
 .footer-social-link:hover {
-  opacity: 0.85;
+  transform: translateY(-6px) scale(1.05);
+  box-shadow:
+    0 0 15px 5px rgba(255, 100, 0, 0.6),
+    0 0 30px 10px rgba(255, 0, 0, 0.5),
+    0 10px 20px rgba(255, 60, 0, 0.8);
 }
 
 .footer-social-link:focus-visible {
@@ -359,7 +432,21 @@
   text-decoration: none;
   z-index: 2;
   white-space: nowrap;
-  transition: color 0.15s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.footer-bottom-link::before {
+  content: "";
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  transform: translateY(-50%) scaleY(0);
+  width: 4px;
+  height: 70%;
+  background-color: #E31E25;
+  border-radius: 4px;
+  opacity: 0;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .footer-bottom-link--privacy-policy {
@@ -380,6 +467,12 @@
 
 .footer-bottom-link:hover {
   color: #E31E25;
+  transform: translateX(10px);
+}
+
+.footer-bottom-link:hover::before {
+  opacity: 1;
+  transform: translateY(-50%) scaleY(1);
 }
 
 .footer-bottom-link:focus-visible {

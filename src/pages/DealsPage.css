@@ -32,6 +32,6 @@
 
 .deals-page__navbar-wrapper {
   position: relative;
-  z-index: 30;
+  z-index: 100;
   width: 100%;
 }

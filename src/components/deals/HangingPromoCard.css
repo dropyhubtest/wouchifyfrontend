@@ -114,15 +114,15 @@
   left: 24%;
 }
 
-/* Tag 2: Center-Left - ₹300 Off (left: 43.5%, z-index: 20 sits on top of Tag 3) */
+/* Tag 2: Center-Left - ₹300 Off (left: 41%, z-index: 20 sits on top of Tag 3) */
 .item-300 {
-  left: 43.5%;
+  left: 41%;
   z-index: 20;
 }
 
-/* Tag 3: Center-Right - 25% Rewards (left: 47.5%, z-index: 10 tucks underneath Tag 2) */
+/* Tag 3: Center-Right - 25% Rewards (left: 52%, z-index: 10 tucks underneath Tag 2) */
 .item-25 {
-  left: 47.5%;
+  left: 52%;
   z-index: 10;
 }
 

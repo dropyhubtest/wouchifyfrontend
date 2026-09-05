@@ -6,38 +6,8 @@ import { TOP_STORES } from '../../data/topStores'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
 import './TopStoresSection.css'
 
-const TILE_STEP_PX = 452 // 398px tile width + 54px gap
-const VISIBLE_TILES = 4
-const MAX_STEP = Math.max(0, TOP_STORES.length - VISIBLE_TILES)
-
-const getInitialStoreStep = (): number => {
-  if (typeof window !== 'undefined') {
-    const params = new URLSearchParams(window.location.search)
-    const stepParam = params.get('storeStep')
-    if (stepParam) {
-      const parsed = parseInt(stepParam, 10)
-      if (!isNaN(parsed) && parsed >= 0 && parsed <= MAX_STEP) {
-        return parsed
-      }
-    }
-  }
-  return 0
-}
-
 export const TopStoresSection: React.FC = () => {
   const sectionScale = useDesktopScale()
-  const [currentStep, setCurrentStep] = useState<number>(getInitialStoreStep)
-
-  const handlePrev = () => {
-    setCurrentStep((prev) => Math.max(0, prev - 1))
-  }
-
-  const handleNext = () => {
-    setCurrentStep((prev) => Math.min(MAX_STEP, prev + 1))
-  }
-
-  const isLeftVisible = currentStep > 0
-  const isRightVisible = currentStep < MAX_STEP
 
   return (
     <section
@@ -65,12 +35,7 @@ export const TopStoresSection: React.FC = () => {
 
         {/* Promo Carousel Viewport */}
         <div className="top-stores__viewport">
-          <div
-            className="top-stores__track"
-            style={{
-              transform: `translateX(-${currentStep * TILE_STEP_PX}px)`,
-            }}
-          >
+          <div className="top-stores__track">
             {TOP_STORES.map((store) => (
               <a
                 key={store.id}
@@ -147,40 +112,6 @@ export const TopStoresSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Navigation Arrows (46 x 46 px) */}
-        {isLeftVisible && (
-          <button
-            type="button"
-            className="top-stores__arrow top-stores__arrow--left"
-            onClick={handlePrev}
-            aria-label="Previous stores"
-          >
-            <img
-              src={arrowLeftCircle}
-              alt=""
-              width="46"
-              height="46"
-              aria-hidden="true"
-            />
-          </button>
-        )}
-
-        {isRightVisible && (
-          <button
-            type="button"
-            className="top-stores__arrow top-stores__arrow--right"
-            onClick={handleNext}
-            aria-label="Next stores"
-          >
-            <img
-              src={arrowRightCircle}
-              alt=""
-              width="46"
-              height="46"
-              aria-hidden="true"
-            />
-          </button>
-        )}
       </div>
     </section>
   )

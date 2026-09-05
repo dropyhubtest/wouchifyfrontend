@@ -67,12 +67,12 @@ export const FooterSection: React.FC = () => {
             loot deals, and rewards - all in one place, zero cost.
           </p>
           <div className="footer-pills-row">
-            <div className="footer-tag-pill footer-tag-pill--verified">
+            <a href="/deals" className="footer-tag-pill footer-tag-pill--verified">
               Verified Deals
-            </div>
-            <div className="footer-tag-pill footer-tag-pill--instant">
+            </a>
+            <a href="/loot-deals" className="footer-tag-pill footer-tag-pill--instant">
               Instant Deals
-            </div>
+            </a>
           </div>
         </div>
 
@@ -134,7 +134,9 @@ export const FooterSection: React.FC = () => {
             Stay Updated
           </h2>
           <p className="footer-stay-updated-text">
-            Get daily loot alerts &amp; exclusive codes — join our Telegram!
+            Get daily loot alerts &amp; exclusive codes
+            <br />
+            — join our Telegram!
           </p>
         </div>
 

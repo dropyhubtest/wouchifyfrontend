@@ -24,7 +24,9 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ activeNav }) => {
   }, [isMenuOpen])
 
   return (
-    <header className="mobile-header">
+    <>
+      <div aria-hidden="true" style={{ height: '64px', width: '100%', flexShrink: 0 }} />
+      <header className="mobile-header">
       <button
         type="button"
         className="mobile-header__menu"
@@ -100,6 +102,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ activeNav }) => {
         </>
       )}
     </header>
+    </>
   )
 }
 

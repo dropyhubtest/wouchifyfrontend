@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FEATURED_CREDIT_CARDS } from '../../data/featuredCreditCards'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
 import './FeaturedCreditCardsSection.css'
@@ -9,8 +9,12 @@ export const FeaturedCreditCardsSection: React.FC = () => {
   const sectionScale = useDesktopScale()
   const [activeIndex, setActiveIndex] = useState<number>(0)
 
-  const currentCard =
-    FEATURED_CREDIT_CARDS[activeIndex] || FEATURED_CREDIT_CARDS[0]
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % FEATURED_CREDIT_CARDS.length)
+    }, 4000)
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <section
@@ -35,37 +39,49 @@ export const FeaturedCreditCardsSection: React.FC = () => {
           Check the exclusive offers now!!
         </p>
 
-        {/* Active Credit Card Data Content */}
-        <img
-          src={currentCard.bankMark}
-          alt={`${currentCard.bank} logo mark`}
-          className="featured-credit-cards__bank-mark"
-          width="273"
-          height="273"
-        />
+        {/* Carousel Viewport */}
+        <div className="featured-credit-cards__viewport">
+          <div
+            className="featured-credit-cards__track"
+            style={{ transform: `translateX(-${activeIndex * 1920}px)` }}
+          >
+            {FEATURED_CREDIT_CARDS.map((card) => (
+              <div key={card.id} className="featured-credit-cards__slide">
+                {/* Active Credit Card Data Content */}
+                <img
+                  src={card.bankMark}
+                  alt={`${card.bank} logo mark`}
+                  className="featured-credit-cards__bank-mark"
+                  width="273"
+                  height="273"
+                />
 
-        <h3 className="featured-credit-cards__bank-heading">
-          {currentCard.heading}
-        </h3>
+                <h3 className="featured-credit-cards__bank-heading">
+                  {card.heading}
+                </h3>
 
-        <p className="featured-credit-cards__offer-description">
-          {currentCard.description}
-        </p>
+                <p className="featured-credit-cards__offer-description">
+                  {card.description}
+                </p>
 
-        {/* Clickable Credit Card Anchor */}
-        <a
-          href={currentCard.href}
-          aria-label={`View ${currentCard.heading} credit card offer`}
-          className="featured-credit-cards__card-link"
-        >
-          <img
-            src={currentCard.cardImage}
-            alt={`${currentCard.heading} credit card`}
-            className="featured-credit-cards__card-image"
-            width="613"
-            height="561"
-          />
-        </a>
+                {/* Clickable Credit Card Anchor */}
+                <a
+                  href={card.href}
+                  aria-label={`View ${card.heading} credit card offer`}
+                  className="featured-credit-cards__card-link"
+                >
+                  <img
+                    src={card.cardImage}
+                    alt={`${card.heading} credit card`}
+                    className="featured-credit-cards__card-image"
+                    width="613"
+                    height="561"
+                  />
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Pagination Dots (5 total matching Figma) */}
         {DOT_LEFT_POSITIONS.map((leftPos, index) => {
