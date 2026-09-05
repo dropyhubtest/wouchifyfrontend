@@ -33,6 +33,7 @@ import { LootDealsPage } from './pages/LootDealsPage'
 import { CouponsPage } from './pages/CouponsPage'
 import { SignUpPage } from './pages/SignUpPage'
 import { TermsPage } from './pages/TermsPage'
+import { WalletPage } from './pages/WalletPage'
 
 function resolveCurrentPath(): string {
   if (typeof window === 'undefined') return '/'
@@ -158,6 +159,11 @@ function resolveCurrentPath(): string {
     return '/stores'
   }
 
+  // Wallet page (/wallet)
+  if (pathname === '/wallet' || page === 'wallet') {
+    return '/wallet'
+  }
+
   // Deals hero/landing page (/deals)
   if (page === 'deals' || pathname === '/deals' || pathname.startsWith('/deals/')) {
     return '/deals'
@@ -234,6 +240,7 @@ export default function App() {
   const isStoresRoute = currentPath === '/stores' || currentPath.startsWith('/stores/')
   const isDealsRoute = currentPath === '/deals' || currentPath.startsWith('/deals/')
   const isCategoriesRoute = currentPath === '/categories' || currentPath.startsWith('/categories/')
+  const isWalletRoute = currentPath === '/wallet'
 
   const renderContent = () => {
     if (isMobile) {
@@ -278,6 +285,10 @@ export default function App() {
       }
       if (isCategoriesRoute) {
         return <MobileCategoriesPage />
+      }
+      if (isWalletRoute) {
+        // Fallback to desktop WalletPage for mobile temporarily
+        return <WalletPage />
       }
       return <MobileHomePage />
     }
@@ -328,6 +339,10 @@ export default function App() {
 
     if (isDealsRoute) {
       return <DealsPage />
+    }
+
+    if (isWalletRoute) {
+      return <WalletPage />
     }
 
     if (isSubcategoriesRoute) {

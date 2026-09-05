@@ -160,6 +160,27 @@ export const Navbar: React.FC<NavbarProps> = ({ activeNav, transparent = false }
             />
           </button>
 
+          {/* Wallet Button */}
+          <a
+            href="/wallet"
+            className="action-btn wallet-btn"
+            aria-label="My Wallet"
+          >
+            <div className="wallet-pill">
+              <div className="wallet-anim-container">
+                <div className="falling-coin coin-1">₹</div>
+                <div className="falling-coin coin-2">₹</div>
+                <div className="falling-coin coin-3">₹</div>
+                <svg className="wallet-purse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+                  <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+                  <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
+                </svg>
+              </div>
+              <span className="wallet-balance">1,250</span>
+            </div>
+          </a>
+
           {/* Account Button: left: 1784px, top: 44px, 38 x 38 */}
           <a
             href="/signup"

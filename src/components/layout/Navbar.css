@@ -193,10 +193,10 @@
    3. Header Actions (Search, Cart, Account)
    ========================================================================== */
 
-/* Search Frame: left: 1440px; top: 38px; width: 235px; height: 58px; */
+/* Search Frame: left: 1340px; top: 38px; width: 235px; height: 58px; */
 .search-form {
   position: absolute;
-  left: 1440px;
+  left: 1340px;
   top: 38px;
   width: 235px;
   height: 58px;
@@ -297,10 +297,10 @@
   max-width: none;
 }
 
-/* Cart Button: left: 1707px; top: 48px; width: 31px; height: 31px; */
+/* Cart Button */
 .cart-btn {
   position: absolute;
-  left: 1707px;
+  left: 1610px;
   top: 48px;
   width: 31px;
   height: 31px;
@@ -329,10 +329,114 @@
   border-radius: 4px;
 }
 
-/* Account Button: left: 1784px; top: 44px; width: 38px; height: 38px; */
+/* Wallet Button */
+.wallet-btn {
+  position: absolute;
+  left: 1670px;
+  top: 38px;
+  display: inline-flex;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.wallet-pill {
+  background-color: #E31E25;
+  color: white;
+  border-radius: 24px;
+  padding: 8px 18px;
+  display: flex;
+  align-items: center;
+  font-family: var(--font-family-primary);
+  font-weight: 700;
+  font-size: 17px;
+  box-shadow: 0 4px 8px rgba(227, 30, 37, 0.25);
+  transition: background-color 0.2s ease;
+}
+
+.wallet-btn:hover {
+  transform: translateY(-2px);
+}
+
+.wallet-btn:hover .wallet-pill {
+  background-color: #c8181f;
+}
+
+.wallet-anim-container {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wallet-purse-icon {
+  width: 28px;
+  height: 28px;
+  color: white;
+  position: relative;
+  z-index: 2;
+}
+
+.falling-coin {
+  position: absolute;
+  top: -24px;
+  width: 20px;
+  height: 20px;
+  background: #FFD700; /* Gold */
+  border-radius: 50%;
+  color: #B8860B; /* Dark gold text */
+  font-size: 13px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  z-index: 1;
+  box-shadow: 0 1.5px 0 #DAA520;
+  animation: dropCoinAnim 1.2s linear infinite;
+}
+
+.falling-coin.coin-1 {
+  animation-delay: 0s;
+  left: 7px;
+}
+
+.falling-coin.coin-2 {
+  animation-delay: 0.4s;
+  left: 3px;
+}
+
+.falling-coin.coin-3 {
+  animation-delay: 0.8s;
+  left: 11px;
+}
+
+@keyframes dropCoinAnim {
+  0% {
+    top: -28px;
+    opacity: 0;
+    transform: scale(0.5) rotateY(0deg);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1) rotateY(90deg);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    top: 14px;
+    opacity: 0;
+    transform: scale(0.5) rotateY(180deg);
+  }
+}
+
+/* Account Button */
 .account-btn {
   position: absolute;
-  left: 1784px;
+  left: 1810px;
   top: 44px;
   width: 38px;
   height: 38px;
