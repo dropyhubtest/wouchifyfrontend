@@ -1,6 +1,4 @@
-import React, { useState } from 'react'
-import arrowLeftCircle from '../../assets/brands/arrow-left-circle.svg'
-import arrowRightCircle from '../../assets/brands/arrow-right-circle.svg'
+import React from 'react'
 import wouchifyIcon from '../../assets/brand/wouchify-icon.png'
 import { TOP_STORES } from '../../data/topStores'
 import { useDesktopScale } from '../../hooks/useDesktopScale'

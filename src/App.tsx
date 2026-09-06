@@ -34,6 +34,9 @@ import { CouponsPage } from './pages/CouponsPage'
 import { SignUpPage } from './pages/SignUpPage'
 import { TermsPage } from './pages/TermsPage'
 import { WalletPage } from './pages/WalletPage'
+import { AdminLoginPage } from './pages/admin/AdminLoginPage'
+import { AdminDashboardPage } from './pages/admin/AdminDashboardPage'
+import { BrandPage } from './pages/BrandPage'
 
 function resolveCurrentPath(): string {
   if (typeof window === 'undefined') return '/'
@@ -164,6 +167,21 @@ function resolveCurrentPath(): string {
     return '/wallet'
   }
 
+  // Admin login (/admin/login or /admin)
+  if (pathname === '/admin' || pathname === '/admin/login' || page === 'admin-login') {
+    return '/admin/login'
+  }
+
+  // Admin dashboard
+  if (pathname === '/admin/dashboard' || page === 'admin-dashboard') {
+    return '/admin/dashboard'
+  }
+
+  // Brand pages (/brands/:slug)
+  if (pathname.startsWith('/brands/')) {
+    return pathname
+  }
+
   // Deals hero/landing page (/deals)
   if (page === 'deals' || pathname === '/deals' || pathname.startsWith('/deals/')) {
     return '/deals'
@@ -209,7 +227,21 @@ export default function App() {
         e.preventDefault()
         window.history.pushState({}, '', href)
         setCurrentPath(resolveCurrentPath())
-        window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+        
+        // Handle hash navigation
+        const url = new URL(href, window.location.origin)
+        if (url.hash) {
+          setTimeout(() => {
+            const element = document.getElementById(url.hash.substring(1))
+            if (element) {
+              element.scrollIntoView({ behavior: 'smooth' })
+            } else {
+              window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+            }
+          }, 100)
+        } else {
+          window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+        }
       }
     }
 
@@ -241,6 +273,10 @@ export default function App() {
   const isDealsRoute = currentPath === '/deals' || currentPath.startsWith('/deals/')
   const isCategoriesRoute = currentPath === '/categories' || currentPath.startsWith('/categories/')
   const isWalletRoute = currentPath === '/wallet'
+  const isAdminLoginRoute = currentPath === '/admin/login'
+  const isAdminDashboardRoute = currentPath === '/admin/dashboard'
+  const isBrandRoute = currentPath.startsWith('/brands/')
+  const brandSlug = isBrandRoute ? currentPath.replace('/brands/', '') : ''
 
   const renderContent = () => {
     if (isMobile) {
@@ -289,6 +325,15 @@ export default function App() {
       if (isWalletRoute) {
         // Fallback to desktop WalletPage for mobile temporarily
         return <WalletPage />
+      }
+      if (isAdminLoginRoute) {
+        return <AdminLoginPage />
+      }
+      if (isAdminDashboardRoute) {
+        return <AdminDashboardPage />
+      }
+      if (isBrandRoute) {
+        return <BrandPage brandSlug={brandSlug} />
       }
       return <MobileHomePage />
     }
@@ -343,6 +388,18 @@ export default function App() {
 
     if (isWalletRoute) {
       return <WalletPage />
+    }
+
+    if (isAdminLoginRoute) {
+      return <AdminLoginPage />
+    }
+
+    if (isAdminDashboardRoute) {
+      return <AdminDashboardPage />
+    }
+
+    if (isBrandRoute) {
+      return <BrandPage brandSlug={brandSlug} />
     }
 
     if (isSubcategoriesRoute) {
