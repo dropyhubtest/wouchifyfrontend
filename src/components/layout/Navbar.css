@@ -11,7 +11,6 @@
   top: 0;
   left: 0;
   z-index: 1000;
-  overflow: hidden;
   box-sizing: border-box;
   display: flex;
   justify-content: center;
@@ -37,7 +36,6 @@
   transform-origin: top center;
   transform: scale(var(--header-scale, 1));
   box-sizing: border-box;
-  overflow: hidden;
 }
 
 /* ==========================================================================
@@ -196,7 +194,7 @@
 /* Search Frame: right-side, shifted right to avoid nav link overlap */
 .search-form {
   position: absolute;
-  left: 1340px;
+  left: 1260px;
   top: 38px;
   width: 200px;
   height: 54px;
@@ -300,7 +298,7 @@
 /* Cart Button */
 .cart-btn {
   position: absolute;
-  left: 1558px;
+  left: 1480px;
   top: 50px;
   width: 31px;
   height: 31px;
@@ -332,8 +330,8 @@
 /* Wallet Button */
 .wallet-btn {
   position: absolute;
-  left: 1604px;
-  top: 40px;
+  left: 1530px;
+  top: 45px;
   display: inline-flex;
   text-decoration: none;
   transition: transform 0.2s ease;
@@ -384,9 +382,11 @@
   top: -24px;
   width: 20px;
   height: 20px;
-  background: #FFD700; /* Gold */
+  background: #FFD700;
+  /* Gold */
   border-radius: 50%;
-  color: #B8860B; /* Dark gold text */
+  color: #B8860B;
+  /* Dark gold text */
   font-size: 13px;
   font-weight: 900;
   display: flex;
@@ -419,13 +419,16 @@
     opacity: 0;
     transform: scale(0.5) rotateY(0deg);
   }
+
   20% {
     opacity: 1;
     transform: scale(1) rotateY(90deg);
   }
+
   70% {
     opacity: 1;
   }
+
   100% {
     top: 14px;
     opacity: 0;
@@ -475,7 +478,7 @@
    ============================================================ */
 .navbar-login-btn {
   position: absolute;
-  left: 1746px;
+  left: 1720px;
   top: 46px;
   display: inline-flex;
   align-items: center;
@@ -504,8 +507,8 @@
    ============================================================ */
 .navbar-user-wrap {
   position: absolute;
-  left: 1716px;
-  top: 42px;
+  left: 1670px;
+  top: 44px;
   display: flex;
   align-items: center;
 }
@@ -513,11 +516,11 @@
 .navbar-user-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   background: transparent;
   border: 1.5px solid #E0E0F0;
   border-radius: 40px;
-  padding: 3px 10px 3px 3px;
+  padding: 4px 14px 4px 4px;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease;
   outline: none;
@@ -529,13 +532,13 @@
 }
 
 .navbar-avatar {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: #282D78;
   color: #ffffff;
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -551,10 +554,10 @@
 
 .navbar-user-name {
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   color: #282D78;
-  max-width: 100px;
+  max-width: 140px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -583,8 +586,15 @@
 }
 
 @keyframes menu-drop {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .navbar-user-menu__header {
