@@ -1,162 +1,168 @@
 /* ==========================================================================
-   Mobile Sign Up / Login Page (440px Reference Container)
+   Sign Up / Login Page (1920px Reference Canvas)
    ========================================================================== */
 
-.mobileSignUpPage {
+.login-page {
   width: 100%;
-  max-width: 440px;
   min-height: 100vh;
-  margin: 0 auto;
-  background: #FFFFFF;
-  overflow-x: hidden;
-  box-sizing: border-box;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
-
-/* 1. Header Bar */
-.headerWrapper {
-  width: 100%;
-  background: #EEEFFF;
-  border-bottom: 1px solid #E8E8F0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  position: relative;
-  z-index: 10;
-}
-
-/* 2. Main Content Area */
-.mainContent {
-  width: 100%;
-  position: relative;
+  background-color: #FFFFFF;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 68px 16px 80px 16px;
+  position: relative;
+  overflow-x: hidden;
   box-sizing: border-box;
-  overflow: visible;
 }
 
-/* Floating Big W Watermark on Top-Right Corner */
-.watermarkWrap {
+/* 2. Scaled Hero Section Wrapper */
+.login-page__hero-section {
+  width: 100%;
+  position: relative;
+  overflow: visible;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+  background-color: #FFFFFF;
+}
+
+/* 1920px Reference Canvas */
+.login-page__canvas {
+  width: 1920px;
+  height: 820px;
   position: absolute;
-  top: 14px;
-  right: -14px;
-  width: 133px;
-  height: 88px;
+  top: 0;
+  left: 50%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 40px 80px 0 80px;
+  pointer-events: auto;
+}
+
+/* Big W Watermark on Top-Left (Matching Figma Design) */
+.login-page__watermark-wrap {
+  position: absolute;
+  top: 15px;
+  left: 170px;
+  width: 360px;
+  height: 238px;
   pointer-events: none;
   user-select: none;
   z-index: 1;
 }
 
-/* Form Container */
-.formCard {
+/* Sign-Up / Login Card */
+.login-page__card {
   position: relative;
   z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
+  max-width: 600px;
+  margin-top: 36px;
 }
 
-/* Main Welcome Title */
-.welcomeTitle {
+/* Main Welcome Heading */
+.login-page__welcome-title {
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: clamp(20px, 5.8vw, 26px);
+  font-size: 42px;
   font-weight: 500;
   color: var(--color-red, #E31E25);
   text-align: center;
-  margin: 0 0 16px 0;
+  margin: 0 0 20px 0;
+  letter-spacing: -0.5px;
   line-height: 1.2;
   white-space: nowrap;
-  letter-spacing: -0.3px;
 }
 
-/* Subheading */
-.formTitle {
+/* Form Heading */
+.login-page__form-title {
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: clamp(18px, 5vw, 22px);
+  font-size: 32px;
   font-weight: 700;
   color: #000000;
   text-align: center;
-  margin: 0 0 6px 0;
+  margin: 0 0 8px 0;
   line-height: 1.2;
   white-space: nowrap;
 }
 
-/* OTP Description */
-.otpDesc {
+/* Helper Text */
+.login-page__otp-desc {
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 13.5px;
+  font-size: 16px;
   font-weight: 400;
   color: #555555;
   text-align: center;
-  margin: 0 0 22px 0;
+  margin: 0 0 24px 0;
   white-space: nowrap;
 }
 
-/* Form */
-.form {
+/* Form Container */
+.login-page__form {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-/* Input Wrap */
-.inputWrap {
-  width: 100%;
-  max-width: 340px;
-  height: 52px;
+/* Mobile/Email Input */
+.login-page__input-wrap {
+  width: 530px;
+  height: 72px;
   position: relative;
   box-sizing: border-box;
 }
 
-.input {
+.login-page__input {
   width: 100%;
   height: 100%;
-  border-radius: 12px;
-  border: 1.2px solid #C4C4D0;
+  border-radius: 18px;
+  border: 1.5px solid #D5D5DF;
   background-color: #FFFFFF;
-  padding: 0 18px;
+  padding: 0 28px;
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 400;
   color: #111827;
   outline: none;
-  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.02);
+  box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.02);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
   box-sizing: border-box;
 }
 
-.input::placeholder {
-  color: #A0A0B0;
-  font-size: 13px;
+.login-page__input::placeholder {
+  color: #B4B4C0;
+  font-size: 16px;
+  font-weight: 400;
 }
 
-.input:focus {
+.login-page__input:focus {
   border-color: var(--color-navy, #2F368C);
-  box-shadow: 0 0 0 2.5px rgba(47, 54, 140, 0.12);
+  box-shadow: 0 0 0 3px rgba(47, 54, 140, 0.12);
 }
 
 /* "or" Divider */
-.orDivider {
+.login-page__or-divider {
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 400;
-  color: #666666;
-  margin: 14px 0;
+  color: #777777;
+  margin: 16px 0;
   user-select: none;
 }
 
 /* Google Sign-In Circular Button */
-.googleBtn {
-  width: 54px;
-  height: 54px;
+.login-page__google-btn {
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   background-color: #FFFFFF;
-  border: 1.2px solid #D5D5DF;
-  box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.08);
+  border: 1.5px solid #D5D5DF;
+  box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -166,73 +172,70 @@
   padding: 0;
 }
 
-.googleBtn:hover {
-  transform: translateY(-1px);
+.login-page__google-btn:hover {
+  transform: translateY(-2px);
   border-color: var(--color-navy, #2F368C);
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.12);
 }
 
-.googleBtn:active {
+.login-page__google-btn:active {
   transform: translateY(0);
 }
 
-.googleIcon {
-  width: 29px;
-  height: 29px;
+.login-page__google-icon {
+  width: 32px;
+  height: 32px;
   object-fit: contain;
   display: block;
 }
 
 /* Terms and Privacy Text */
-.termsText {
+.login-page__terms-text {
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: clamp(9.2px, 2.5vw, 11px);
+  font-size: 14px;
   font-weight: 400;
   color: #333333;
   text-align: center;
-  margin: 16px 4px 18px 4px;
-  line-height: 1.45;
-  width: 100%;
-  max-width: 100%;
+  margin: 20px 0 22px 0;
   white-space: nowrap;
+  line-height: 1.5;
 }
 
-.termsLink {
+.login-page__terms-link {
   color: #282D78;
-  font-weight: 600;
+  font-weight: 500;
   text-decoration: none;
   transition: color 0.15s ease;
 }
 
-.termsLink:hover {
+.login-page__terms-link:hover {
   color: var(--color-red, #E31E25);
+  text-decoration: none;
 }
 
 /* Primary Continue Button */
-.continueBtn {
-  width: 190px;
-  height: 44px;
-  border-radius: 999px;
+.login-page__submit-btn {
+  width: 330px;
+  height: 58px;
+  border-radius: 14px;
   background-color: #282D78;
   color: #FFFFFF;
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 14.5px;
+  font-size: 18px;
   font-weight: 600;
   border: none;
   cursor: pointer;
-  box-shadow: 0px 4px 14px rgba(40, 45, 120, 0.28);
+  box-shadow: 0px 6px 20px rgba(40, 45, 120, 0.3);
   transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
   outline: none;
-  margin-bottom: 8px;
 }
 
-.continueBtn:active {
-  transform: scale(0.97);
+.login-page__submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0px 8px 24px rgba(40, 45, 120, 0.42);
+  background-color: #1F2466;
 }
 
-@media (max-width: 340px) {
-  .welcomeTitle,
-  .termsText {
-    white-space: normal;
-  }
+.login-page__submit-btn:active {
+  transform: translateY(0);
 }

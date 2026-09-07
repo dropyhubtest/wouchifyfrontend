@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { GoogleOAuthProvider } from '@react-oauth/google'
 import { useMediaQuery } from './hooks/useMediaQuery'
 import { DesktopHomePage } from './components/desktop/DesktopHomePage'
 import {
@@ -8,6 +9,7 @@ import {
   MobileLootDealsPage,
   MobileCouponsPage,
   MobileSignUpPage,
+  MobileLoginPage,
   MobileTermsPage,
   MobileCategoriesPage,
   MobileSubCategoriesPage,
@@ -32,11 +34,18 @@ import { DealsPage } from './pages/DealsPage'
 import { LootDealsPage } from './pages/LootDealsPage'
 import { CouponsPage } from './pages/CouponsPage'
 import { SignUpPage } from './pages/SignUpPage'
+import { LoginPage } from './pages/LoginPage'
 import { TermsPage } from './pages/TermsPage'
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage'
+import { AboutUsPage } from './pages/AboutUsPage'
+import { FAQPage } from './pages/FAQPage'
+import { ContactUsPage } from './pages/ContactUsPage'
+import { NotFoundPage } from './pages/NotFoundPage'
 import { WalletPage } from './pages/WalletPage'
 import { AdminLoginPage } from './pages/admin/AdminLoginPage'
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage'
 import { BrandPage } from './pages/BrandPage'
+import { WelcomeToast } from './components/auth/WelcomeToast'
 
 function resolveCurrentPath(): string {
   if (typeof window === 'undefined') return '/'
@@ -122,16 +131,22 @@ function resolveCurrentPath(): string {
     return '/loot-deals'
   }
 
-  // Sign Up / Login page (/signup or /login)
+  // Sign Up page
   if (
     pathname === '/signup' ||
     pathname === '/sign-up' ||
-    pathname === '/login' ||
     page === 'signup' ||
-    page === 'sign-up' ||
-    page === 'login'
+    page === 'sign-up'
   ) {
     return '/signup'
+  }
+
+  // Login page
+  if (
+    pathname === '/login' ||
+    page === 'login'
+  ) {
+    return '/login'
   }
 
   // Terms & Conditions page (/terms or /terms-of-use)
@@ -147,6 +162,12 @@ function resolveCurrentPath(): string {
   ) {
     return '/terms'
   }
+
+  // Static Pages (/privacy, /about, /faq, /contact)
+  if (pathname === '/privacy' || page === 'privacy' || page === 'privacy-policy') return '/privacy'
+  if (pathname === '/about' || page === 'about' || page === 'about-us') return '/about'
+  if (pathname === '/faq' || page === 'faq') return '/faq'
+  if (pathname === '/contact' || pathname === '/contact-us' || page === 'contact' || page === 'contact-us') return '/contact'
 
   // Coupons landing page (/coupons)
   if (
@@ -192,11 +213,13 @@ function resolveCurrentPath(): string {
     return cat ? `/categories/${cat}` : '/categories'
   }
 
-  if (pathname && pathname !== '/') {
-    return pathname
+  // If it's a known root path, or explicitly '/'
+  if (pathname === '/') {
+    return '/'
   }
 
-  return '/'
+  // If nothing matched, it's a 404
+  return '/404'
 }
 
 export default function App() {
@@ -261,12 +284,17 @@ export default function App() {
   const isBrandsDirectoryRoute = currentPath === '/categories/brands'
   const isStoresDirectoryRoute = currentPath === '/categories/stores'
   const isSubcategoriesRoute = currentPath === '/categories/subcategories'
-  const isSignUpRoute = currentPath === '/signup' || currentPath === '/sign-up' || currentPath === '/login'
+  const isSignUpRoute = currentPath === '/signup' || currentPath === '/sign-up'
+  const isLoginRoute = currentPath === '/login'
   const isTermsRoute =
     currentPath === '/terms' ||
     currentPath === '/terms-and-conditions' ||
     currentPath === '/terms-of-use' ||
     currentPath === '/terms-of-service'
+  const isPrivacyRoute = currentPath === '/privacy'
+  const isAboutRoute = currentPath === '/about'
+  const isFaqRoute = currentPath === '/faq'
+  const isContactRoute = currentPath === '/contact'
   const isCouponsRoute = currentPath === '/coupons' || currentPath.startsWith('/coupons/')
   const isLootDealsRoute = currentPath === '/loot-deals' || currentPath.startsWith('/loot-deals/')
   const isStoresRoute = currentPath === '/stores' || currentPath.startsWith('/stores/')
@@ -276,6 +304,7 @@ export default function App() {
   const isAdminLoginRoute = currentPath === '/admin/login'
   const isAdminDashboardRoute = currentPath === '/admin/dashboard'
   const isBrandRoute = currentPath.startsWith('/brands/')
+  const isNotFoundRoute = currentPath === '/404'
   const brandSlug = isBrandRoute ? currentPath.replace('/brands/', '') : ''
 
   const renderContent = () => {
@@ -310,6 +339,9 @@ export default function App() {
       if (isSignUpRoute) {
         return <MobileSignUpPage />
       }
+      if (isLoginRoute) {
+        return <MobileLoginPage />
+      }
       if (isTermsRoute) {
         return <MobileTermsPage />
       }
@@ -334,6 +366,9 @@ export default function App() {
       }
       if (isBrandRoute) {
         return <BrandPage brandSlug={brandSlug} />
+      }
+      if (isNotFoundRoute) {
+        return <NotFoundPage />
       }
       return <MobileHomePage />
     }
@@ -366,8 +401,24 @@ export default function App() {
       return <SignUpPage />
     }
 
+    if (isLoginRoute) {
+      return <LoginPage />
+    }
+
     if (isTermsRoute) {
       return <TermsPage />
+    }
+    if (isPrivacyRoute) {
+      return <PrivacyPolicyPage />
+    }
+    if (isAboutRoute) {
+      return <AboutUsPage />
+    }
+    if (isFaqRoute) {
+      return <FAQPage />
+    }
+    if (isContactRoute) {
+      return <ContactUsPage />
     }
 
     if (isCouponsRoute) {
@@ -425,12 +476,19 @@ export default function App() {
       return <CategoriesPage />
     }
 
+    if (isNotFoundRoute) {
+      return <NotFoundPage />
+    }
+
     return <DesktopHomePage />
   }
 
   return (
-    <div key={currentPath} className="page-transition-wrapper">
-      {renderContent()}
-    </div>
+    <GoogleOAuthProvider clientId="938902651101-d98pjaqlcnpel7b3ig2du9s63glbsoh9.apps.googleusercontent.com">
+      <WelcomeToast />
+      <div key={currentPath} className="page-transition-wrapper">
+        {renderContent()}
+      </div>
+    </GoogleOAuthProvider>
   )
 }

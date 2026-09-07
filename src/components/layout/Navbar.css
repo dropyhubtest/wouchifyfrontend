@@ -139,50 +139,50 @@
   font-weight: 800;
 }
 
-/* Gap after HOME: 35px */
+/* Gap after HOME: 20px */
 .nav-item-categories {
   width: 125px;
-  margin-left: 35px;
+  margin-left: 20px;
 }
 
 .nav-item-categories .nav-link {
   width: 125px;
 }
 
-/* Gap after CATEGORIES: 38px */
+/* Gap after CATEGORIES: 20px */
 .nav-item-stores {
   width: 76px;
-  margin-left: 38px;
+  margin-left: 20px;
 }
 
 .nav-item-stores .nav-link {
   width: 76px;
 }
 
-/* Gap after STORES: 38px */
+/* Gap after STORES: 20px */
 .nav-item-deals {
   width: 61px;
-  margin-left: 38px;
+  margin-left: 20px;
 }
 
 .nav-item-deals .nav-link {
   width: 61px;
 }
 
-/* Gap after DEALS: 40px */
+/* Gap after DEALS: 20px */
 .nav-item-loot-deals {
   width: 118px;
-  margin-left: 40px;
+  margin-left: 20px;
 }
 
 .nav-item-loot-deals .nav-link {
   width: 118px;
 }
 
-/* Gap after LOOT DEALS: 42px */
+/* Gap after LOOT DEALS: 20px */
 .nav-item-coupons {
   width: 100px;
-  margin-left: 42px;
+  margin-left: 20px;
 }
 
 .nav-item-coupons .nav-link {
@@ -193,13 +193,13 @@
    3. Header Actions (Search, Cart, Account)
    ========================================================================== */
 
-/* Search Frame: left: 1340px; top: 38px; width: 235px; height: 58px; */
+/* Search Frame: right-side, shifted right to avoid nav link overlap */
 .search-form {
   position: absolute;
   left: 1340px;
   top: 38px;
-  width: 235px;
-  height: 58px;
+  width: 200px;
+  height: 54px;
   display: flex;
   align-items: center;
   background-color: transparent;
@@ -254,8 +254,8 @@
   position: absolute;
   right: 0;
   top: 0;
-  width: 58px;
-  height: 58px;
+  width: 54px;
+  height: 54px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -279,8 +279,8 @@
 
 .search-icon-crop {
   position: relative;
-  width: 58px;
-  height: 58px;
+  width: 54px;
+  height: 54px;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -289,8 +289,8 @@
 
 .search-icon-img {
   position: absolute;
-  height: 58px;
-  width: 235px;
+  height: 54px;
+  width: 200px;
   right: 0;
   top: 0;
   pointer-events: none;
@@ -300,8 +300,8 @@
 /* Cart Button */
 .cart-btn {
   position: absolute;
-  left: 1610px;
-  top: 48px;
+  left: 1558px;
+  top: 50px;
   width: 31px;
   height: 31px;
   display: inline-flex;
@@ -332,8 +332,8 @@
 /* Wallet Button */
 .wallet-btn {
   position: absolute;
-  left: 1670px;
-  top: 38px;
+  left: 1604px;
+  top: 40px;
   display: inline-flex;
   text-decoration: none;
   transition: transform 0.2s ease;
@@ -468,4 +468,170 @@
 .action-icon-img {
   display: block;
   object-fit: contain;
+}
+
+/* ============================================================
+   Auth: Login Button (not logged in)
+   ============================================================ */
+.navbar-login-btn {
+  position: absolute;
+  left: 1746px;
+  top: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 8px;
+  background: #282D78;
+  color: #ffffff;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s ease, transform 0.15s ease;
+  box-shadow: 0 3px 12px rgba(40, 45, 120, 0.28);
+}
+
+.navbar-login-btn:hover {
+  background: #1F2466;
+  transform: translateY(-1px);
+}
+
+/* ============================================================
+   Auth: User Avatar + Name (logged in)
+   ============================================================ */
+.navbar-user-wrap {
+  position: absolute;
+  left: 1716px;
+  top: 42px;
+  display: flex;
+  align-items: center;
+}
+
+.navbar-user-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1.5px solid #E0E0F0;
+  border-radius: 40px;
+  padding: 3px 10px 3px 3px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  outline: none;
+}
+
+.navbar-user-btn:hover {
+  background: #f0f0ff;
+  border-color: #282D78;
+}
+
+.navbar-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #282D78;
+  color: #ffffff;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.navbar-avatar--lg {
+  width: 42px;
+  height: 42px;
+  font-size: 16px;
+}
+
+.navbar-user-name {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  color: #282D78;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navbar-chevron {
+  width: 10px;
+  height: 6px;
+  color: #282D78;
+  flex-shrink: 0;
+}
+
+/* Dropdown Menu */
+.navbar-user-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: #ffffff;
+  border: 1.5px solid #E8E8F0;
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 10px 36px rgba(40, 45, 120, 0.16);
+  min-width: 220px;
+  z-index: 1001;
+  animation: menu-drop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes menu-drop {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.navbar-user-menu__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+}
+
+.navbar-user-menu__name {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 2px 0;
+}
+
+.navbar-user-menu__email {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 11px;
+  font-weight: 400;
+  color: #888888;
+  margin: 0;
+  word-break: break-all;
+}
+
+.navbar-user-menu__divider {
+  height: 1px;
+  background: #F0F0F5;
+  margin-bottom: 10px;
+}
+
+.navbar-user-menu__logout {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: #fff0f0;
+  color: #E31E25;
+  border: none;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.navbar-user-menu__logout:hover {
+  background: #ffd9da;
 }

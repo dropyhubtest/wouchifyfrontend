@@ -1,10 +1,47 @@
-import React from 'react'
-import { RECENT_DEALS } from '../../data/recentDeals'
+import React, { useEffect, useState } from 'react'
+import { RECENT_DEALS, type RecentDealItem } from '../../data/recentDeals'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
+import { fetchDeals } from '../../utils/api'
 import './RecentDealsSection.css'
 
 export const RecentDealsSection: React.FC = () => {
   const sectionScale = useDesktopScale()
+  const [displayDeals, setDisplayDeals] = useState<RecentDealItem[]>(RECENT_DEALS)
+
+  useEffect(() => {
+    const loadDeals = async () => {
+      try {
+        const { data } = await fetchDeals()
+        // Map the live data to the positional layout
+        if (data && data.length > 0) {
+          const mappedDeals = data.slice(0, 2).map((deal: any, index: number) => {
+            const layout = index === 0 ? RECENT_DEALS[0] : RECENT_DEALS[1]
+            return {
+              id: deal._id,
+              name: deal.title,
+              // Fallback to brand logo or placeholder
+              image: deal.brand?.logoUrl || layout.image,
+              href: `/deals/${deal._id}`,
+              alt: deal.title,
+              left: layout.left,
+              top: layout.top,
+              width: layout.width,
+              height: layout.height
+            }
+          })
+
+          // Fill with dummy data if less than 2 deals
+          if (mappedDeals.length < 2) {
+             mappedDeals.push(RECENT_DEALS[1])
+          }
+          setDisplayDeals(mappedDeals)
+        }
+      } catch (error) {
+        console.error('Error fetching recent deals:', error)
+      }
+    }
+    loadDeals()
+  }, [])
 
   return (
     <section
@@ -32,7 +69,7 @@ export const RecentDealsSection: React.FC = () => {
 
         {/* Deal Cards Container */}
         <div className="recent-deals__cards-container">
-          {RECENT_DEALS.map((deal) => (
+          {displayDeals.map((deal) => (
             <a
               key={deal.id}
               href={deal.href}
@@ -40,6 +77,12 @@ export const RecentDealsSection: React.FC = () => {
               style={{
                 left: `${deal.left}px`,
                 top: `${deal.top}px`,
+                backgroundColor: '#f8f9fa',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '12px',
+                overflow: 'hidden'
               }}
               aria-label={`View ${deal.name} deal`}
             >
@@ -47,8 +90,12 @@ export const RecentDealsSection: React.FC = () => {
                 src={deal.image}
                 alt={deal.alt}
                 className="recent-deals__image"
-                width="422"
-                height="261"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: deal.image.includes('clearbit') ? 'contain' : 'cover',
+                  padding: deal.image.includes('clearbit') ? '2rem' : '0'
+                }}
               />
             </a>
           ))}

@@ -3,25 +3,62 @@ import { Navbar } from '../components/layout'
 import { FooterSection } from '../components/footer'
 import { WatermarkAnimation } from '../components/hero'
 import { useDesktopScale } from '../hooks/useDesktopScale'
-import googleLogo from '../assets/sign-up/google.png'
+import { GoogleLogin } from '@react-oauth/google'
+import { register, googleLogin as googleLoginApi } from '../utils/api'
+import { RegistrationSuccessModal } from '../components/auth/RegistrationSuccessModal'
 import watermarkMain from '../assets/hero/hero-watermark-main.png'
 import watermarkMainState2 from '../assets/hero/hero-watermark-main-state-2.png'
 import './SignUpPage.css'
 
 export const SignUpPage: React.FC = () => {
   const scale = useDesktopScale()
-  const [identifier, setIdentifier] = useState('')
-  const canvasHeight = 760
+  const [fullName, setFullName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [registeredName, setRegisteredName] = useState('')
+  const canvasHeight = 840
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (identifier.trim()) {
-      alert(`OTP sent to ${identifier.trim()}`)
+    setError('')
+    
+    if (password !== confirmPassword) {
+      setError("Passwords do not match!")
+      return
+    }
+
+    try {
+      setLoading(true)
+      const { data } = await register({ fullName, email, password })
+      setRegisteredName(fullName)
+      setShowSuccessModal(true)
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Something went wrong')
+    } finally {
+      setLoading(false)
     }
   }
 
-  const handleGoogleSignIn = () => {
-    alert('Signing in with Google...')
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    try {
+      setLoading(true)
+      const { data } = await googleLoginApi(credentialResponse.credential, false)
+      setRegisteredName(data.fullName || data.email)
+      setShowSuccessModal(true)
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Google signup failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleModalClose = () => {
+    setShowSuccessModal(false)
+    window.location.href = '/login'
   }
 
   return (
@@ -29,6 +66,10 @@ export const SignUpPage: React.FC = () => {
       className="signup-page"
       style={{ '--deals-scale': scale } as React.CSSProperties}
     >
+      {showSuccessModal && (
+        <RegistrationSuccessModal userName={registeredName} onClose={handleModalClose} />
+      )}
+
       {/* 1. Existing Shared Navbar */}
       <Navbar />
 
@@ -57,24 +98,53 @@ export const SignUpPage: React.FC = () => {
           <div className="signup-page__card">
             {/* Main Welcome Heading */}
             <h1 className="signup-page__welcome-title">Welcome to Wouchify!</h1>
-
-            {/* Subheading */}
-            <h2 className="signup-page__form-title">Login or Singup</h2>
-
-            {/* Helper OTP Text */}
-            <p className="signup-page__otp-desc">We will send an OTP to verify</p>
+            <h2 className="signup-page__form-title">Sign Up</h2>
+            <p className="signup-page__otp-desc">Create your account to unlock exclusive deals</p>
 
             {/* Form */}
             <form className="signup-page__form" onSubmit={handleSubmit}>
+              {error && <p style={{ color: 'red', marginBottom: '16px' }}>{error}</p>}
               {/* Mobile / Email Input */}
               <div className="signup-page__input-wrap">
                 <input
                   type="text"
                   className="signup-page__input"
-                  placeholder="Enter Mobile number or Email"
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  aria-label="Mobile number or Email"
+                  placeholder="Full Name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="signup-page__input-wrap" style={{ marginTop: '16px' }}>
+                <input
+                  type="email"
+                  className="signup-page__input"
+                  placeholder="Email Address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="signup-page__input-wrap" style={{ marginTop: '16px' }}>
+                <input
+                  type="password"
+                  className="signup-page__input"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="signup-page__input-wrap" style={{ marginTop: '16px' }}>
+                <input
+                  type="password"
+                  className="signup-page__input"
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                 />
               </div>
@@ -82,36 +152,28 @@ export const SignUpPage: React.FC = () => {
               {/* "or" Divider */}
               <div className="signup-page__or-divider">or</div>
 
-              {/* Google Circular Sign-In Button */}
-              <button
-                type="button"
-                className="signup-page__google-btn"
-                onClick={handleGoogleSignIn}
-                title="Sign in with Google"
-                aria-label="Sign in with Google"
-              >
-                <img
-                  src={googleLogo}
-                  alt="Google"
-                  className="signup-page__google-icon"
+              {/* Google Sign-In Button */}
+              <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginTop: '8px' }}>
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => setError('Google Login Failed')}
+                  text="signup_with"
+                  shape="rectangular"
+                  width="330"
                 />
-              </button>
+              </div>
 
               {/* Terms and Privacy Policy Note */}
               <p className="signup-page__terms-text">
-                By continuing, you agree to Wouchify&apos;s{' '}
-                <a href="/terms" className="signup-page__terms-link">
-                  terms &amp; conditions
-                </a>{' '}
-                and{' '}
-                <a href="/privacy" className="signup-page__terms-link">
-                  privacy policy
+                Already have an account?{' '}
+                <a href="/login" className="signup-page__terms-link">
+                  Login
                 </a>
               </p>
 
               {/* Primary Continue Button */}
-              <button type="submit" className="signup-page__submit-btn">
-                Continue
+              <button type="submit" className="signup-page__submit-btn" disabled={loading}>
+                {loading ? 'Signing Up...' : 'Sign Up'}
               </button>
             </form>
           </div>

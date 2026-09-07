@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import logo from '../../assets/navbar/wouchify-logo.png'
 import searchIcon from '../../assets/navbar/search.svg'
 import cartIcon from '../../assets/navbar/cart.svg'
@@ -18,6 +18,35 @@ export const Navbar: React.FC<NavbarProps> = ({ activeNav, transparent = false }
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
   const headerScale = useDesktopScale()
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // Auth state
+  const [user, setUser] = useState<{ fullName?: string; email?: string } | null>(null)
+  const [showUserMenu, setShowUserMenu] = useState(false)
+
+  useEffect(() => {
+    const userInfo = localStorage.getItem('userInfo')
+    if (userInfo) {
+      try { setUser(JSON.parse(userInfo)) } catch {}
+    }
+  }, [])
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('userInfo')
+    localStorage.removeItem('just_logged_in')
+    window.location.href = '/login'
+  }
+
+  // Get initials for avatar
+  const getInitials = (name?: string) => {
+    if (!name) return '?'
+    const parts = name.trim().split(' ')
+    return parts.length > 1
+      ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+      : parts[0][0].toUpperCase()
+  }
+
+  const displayName = user?.fullName || user?.email?.split('@')[0] || 'User'
 
   const handleSearchFocus = () => {
     setIsSearchExpanded(true)
@@ -181,21 +210,42 @@ export const Navbar: React.FC<NavbarProps> = ({ activeNav, transparent = false }
             </div>
           </a>
 
-          {/* Account Button: left: 1784px, top: 44px, 38 x 38 */}
-          <a
-            href="/signup"
-            className="action-btn account-btn"
-            aria-label="Account Profile"
-          >
-            <img
-              src={accountIcon}
-              alt=""
-              aria-hidden="true"
-              className="action-icon-img"
-              width="38"
-              height="38"
-            />
-          </a>
+          {/* Account / Auth Button */}
+          {user ? (
+            <div className="navbar-user-wrap">
+              <button
+                type="button"
+                className="navbar-user-btn"
+                onClick={() => setShowUserMenu((v) => !v)}
+                aria-label="Account Menu"
+              >
+                <div className="navbar-avatar">{getInitials(user.fullName)}</div>
+                <span className="navbar-user-name">{displayName}</span>
+                <svg className="navbar-chevron" viewBox="0 0 10 6" fill="none">
+                  <path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              </button>
+              {showUserMenu && (
+                <div className="navbar-user-menu">
+                  <div className="navbar-user-menu__header">
+                    <div className="navbar-avatar navbar-avatar--lg">{getInitials(user.fullName)}</div>
+                    <div>
+                      <p className="navbar-user-menu__name">{displayName}</p>
+                      <p className="navbar-user-menu__email">{user.email}</p>
+                    </div>
+                  </div>
+                  <div className="navbar-user-menu__divider" />
+                  <button className="navbar-user-menu__logout" onClick={handleLogout}>
+                    Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <a href="/login" className="navbar-login-btn" aria-label="Login">
+              Login
+            </a>
+          )}
         </div>
       </div>
     </header>
