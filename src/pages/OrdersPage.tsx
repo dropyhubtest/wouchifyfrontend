@@ -142,7 +142,6 @@ export const OrdersPage: React.FC = () => {
         ) : (
           <div className="orders-list">
             {filtered.map(order => {
-              const st = STATUS_STEPS[order.status] || STATUS_STEPS[order.orderStatus]
               const stepInfo = STATUS_STEPS[order.orderStatus]
               const cb = CASHBACK_CONFIG[order.cashbackStatus]
               const isExpanded = expandedOrder === order.id
