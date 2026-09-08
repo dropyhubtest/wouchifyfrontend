@@ -51,6 +51,9 @@ import { ReferPage } from './pages/ReferPage'
 import { AdminLoginPage } from './pages/admin/AdminLoginPage'
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage'
 import { BrandPage } from './pages/BrandPage'
+import { StaffLoginPage } from './pages/admin/StaffLoginPage'
+import { StaffDashboardPage } from './pages/admin/StaffDashboardPage'
+import { ExecutiveDashboardPage } from './pages/admin/executive/ExecutiveDashboardPage'
 import { WelcomeToast } from './components/auth/WelcomeToast'
 
 function resolveCurrentPath(): string {
@@ -135,6 +138,20 @@ function resolveCurrentPath(): string {
     (pathname === '/deals' && (type === 'flash' || type === 'flash-style' || type === 'loot'))
   ) {
     return '/loot-deals'
+  }
+
+  // Admin and Staff pages
+  if (
+    pathname === '/admin/login' ||
+    pathname === '/admin/dashboard' ||
+    pathname === '/operational-manager/login' ||
+    pathname === '/executive/login' ||
+    pathname === '/operational-manager/dashboard' ||
+    pathname === '/executive/login' ||
+    pathname === '/operational-manager/dashboard' ||
+    pathname === '/executive/dashboard'
+  ) {
+    return pathname
   }
 
   // Sign Up page
@@ -225,7 +242,8 @@ function resolveCurrentPath(): string {
   }
 
   // Categories landing/detail
-  if (page === 'categories') {
+  if (pathname === '/categories' || pathname.startsWith('/categories/') || page === 'categories') {
+    if (pathname.startsWith('/categories/')) return pathname;
     return cat ? `/categories/${cat}` : '/categories'
   }
 
@@ -325,6 +343,12 @@ export default function App() {
   const isReferRoute = currentPath === '/refer'
   const isAdminLoginRoute = currentPath === '/admin/login'
   const isAdminDashboardRoute = currentPath === '/admin/dashboard'
+  const isStaffLoginRoute = 
+    currentPath === '/operational-manager/login' || 
+    currentPath === '/executive/login'
+  const isStaffDashboardRoute = 
+    currentPath === '/operational-manager/dashboard'
+  const isExecutiveRoute = currentPath.startsWith('/executive/') && currentPath !== '/executive/login'
   const isBrandRoute = currentPath.startsWith('/brands/')
   const isNotFoundRoute = currentPath === '/404'
   const brandSlug = isBrandRoute ? currentPath.replace('/brands/', '') : ''
@@ -472,6 +496,21 @@ export default function App() {
 
     if (isAdminLoginRoute) {
       return <AdminLoginPage />
+    }
+
+    if (isStaffLoginRoute) {
+      return <StaffLoginPage />
+    }
+
+
+
+    if (isExecutiveRoute) {
+      // For now, if it's ANY executive route, show the ExecutiveDashboardPage
+      return <ExecutiveDashboardPage />
+    }
+
+    if (isStaffDashboardRoute) {
+      return <NotFoundPage />
     }
 
     if (isAdminDashboardRoute) {
