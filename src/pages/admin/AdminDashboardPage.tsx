@@ -239,6 +239,8 @@ interface UserItem {
 }
 
 const INITIAL_DEALS: DealItem[] = [
+  { id: 'deal-1', name: 'Xiaomi 138 cm (55 inch) FX Pro QLED Ultra HD 4K Smart Fire TV L55MB-FPIN', store: 'Amazon', category: 'Electronics', price: '₹37,998', originalPrice: '₹62,999', discount: '40% OFF', status: 'active', expiry: 'Sep 30, 2026', isBestSelling: true, sectionPlacement: 'both' },
+  { id: 10, name: 'Milton Rapid Electric Kettle 1.8L [Trending]', store: 'Amazon', category: 'Electronics', price: '₹604', originalPrice: '₹1,499', discount: '60% OFF', status: 'active', expiry: 'Sep 28, 2026', isBestSelling: true, sectionPlacement: 'both' },
   { id: 1, name: 'Apple iPhone 16 Pro (128 GB) - Natural Titanium', store: 'Amazon', category: 'Electronics', price: '₹1,19,900', originalPrice: '₹1,34,900', discount: '11% OFF', status: 'active', expiry: 'Sep 25, 2026', isBestSelling: true, sectionPlacement: 'best_selling' },
   { id: 2, name: 'Nike Air Max Men Sneaker Shoes', store: 'Myntra', category: 'Fashion', price: '₹5,499', originalPrice: '₹9,995', discount: '45% OFF', status: 'active', expiry: 'Sep 18, 2026', isBestSelling: false, sectionPlacement: 'favourite' },
   { id: 3, name: 'Sony WH-1000XM5 Wireless Noise Cancelling Headphones', store: 'Flipkart', category: 'Electronics', price: '₹26,990', originalPrice: '₹34,990', discount: '23% OFF', status: 'active', expiry: 'Sep 22, 2026', isBestSelling: true, sectionPlacement: 'both' },
@@ -248,7 +250,6 @@ const INITIAL_DEALS: DealItem[] = [
   { id: 7, name: 'Fresh Organic Produce Combo Pack (5kg)', store: 'Big Basket', category: 'Grocery', price: '₹399', originalPrice: '₹650', discount: '38% OFF', status: 'active', expiry: 'Sep 15, 2026', isBestSelling: false, sectionPlacement: 'favourite' },
   { id: 8, name: '10-Minute Grocery Rush Flash Pass', store: 'Zepto', category: 'Grocery', price: '₹99', originalPrice: '₹299', discount: '67% OFF', status: 'active', expiry: 'Sep 14, 2026', isBestSelling: false, sectionPlacement: 'favourite' },
   { id: 9, name: 'Oval Up Down LED Wall Light 2W [Flash Loot]', store: 'Amazon', category: 'Electronics', price: '₹179', originalPrice: '₹1,899', discount: '91% OFF', status: 'active', expiry: 'Sep 30, 2026', isBestSelling: false, sectionPlacement: 'favourite' },
-  { id: 10, name: 'Milton Rapid Electric Kettle 1.8L [Trending]', store: 'Amazon', category: 'Electronics', price: '₹604', originalPrice: '₹1,499', discount: '60% OFF', status: 'active', expiry: 'Sep 28, 2026', isBestSelling: true, sectionPlacement: 'both' },
 ]
 
 const INITIAL_COUPONS: CouponItem[] = [
@@ -284,7 +285,23 @@ export const AdminDashboardPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [deals, setDeals] = useState<DealItem[]>(INITIAL_DEALS)
+  const [deals, setDeals] = useState<DealItem[]>(() => {
+    try {
+      const cached = localStorage.getItem('wouchify_public_deals')
+      if (cached) {
+        const parsed = JSON.parse(cached)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const cachedIds = new Set(parsed.map((d: any) => String(d._id || d.id)))
+          const cachedNames = new Set(parsed.map((d: any) => String(d.name).toLowerCase().trim()))
+          const missingDefaults = INITIAL_DEALS.filter(
+            (d) => !cachedIds.has(String(d._id || d.id)) && !cachedNames.has(d.name.toLowerCase().trim())
+          )
+          return [...parsed, ...missingDefaults]
+        }
+      }
+    } catch {}
+    return INITIAL_DEALS
+  })
   const [coupons, setCoupons] = useState<CouponItem[]>(INITIAL_COUPONS)
   const [lootDeals, setLootDeals] = useState<LootDealAdminItem[]>(INITIAL_LOOT_DEALS)
   const [transactions, setTransactions] = useState<TransactionItem[]>(INITIAL_TRANSACTIONS)
@@ -307,7 +324,29 @@ export const AdminDashboardPage: React.FC = () => {
         if (!isMounted) return
 
         if (dealsRes.status === 'fulfilled' && Array.isArray(dealsRes.value) && dealsRes.value.length > 0) {
-          setDeals(dealsRes.value)
+          setDeals((prevDeals) => {
+            const backendDeals = dealsRes.value
+            const backendIds = new Set(backendDeals.map((d: any) => String(d._id || d.id)))
+            const backendNames = new Set(backendDeals.map((d: any) => String(d.name).toLowerCase().trim()))
+
+            // Retain any custom deals created by the user locally that backend might not have yet
+            const locallyCreated = prevDeals.filter(
+              (d) => !backendIds.has(String(d._id || d.id)) && !backendNames.has(d.name.toLowerCase().trim())
+            )
+
+            // Auto-sync any local custom deals to backend so backend persists them too!
+            if (locallyCreated.length > 0) {
+              locallyCreated.forEach((deal) => {
+                adminApi.createDeal(deal).catch(() => {})
+              })
+            }
+
+            const merged = [...locallyCreated, ...backendDeals]
+            try {
+              localStorage.setItem('wouchify_public_deals', JSON.stringify(merged))
+            } catch {}
+            return merged
+          })
         }
         if (couponsRes.status === 'fulfilled' && Array.isArray(couponsRes.value) && couponsRes.value.length > 0) {
           setCoupons(couponsRes.value)
@@ -513,7 +552,14 @@ export const AdminDashboardPage: React.FC = () => {
 
   // ── Handlers ───────────────────────────────────────────────────────────────
   const handleDeleteDeal = async (id: string | number) => {
-    setDeals((prev) => prev.filter((d) => d.id !== id))
+    setDeals((prev) => {
+      const updated = prev.filter((d) => d.id !== id && d._id !== String(id))
+      try {
+        localStorage.setItem('wouchify_public_deals', JSON.stringify(updated))
+        window.dispatchEvent(new Event('wouchify_deals_updated'))
+      } catch {}
+      return updated
+    })
     try {
       await adminApi.deleteDeal(id)
     } catch {
@@ -523,16 +569,21 @@ export const AdminDashboardPage: React.FC = () => {
   }
 
   const handleToggleDealStatus = async (id: string | number) => {
-    setDeals((prev) =>
-      prev.map((d) => {
-        if (d.id === id) {
-          const nextStatus = d.status === 'active' ? 'pending' : 'active'
+    setDeals((prev) => {
+      const updated = prev.map((d) => {
+        if (d.id === id || d._id === String(id)) {
+          const nextStatus: 'active' | 'pending' = d.status === 'active' ? 'pending' : 'active'
           showToast(`Deal marked as ${nextStatus.toUpperCase()}`)
           return { ...d, status: nextStatus }
         }
         return d
       })
-    )
+      try {
+        localStorage.setItem('wouchify_public_deals', JSON.stringify(updated))
+        window.dispatchEvent(new Event('wouchify_deals_updated'))
+      } catch {}
+      return updated
+    })
     try {
       await adminApi.toggleDealStatus(id)
     } catch {
@@ -610,18 +661,25 @@ export const AdminDashboardPage: React.FC = () => {
 
   const handleToggleBestSelling = async (id: string | number) => {
     let toggledState = false
-    setDeals((prev) =>
-      prev.map((d) => {
-        if (d.id === id) {
+    setDeals((prev) => {
+      const updated = prev.map((d) => {
+        if (d.id === id || d._id === String(id)) {
           const next = !d.isBestSelling
           toggledState = next
-          const nextPlacement = next ? (d.sectionPlacement === 'favourite' ? 'both' : 'best_selling') : 'favourite'
+          const nextPlacement: 'favourite' | 'best_selling' | 'both' = next
+            ? (d.sectionPlacement === 'favourite' ? 'both' : 'best_selling')
+            : 'favourite'
           showToast(next ? '⭐ Deal added to Best Selling Deal Picks!' : 'Deal removed from Best Selling')
           return { ...d, isBestSelling: next, sectionPlacement: nextPlacement }
         }
         return d
       })
-    )
+      try {
+        localStorage.setItem('wouchify_public_deals', JSON.stringify(updated))
+        window.dispatchEvent(new Event('wouchify_deals_updated'))
+      } catch {}
+      return updated
+    })
     try {
       await adminApi.updateDeal(id, {
         isBestSelling: toggledState,
@@ -652,8 +710,10 @@ export const AdminDashboardPage: React.FC = () => {
       newDeal.sectionPlacement === 'both'
     )
 
+    const dealId = Date.now()
     const created: DealItem = {
-      id: Date.now(),
+      id: dealId,
+      _id: String(dealId),
       name: newDeal.name,
       store: newDeal.store,
       category: newDeal.category,
@@ -670,7 +730,14 @@ export const AdminDashboardPage: React.FC = () => {
       sectionPlacement: newDeal.sectionPlacement || 'favourite'
     }
 
-    setDeals([created, ...deals])
+    setDeals((prev) => {
+      const updated = [created, ...prev]
+      try {
+        localStorage.setItem('wouchify_public_deals', JSON.stringify(updated))
+        window.dispatchEvent(new Event('wouchify_deals_updated'))
+      } catch {}
+      return updated
+    })
     setIsAddDealModalOpen(false)
     setNewDeal({
       name: '',

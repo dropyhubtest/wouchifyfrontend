@@ -1,5 +1,13 @@
+const fs = require('fs');
+const path = require('path');
+
+const DATA_DIR = path.join(__dirname, '../data');
+const DATA_FILE = path.join(DATA_DIR, 'dev_store.json');
+
 // In-memory fallback store for development when MongoDB is not connected
 let deals = [
+  { _id: '11', id: 11, name: 'Xiaomi 138 cm (55 inch) FX Pro QLED Ultra HD 4K Smart Fire TV L55MB-FPIN', store: 'Amazon', category: 'Electronics', price: '₹37,998', originalPrice: '₹62,999', discount: '40% OFF', status: 'active', expiry: 'Sep 30, 2026', isBestSelling: true, sectionPlacement: 'both' },
+  { _id: '10', id: 10, name: 'Milton Rapid Electric Kettle 1.8L [Trending]', store: 'Amazon', category: 'Electronics', price: '₹604', originalPrice: '₹1,499', discount: '60% OFF', status: 'active', expiry: 'Sep 28, 2026', isBestSelling: true, sectionPlacement: 'both' },
   { _id: '1', id: 1, name: 'Apple iPhone 16 Pro (128 GB) - Natural Titanium', store: 'Amazon', category: 'Electronics', price: '₹1,19,900', originalPrice: '₹1,34,900', discount: '11% OFF', status: 'active', expiry: 'Sep 25, 2026', isBestSelling: true, sectionPlacement: 'both' },
   { _id: '2', id: 2, name: 'Nike Air Max Men Sneaker Shoes', store: 'Myntra', category: 'Fashion', price: '₹5,499', originalPrice: '₹9,995', discount: '45% OFF', status: 'active', expiry: 'Sep 18, 2026', isBestSelling: false, sectionPlacement: 'favourite' },
   { _id: '3', id: 3, name: 'Sony WH-1000XM5 Wireless Noise Cancelling Headphones', store: 'Flipkart', category: 'Electronics', price: '₹26,990', originalPrice: '₹34,990', discount: '23% OFF', status: 'active', expiry: 'Sep 22, 2026', isBestSelling: true, sectionPlacement: 'best_selling' },
@@ -8,9 +16,41 @@ let deals = [
   { _id: '6', id: 6, name: 'Nykaa Beauty Mega Sale - MAC & Clinique Combos', store: 'Nykaa', category: 'Beauty', price: '₹1,890', originalPrice: '₹3,500', discount: '46% OFF', status: 'active', expiry: 'Sep 30, 2026', isBestSelling: false, sectionPlacement: 'favourite' },
   { _id: '7', id: 7, name: 'Fresh Organic Produce Combo Pack (5kg)', store: 'Big Basket', category: 'Grocery', price: '₹399', originalPrice: '₹650', discount: '38% OFF', status: 'active', expiry: 'Sep 15, 2026', isBestSelling: false, sectionPlacement: 'favourite' },
   { _id: '8', id: 8, name: '10-Minute Grocery Rush Flash Pass', store: 'Zepto', category: 'Grocery', price: '₹99', originalPrice: '₹299', discount: '67% OFF', status: 'active', expiry: 'Sep 14, 2026', isBestSelling: false, sectionPlacement: 'favourite' },
-  { _id: '9', id: 9, name: 'Oval Up Down LED Wall Light 2W [Flash Loot]', store: 'Amazon', category: 'Electronics', price: '₹179', originalPrice: '₹1,899', discount: '91% OFF', status: 'active', expiry: 'Sep 30, 2026', isBestSelling: false, sectionPlacement: 'favourite' },
-  { _id: '10', id: 10, name: 'Milton Rapid Electric Kettle 1.8L [Trending]', store: 'Amazon', category: 'Electronics', price: '₹604', originalPrice: '₹1,499', discount: '60% OFF', status: 'active', expiry: 'Sep 28, 2026', isBestSelling: true, sectionPlacement: 'both' }
+  { _id: '9', id: 9, name: 'Oval Up Down LED Wall Light 2W [Flash Loot]', store: 'Amazon', category: 'Electronics', price: '₹179', originalPrice: '₹1,899', discount: '91% OFF', status: 'active', expiry: 'Sep 30, 2026', isBestSelling: false, sectionPlacement: 'favourite' }
 ];
+
+function saveToDisk() {
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    const payload = { deals, coupons, lootDeals, stores, categories, users, transactions };
+    fs.writeFileSync(DATA_FILE, JSON.stringify(payload, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Failed to save inMemoryStore to disk:', err.message);
+  }
+}
+
+function loadFromDisk() {
+  try {
+    if (fs.existsSync(DATA_FILE)) {
+      const raw = fs.readFileSync(DATA_FILE, 'utf8');
+      const data = JSON.parse(raw);
+      if (Array.isArray(data.deals) && data.deals.length > 0) deals = data.deals;
+      if (Array.isArray(data.coupons) && data.coupons.length > 0) coupons = data.coupons;
+      if (Array.isArray(data.lootDeals) && data.lootDeals.length > 0) lootDeals = data.lootDeals;
+      if (Array.isArray(data.stores) && data.stores.length > 0) stores = data.stores;
+      if (Array.isArray(data.categories) && data.categories.length > 0) categories = data.categories;
+      if (Array.isArray(data.users) && data.users.length > 0) users = data.users;
+      if (Array.isArray(data.transactions) && data.transactions.length > 0) transactions = data.transactions;
+      console.log(`Loaded persisted store from ${DATA_FILE} (${deals.length} deals)`);
+    }
+  } catch (err) {
+    console.error('Failed to load inMemoryStore from disk:', err.message);
+  }
+}
+
+loadFromDisk();
 
 let coupons = [
   { _id: '1', id: 1, code: 'WOUCH50', store: 'Swiggy', discount: '50% OFF', category: 'Food', usageCount: 1420, usageLimit: 2000, status: 'active', expiry: 'Sep 30, 2026' },
@@ -80,27 +120,37 @@ module.exports = {
     return result;
   },
   addDeal: (item) => {
-    const id = Date.now().toString();
-    const created = { _id: id, id: Date.now(), ...item };
+    const id = item.id ? String(item.id) : Date.now().toString();
+    const created = { _id: id, id: item.id || Date.now(), ...item };
+    const existingIdx = deals.findIndex(d => d._id === id || String(d.id) === String(id) || (item.name && d.name.toLowerCase().trim() === item.name.toLowerCase().trim()));
+    if (existingIdx !== -1) {
+      deals[existingIdx] = { ...deals[existingIdx], ...created };
+      saveToDisk();
+      return deals[existingIdx];
+    }
     deals.unshift(created);
+    saveToDisk();
     return created;
   },
   updateDeal: (id, updates) => {
     const idx = deals.findIndex(d => d._id === id || String(d.id) === String(id));
     if (idx === -1) return null;
     deals[idx] = { ...deals[idx], ...updates };
+    saveToDisk();
     return deals[idx];
   },
   deleteDeal: (id) => {
     const idx = deals.findIndex(d => d._id === id || String(d.id) === String(id));
     if (idx === -1) return false;
     deals.splice(idx, 1);
+    saveToDisk();
     return true;
   },
   toggleDealStatus: (id) => {
     const deal = deals.find(d => d._id === id || String(d.id) === String(id));
     if (!deal) return null;
     deal.status = deal.status === 'active' ? 'pending' : 'active';
+    saveToDisk();
     return deal;
   },
 
@@ -110,18 +160,21 @@ module.exports = {
     const id = Date.now().toString();
     const created = { _id: id, id: Date.now(), usageCount: 0, usageLimit: 1000, status: 'active', ...item };
     coupons.unshift(created);
+    saveToDisk();
     return created;
   },
   updateCoupon: (id, updates) => {
     const idx = coupons.findIndex(c => c._id === id || String(c.id) === String(id));
     if (idx === -1) return null;
     coupons[idx] = { ...coupons[idx], ...updates };
+    saveToDisk();
     return coupons[idx];
   },
   deleteCoupon: (id) => {
     const idx = coupons.findIndex(c => c._id === id || String(c.id) === String(id));
     if (idx === -1) return false;
     coupons.splice(idx, 1);
+    saveToDisk();
     return true;
   },
 
@@ -137,24 +190,28 @@ module.exports = {
     const id = `loot-${Date.now()}`;
     const created = { _id: id, id, status: 'active', ...item };
     lootDeals.unshift(created);
+    saveToDisk();
     return created;
   },
   updateLootDeal: (id, updates) => {
     const idx = lootDeals.findIndex(l => l._id === id || l.id === id);
     if (idx === -1) return null;
     lootDeals[idx] = { ...lootDeals[idx], ...updates };
+    saveToDisk();
     return lootDeals[idx];
   },
   deleteLootDeal: (id) => {
     const idx = lootDeals.findIndex(l => l._id === id || l.id === id);
     if (idx === -1) return false;
     lootDeals.splice(idx, 1);
+    saveToDisk();
     return true;
   },
   toggleLootDealStatus: (id) => {
     const loot = lootDeals.find(l => l._id === id || l.id === id);
     if (!loot) return null;
     loot.status = loot.status === 'active' ? 'inactive' : 'active';
+    saveToDisk();
     return loot;
   },
 
@@ -164,18 +221,21 @@ module.exports = {
     const id = Date.now().toString();
     const created = { _id: id, status: 'active', ...item };
     stores.unshift(created);
+    saveToDisk();
     return created;
   },
   updateStore: (id, updates) => {
     const idx = stores.findIndex(s => s._id === id);
     if (idx === -1) return null;
     stores[idx] = { ...stores[idx], ...updates };
+    saveToDisk();
     return stores[idx];
   },
   deleteStore: (id) => {
     const idx = stores.findIndex(s => s._id === id);
     if (idx === -1) return false;
     stores.splice(idx, 1);
+    saveToDisk();
     return true;
   },
 
@@ -185,18 +245,21 @@ module.exports = {
     const id = Date.now().toString();
     const created = { _id: id, dealsCount: 0, ...item };
     categories.push(created);
+    saveToDisk();
     return created;
   },
   updateCategory: (id, updates) => {
     const idx = categories.findIndex(c => c._id === id);
     if (idx === -1) return null;
     categories[idx] = { ...categories[idx], ...updates };
+    saveToDisk();
     return categories[idx];
   },
   deleteCategory: (id) => {
     const idx = categories.findIndex(c => c._id === id);
     if (idx === -1) return false;
     categories.splice(idx, 1);
+    saveToDisk();
     return true;
   },
 
@@ -206,24 +269,28 @@ module.exports = {
     const id = Date.now().toString();
     const created = { _id: id, id: Date.now(), walletBalance: '₹0', totalCashback: '₹0', joinedDate: 'Today', status: 'active', ...item };
     users.unshift(created);
+    saveToDisk();
     return created;
   },
   updateUser: (id, updates) => {
     const idx = users.findIndex(u => u._id === id || String(u.id) === String(id));
     if (idx === -1) return null;
     users[idx] = { ...users[idx], ...updates };
+    saveToDisk();
     return users[idx];
   },
   deleteUser: (id) => {
     const idx = users.findIndex(u => u._id === id || String(u.id) === String(id));
     if (idx === -1) return false;
     users.splice(idx, 1);
+    saveToDisk();
     return true;
   },
   toggleUserStatus: (id, status) => {
     const user = users.find(u => u._id === id || String(u.id) === String(id));
     if (!user) return null;
     user.status = status || (user.status === 'active' ? 'suspended' : 'active');
+    saveToDisk();
     return user;
   },
 
@@ -234,23 +301,28 @@ module.exports = {
     const txnId = `TXN-${num}`;
     const created = { _id: txnId, id: txnId, transactionId: txnId, status: 'Pending', time: 'Just now', ...item };
     transactions.unshift(created);
+    saveToDisk();
     return created;
   },
   approveTransaction: (id) => {
     const txn = transactions.find(t => t._id === id || t.id === id || t.transactionId === id);
     if (!txn) return null;
     txn.status = 'Completed';
+    saveToDisk();
     return txn;
   },
 
   // Seed / Reset
-  seed: () => ({
-    dealsCount: deals.length,
-    couponsCount: coupons.length,
-    lootDealsCount: lootDeals.length,
-    storesCount: stores.length,
-    categoriesCount: categories.length,
-    usersCount: users.length,
-    transactionsCount: transactions.length
-  })
+  seed: () => {
+    saveToDisk();
+    return {
+      dealsCount: deals.length,
+      couponsCount: coupons.length,
+      lootDealsCount: lootDeals.length,
+      storesCount: stores.length,
+      categoriesCount: categories.length,
+      usersCount: users.length,
+      transactionsCount: transactions.length
+    };
+  }
 };
