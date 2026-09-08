@@ -84,6 +84,7 @@
 
 .best-selling-deals__cards-container {
   display: flex;
+  flex-wrap: wrap;
   align-items: stretch;
   gap: 32px;
   margin-top: 20px;

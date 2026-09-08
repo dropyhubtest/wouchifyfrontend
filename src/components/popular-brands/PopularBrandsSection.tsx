@@ -15,7 +15,7 @@ export const PopularBrandsSection: React.FC = () => {
       try {
         const { data } = await fetchPopularBrands()
         // Map the backend data to match the frontend expected structure
-        const formatted = data.map((b: any, index: number) => ({
+        const formatted = data.map((b: any) => ({
           id: b._id,
           name: b.name,
           logo: b.logoUrl || '/images/default-logo.png', // Fallback image if missing

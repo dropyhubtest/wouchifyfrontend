@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import logo from '../../assets/navbar/wouchify-logo.png'
-import searchIcon from '../../assets/navbar/search.svg'
 import cartIcon from '../../assets/navbar/cart.svg'
-import accountIcon from '../../assets/navbar/account.svg'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
 import './Navbar.css'
 
@@ -22,6 +20,18 @@ export const Navbar: React.FC<NavbarProps> = ({ activeNav, transparent = false }
   // Auth state
   const [user, setUser] = useState<{ fullName?: string; email?: string } | null>(null)
   const [showUserMenu, setShowUserMenu] = useState(false)
+
+  // Scroll state for dynamic header transparency on pages with overlapping hero artwork
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20)
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   useEffect(() => {
     const userInfo = localStorage.getItem('userInfo')
@@ -86,7 +96,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeNav, transparent = false }
         />
       )}
       <header
-        className={`wouchify-header ${transparent ? 'wouchify-header--transparent' : ''}`}
+        className={`wouchify-header ${transparent ? 'wouchify-header--transparent' : ''} ${isScrolled ? 'is-scrolled' : ''}`}
         role="banner"
         style={
           {
@@ -167,9 +177,20 @@ export const Navbar: React.FC<NavbarProps> = ({ activeNav, transparent = false }
               aria-label="Search"
               onClick={triggerInputFocus}
             >
-              <span className="search-icon-crop" aria-hidden="true">
-                <img src={searchIcon} alt="" className="search-icon-img" />
-              </span>
+              <svg
+                width="19"
+                height="19"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#1E1E1E"
+                strokeWidth="2.3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
             </button>
           </form>
 
@@ -184,8 +205,8 @@ export const Navbar: React.FC<NavbarProps> = ({ activeNav, transparent = false }
               alt=""
               aria-hidden="true"
               className="action-icon-img"
-              width="31"
-              height="31"
+              width="20"
+              height="20"
             />
           </button>
 

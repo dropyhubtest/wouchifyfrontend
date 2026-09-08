@@ -112,7 +112,7 @@ export const DEALS_FAVOURITE_STORES: DealsFavouriteStoreItem[] = [
     name: 'Big Basket',
     slug: 'bigbasket',
     logo: bigbasketLogo,
-    logoScale: 1.35,
+    logoScale: 0.95,
     discountBadge: '60% off',
     badgeBg: '#D1E8FF',
     href: '/stores#bigbasket',
@@ -132,7 +132,7 @@ export const DEALS_FAVOURITE_STORES: DealsFavouriteStoreItem[] = [
     name: 'Nykaa',
     slug: 'nykaa',
     logo: nykaaLogo,
-    logoScale: 1.35,
+    logoScale: 0.95,
     discountBadge: '10% off',
     badgeBg: '#D1E8FF',
     href: '/stores#nykaa',
@@ -231,7 +231,7 @@ export const DEALS_FAVOURITE_STORES: DealsFavouriteStoreItem[] = [
 ]
 
 /* ==========================================================================
-   Deal Card Items
+   Deal Card Items & Mapping Helpers
    ========================================================================== */
 
 export interface DealCardItem {
@@ -246,6 +246,118 @@ export interface DealCardItem {
   discountPercentage?: string
   ctaText: string
   ctaHref: string
+  dealTag?: string
+  status?: string
+  rating?: string
+  isBestSelling?: boolean
+  sectionPlacement?: 'favourite' | 'best_selling' | 'both'
+}
+
+export const STORE_LOGOS_MAP: Record<string, string> = {
+  amazon: amazonLogo,
+  flipkart: flipkartLogo,
+  myntra: myntraLogo,
+  ajio: ajioLogo,
+  'big basket': bigbasketLogo,
+  bigbasket: bigbasketLogo,
+  nykaa: nykaaLogo,
+  zepto: zeptoLogo,
+  swiggy: swiggyLogo,
+  zomato: zomatoLogo,
+  pepperfry: pepperfryLogo,
+  'reliance digital': relianceDigitalLogo,
+  'tata cliq': tataCliqLogo,
+  meesho: meeshoLogo,
+  jiomart: jiomartLogo,
+  snapdeal: snapdealLogo,
+  firstcry: firstcryLogo,
+  zivame: zivameLogo,
+}
+
+export function getStoreLogo(storeName?: string): string {
+  if (!storeName) return amazonLogo
+  const key = storeName.toLowerCase().trim()
+  return STORE_LOGOS_MAP[key] || amazonLogo
+}
+
+export function convertGoogleDriveUrl(url: string): string {
+  if (!url) return ''
+  const trimmed = url.trim()
+  // Match /file/d/<ID>
+  const fileDMatch = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)
+  if (fileDMatch && fileDMatch[1]) {
+    return `https://lh3.googleusercontent.com/d/${fileDMatch[1]}`
+  }
+  // Match id=<ID>
+  const idMatch = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/)
+  if (idMatch && idMatch[1]) {
+    return `https://lh3.googleusercontent.com/d/${idMatch[1]}`
+  }
+  return trimmed
+}
+
+export const DEAL_PRODUCT_PRESETS = [
+  { label: 'Xiaomi 55" 4K Smart TV', image: deal1 },
+  { label: 'Milton 1.8L Electric Kettle', image: deal2 },
+  { label: 'Smartwatch / Fitness Band', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80' },
+  { label: 'Wireless Noise Cancelling Headphones', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80' },
+  { label: 'Running Sneaker Shoes', image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&auto=format&fit=crop&q=80' },
+  { label: 'Organic Groceries / Food Combo', image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&auto=format&fit=crop&q=80' },
+  { label: 'Beauty & Skincare Gift Box', image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&auto=format&fit=crop&q=80' },
+  { label: 'Smart Laptop / Tablet', image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&auto=format&fit=crop&q=80' }
+]
+
+export function normalizeDealToCard(deal: any, index: number = 0): DealCardItem {
+  const title = deal.name || deal.title || 'Special Promotional Deal'
+  const store = deal.store || 'Amazon'
+  const category = (deal.category || 'Electronics').toUpperCase()
+
+  // Clean prices (keep numbers only for DealCard component layout)
+  let rawPrice = String(deal.price || '999').replace(/[^0-9.]/g, '')
+  if (!rawPrice) rawPrice = '999'
+
+  let rawOrig = deal.originalPrice ? String(deal.originalPrice).replace(/[^0-9.]/g, '') : ''
+
+  // Fallback image
+  let prodImg = deal.productImage
+  if (!prodImg) {
+    if (index % 2 === 0) prodImg = deal1
+    else prodImg = deal2
+  } else {
+    prodImg = convertGoogleDriveUrl(prodImg)
+  }
+
+  // Calculate discount if missing
+  let discount = deal.discount || deal.discountPercentage
+  if (!discount && rawOrig && Number(rawOrig) > Number(rawPrice)) {
+    discount = `${Math.round(((Number(rawOrig) - Number(rawPrice)) / Number(rawOrig)) * 100)}% OFF`
+  }
+
+  const isBestSelling = Boolean(
+    deal.isBestSelling ||
+    deal.sectionPlacement === 'best_selling' ||
+    deal.sectionPlacement === 'both' ||
+    (deal.dealTag && deal.dealTag.toLowerCase().includes('best seller'))
+  )
+
+  return {
+    id: String(deal._id || deal.id || `deal-${index}`),
+    title,
+    category,
+    store,
+    storeLogo: deal.storeLogo || getStoreLogo(store),
+    productImage: prodImg,
+    price: rawPrice,
+    originalPrice: rawOrig || undefined,
+    discountPercentage: discount || undefined,
+    ctaText: deal.ctaText || 'GRAB DEAL',
+    ctaHref: deal.ctaHref || `/stores#${store.toLowerCase().replace(/\s+/g, '-')}`,
+    dealTag: deal.dealTag || 'Deal',
+    status: deal.status || 'active',
+    rating: deal.rating || '4.8',
+    isBestSelling,
+    sectionPlacement: deal.sectionPlacement || (isBestSelling ? 'best_selling' : 'favourite')
+  }
 }
 
 export const DEALS_CARD_ITEMS: DealCardItem[] = [

@@ -13,6 +13,13 @@
   gap: 6px;
   box-sizing: border-box;
   text-decoration: none;
+  cursor: pointer;
+  border-radius: 20px;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.deal-card:hover {
+  transform: translateY(-8px);
 }
 
 .deal-card__image-container {
@@ -27,6 +34,11 @@
   border-radius: 20px 20px 0 0;
   flex-shrink: 0;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.10);
+  transition: box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.deal-card:hover .deal-card__image-container {
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.20);
 }
 
 .deal-card__image-container::after {
@@ -44,6 +56,11 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.deal-card:hover .deal-card__image {
+  transform: scale(1.06);
 }
 
 .deal-card__content {
@@ -55,10 +72,18 @@
   flex-direction: column;
   flex: 1;
   box-sizing: border-box;
+  transition: box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow:
     inset 0 6px 8px -2px rgba(0, 0, 0, 0.18),          /* top INNER */
     0 8px 12px -3px rgba(0, 0, 0, 0.22),                /* bottom OUTER (deepest) */
     0 2px 6px -2px rgba(0, 0, 0, 0.08);                 /* left/right OUTER (lighter) */
+}
+
+.deal-card:hover .deal-card__content {
+  box-shadow:
+    inset 0 6px 8px -2px rgba(0, 0, 0, 0.14),
+    0 20px 36px -4px rgba(0, 0, 0, 0.26),
+    0 8px 16px -2px rgba(0, 0, 0, 0.12);
 }
 
 /* Store Row */
@@ -140,6 +165,12 @@
   text-transform: uppercase;
   margin-bottom: 10px;
   letter-spacing: 0.5px;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease;
+}
+
+.deal-card:hover .deal-card__category {
+  transform: translateX(4px);
+  background-color: #242A70;
 }
 
 /* Product Title */
@@ -155,6 +186,11 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   height: 42px;
+  transition: color 0.2s ease;
+}
+
+.deal-card:hover .deal-card__title {
+  color: #1E293B;
 }
 
 /* Price Row */
@@ -200,11 +236,19 @@
   justify-content: center;
   text-decoration: none;
   margin-top: auto;
-  transition: background-color 0.15s ease, transform 0.15s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.deal-card:hover .deal-card__grab-btn {
+  background: #C4141A;
+  box-shadow: 0 6px 18px rgba(227, 30, 37, 0.45);
+  transform: translateY(-2px);
 }
 
 .deal-card__grab-btn:hover {
-  background: #C4141A;
+  background: #B31015;
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 8px 22px rgba(227, 30, 37, 0.55);
 }
 
 /* ==========================================================================
@@ -218,6 +262,14 @@
   align-items: stretch;
   gap: 6px;
   box-sizing: border-box;
+  text-decoration: none;
+  cursor: pointer;
+  border-radius: 20px;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.deal-card--horizontal:hover {
+  transform: translateY(-7px);
 }
 
 .deal-card__image-container--horizontal {
@@ -225,6 +277,15 @@
   height: 265px;
   flex-shrink: 0;
   border-radius: 20px 0 0 20px;
+  transition: box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.deal-card--horizontal:hover .deal-card__image-container--horizontal {
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.20);
+}
+
+.deal-card--horizontal:hover .deal-card__image {
+  transform: scale(1.05);
 }
 
 .deal-card__content--horizontal {
@@ -238,6 +299,14 @@
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  transition: box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.deal-card--horizontal:hover .deal-card__content--horizontal {
+  box-shadow:
+    inset 0 6px 8px -2px rgba(0, 0, 0, 0.14),
+    0 18px 32px -4px rgba(0, 0, 0, 0.24),
+    0 6px 14px -2px rgba(0, 0, 0, 0.10);
 }
 
 .deal-card__content--horizontal .deal-card__store-row {
@@ -302,4 +371,17 @@
   font-size: 15px;
   font-weight: 700;
   margin-top: auto;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.deal-card--horizontal:hover .deal-card__grab-btn {
+  background: #C4141A;
+  box-shadow: 0 6px 18px rgba(227, 30, 37, 0.45);
+  transform: translateY(-2px);
+}
+
+.deal-card__content--horizontal .deal-card__grab-btn:hover {
+  background: #B31015;
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 8px 22px rgba(227, 30, 37, 0.55);
 }

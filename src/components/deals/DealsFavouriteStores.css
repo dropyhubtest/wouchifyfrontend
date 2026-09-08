@@ -189,6 +189,75 @@
   line-height: 1;
 }
 
+.deals-favourite__filter-pill-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.deals-favourite__filter-pill--active {
+  box-shadow:
+    0px 0px 0px 2px #2F368C,
+    0px 3px 6px rgba(47, 54, 140, 0.2),
+    inset 0px 2px 3px rgba(0, 0, 0, 0.18) !important;
+}
+
+.deals-favourite__filter-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 220px;
+  background: #FFFFFF;
+  border-radius: 14px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.16), 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 8px;
+  z-index: 100;
+  list-style: none;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  animation: filterMenuDrop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes filterMenuDrop {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+.deals-favourite__filter-menu-item {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 14px;
+  font-weight: 500;
+  color: #1E293B;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.deals-favourite__filter-menu-item:hover {
+  background: #F1F3FF;
+  color: #2F368C;
+}
+
+.deals-favourite__filter-menu-item.active {
+  background: #2F368C;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
 .deals-favourite__filter-chevron {
   width: 15px;
   height: 9px;
@@ -256,11 +325,19 @@
 }
 
 .deals-favourite__store-tile:hover {
-  transform: translateY(-2px);
+  transform: translateY(-5px) scale(1.02);
   box-shadow:
-    inset 0 4px 6px -1px rgba(0, 0, 0, 0.20),
-    0 12px 24px -2px rgba(0, 0, 0, 0.22),
-    0 4px 8px -1px rgba(0, 0, 0, 0.10);
+    inset 0 4px 6px -1px rgba(0, 0, 0, 0.18),
+    0 16px 30px -2px rgba(0, 0, 0, 0.26),
+    0 6px 14px -1px rgba(0, 0, 0, 0.12);
+}
+
+.deals-favourite__store-tile:hover .deals-favourite__store-logo {
+  transform: scale(1.04);
+}
+
+.deals-favourite__store-logo {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Perfect Circle 3D Silver Discount Badge (Matching media_1788242343582.png) */
@@ -283,6 +360,12 @@
   box-sizing: border-box;
   pointer-events: none;
   padding-top: 1px;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.deals-favourite__store-tile:hover .deals-favourite__store-badge {
+  transform: scale(1.08) rotate(-4deg);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.32);
 }
 
 .deals-favourite__store-badge-percent {
@@ -330,11 +413,13 @@
 }
 
 .deals-favourite__store-logo--nykaa {
-  transform: scale(1.36);
+  max-height: 40px;
+  max-width: 82%;
 }
 
 .deals-favourite__store-logo--bigbasket {
-  transform: scale(1.32);
+  max-height: 42px;
+  max-width: 82%;
 }
 
 /* ==========================================================================
@@ -344,6 +429,7 @@
 .deals-favourite__grid {
   display: flex;
   align-items: stretch;
+  flex-wrap: wrap;
   gap: 36px;
   margin-top: 44px;
 }

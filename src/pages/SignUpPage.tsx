@@ -33,7 +33,7 @@ export const SignUpPage: React.FC = () => {
 
     try {
       setLoading(true)
-      const { data } = await register({ fullName, email, password })
+      await register({ fullName, email, password })
       setRegisteredName(fullName)
       setShowSuccessModal(true)
     } catch (err: any) {
