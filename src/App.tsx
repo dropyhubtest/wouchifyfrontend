@@ -54,6 +54,8 @@ import { BrandPage } from './pages/BrandPage'
 import { StaffLoginPage } from './pages/admin/StaffLoginPage'
 import { StaffDashboardPage } from './pages/admin/StaffDashboardPage'
 import { ExecutiveDashboardPage } from './pages/admin/executive/ExecutiveDashboardPage'
+import { ExecutiveDealsPage } from './pages/admin/executive/ExecutiveDealsPage'
+import { ExecutiveLootDealsPage } from './pages/admin/executive/ExecutiveLootDealsPage'
 import { WelcomeToast } from './components/auth/WelcomeToast'
 
 function resolveCurrentPath(): string {
@@ -145,11 +147,8 @@ function resolveCurrentPath(): string {
     pathname === '/admin/login' ||
     pathname === '/admin/dashboard' ||
     pathname === '/operational-manager/login' ||
-    pathname === '/executive/login' ||
     pathname === '/operational-manager/dashboard' ||
-    pathname === '/executive/login' ||
-    pathname === '/operational-manager/dashboard' ||
-    pathname === '/executive/dashboard'
+    pathname.startsWith('/executive/')
   ) {
     return pathname
   }
@@ -511,7 +510,8 @@ export default function App() {
 
 
     if (isExecutiveRoute) {
-      // For now, if it's ANY executive route, show the ExecutiveDashboardPage
+      if (currentPath === '/executive/deals') return <ExecutiveDealsPage />
+      if (currentPath === '/executive/loot-deals') return <ExecutiveLootDealsPage />
       return <ExecutiveDashboardPage />
     }
 
