@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { Navbar } from '../components/layout/Navbar'
+import { MobileHeader } from '../components/mobile/MobileHeader'
 import { FooterSection } from '../components/footer/FooterSection'
 import { adminApi } from '../services/adminApi'
+import { useMediaQuery } from '../hooks/useMediaQuery'
 import './WalletPage.css'
 
 interface Transaction {
@@ -21,6 +23,7 @@ const DEFAULT_TRANSACTIONS: Transaction[] = [
 ]
 
 export const WalletPage: React.FC = () => {
+  const isMobile = useMediaQuery('(max-width: 768px)')
   const [availableBalance, setAvailableBalance] = useState(1250)
   const [pendingBalance, setPendingBalance] = useState(350)
   const [totalEarned, setTotalEarned] = useState(4500)
@@ -99,7 +102,7 @@ export const WalletPage: React.FC = () => {
     <main className="wallet-page">
       {/* Clean Navbar Wrapper - No unnecessary bar beneath */}
       <div className="wallet-page__navbar-wrapper">
-        <Navbar />
+        {isMobile ? <MobileHeader /> : <Navbar />}
       </div>
 
       <div className="wallet-container">

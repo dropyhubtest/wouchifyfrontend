@@ -15,8 +15,8 @@ export const WelcomeToast: React.FC = () => {
       setShow(true)
       localStorage.removeItem('just_logged_in')
 
-      // Auto-hide after 4 seconds
-      const timer = setTimeout(() => setShow(false), 4000)
+      // Auto-hide after 5 seconds
+      const timer = setTimeout(() => setShow(false), 5000)
       return () => clearTimeout(timer)
     }
   }, [])

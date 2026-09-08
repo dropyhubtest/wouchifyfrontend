@@ -1,18 +1,21 @@
 import React from 'react'
-import { Navbar } from '../components/layout'
+import { Navbar } from '../components/layout/Navbar'
+import { MobileHeader } from '../components/mobile/MobileHeader'
 import { FooterSection } from '../components/footer'
 import { useDesktopScale } from '../hooks/useDesktopScale'
+import { useMediaQuery } from '../hooks/useMediaQuery'
 import './NotFoundPage.css'
 
 export const NotFoundPage: React.FC = () => {
   const scale = useDesktopScale()
+  const isMobile = useMediaQuery('(max-width: 768px)')
 
   return (
     <div
       className="not-found-page"
       style={{ '--page-scale': scale } as React.CSSProperties}
     >
-      <Navbar />
+      {isMobile ? <MobileHeader /> : <Navbar />}
 
       <main className="not-found-page__content">
         <div className="not-found-page__inner" style={{ transform: `scale(${scale})`, transformOrigin: 'top center' }}>

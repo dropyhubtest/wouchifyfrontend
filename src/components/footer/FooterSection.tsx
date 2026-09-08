@@ -218,6 +218,64 @@ export const FooterSection: React.FC = () => {
           )
         })}
       </div>
+
+      {/* ---- Mobile-only footer (replaces the canvas on small screens) ---- */}
+      <div className="footer-mobile">
+        <div className="footer-mobile__brand">
+          <img src={wouchifyLogo} alt="Wouchify" className="footer-mobile__logo" />
+          <p className="footer-mobile__desc">
+            India's #1 free deal discovery platform. Verified coupons, loot deals, and rewards — zero cost.
+          </p>
+          <div className="footer-mobile__pills">
+            <a href="/deals" className="footer-mobile__pill">Verified Deals</a>
+            <a href="/loot-deals" className="footer-mobile__pill">Instant Deals</a>
+          </div>
+        </div>
+
+        <div className="footer-mobile__columns">
+          <div>
+            <p className="footer-mobile__col-title">Explore</p>
+            <ul className="footer-mobile__col-links">
+              {EXPLORE_LINKS.map(l => <li key={l.label}><a href={l.href}>{l.label}</a></li>)}
+            </ul>
+          </div>
+          <div>
+            <p className="footer-mobile__col-title">Company</p>
+            <ul className="footer-mobile__col-links">
+              {COMPANY_LINKS.map(l => <li key={l.label}><a href={l.href}>{l.label}</a></li>)}
+            </ul>
+          </div>
+          <div>
+            <p className="footer-mobile__col-title">Legal</p>
+            <ul className="footer-mobile__col-links">
+              {LEGAL_LINKS.map(l => <li key={l.label}><a href={l.href}>{l.label}</a></li>)}
+            </ul>
+          </div>
+          <div>
+            <p className="footer-mobile__col-title">Stay Updated</p>
+            <ul className="footer-mobile__col-links">
+              <li><a href="#">Join our Telegram</a></li>
+              <li><a href="#">Follow on Instagram</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="footer-mobile__social">
+          <span className="footer-mobile__social-label">Follow us:</span>
+          {SOCIAL_LINKS.map(s => (
+            <a key={s.id} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.name}>
+              <img src={s.icon} alt={s.name} className="footer-mobile__social-icon" />
+            </a>
+          ))}
+        </div>
+
+        <div className="footer-mobile__bottom">
+          <p className="footer-mobile__copyright">© 2026 WOUCHIFY. All rights reserved. Made with ❤️ in India.</p>
+          <div className="footer-mobile__bottom-links">
+            {BOTTOM_LEGAL_LINKS.map(l => <a key={l.label} href={l.href}>{l.label}</a>)}
+          </div>
+        </div>
+      </div>
     </footer>
   )
 }

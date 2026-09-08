@@ -29,11 +29,17 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3001', 'http://localhost:3000', 'http://127.0.0.1:3001']
+  origin: function (origin, callback) {
+    // Allow localhost and Vercel connections
+    callback(null, true);
+  },
+  credentials: true
 }));
 app.use(express.json());
 
 // Routes
+const authRoutes = require('./routes/auth');
+app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminAuthRoutes);
 app.use('/api/deals', dealRoutes);
 app.use('/api/coupons', couponRoutes);
