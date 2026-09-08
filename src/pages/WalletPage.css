@@ -20,6 +20,12 @@
   pointer-events: none;
 }
 
+@media (max-width: 768px) {
+  .wallet-page__header-bg {
+    height: 64px;
+  }
+}
+
 .wallet-page__navbar-wrapper {
   position: relative;
   z-index: 100;

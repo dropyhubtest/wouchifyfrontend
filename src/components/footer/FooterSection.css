@@ -480,3 +480,165 @@
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+/* ==========================================================================
+   6. MOBILE FOOTER OVERRIDE (≤ 768px)
+   Bypasses the 1920px canvas entirely and renders a proper mobile layout
+   ========================================================================== */
+@media (max-width: 768px) {
+  .footer-section {
+    height: auto !important;
+    display: block;
+    background: #fff;
+    border-top: 2px dashed rgba(227, 30, 37, 0.45);
+  }
+
+  /* Hide the fixed-position canvas completely on mobile */
+  .footer-canvas {
+    display: none !important;
+  }
+
+  /* Inject a mobile-only footer layout as a pseudo-element workaround via
+     a separate mobile footer block rendered via CSS on .footer-section itself */
+}
+
+/* Mobile Footer Block — shown only on mobile, hidden on desktop */
+.footer-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .footer-mobile {
+    display: block;
+    background: #ffffff;
+    padding: 28px 20px 16px;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .footer-mobile__brand {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  .footer-mobile__logo {
+    width: 130px;
+    height: auto;
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .footer-mobile__desc {
+    margin: 0 0 12px;
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.6;
+  }
+
+  .footer-mobile__pills {
+    display: flex;
+    gap: 10px;
+  }
+
+  .footer-mobile__pill {
+    height: 32px;
+    padding: 0 14px;
+    border-radius: 999px;
+    background-color: #E31E25;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+  }
+
+  /* Columns */
+  .footer-mobile__columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 16px;
+    padding: 20px 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  .footer-mobile__col-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 10px;
+  }
+
+  .footer-mobile__col-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .footer-mobile__col-links a {
+    font-size: 13px;
+    color: #6b7280;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.15s;
+  }
+
+  .footer-mobile__col-links a:hover { color: #E31E25; }
+
+  /* Social */
+  .footer-mobile__social {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  .footer-mobile__social-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111827;
+    margin-right: 4px;
+  }
+
+  .footer-mobile__social-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: contain;
+    transition: transform 0.2s;
+  }
+
+  .footer-mobile__social-icon:hover { transform: scale(1.1); }
+
+  /* Bottom bar */
+  .footer-mobile__bottom {
+    padding: 16px 0 0;
+    text-align: center;
+  }
+
+  .footer-mobile__copyright {
+    font-size: 11px;
+    color: #9ca3af;
+    margin: 0 0 10px;
+  }
+
+  .footer-mobile__bottom-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 16px;
+  }
+
+  .footer-mobile__bottom-links a {
+    font-size: 11px;
+    color: #6b7280;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .footer-mobile__bottom-links a:hover { color: #E31E25; }
+}

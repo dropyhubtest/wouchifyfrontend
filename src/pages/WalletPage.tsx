@@ -1,9 +1,13 @@
 import React from 'react'
 import { Navbar } from '../components/layout/Navbar'
+import { MobileHeader } from '../components/mobile/MobileHeader'
 import { FooterSection } from '../components/footer/FooterSection'
+import { useMediaQuery } from '../hooks/useMediaQuery'
 import './WalletPage.css'
 
 export const WalletPage: React.FC = () => {
+  const isMobile = useMediaQuery('(max-width: 768px)')
+
   // Mock Data
   const availableBalance = 1250
   const pendingBalance = 350
@@ -20,7 +24,7 @@ export const WalletPage: React.FC = () => {
     <main className="wallet-page">
       <div className="wallet-page__header-bg" />
       <div className="wallet-page__navbar-wrapper">
-        <Navbar />
+        {isMobile ? <MobileHeader /> : <Navbar />}
       </div>
 
       <div className="wallet-container">

@@ -1,9 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import logo from '../../assets/navbar/wouchify-logo.png'
 import searchIcon from '../../assets/navbar/search.svg'
 import cartIcon from '../../assets/navbar/cart.svg'
 import accountIcon from '../../assets/navbar/account.svg'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
+import { SearchOverlay } from '../search/SearchOverlay'
 import './Navbar.css'
 
 import { NAV_LINKS, resolveActiveNav } from '../../data/navigation'
@@ -14,19 +15,22 @@ export interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ activeNav, transparent = false }) => {
-  const [searchValue, setSearchValue] = useState('')
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false)
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
   const headerScale = useDesktopScale()
-  const inputRef = useRef<HTMLInputElement>(null)
 
   // Auth state
-  const [user, setUser] = useState<{ fullName?: string; email?: string } | null>(null)
+  const [user, setUser] = useState<{ name?: string; fullName?: string; email?: string } | null>(null)
   const [showUserMenu, setShowUserMenu] = useState(false)
 
   useEffect(() => {
     const userInfo = localStorage.getItem('userInfo')
     if (userInfo) {
-      try { setUser(JSON.parse(userInfo)) } catch {}
+      try {
+        const parsed = JSON.parse(userInfo)
+        // Handle both old format {token, user:{...}} and new flat format {name, email}
+        const userData = parsed?.user || parsed
+        setUser(userData)
+      } catch {}
     }
   }, [])
 
@@ -46,36 +50,8 @@ export const Navbar: React.FC<NavbarProps> = ({ activeNav, transparent = false }
       : parts[0][0].toUpperCase()
   }
 
-  const displayName = user?.fullName || user?.email?.split('@')[0] || 'User'
+  const displayName = user?.name || user?.fullName || user?.email?.split('@')[0] || 'User'
 
-  const handleSearchFocus = () => {
-    setIsSearchExpanded(true)
-  }
-
-  const handleSearchBlur = () => {
-    if (!searchValue.trim()) {
-      setIsSearchExpanded(false)
-    }
-  }
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchValue.trim()) {
-      console.log('Searching for:', searchValue)
-    }
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Escape') {
-      setIsSearchExpanded(false)
-      inputRef.current?.blur()
-    }
-  }
-
-  const triggerInputFocus = () => {
-    setIsSearchExpanded(true)
-    inputRef.current?.focus()
-  }
 
   return (
     <>
@@ -134,44 +110,17 @@ export const Navbar: React.FC<NavbarProps> = ({ activeNav, transparent = false }
 
         {/* Header Actions: Search, Cart, Account */}
         <div className="navbar-actions">
-          {/* Search Component: left: 1440px, top: 38px, 235 x 58 */}
-          <form
-            role="search"
-            className={`search-form ${isSearchExpanded ? 'expanded' : ''}`}
-            onSubmit={handleSearchSubmit}
-            onMouseEnter={() => setIsSearchExpanded(true)}
-            onMouseLeave={() => {
-              if (!inputRef.current || document.activeElement !== inputRef.current) {
-                if (!searchValue.trim()) {
-                  setIsSearchExpanded(false)
-                }
-              }
-            }}
+          {/* Search Button — opens overlay */}
+          <button
+            type="button"
+            className="action-btn search-overlay-trigger"
+            aria-label="Open Search"
+            onClick={() => setIsSearchOpen(true)}
           >
-            <input
-              ref={inputRef}
-              type="search"
-              className="search-input"
-              placeholder="Search deals, stores..."
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              onFocus={handleSearchFocus}
-              onBlur={handleSearchBlur}
-              onKeyDown={handleKeyDown}
-              aria-label="Search site"
-              tabIndex={0}
-            />
-            <button
-              type="button"
-              className="search-action-btn"
-              aria-label="Search"
-              onClick={triggerInputFocus}
-            >
-              <span className="search-icon-crop" aria-hidden="true">
-                <img src={searchIcon} alt="" className="search-icon-img" />
-              </span>
-            </button>
-          </form>
+            <span className="search-icon-crop" aria-hidden="true">
+              <img src={searchIcon} alt="" className="search-icon-img" />
+            </span>
+          </button>
 
           {/* Cart Button: left: 1707px, top: 48px, 31 x 31 */}
           <button
@@ -219,7 +168,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeNav, transparent = false }
                 onClick={() => setShowUserMenu((v) => !v)}
                 aria-label="Account Menu"
               >
-                <div className="navbar-avatar">{getInitials(user.fullName)}</div>
+                <div className="navbar-avatar">{getInitials(user.name || user.fullName || user.email?.split('@')[0])}</div>
                 <span className="navbar-user-name">{displayName}</span>
                 <svg className="navbar-chevron" viewBox="0 0 10 6" fill="none">
                   <path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
@@ -228,12 +177,18 @@ export const Navbar: React.FC<NavbarProps> = ({ activeNav, transparent = false }
               {showUserMenu && (
                 <div className="navbar-user-menu">
                   <div className="navbar-user-menu__header">
-                    <div className="navbar-avatar navbar-avatar--lg">{getInitials(user.fullName)}</div>
+                    <div className="navbar-avatar navbar-avatar--lg">{getInitials(user.name || user.fullName || user.email?.split('@')[0])}</div>
                     <div>
                       <p className="navbar-user-menu__name">{displayName}</p>
                       <p className="navbar-user-menu__email">{user.email}</p>
                     </div>
                   </div>
+                  <div className="navbar-user-menu__divider" />
+                  <a className="navbar-user-menu__link" href="/profile">👤 My Profile</a>
+                  <a className="navbar-user-menu__link" href="/orders">🛍️ My Orders</a>
+                  <a className="navbar-user-menu__link" href="/wallet">💰 My Wallet</a>
+                  <a className="navbar-user-menu__link" href="/notifications">🔔 Notifications</a>
+                  <a className="navbar-user-menu__link" href="/refer">🎁 Refer &amp; Earn</a>
                   <div className="navbar-user-menu__divider" />
                   <button className="navbar-user-menu__logout" onClick={handleLogout}>
                     Sign Out
@@ -249,6 +204,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeNav, transparent = false }
         </div>
       </div>
     </header>
+    <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} headerScale={headerScale} />
     </>
   )
 }

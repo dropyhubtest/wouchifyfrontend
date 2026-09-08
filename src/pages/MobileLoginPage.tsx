@@ -24,6 +24,8 @@ export const MobileLoginPage: React.FC = () => {
         const { data } = await login({ email: emailOrPhone, password })
         if (data.token) {
           localStorage.setItem('token', data.token)
+          localStorage.setItem('userInfo', JSON.stringify(data.user))
+          localStorage.setItem('just_logged_in', 'true')
         }
         window.location.href = '/'
       } catch (err: any) {
@@ -40,6 +42,8 @@ export const MobileLoginPage: React.FC = () => {
       const { data } = await googleLoginApi(credentialResponse.credential, true)
       if (data.token) {
         localStorage.setItem('token', data.token)
+        localStorage.setItem('userInfo', JSON.stringify(data.user))
+        localStorage.setItem('just_logged_in', 'true')
       }
       window.location.href = '/'
     } catch (err: any) {

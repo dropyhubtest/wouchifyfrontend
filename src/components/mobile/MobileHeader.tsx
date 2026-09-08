@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import mobileWouchifyLogo from '../../assets/mobile/wouchify-mobile-cropped-v2.png'
 import favoriteIcon from '../../assets/mobile/navigation/favorite.svg'
+import cartIcon from '../../assets/navbar/cart.svg'
+import accountIcon from '../../assets/navbar/account.svg'
 import { NAV_LINKS, resolveActiveNav } from '../../data/navigation'
+import { SearchOverlay } from '../search/SearchOverlay'
 import './MobileHeader.css'
 
 export interface MobileHeaderProps {
@@ -10,7 +13,22 @@ export interface MobileHeaderProps {
 
 export const MobileHeader: React.FC<MobileHeaderProps> = ({ activeNav }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [showUserMenu, setShowUserMenu] = useState(false)
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [userInfo, setUserInfo] = useState<{ name?: string; fullName?: string; email?: string } | null>(null)
   const currentActiveNav = resolveActiveNav(activeNav)
+
+  useEffect(() => {
+    const raw = localStorage.getItem('userInfo')
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw)
+        // Handle both old format {token, user:{...}} and new flat format {name, email}
+        const userData = parsed?.user || parsed
+        setUserInfo(userData)
+      } catch { /* ignore */ }
+    }
+  }, [])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -23,87 +41,179 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ activeNav }) => {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isMenuOpen])
 
+  const getInitial = () => {
+    if (userInfo?.fullName) return userInfo.fullName.charAt(0).toUpperCase()
+    if (userInfo?.name) return userInfo.name.charAt(0).toUpperCase()
+    if (userInfo?.email) return userInfo.email.charAt(0).toUpperCase()
+    return null
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('userInfo')
+    localStorage.removeItem('just_logged_in')
+    window.location.href = '/login'
+  }
+
+  const displayName = userInfo?.fullName || userInfo?.name || userInfo?.email?.split('@')[0] || 'User'
+
   return (
     <>
       <div aria-hidden="true" style={{ height: '64px', width: '100%', flexShrink: 0 }} />
       <header className="mobile-header">
-      <button
-        type="button"
-        className="mobile-header__menu"
-        aria-label="Open navigation menu"
-        aria-expanded={isMenuOpen}
-        aria-controls="mobile-nav-drawer"
-        onClick={() => setIsMenuOpen((prev) => !prev)}
-      >
-        <span />
-        <span />
-        <span />
-      </button>
+        <button
+          type="button"
+          className="mobile-header__menu"
+          aria-label="Open navigation menu"
+          aria-expanded={isMenuOpen}
+          aria-controls="mobile-nav-drawer"
+          onClick={() => setIsMenuOpen((prev) => !prev)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
 
-      <a href="/" aria-label="Wouchify Home">
-        <img
-          className="mobile-header__logo"
-          src={mobileWouchifyLogo}
-          alt="Wouchify"
-          width="164"
-          height="48"
-        />
-      </a>
-
-      <a
-        className="mobile-header__favorite"
-        href="/favorites"
-        aria-label="View favourites"
-      >
-        <img src={favoriteIcon} alt="" aria-hidden="true" />
-      </a>
-
-      {isMenuOpen && (
-        <>
-          <div
-            className="mobile-drawer-backdrop"
-            onClick={() => setIsMenuOpen(false)}
-            aria-hidden="true"
+        <a href="/" aria-label="Wouchify Home">
+          <img
+            className="mobile-header__logo"
+            src={mobileWouchifyLogo}
+            alt="Wouchify"
+            width="130"
+            height="38"
           />
-          <nav
-            id="mobile-nav-drawer"
-            className="mobile-nav-drawer"
-            aria-label="Mobile Navigation"
+        </a>
+
+        {/* Right-side action icons */}
+        <div className="mobile-header__actions">
+          {/* Search icon */}
+          <button
+            type="button"
+            className="mobile-header__action-btn"
+            aria-label="Search"
+            onClick={() => setIsSearchOpen(true)}
           >
-            <div className="mobile-drawer-header">
-              <span className="mobile-drawer-title">Navigation</span>
+            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#2A3189" strokeWidth="2" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+            </svg>
+          </button>
+
+          <a className="mobile-header__action-btn" href="/favorites" aria-label="View favourites">
+            <img src={favoriteIcon} alt="" aria-hidden="true" />
+          </a>
+
+          <a className="mobile-header__action-btn" href="/cart" aria-label="View cart">
+            <img src={cartIcon} alt="" aria-hidden="true" />
+          </a>
+
+          <a className="mobile-header__action-btn mobile-header__wallet" href="/wallet" aria-label="My Wallet">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="2" y="6" width="20" height="14" rx="2" stroke="#2A3189" strokeWidth="1.8" fill="none"/>
+              <path d="M2 10h20" stroke="#2A3189" strokeWidth="1.8"/>
+              <path d="M16 10V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v4" stroke="#2A3189" strokeWidth="1.8"/>
+              <circle cx="17" cy="16" r="1.5" fill="#2A3189"/>
+            </svg>
+          </a>
+
+          {userInfo ? (
+            <div className="mobile-header__user-wrap" style={{ position: 'relative' }}>
               <button
                 type="button"
-                className="mobile-drawer-close-btn"
-                aria-label="Close navigation menu"
-                onClick={() => setIsMenuOpen(false)}
+                className="mobile-header__action-btn mobile-header__avatar"
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                aria-label="My Profile"
+                style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer' }}
               >
-                &times;
+                {getInitial() ? (
+                  <span className="mobile-header__avatar-initial">{getInitial()}</span>
+                ) : (
+                  <img src={accountIcon} alt="" aria-hidden="true" />
+                )}
               </button>
+
+              {showUserMenu && (
+                <div className="mobile-header__user-menu">
+                  <div className="mobile-header__user-menu-header">
+                    <div className="mobile-header__avatar-initial mobile-header__avatar-initial--lg">{getInitial()}</div>
+                    <div>
+                      <p className="mobile-header__user-menu-name">{displayName}</p>
+                      <p className="mobile-header__user-menu-email">{userInfo.email}</p>
+                    </div>
+                  </div>
+                  <div className="mobile-header__user-menu-divider" />
+                  <a className="mobile-header__user-menu-link" href="/profile">👤 My Profile</a>
+                  <a className="mobile-header__user-menu-link" href="/orders">🛍️ My Orders</a>
+                  <a className="mobile-header__user-menu-link" href="/wallet">💰 My Wallet</a>
+                  <a className="mobile-header__user-menu-link" href="/notifications">🔔 Notifications</a>
+                  <a className="mobile-header__user-menu-link" href="/refer">🎁 Refer &amp; Earn</a>
+                  <div className="mobile-header__user-menu-divider" />
+                  <button className="mobile-header__user-menu-logout" onClick={handleLogout}>
+                    Sign Out
+                  </button>
+                </div>
+              )}
             </div>
-            <ul className="mobile-drawer-list">
-              {NAV_LINKS.map((item) => {
-                const isActive = currentActiveNav === item.id.toLowerCase()
-                return (
-                  <li key={item.id} className="mobile-drawer-item">
-                    <a
-                      href={item.href}
-                      className={`mobile-drawer-link ${isActive ? 'active' : ''}`}
-                      onClick={() => setIsMenuOpen(false)}
-                      {...(isActive ? { 'aria-current': 'page' } : {})}
-                    >
-                      {item.name}
-                    </a>
-                  </li>
-                )
-              })}
-            </ul>
-          </nav>
-        </>
-      )}
-    </header>
+          ) : (
+            <a className="mobile-header__action-btn mobile-header__avatar" href="/login" aria-label="Login">
+              <img src={accountIcon} alt="" aria-hidden="true" />
+            </a>
+          )}
+        </div>
+
+        {isMenuOpen && (
+          <>
+            <div
+              className="mobile-drawer-backdrop"
+              onClick={() => setIsMenuOpen(false)}
+              aria-hidden="true"
+            />
+            <nav
+              id="mobile-nav-drawer"
+              className="mobile-nav-drawer"
+              aria-label="Mobile Navigation"
+            >
+              <div className="mobile-drawer-header">
+                <a href="/" aria-label="Wouchify Home" onClick={() => setIsMenuOpen(false)}>
+                  <img
+                    src={mobileWouchifyLogo}
+                    alt="Wouchify"
+                    className="mobile-drawer-logo"
+                  />
+                </a>
+                <button
+                  type="button"
+                  className="mobile-drawer-close-btn"
+                  aria-label="Close navigation menu"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  &times;
+                </button>
+              </div>
+              <ul className="mobile-drawer-list">
+                {NAV_LINKS.map((item) => {
+                  const isActive = currentActiveNav === item.id.toLowerCase()
+                  return (
+                    <li key={item.id} className="mobile-drawer-item">
+                      <a
+                        href={item.href}
+                        className={`mobile-drawer-link ${isActive ? 'active' : ''}`}
+                        onClick={() => setIsMenuOpen(false)}
+                        {...(isActive ? { 'aria-current': 'page' } : {})}
+                      >
+                        {item.name}
+                      </a>
+                    </li>
+                  )
+                })}
+              </ul>
+            </nav>
+          </>
+        )}
+      </header>
+      <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </>
   )
 }
 
 export default MobileHeader
+

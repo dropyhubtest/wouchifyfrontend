@@ -42,6 +42,12 @@ import { FAQPage } from './pages/FAQPage'
 import { ContactUsPage } from './pages/ContactUsPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { WalletPage } from './pages/WalletPage'
+import { ProfilePage } from './pages/ProfilePage'
+import { OrdersPage } from './pages/OrdersPage'
+import { CartPage } from './pages/CartPage'
+import { FavoritesPage } from './pages/FavoritesPage'
+import { NotificationsPage } from './pages/NotificationsPage'
+import { ReferPage } from './pages/ReferPage'
 import { AdminLoginPage } from './pages/admin/AdminLoginPage'
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage'
 import { BrandPage } from './pages/BrandPage'
@@ -184,9 +190,19 @@ function resolveCurrentPath(): string {
   }
 
   // Wallet page (/wallet)
-  if (pathname === '/wallet' || page === 'wallet') {
-    return '/wallet'
-  }
+  if (pathname === '/wallet' || page === 'wallet') return '/wallet'
+  // Profile page
+  if (pathname === '/profile' || page === 'profile') return '/profile'
+  // Orders page
+  if (pathname === '/orders' || page === 'orders') return '/orders'
+  // Cart page
+  if (pathname === '/cart' || page === 'cart') return '/cart'
+  // Favorites page
+  if (pathname === '/favorites' || pathname === '/wishlist' || page === 'favorites') return '/favorites'
+  // Notifications page
+  if (pathname === '/notifications' || page === 'notifications') return '/notifications'
+  // Refer page
+  if (pathname === '/refer' || pathname === '/refer-earn' || page === 'refer') return '/refer'
 
   // Admin login (/admin/login or /admin)
   if (pathname === '/admin' || pathname === '/admin/login' || page === 'admin-login') {
@@ -301,6 +317,12 @@ export default function App() {
   const isDealsRoute = currentPath === '/deals' || currentPath.startsWith('/deals/')
   const isCategoriesRoute = currentPath === '/categories' || currentPath.startsWith('/categories/')
   const isWalletRoute = currentPath === '/wallet'
+  const isProfileRoute = currentPath === '/profile'
+  const isOrdersRoute = currentPath === '/orders'
+  const isCartRoute = currentPath === '/cart'
+  const isFavoritesRoute = currentPath === '/favorites'
+  const isNotificationsRoute = currentPath === '/notifications'
+  const isReferRoute = currentPath === '/refer'
   const isAdminLoginRoute = currentPath === '/admin/login'
   const isAdminDashboardRoute = currentPath === '/admin/dashboard'
   const isBrandRoute = currentPath.startsWith('/brands/')
@@ -354,10 +376,13 @@ export default function App() {
       if (isCategoriesRoute) {
         return <MobileCategoriesPage />
       }
-      if (isWalletRoute) {
-        // Fallback to desktop WalletPage for mobile temporarily
-        return <WalletPage />
-      }
+      if (isWalletRoute) return <WalletPage />
+      if (isProfileRoute) return <ProfilePage />
+      if (isOrdersRoute) return <OrdersPage />
+      if (isCartRoute) return <CartPage />
+      if (isFavoritesRoute) return <FavoritesPage />
+      if (isNotificationsRoute) return <NotificationsPage />
+      if (isReferRoute) return <ReferPage />
       if (isAdminLoginRoute) {
         return <AdminLoginPage />
       }
@@ -437,9 +462,13 @@ export default function App() {
       return <DealsPage />
     }
 
-    if (isWalletRoute) {
-      return <WalletPage />
-    }
+    if (isWalletRoute) return <WalletPage />
+    if (isProfileRoute) return <ProfilePage />
+    if (isOrdersRoute) return <OrdersPage />
+    if (isCartRoute) return <CartPage />
+    if (isFavoritesRoute) return <FavoritesPage />
+    if (isNotificationsRoute) return <NotificationsPage />
+    if (isReferRoute) return <ReferPage />
 
     if (isAdminLoginRoute) {
       return <AdminLoginPage />
