@@ -68,7 +68,10 @@ router.post("/google", async (req, res) => {
     let user = await User.findOne({ $or: [{ googleId }, { email }] });
 
     if (!user) {
-      // Auto-create user on first Google login
+      if (isLogin) {
+        return res.status(404).json({ message: "No account found. Please register first." });
+      }
+      // Auto-create user on first Google registration
       user = new User({ name, email, googleId, avatar: picture });
       await user.save();
     } else if (!user.googleId) {

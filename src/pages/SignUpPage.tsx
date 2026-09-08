@@ -47,7 +47,7 @@ export const SignUpPage: React.FC = () => {
     try {
       setLoading(true)
       const { data } = await googleLoginApi(credentialResponse.credential, false)
-      setRegisteredName(data.fullName || data.email)
+      setRegisteredName(data.user?.name || data.user?.email || 'User')
       setShowSuccessModal(true)
     } catch (err: any) {
       setError(err.response?.data?.message || 'Google signup failed')
