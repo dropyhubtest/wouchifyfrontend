@@ -10,7 +10,10 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3001', 'http://localhost:5173'],
+  origin: function (origin, callback) {
+    // Allow all origins for now to ensure Vercel can connect
+    callback(null, true);
+  },
   credentials: true
 }));
 app.use(express.json());
