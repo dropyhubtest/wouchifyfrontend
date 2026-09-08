@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import { Navbar } from '../components/layout'
 import { FooterSection } from '../components/footer'
+import { CustomDropdown } from '../components/common/CustomDropdown'
 import { getBrandData } from '../data/brandDeals'
 import type { BrandDeal, DealCategory, DealType } from '../data/brandDeals'
 import './BrandPage.css'
@@ -166,11 +167,13 @@ export const BrandPage: React.FC<BrandPageProps> = ({ brandSlug }) => {
           {/* Sort */}
           <div className="brand-sort">
             <label>Sort by:</label>
-            <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
-              {SORT_OPTIONS.map(s => (
-                <option key={s.value} value={s.value}>{s.label}</option>
-              ))}
-            </select>
+            <CustomDropdown
+              value={sortBy}
+              onChange={val => setSortBy(val)}
+              options={SORT_OPTIONS}
+              variant="storefront"
+              size="sm"
+            />
           </div>
         </div>
 

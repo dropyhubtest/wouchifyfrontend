@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
   name: { type: String, trim: true },
@@ -7,7 +7,11 @@ const userSchema = new mongoose.Schema({
   mobile: { type: String },
   googleId: { type: String },
   avatar: { type: String },
-  role: { type: String, default: "user" }
+  role: { type: String, default: "user" },
+  walletBalance: { type: String, default: '₹0' },
+  totalCashback: { type: String, default: '₹0' },
+  joinedDate: { type: String, default: () => new Date().toISOString().split('T')[0] },
+  status: { type: String, enum: ['active', 'verified', 'suspended'], default: 'active' }
 }, { timestamps: true });
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model('User', userSchema);

@@ -1,0 +1,287 @@
+/* ==========================================================================
+   Custom Dropdown Component Styles
+   Supports Admin & Storefront Visual Languages
+   ========================================================================== */
+
+.custom-dropdown {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  user-select: none;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+}
+
+.custom-dropdown__label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 6px;
+}
+
+/* ── Trigger Button ─────────────────────────────────────────────────── */
+.custom-dropdown__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 10px;
+  color: #1E293B;
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 13.5px;
+  padding: 8px 14px;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.custom-dropdown__trigger:hover {
+  border-color: #CBD5E1;
+  background-color: #F8FAFC;
+}
+
+.custom-dropdown--open .custom-dropdown__trigger {
+  border-color: #2F368C;
+  box-shadow: 0 0 0 3px rgba(47, 54, 140, 0.12);
+  background-color: #FFFFFF;
+}
+
+.custom-dropdown--disabled .custom-dropdown__trigger {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #F1F5F9;
+}
+
+/* Selected text & Icon */
+.custom-dropdown__selected-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.custom-dropdown__selected-icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.custom-dropdown__selected-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Animated Arrow */
+.custom-dropdown__arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748B;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s;
+  flex-shrink: 0;
+}
+
+.custom-dropdown--open .custom-dropdown__arrow {
+  transform: rotate(180deg);
+  color: #2F368C;
+}
+
+/* ── Menu Dropdown Popup ────────────────────────────────────────────── */
+.custom-dropdown__menu-wrapper {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 100%;
+  width: max-content;
+  max-width: 320px;
+  z-index: 1000;
+  animation: dropdownSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.custom-dropdown__menu {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -4px rgba(47, 54, 140, 0.14),
+              0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  max-height: 280px;
+  overflow-y: auto;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.custom-dropdown__menu::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-dropdown__menu::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 999px;
+}
+
+/* ── Menu Items ─────────────────────────────────────────────────────── */
+.custom-dropdown__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.custom-dropdown__item:hover,
+.custom-dropdown__item--highlighted {
+  background: #F1F5F9;
+  color: #1E293B;
+}
+
+.custom-dropdown__item--selected {
+  background: #EEF2FF;
+  color: #2F368C;
+  font-weight: 600;
+}
+
+.custom-dropdown__item--selected:hover {
+  background: #E0E7FF;
+}
+
+.custom-dropdown__item-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.custom-dropdown__item-icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.custom-dropdown__item-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.custom-dropdown__item-badge {
+  font-size: 11px;
+  font-weight: 700;
+  background: #E2E8F0;
+  color: #475569;
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+.custom-dropdown__checkmark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Variants ───────────────────────────────────────────────────────── */
+
+/* Admin Variant */
+.custom-dropdown--admin .custom-dropdown__trigger {
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  color: #1E293B;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 7px 14px;
+  border-radius: 10px;
+}
+
+.custom-dropdown--admin .custom-dropdown__trigger:hover {
+  border-color: #282D78;
+}
+
+.custom-dropdown--admin.custom-dropdown--open .custom-dropdown__trigger {
+  border-color: #282D78;
+  box-shadow: 0 0 0 3px rgba(40, 45, 120, 0.12);
+}
+
+/* Storefront Variant */
+.custom-dropdown--storefront .custom-dropdown__trigger {
+  background: #FFFFFF;
+  border: 1.5px solid #DCE0FA;
+  color: #282D78;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 9px 18px;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(40, 45, 120, 0.05);
+}
+
+.custom-dropdown--storefront .custom-dropdown__trigger:hover {
+  border-color: #282D78;
+  background-color: #F8FAFC;
+}
+
+.custom-dropdown--storefront.custom-dropdown--open .custom-dropdown__trigger {
+  border-color: #E31E25;
+  box-shadow: 0 0 0 3px rgba(227, 30, 37, 0.15);
+}
+
+/* Pill Variant (compact filter pill style) */
+.custom-dropdown--pill .custom-dropdown__trigger {
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  color: #475569;
+  font-weight: 600;
+  font-size: 12.5px;
+  padding: 6px 14px;
+  border-radius: 999px;
+}
+
+.custom-dropdown--pill .custom-dropdown__trigger:hover {
+  background: #E2E8F0;
+  color: #1E293B;
+}
+
+.custom-dropdown--pill.custom-dropdown--open .custom-dropdown__trigger {
+  background: #FFFFFF;
+  border-color: #282D78;
+  color: #282D78;
+  box-shadow: 0 2px 8px rgba(40, 45, 120, 0.12);
+}
+
+/* ── Sizes ─────────────────────────────────────────────────────────── */
+.custom-dropdown--sm .custom-dropdown__trigger {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.custom-dropdown--lg .custom-dropdown__trigger {
+  padding: 10px 18px;
+  font-size: 15px;
+}

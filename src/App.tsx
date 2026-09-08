@@ -241,10 +241,16 @@ function resolveCurrentPath(): string {
     return '/deals'
   }
 
-  // Categories landing/detail
-  if (pathname === '/categories' || pathname.startsWith('/categories/') || page === 'categories') {
-    if (pathname.startsWith('/categories/')) return pathname;
-    return cat ? `/categories/${cat}` : '/categories'
+  // Categories landing/detail (/categories or /categories/:slug)
+  if (
+    pathname === '/categories' ||
+    pathname.startsWith('/categories/') ||
+    page === 'categories'
+  ) {
+    if (page === 'categories') {
+      return cat ? `/categories/${cat}` : '/categories'
+    }
+    return pathname
   }
 
   // If it's a known root path, or explicitly '/'

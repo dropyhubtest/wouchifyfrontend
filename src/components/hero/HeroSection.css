@@ -338,7 +338,7 @@
   position: static;
 }
 
-.stat-value {
+.hero-section .stat-value {
   position: absolute;
   font-family: var(--font-family-primary);
   font-weight: 700;
@@ -349,7 +349,7 @@
   letter-spacing: -0.02em;
 }
 
-.stat-label {
+.hero-section .stat-label {
   position: absolute;
   font-family: var(--font-family-primary);
   font-weight: 700;

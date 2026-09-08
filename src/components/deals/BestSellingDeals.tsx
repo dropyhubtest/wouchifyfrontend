@@ -1,7 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { DealCard } from './DealCard'
 import { DealsEmptyState } from './DealsEmptyState'
-import { BEST_SELLING_DEAL_ITEMS } from '../../data/dealsPage'
+import { BEST_SELLING_DEAL_ITEMS, normalizeDealToCard, type DealCardItem } from '../../data/dealsPage'
+import { adminApi } from '../../services/adminApi'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
 import './BestSellingDeals.css'
 
@@ -23,6 +24,62 @@ export const BestSellingDeals: React.FC<BestSellingDealsProps> = ({
   const scale = useDesktopScale()
   const canvasRef = useRef<HTMLDivElement>(null)
   const [canvasHeight, setCanvasHeight] = useState<number>(520)
+
+  // Live Best Selling Deals list initialized from cached storage or defaults
+  const [bestDeals, setBestDeals] = useState<DealCardItem[]>(() => {
+    try {
+      const cached = localStorage.getItem('wouchify_public_deals')
+      if (cached) {
+        const parsed = JSON.parse(cached)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const featured = parsed
+            .map((d: any, idx: number) => normalizeDealToCard(d, idx))
+            .filter((d: DealCardItem) => d.status === 'active' && d.isBestSelling)
+          if (featured.length > 0) return featured
+        }
+      }
+    } catch {}
+    return BEST_SELLING_DEAL_ITEMS
+  })
+
+  // Fetch from adminApi & subscribe to live updates
+  useEffect(() => {
+    let isMounted = true
+
+    const fetchBestSellingDeals = async () => {
+      try {
+        const res = await adminApi.getPublicDeals()
+        if (!isMounted) return
+        if (Array.isArray(res) && res.length > 0) {
+          const normalized = res.map((d: any, idx: number) => normalizeDealToCard(d, idx))
+          const featured = normalized.filter(
+            (d: DealCardItem) => d.status === 'active' && d.isBestSelling
+          )
+          if (featured.length > 0) {
+            setBestDeals(featured)
+          } else {
+            setBestDeals(BEST_SELLING_DEAL_ITEMS)
+          }
+        }
+      } catch {
+        // Fallback to cached/defaults
+      }
+    }
+
+    fetchBestSellingDeals()
+
+    const handleUpdate = () => {
+      fetchBestSellingDeals()
+    }
+
+    window.addEventListener('wouchify_deals_updated', handleUpdate)
+    window.addEventListener('storage', handleUpdate)
+    return () => {
+      isMounted = false
+      window.removeEventListener('wouchify_deals_updated', handleUpdate)
+      window.removeEventListener('storage', handleUpdate)
+    }
+  }, [])
 
   useEffect(() => {
     const updateHeight = () => {
@@ -51,7 +108,7 @@ export const BestSellingDeals: React.FC<BestSellingDealsProps> = ({
       window.removeEventListener('resize', updateHeight)
       window.removeEventListener('load', updateHeight)
     }
-  }, [scale, showEmptyState])
+  }, [scale, showEmptyState, bestDeals])
 
   return (
     <section
@@ -79,7 +136,7 @@ export const BestSellingDeals: React.FC<BestSellingDealsProps> = ({
           />
         ) : (
           <div className="best-selling-deals__cards-container">
-            {BEST_SELLING_DEAL_ITEMS.map((deal) => (
+            {bestDeals.map((deal) => (
               <DealCard key={deal.id} deal={deal} horizontal={true} />
             ))}
           </div>

@@ -114,9 +114,9 @@
   left: 24%;
 }
 
-/* Tag 2: Center-Left - ₹300 Off (left: 41%, z-index: 20 sits on top of Tag 3) */
+/* Tag 2: Center-Left - ₹300 Off (pushed right towards Tag 3 at 52%) */
 .item-300 {
-  left: 41%;
+  left: 46%;
   z-index: 20;
 }
 
