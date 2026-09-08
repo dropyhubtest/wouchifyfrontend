@@ -45,14 +45,46 @@ export const adminApi = {
 
   // Deals
   getDeals: async (params?: { category?: string; status?: string }) => {
-    const query = new URLSearchParams();
-    if (params?.category && params.category !== 'All') query.append('category', params.category);
-    if (params?.status && params.status !== 'All') query.append('status', params.status);
-    const qs = query.toString() ? `?${query.toString()}` : '';
-    const res = await fetch(`${API_BASE}/deals${qs}`, {
-      headers: getAuthHeaders()
-    });
-    return handleResponse<any[]>(res);
+    let backendDeals: any[] = [];
+    try {
+      const query = new URLSearchParams();
+      if (params?.category && params.category !== 'All') query.append('category', params.category);
+      if (params?.status && params.status !== 'All') query.append('status', params.status);
+      const qs = query.toString() ? `?${query.toString()}` : '';
+      const res = await fetch(`${API_BASE}/deals${qs}`, {
+        headers: getAuthHeaders()
+      });
+      if (res.ok) {
+        backendDeals = await res.json();
+      }
+    } catch {
+      // Backend request error handled gracefully
+    }
+
+    // Always merge with localStorage deals so custom deals are never lost
+    let localDeals: any[] = [];
+    try {
+      const cached = localStorage.getItem('wouchify_public_deals');
+      if (cached) localDeals = JSON.parse(cached);
+    } catch {}
+
+    if (backendDeals.length === 0 && localDeals.length > 0) {
+      return localDeals;
+    }
+
+    const backendIds = new Set(backendDeals.map((d: any) => String(d._id || d.id)));
+    const backendNames = new Set(backendDeals.map((d: any) => String(d.name).toLowerCase().trim()));
+    const missingInBackend = localDeals.filter(
+      (d: any) => !backendIds.has(String(d._id || d.id)) && !backendNames.has(String(d.name).toLowerCase().trim())
+    );
+
+    const merged = [...missingInBackend, ...backendDeals];
+    try {
+      if (merged.length > 0) {
+        localStorage.setItem('wouchify_public_deals', JSON.stringify(merged));
+      }
+    } catch {}
+    return merged;
   },
 
   getPublicDeals: async (params?: { category?: string; status?: string }) => {
@@ -82,22 +114,27 @@ export const adminApi = {
   },
 
   createDeal: async (dealData: Record<string, any>) => {
+    const newEntry = { _id: dealData._id || String(Date.now()), id: dealData.id || Date.now(), ...dealData };
     try {
       // Sync to localStorage immediately for cross-tab reactivity
       const cachedStr = localStorage.getItem('wouchify_public_deals');
       const cachedList = cachedStr ? JSON.parse(cachedStr) : [];
-      const newEntry = { _id: String(Date.now()), ...dealData };
-      const updatedList = [newEntry, ...cachedList.filter((d: any) => d.id !== dealData.id && d._id !== dealData.id)];
+      const updatedList = [newEntry, ...cachedList.filter((d: any) => (d.id !== dealData.id && d._id !== dealData.id) && d.name !== dealData.name)];
       localStorage.setItem('wouchify_public_deals', JSON.stringify(updatedList));
       window.dispatchEvent(new CustomEvent('wouchify_deals_updated', { detail: newEntry }));
     } catch {}
 
-    const res = await fetch(`${API_BASE}/deals`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(dealData)
-    });
-    return handleResponse<any>(res);
+    try {
+      const res = await fetch(`${API_BASE}/deals`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(dealData)
+      });
+      return await handleResponse<any>(res);
+    } catch (err) {
+      console.warn('Backend createDeal fallback:', err);
+      return newEntry;
+    }
   },
 
   updateDeal: async (id: string | number, dealData: Record<string, any>) => {
