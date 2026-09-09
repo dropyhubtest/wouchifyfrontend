@@ -2115,3 +2115,115 @@
   color: var(--color-red, #E31E25);
 }
 
+/* Loot Deal Types & Claimed Progress Styles */
+.loot-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 5px;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.loot-type-badge.glitch {
+  background: #fdf2f8;
+  color: #db2777;
+  border: 1px solid #fbcfe8;
+  box-shadow: 0 0 6px rgba(219, 39, 119, 0.2);
+}
+
+.loot-type-badge.flash {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.loot-type-badge.steal {
+  background: #fef2f2;
+  color: var(--color-red, #E31E25);
+  border: 1px solid #fecaca;
+}
+
+.loot-type-badge.under99,
+.loot-type-badge.under199 {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.loot-type-badge.freebie {
+  background: #eef2ff;
+  color: #4338ca;
+  border: 1px solid #c7d2fe;
+}
+
+/* Claimed Progress Meter */
+.loot-claimed-meter {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 130px;
+}
+
+.loot-claimed-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.73rem;
+  font-weight: 700;
+}
+
+.loot-claimed-bar {
+  width: 100%;
+  height: 6px;
+  background: #f1f5f9;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.loot-claimed-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.loot-claimed-fill.high {
+  background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+}
+
+.loot-claimed-fill.med {
+  background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+}
+
+.loot-claimed-fill.low {
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+}
+
+/* Channel Broadcast Pills */
+.broadcast-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.broadcast-pill.telegram {
+  background: #e0f2fe;
+  color: #0284c7;
+  border: 1px solid #bae6fd;
+}
+
+.broadcast-pill.push {
+  background: #faf5ff;
+  color: #9333ea;
+  border: 1px solid #f3e8ff;
+}
+
