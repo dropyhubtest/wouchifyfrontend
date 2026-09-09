@@ -6,55 +6,82 @@
 
 /* ── KPI Ribbon ── */
 .kpi-ribbon {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 14px;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  width: 100%;
 }
 
 .kpi-card {
-  background: white;
-  border-radius: 12px;
+  flex: 1 1 0;
+  min-width: 0;
+  background: #ffffff;
+  border-radius: 14px;
   border: 1px solid #e2e8f0;
-  padding: 16px;
+  padding: 16px 18px;
   display: flex;
-  align-items: flex-start;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
   gap: 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
 }
 
-.kpi-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+  border-color: #cbd5e1;
 }
 
 .kpi-body {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
-}
-
-.kpi-value {
-  font-size: 1.35rem;
-  font-weight: 800;
-  color: #0f172a;
-  line-height: 1.2;
+  flex: 1;
+  order: 1;
 }
 
 .kpi-label {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: #475569;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  order: 1;
+  margin-bottom: 2px;
+}
+
+.kpi-value {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  order: 2;
 }
 
 .kpi-sub {
-  font-size: 0.7rem;
-  color: #94a3b8;
+  display: none;
+}
+
+.kpi-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  order: 2;
 }
 
 .crud-header {
@@ -963,17 +990,19 @@
 
 /* ── Deals Management Advanced Styles ── */
 .deals-kpi-ribbon {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 16px;
+  display: flex;
+  gap: 12px;
   margin-bottom: 24px;
+  width: 100%;
 }
 
 .deals-kpi-card {
+  flex: 1 1 0;
+  min-width: 0;
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 16px 18px;
+  padding: 14px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
