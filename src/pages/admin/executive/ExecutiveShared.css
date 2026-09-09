@@ -509,6 +509,65 @@
   gap: 20px;
 }
 
+/* ── Multi-Step Form Stepper ── */
+.form-stepper {
+  display: flex;
+  align-items: center;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  gap: 6px;
+}
+
+.step-tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.step-tab-btn.active {
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  font-weight: 700;
+}
+
+.step-tab-btn .step-number {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 0.72rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.step-tab-btn.active .step-number {
+  background: var(--color-red, #E31E25);
+  color: #ffffff;
+}
+
+.step-tab-btn.completed .step-number {
+  background: #10b981;
+  color: #ffffff;
+}
+
 /* Form Section Containers */
 .form-section {
   background: #ffffff;
@@ -2538,4 +2597,106 @@
 .view-toggle-btn.active {
   background: #0f172a;
   color: white;
+}
+
+/* ============================================================
+   2-Step Modal Form Stepper
+   ============================================================ */
+.form-stepper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8fafc;
+  padding: 6px 8px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 20px;
+}
+
+.step-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.step-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.step-tab-btn.active {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.step-number {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #64748b;
+  font-weight: 700;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.step-tab-btn.active .step-number {
+  background: var(--color-red, #E31E25);
+  color: #ffffff;
+}
+
+.step-tab-btn.completed .step-number {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.step-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.step-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.step-desc {
+  font-size: 0.72rem;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.step-divider {
+  color: #cbd5e1;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.form-step-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeInStep 0.2s ease;
+}
+
+@keyframes fadeInStep {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
