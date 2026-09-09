@@ -54,6 +54,15 @@ import { ReferPage } from './pages/ReferPage'
 import { AdminLoginPage } from './pages/admin/AdminLoginPage'
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage'
 import { BrandPage } from './pages/BrandPage'
+import { StaffLoginPage } from './pages/admin/StaffLoginPage'
+import { ExecutiveDashboardPage } from './pages/admin/executive/ExecutiveDashboardPage'
+import { ExecutiveDealsPage } from './pages/admin/executive/ExecutiveDealsPage'
+import { ExecutiveLootDealsPage } from './pages/admin/executive/ExecutiveLootDealsPage'
+import { ExecutiveStoresPage } from './pages/admin/executive/ExecutiveStoresPage'
+import { ExecutiveCouponsPage } from './pages/admin/executive/ExecutiveCouponsPage'
+import { ExecutiveCreditCardsPage } from './pages/admin/executive/ExecutiveCreditCardsPage'
+import { ExecutiveBannersPage } from './pages/admin/executive/ExecutiveBannersPage'
+import { ExecutiveAdvertisementsPage } from './pages/admin/executive/ExecutiveAdvertisementsPage'
 import { WelcomeToast } from './components/auth/WelcomeToast'
 
 function resolveCurrentPath(): string {
@@ -138,6 +147,17 @@ function resolveCurrentPath(): string {
     (pathname === '/deals' && (type === 'flash' || type === 'flash-style' || type === 'loot'))
   ) {
     return '/loot-deals'
+  }
+
+  // Admin and Staff pages
+  if (
+    pathname === '/admin/login' ||
+    pathname === '/admin/dashboard' ||
+    pathname === '/operational-manager/login' ||
+    pathname === '/operational-manager/dashboard' ||
+    pathname.startsWith('/executive/')
+  ) {
+    return pathname
   }
 
   // Sign Up page
@@ -360,6 +380,12 @@ export default function App() {
   const isReferRoute = currentPath === '/refer'
   const isAdminLoginRoute = currentPath === '/admin/login'
   const isAdminDashboardRoute = currentPath === '/admin/dashboard'
+  const isStaffLoginRoute = 
+    currentPath === '/operational-manager/login' || 
+    currentPath === '/executive/login'
+  const isStaffDashboardRoute = 
+    currentPath === '/operational-manager/dashboard'
+  const isExecutiveRoute = currentPath.startsWith('/executive/') && currentPath !== '/executive/login'
   const isBrandRoute = currentPath.startsWith('/brands/')
   const isNotFoundRoute = currentPath === '/404'
   const brandSlug = isBrandRoute ? currentPath.replace('/brands/', '') : ''
@@ -519,6 +545,27 @@ export default function App() {
 
     if (isAdminLoginRoute) {
       return <AdminLoginPage />
+    }
+
+    if (isStaffLoginRoute) {
+      return <StaffLoginPage />
+    }
+
+
+
+    if (isExecutiveRoute) {
+      if (currentPath === '/executive/deals') return <ExecutiveDealsPage />
+      if (currentPath === '/executive/loot-deals') return <ExecutiveLootDealsPage />
+      if (currentPath === '/executive/stores') return <ExecutiveStoresPage />
+      if (currentPath === '/executive/coupons') return <ExecutiveCouponsPage />
+      if (currentPath === '/executive/credit-cards') return <ExecutiveCreditCardsPage />
+      if (currentPath === '/executive/banners') return <ExecutiveBannersPage />
+      if (currentPath === '/executive/advertisements') return <ExecutiveAdvertisementsPage />
+      return <ExecutiveDashboardPage />
+    }
+
+    if (isStaffDashboardRoute) {
+      return <NotFoundPage />
     }
 
     if (isAdminDashboardRoute) {

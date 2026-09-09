@@ -60,4 +60,49 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// @route   POST /api/admin/staff-login
+// @desc    Authenticate staff (operational_manager, manager, executive)
+router.post('/staff-login', async (req, res) => {
+  const { email, password, requestedRole } = req.body;
+
+  if (!email || !password || !requestedRole) {
+    return res.status(400).json({ message: 'Please provide email, password, and requestedRole' });
+  }
+
+  try {
+    const admin = await Admin.findOne({ email });
+    
+    if (!admin) {
+      // Temporarily create staff if missing (DEV ONLY)
+      if (email === `${requestedRole}@wouchify.com` && password === 'staff123') {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+        const newStaff = new Admin({ email, password: hashedPassword, role: requestedRole });
+        await newStaff.save();
+        
+        const token = jwt.sign({ id: newStaff._id, role: newStaff.role }, JWT_SECRET, { expiresIn: '1d' });
+        return res.json({ token, user: { email: newStaff.email, role: newStaff.role } });
+      }
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    if (admin.role !== requestedRole) {
+      return res.status(403).json({ message: 'Unauthorized: Role mismatch' });
+    }
+
+    const isMatch = await bcrypt.compare(password, admin.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const payload = { id: admin._id, role: admin.role };
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1d' });
+
+    res.json({ token, user: { email: admin.email, role: admin.role } });
+  } catch (err) {
+    console.error('Staff login error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;
