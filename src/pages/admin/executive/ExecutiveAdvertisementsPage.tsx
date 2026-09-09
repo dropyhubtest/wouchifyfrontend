@@ -616,6 +616,19 @@ export const ExecutiveAdvertisementsPage: React.FC = () => {
   return (
     <ExecutiveLayout activeMenu="advertisements">
       <div className="executive-crud-page">
+        {/* ── Header ── */}
+        <div className="crud-header" style={{ marginBottom: '20px' }}>
+          <div>
+            <h2 className="crud-title">Advertisements Console</h2>
+            <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '0.88rem' }}>
+              Manage sponsored banner slots, affiliate creative placements, and client campaigns with mandatory expiry dates.
+            </p>
+          </div>
+          <button className="crud-add-btn" onClick={handleOpenAdd}>
+            <Plus size={18} /> Add New Ad
+          </button>
+        </div>
+
         {/* ── KPI Ribbon ── */}
         <div className="kpi-ribbon" style={{ marginBottom: '24px' }}>
           <div className="kpi-card">
@@ -672,19 +685,6 @@ export const ExecutiveAdvertisementsPage: React.FC = () => {
               <span className="kpi-sub">Ad displays</span>
             </div>
           </div>
-        </div>
-
-        {/* ── Header ── */}
-        <div className="crud-header">
-          <div>
-            <h2 className="crud-title">Advertisements Console</h2>
-            <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '0.88rem' }}>
-              Manage sponsored banner slots, affiliate creative placements, and client campaigns with mandatory expiry dates.
-            </p>
-          </div>
-          <button className="crud-add-btn" onClick={handleOpenAdd}>
-            <Plus size={18} /> Add New Ad
-          </button>
         </div>
 
         {/* ── Filters ── */}

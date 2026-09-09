@@ -940,6 +940,19 @@ export const ExecutiveBannersPage: React.FC = () => {
   return (
     <ExecutiveLayout activeMenu="banners">
       <div className="executive-crud-page">
+        {/* ── Header Title & Add Button ── */}
+        <div className="crud-header" style={{ marginBottom: '20px' }}>
+          <div>
+            <h2 className="crud-title">Hero Banners Console</h2>
+            <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '0.88rem' }}>
+              Customize and update heroic banners, headings, badges, and visuals across every page of Wouchify.
+            </p>
+          </div>
+          <button className="crud-add-btn" onClick={handleOpenAdd}>
+            <Plus size={18} /> Add Hero Banner
+          </button>
+        </div>
+
         {/* ── KPI Header Ribbon ── */}
         <div className="kpi-ribbon" style={{ marginBottom: '24px' }}>
           <div className="kpi-card">
@@ -996,19 +1009,6 @@ export const ExecutiveBannersPage: React.FC = () => {
               <span className="kpi-sub">Traffic generated</span>
             </div>
           </div>
-        </div>
-
-        {/* ── Header Title & Add Button ── */}
-        <div className="crud-header">
-          <div>
-            <h2 className="crud-title">Hero Banners Console</h2>
-            <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '0.88rem' }}>
-              Customize and update heroic banners, headings, badges, and visuals across every page of Wouchify.
-            </p>
-          </div>
-          <button className="crud-add-btn" onClick={handleOpenAdd}>
-            <Plus size={18} /> Add Hero Banner
-          </button>
         </div>
 
         {/* ── Filters & Search ── */}
