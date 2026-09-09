@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import { ExecutiveLayout } from './ExecutiveLayout'
 import { FAVOURITE_STORES } from '../../../data/storesHero'
-import { CATEGORIES_DATA } from '../../../data/categories'
 import { FLASH_LOOT_DEALS } from '../../../data/flashLootDeals'
 import { EXCLUSIVE_LOOT_DEALS } from '../../../data/exclusiveLootDeals'
 import { DEALS_CARD_ITEMS, getStoreLogo } from '../../../data/dealsPage'
@@ -15,12 +14,8 @@ import {
   Tag, 
   Store as StoreIcon, 
   TrendingUp, 
-  CheckCircle2, 
   AlertCircle,
-  Eye,
-  Calendar,
-  Layers,
-  Check
+  Eye
 } from 'lucide-react'
 import './ExecutiveDashboardPage.css'
 

@@ -235,7 +235,7 @@ export const ExecutiveDealsPage: React.FC = () => {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [itemsPerPage] = useState(10)
 
   // Form State
   const emptyDeal: Deal = {
@@ -426,17 +426,6 @@ export const ExecutiveDealsPage: React.FC = () => {
     setIsModalOpen(true)
   }
 
-  const handleDuplicateDeal = (deal: Deal) => {
-    const newDeal: Deal = {
-      ...deal,
-      id: Date.now().toString(),
-      title: `${deal.title} (Copy)`,
-      status: 'Draft',
-    }
-    setDeals([newDeal, ...deals])
-    showToast(`Duplicated "${deal.title}"`)
-  }
-
   const handleDeleteDeal = (id: string) => {
     if (window.confirm('Are you sure you want to delete this deal?')) {
       setDeals(deals.filter(d => d.id !== id))
@@ -454,11 +443,6 @@ export const ExecutiveDealsPage: React.FC = () => {
       }
       return d
     }))
-  }
-
-  const handleCopyLink = (link: string) => {
-    navigator.clipboard.writeText(link || window.location.href)
-    showToast('Deal link copied to clipboard!')
   }
 
   // Bulk Actions
