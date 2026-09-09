@@ -33,9 +33,9 @@ import { ImageUploadField } from './ImageUploadField'
    Types
    ============================================================ */
 
-type CardStatus  = 'active' | 'inactive' | 'featured' | 'discontinued'
+type CardStatus = 'active' | 'inactive' | 'featured' | 'discontinued'
 type CardNetwork = 'Visa' | 'Mastercard' | 'Rupay' | 'Amex' | 'Diners'
-type CardTier    = 'Entry' | 'Classic' | 'Premium' | 'Super Premium' | 'Infinite'
+type CardTier = 'Entry' | 'Classic' | 'Premium' | 'Super Premium' | 'Infinite'
 
 interface CreditCard {
   id: string
@@ -81,11 +81,11 @@ const NETWORKS: CardNetwork[] = ['Visa', 'Mastercard', 'Rupay', 'Amex', 'Diners'
 const TIERS: CardTier[] = ['Entry', 'Classic', 'Premium', 'Super Premium', 'Infinite']
 
 const NETWORK_COLOR: Record<CardNetwork, string> = {
-  Visa:       '#1a1f71',
+  Visa: '#1a1f71',
   Mastercard: '#eb001b',
-  Rupay:      '#007233',
-  Amex:       '#006fcf',
-  Diners:     '#004a97',
+  Rupay: '#007233',
+  Amex: '#006fcf',
+  Diners: '#004a97',
 }
 
 /* ============================================================
@@ -182,29 +182,29 @@ function daysLeft(date: string): number {
 }
 
 function expiryPill(days: number) {
-  if (days < 0)  return { label: 'Offer Expired',  bg: '#fee2e2', color: '#ef4444' }
+  if (days < 0) return { label: 'Offer Expired', bg: '#fee2e2', color: '#ef4444' }
   if (days === 0) return { label: 'Expires Today!', bg: '#fef3c7', color: '#d97706' }
-  if (days <= 7)  return { label: `${days}d left`,  bg: '#fef3c7', color: '#d97706' }
-  if (days <= 30) return { label: `${days}d left`,  bg: '#fef9c3', color: '#ca8a04' }
-  return          { label: `${days}d left`,          bg: '#dcfce7', color: '#16a34a' }
+  if (days <= 7) return { label: `${days}d left`, bg: '#fef3c7', color: '#d97706' }
+  if (days <= 30) return { label: `${days}d left`, bg: '#fef9c3', color: '#ca8a04' }
+  return { label: `${days}d left`, bg: '#dcfce7', color: '#16a34a' }
 }
 
 function statusCfg(s: CardStatus) {
   const m: Record<CardStatus, { label: string; bg: string; color: string }> = {
-    active:       { label: 'Active',        bg: '#dcfce7', color: '#16a34a' },
-    featured:     { label: 'Featured',      bg: '#ede9fe', color: '#7c3aed' },
-    inactive:     { label: 'Inactive',      bg: '#f1f5f9', color: '#64748b' },
-    discontinued: { label: 'Discontinued',  bg: '#fee2e2', color: '#ef4444' },
+    active: { label: 'Active', bg: '#dcfce7', color: '#16a34a' },
+    featured: { label: 'Featured', bg: '#ede9fe', color: '#7c3aed' },
+    inactive: { label: 'Inactive', bg: '#f1f5f9', color: '#64748b' },
+    discontinued: { label: 'Discontinued', bg: '#fee2e2', color: '#ef4444' },
   }
   return m[s]
 }
 
 const TIER_COLOR: Record<CardTier, string> = {
-  'Entry':         '#64748b',
-  'Classic':       '#3b82f6',
-  'Premium':       '#f59e0b',
+  'Entry': '#64748b',
+  'Classic': '#3b82f6',
+  'Premium': '#f59e0b',
   'Super Premium': '#8b5cf6',
-  'Infinite':      '#ef4444',
+  'Infinite': '#ef4444',
 }
 
 /* ============================================================
@@ -212,21 +212,25 @@ const TIER_COLOR: Record<CardTier, string> = {
    ============================================================ */
 
 const CardVisual: React.FC<{ card: Partial<CreditCard>; size?: 'sm' | 'lg' }> = ({ card, size = 'sm' }) => {
-  const w = size === 'lg' ? 280 : 120
-  const h = size === 'lg' ? 176 : 76
+  // lg: fills parent width at 8:5 card ratio; sm: fixed 120×76
+  const isLg = size === 'lg'
+  const h = isLg ? undefined : 76
   const netColor = NETWORK_COLOR[(card.network as CardNetwork) ?? 'Visa']
   return (
     <div style={{
-      width: w, height: h, borderRadius: size === 'lg' ? 16 : 8,
+      width: isLg ? '100%' : 120,
+      height: isLg ? 0 : h,
+      paddingBottom: isLg ? '63%' : 0,   // 8:5 aspect ratio for lg
+      borderRadius: isLg ? 16 : 8,
       background: `linear-gradient(135deg, ${netColor}dd 0%, ${netColor}88 100%)`,
       position: 'relative', overflow: 'hidden', flexShrink: 0,
-      boxShadow: size === 'lg' ? '0 12px 40px rgba(0,0,0,0.25)' : '0 2px 8px rgba(0,0,0,0.15)',
+      boxShadow: isLg ? '0 12px 40px rgba(0,0,0,0.25)' : '0 2px 8px rgba(0,0,0,0.15)',
     }}>
       {/* Shimmer circle */}
       <div style={{
-        position: 'absolute', width: h * 1.4, height: h * 1.4,
+        position: 'absolute', width: '140%', height: '140%',
         borderRadius: '50%', background: 'rgba(255,255,255,0.07)',
-        top: -h * 0.4, right: -h * 0.4,
+        top: '-40%', right: '-40%',
       }} />
       {/* Card image overlay */}
       {card.imageUrl && (
@@ -234,19 +238,19 @@ const CardVisual: React.FC<{ card: Partial<CreditCard>; size?: 'sm' | 'lg' }> = 
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.55 }} />
       )}
       {/* Content */}
-      <div style={{ position: 'absolute', inset: 0, padding: size === 'lg' ? 18 : 8, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+      <div style={{ position: 'absolute', inset: 0, padding: isLg ? 18 : 8, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           {card.bankLogoUrl
-            ? <img src={card.bankLogoUrl as string} alt="" style={{ height: size === 'lg' ? 22 : 12, objectFit: 'contain', filter: 'brightness(10)' }} />
-            : <span style={{ fontSize: size === 'lg' ? '0.65rem' : '0.45rem', fontWeight: 800, color: 'rgba(255,255,255,0.9)', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{card.bank}</span>
+            ? <img src={card.bankLogoUrl as string} alt="" style={{ height: isLg ? 22 : 12, objectFit: 'contain', filter: 'brightness(10)' }} />
+            : <span style={{ fontSize: isLg ? '0.65rem' : '0.45rem', fontWeight: 800, color: 'rgba(255,255,255,0.9)', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{card.bank}</span>
           }
-          <span style={{ fontSize: size === 'lg' ? '0.7rem' : '0.5rem', fontWeight: 700, color: 'rgba(255,255,255,0.8)', textTransform: 'uppercase' }}>{card.network}</span>
+          <span style={{ fontSize: isLg ? '0.7rem' : '0.5rem', fontWeight: 700, color: 'rgba(255,255,255,0.8)', textTransform: 'uppercase' }}>{card.network}</span>
         </div>
         <div>
-          {size === 'lg' && (
+          {isLg && (
             <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', letterSpacing: '2px', marginBottom: 4 }}>•••• •••• •••• 4242</div>
           )}
-          <div style={{ fontSize: size === 'lg' ? '0.85rem' : '0.5rem', fontWeight: 700, color: 'white', lineClamp: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <div style={{ fontSize: isLg ? '0.85rem' : '0.5rem', fontWeight: 700, color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {card.cardName || 'Card Name'}
           </div>
         </div>
@@ -263,8 +267,8 @@ const CardPreviewModal: React.FC<{ card: CreditCard; onClose: () => void }> = ({
   const [copied, setCopied] = useState(false)
   const days = daysLeft(card.offerExpiryDate)
   const pill = expiryPill(days)
-  const sc   = statusCfg(card.status)
-  const tc   = TIER_COLOR[card.tier]
+  const sc = statusCfg(card.status)
+  const tc = TIER_COLOR[card.tier]
 
   return (
     <div className="crud-modal-overlay">
@@ -376,8 +380,8 @@ const CardFormModal: React.FC<CardFormProps> = ({ editing, onClose, onSave }) =>
   const set = (k: keyof CreditCard, v: unknown) => setForm(f => ({ ...f, [k]: v }))
 
   const handleSave = () => {
-    if (!form.cardName?.trim())       return alert('Card name is required')
-    if (!form.bank?.trim())           return alert('Bank name is required')
+    if (!form.cardName?.trim()) return alert('Card name is required')
+    if (!form.bank?.trim()) return alert('Bank name is required')
     if (!form.offerExpiryDate?.trim()) return alert('Offer Expiry Date is mandatory')
     const now = new Date().toISOString().split('T')[0]
     onSave({
@@ -419,7 +423,10 @@ const CardFormModal: React.FC<CardFormProps> = ({ editing, onClose, onSave }) =>
           <button className="modal-close" onClick={onClose}><X size={20} /></button>
         </div>
 
-        <div className="modal-body" style={{ display: 'grid', gridTemplateColumns: '1fr 220px', gap: 24 }}>
+        {/* Scrollable body */}
+        <div className="modal-body">
+          {/* Two-column layout: scrollable form + sticky preview */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 240px', gap: 24, alignItems: 'start' }}>
 
           {/* ── Form ── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -550,11 +557,14 @@ const CardFormModal: React.FC<CardFormProps> = ({ editing, onClose, onSave }) =>
             </div>
           </div>
 
-          {/* ── Live Preview ── */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {/* ── Live Preview (sticky) ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, position: 'sticky', top: 0 }}>
             <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Live Preview</div>
-            <CardVisual card={form} size="lg" />
-            <div style={{ background: '#f8fafc', borderRadius: 10, padding: 12, border: '1px solid #e2e8f0', fontSize: '0.78rem' }}>
+            {/* Card visual — fills 240px column, no overflow */}
+            <div style={{ width: '100%', overflow: 'hidden', borderRadius: 16 }}>
+              <CardVisual card={form} size="lg" />
+            </div>
+            <div style={{ background: 'white', borderRadius: 10, padding: 12, border: '1px solid #e2e8f0', fontSize: '0.78rem' }}>
               <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: 4 }}>{form.cardName || 'Card Name'}</div>
               <div style={{ color: '#64748b' }}>{form.bank || 'Bank'} · {form.network || 'Visa'}</div>
               {form.rewardRate && <div style={{ color: '#6366f1', fontWeight: 600, marginTop: 6 }}>{form.rewardRate}</div>}
@@ -562,7 +572,8 @@ const CardFormModal: React.FC<CardFormProps> = ({ editing, onClose, onSave }) =>
             </div>
             <div style={{ fontSize: '0.7rem', color: '#94a3b8', textAlign: 'center' }}>Reflects customer-facing card</div>
           </div>
-        </div>
+          </div>{/* end two-column grid */}
+        </div>{/* end modal-body */}
 
         <div className="modal-footer">
           <button className="btn-cancel" onClick={onClose}>Cancel</button>
@@ -589,12 +600,12 @@ export const ExecutiveCreditCardsPage: React.FC = () => {
   const [previewing, setPreviewing] = useState<CreditCard | null>(null)
 
   const kpi = useMemo(() => ({
-    total:        cards.length,
-    active:       cards.filter(c => c.status === 'active').length,
-    featured:     cards.filter(c => c.status === 'featured').length,
+    total: cards.length,
+    active: cards.filter(c => c.status === 'active').length,
+    featured: cards.filter(c => c.status === 'featured').length,
     expiringSoon: cards.filter(c => daysLeft(c.offerExpiryDate) <= 7 && daysLeft(c.offerExpiryDate) >= 0).length,
     totalApplies: cards.reduce((a, c) => a + c.applyCount, 0),
-    totalViews:   cards.reduce((a, c) => a + c.viewCount, 0),
+    totalViews: cards.reduce((a, c) => a + c.viewCount, 0),
   }), [cards])
 
   const bankOptions = useMemo(() => ['All', ...Array.from(new Set(cards.map(c => c.bank)))], [cards])
@@ -608,20 +619,20 @@ export const ExecutiveCreditCardsPage: React.FC = () => {
         c.welcomeOffer.toLowerCase().includes(q) || c.rewardRate.toLowerCase().includes(q)
       )
     }
-    if (filterBank !== 'All')        list = list.filter(c => c.bank === filterBank)
-    if (filterStatus !== 'all')      list = list.filter(c => c.status === filterStatus)
-    if (filterTier !== 'all')        list = list.filter(c => c.tier === filterTier)
+    if (filterBank !== 'All') list = list.filter(c => c.bank === filterBank)
+    if (filterStatus !== 'all') list = list.filter(c => c.status === filterStatus)
+    if (filterTier !== 'all') list = list.filter(c => c.tier === filterTier)
     list.sort((a, b) => {
-      if (sortBy === 'expiry')  return a.offerExpiryDate.localeCompare(b.offerExpiryDate)
+      if (sortBy === 'expiry') return a.offerExpiryDate.localeCompare(b.offerExpiryDate)
       if (sortBy === 'applies') return b.applyCount - a.applyCount
-      if (sortBy === 'views')   return b.viewCount - a.viewCount
-      if (sortBy === 'added')   return b.addedOn.localeCompare(a.addedOn)
+      if (sortBy === 'views') return b.viewCount - a.viewCount
+      if (sortBy === 'added') return b.addedOn.localeCompare(a.addedOn)
       return 0
     })
     return list
   }, [cards, search, filterBank, filterStatus, filterTier, sortBy])
 
-  const openAdd  = () => { setEditing(null); setIsFormOpen(true) }
+  const openAdd = () => { setEditing(null); setIsFormOpen(true) }
   const openEdit = (c: CreditCard) => { setEditing(c); setIsFormOpen(true) }
 
   const handleSave = (data: CreditCard) => {
@@ -748,8 +759,8 @@ export const ExecutiveCreditCardsPage: React.FC = () => {
               ) : filtered.map(card => {
                 const days = daysLeft(card.offerExpiryDate)
                 const pill = expiryPill(days)
-                const sc   = statusCfg(card.status)
-                const tc   = TIER_COLOR[card.tier]
+                const sc = statusCfg(card.status)
+                const tc = TIER_COLOR[card.tier]
                 const netColor = NETWORK_COLOR[card.network]
 
                 return (
@@ -812,8 +823,8 @@ export const ExecutiveCreditCardsPage: React.FC = () => {
         </div>
       </div>
 
-      {isFormOpen  && <CardFormModal  editing={editing}  onClose={() => setIsFormOpen(false)}  onSave={handleSave} />}
-      {previewing  && <CardPreviewModal card={previewing} onClose={() => setPreviewing(null)} />}
+      {isFormOpen && <CardFormModal editing={editing} onClose={() => setIsFormOpen(false)} onSave={handleSave} />}
+      {previewing && <CardPreviewModal card={previewing} onClose={() => setPreviewing(null)} />}
     </ExecutiveLayout>
   )
 }

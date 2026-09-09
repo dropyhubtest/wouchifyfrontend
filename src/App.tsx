@@ -58,7 +58,6 @@ import { ExecutiveLootDealsPage } from './pages/admin/executive/ExecutiveLootDea
 import { ExecutiveStoresPage } from './pages/admin/executive/ExecutiveStoresPage'
 import { ExecutiveCouponsPage } from './pages/admin/executive/ExecutiveCouponsPage'
 import { ExecutiveCreditCardsPage } from './pages/admin/executive/ExecutiveCreditCardsPage'
-import { ExecutiveGiveawaysPage } from './pages/admin/executive/ExecutiveGiveawaysPage'
 import { ExecutiveBannersPage } from './pages/admin/executive/ExecutiveBannersPage'
 import { ExecutiveAdvertisementsPage } from './pages/admin/executive/ExecutiveAdvertisementsPage'
 import { WelcomeToast } from './components/auth/WelcomeToast'
@@ -520,7 +519,6 @@ export default function App() {
       if (currentPath === '/executive/stores') return <ExecutiveStoresPage />
       if (currentPath === '/executive/coupons') return <ExecutiveCouponsPage />
       if (currentPath === '/executive/credit-cards') return <ExecutiveCreditCardsPage />
-      if (currentPath === '/executive/giveaways') return <ExecutiveGiveawaysPage />
       if (currentPath === '/executive/banners') return <ExecutiveBannersPage />
       if (currentPath === '/executive/advertisements') return <ExecutiveAdvertisementsPage />
       return <ExecutiveDashboardPage />

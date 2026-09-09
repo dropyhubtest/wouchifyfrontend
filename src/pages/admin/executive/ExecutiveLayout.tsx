@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { LayoutDashboard, Zap, Flame, Store, Tag, CreditCard, Gift, Image as ImageIcon, Megaphone, ChevronLeft, ChevronRight, LogOut } from 'lucide-react'
+import { LayoutDashboard, Zap, Flame, Store, Tag, CreditCard, Image as ImageIcon, Megaphone, ChevronLeft, ChevronRight, LogOut } from 'lucide-react'
 import logo from '../../../assets/navbar/wouchify-logo.png'
 import './ExecutiveLayout.css'
 
@@ -46,7 +46,6 @@ export const ExecutiveLayout: React.FC<ExecutiveLayoutProps> = ({ children, acti
     { id: 'stores', label: 'Stores', path: '/executive/stores', icon: <Store size={20} /> },
     { id: 'coupons', label: 'Coupons', path: '/executive/coupons', icon: <Tag size={20} /> },
     { id: 'credit-cards', label: 'Credit Cards', path: '/executive/credit-cards', icon: <CreditCard size={20} /> },
-    { id: 'giveaways', label: 'Giveaways', path: '/executive/giveaways', icon: <Gift size={20} /> },
     { id: 'banners', label: 'Banners', path: '/executive/banners', icon: <ImageIcon size={20} /> },
     { id: 'advertisements', label: 'Advertisements', path: '/executive/advertisements', icon: <Megaphone size={20} /> },
   ]
