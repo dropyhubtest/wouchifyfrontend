@@ -1313,8 +1313,8 @@ export const ExecutiveBannersPage: React.FC = () => {
             ============================================================ */}
         {isFormOpen && (
           <div className="crud-modal-overlay">
-            <div className="crud-modal" style={{ maxWidth: '1000px', width: '94%' }}>
-              <div className="modal-header">
+            <div className="crud-modal" style={{ maxWidth: '1020px', width: '94%', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+              <div className="modal-header" style={{ flexShrink: 0 }}>
                 <div>
                   <h3 className="modal-title">
                     {editingBanner ? 'Edit Hero Banner' : 'Create New Hero Banner'}
@@ -1328,8 +1328,8 @@ export const ExecutiveBannersPage: React.FC = () => {
                 </button>
               </div>
 
-              <form onSubmit={handleSave}>
-                <div className="modal-body">
+              <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+                <div className="modal-body" style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '24px' }}>
                   {/* Two Column Layout: Left Form + Right Sticky Dynamic Hero Preview */}
                   <div style={{
                     display: 'grid',
@@ -1694,7 +1694,7 @@ export const ExecutiveBannersPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="modal-footer">
+                <div className="modal-footer" style={{ flexShrink: 0 }}>
                   <button type="button" className="btn-cancel" onClick={() => setIsFormOpen(false)}>
                     Cancel
                   </button>

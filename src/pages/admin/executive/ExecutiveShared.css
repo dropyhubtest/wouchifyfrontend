@@ -461,9 +461,21 @@
   transform: rotate(90deg);
 }
 
+.crud-modal > form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .modal-body {
-  padding: 28px;
+  padding: 24px 28px;
   overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  min-height: 0;
   background: #f8fafc;
   display: flex;
   flex-direction: column;
