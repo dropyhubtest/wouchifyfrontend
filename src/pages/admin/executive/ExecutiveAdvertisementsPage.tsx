@@ -14,13 +14,7 @@ import {
   CheckCircle2,
   Clock,
   RotateCcw,
-  TrendingUp,
-  Sliders,
   DollarSign,
-  Layers,
-  AlertTriangle,
-  Monitor,
-  Smartphone,
   MousePointer
 } from 'lucide-react'
 import './ExecutiveShared.css'

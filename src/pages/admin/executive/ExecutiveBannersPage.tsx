@@ -18,12 +18,9 @@ import {
   Tag,
   CreditCard,
   Layers,
-  AlertTriangle,
   CheckCircle2,
   Clock,
   RotateCcw,
-  Check,
-  Copy,
   TrendingUp,
   Sliders,
   Palette

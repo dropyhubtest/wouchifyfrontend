@@ -1,5 +1,5 @@
 import React, { useRef } from 'react'
-import { Upload, Link2, X, Image as ImageIcon } from 'lucide-react'
+import { Upload, Link2, X } from 'lucide-react'
 
 interface ImageUploadFieldProps {
   /** Current image URL or base64 data URL */

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react'
+import React, { useState, useMemo } from 'react'
 import { ExecutiveLayout } from './ExecutiveLayout'
 import {
   Plus,
@@ -14,18 +14,13 @@ import {
   RotateCcw,
   CheckCircle2,
   XCircle,
-  Clock,
   Ticket,
-  Store as StoreIcon,
   TrendingUp,
   AlertTriangle,
-  Calendar,
   ExternalLink,
-  Zap,
   Star,
   ShoppingBag,
-  Percent,
-  Bell,
+  Percent
 } from 'lucide-react'
 import './ExecutiveShared.css'
 import { FAVOURITE_STORES } from '../../../data/storesHero'

@@ -11,16 +11,12 @@ import {
   Filter,
   RotateCcw,
   CheckCircle2,
-  XCircle,
   AlertTriangle,
   TrendingUp,
   Star,
   Gift,
   Percent,
   ExternalLink,
-  Copy,
-  Check,
-  Calendar,
   Banknote,
   Shield,
   Sparkles,
@@ -264,7 +260,6 @@ const CardVisual: React.FC<{ card: Partial<CreditCard>; size?: 'sm' | 'lg' }> = 
    ============================================================ */
 
 const CardPreviewModal: React.FC<{ card: CreditCard; onClose: () => void }> = ({ card, onClose }) => {
-  const [copied, setCopied] = useState(false)
   const days = daysLeft(card.offerExpiryDate)
   const pill = expiryPill(days)
   const sc = statusCfg(card.status)
