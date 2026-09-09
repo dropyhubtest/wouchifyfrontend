@@ -36,6 +36,7 @@ import './ExecutiveShared.css'
 import { DEAL_PRODUCT_PRESETS, getStoreLogo, convertGoogleDriveUrl } from '../../../data/dealsPage'
 import { FAVOURITE_STORES } from '../../../data/storesHero'
 import { CATEGORIES_DATA } from '../../../data/categories'
+import { ImageUploadField } from './ImageUploadField'
 
 export interface LootDeal {
   id: string
@@ -1757,15 +1758,12 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                     <span className="form-section-desc">Image URL & quick presets</span>
                   </div>
 
-                  <div className="form-group">
-                    <label>Main Image URL</label>
-                    <input 
-                      type="text" 
-                      placeholder="https://..." 
-                      value={form.image}
-                      onChange={(e) => handleImageUrlChange(e.target.value)}
-                    />
-                  </div>
+                  <ImageUploadField
+                    label="Main Product Image"
+                    placeholder="Paste URL or upload from device…"
+                    value={form.image}
+                    onChange={(val) => handleImageUrlChange(val)}
+                  />
 
                   <div style={{ marginTop: '10px' }}>
                     <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>Quick Sample Presets:</span>
