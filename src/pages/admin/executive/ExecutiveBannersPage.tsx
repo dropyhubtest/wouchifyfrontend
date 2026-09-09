@@ -735,6 +735,7 @@ export const ExecutiveBannersPage: React.FC = () => {
 
   // Modals state
   const [isFormOpen, setIsFormOpen] = useState(false)
+  const [formStep, setFormStep] = useState<1 | 2>(1)
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null)
   const [previewingBanner, setPreviewingBanner] = useState<Banner | null>(null)
 
@@ -812,6 +813,7 @@ export const ExecutiveBannersPage: React.FC = () => {
   // Handlers
   const handleOpenAdd = () => {
     setEditingBanner(null)
+    setFormStep(1)
     const defaultExp = new Date()
     defaultExp.setDate(defaultExp.getDate() + 30)
     setFormData({
@@ -839,6 +841,7 @@ export const ExecutiveBannersPage: React.FC = () => {
 
   const handleOpenEdit = (b: Banner) => {
     setEditingBanner(b)
+    setFormStep(1)
     setFormData({ ...b })
     setIsFormOpen(true)
   }
@@ -1326,312 +1329,347 @@ export const ExecutiveBannersPage: React.FC = () => {
               </div>
 
               <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
-                <div className="modal-body" style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '24px' }}>
-                  {/* Two Column Layout: Left Form + Right Sticky Dynamic Hero Preview */}
+                <div className="modal-body" style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '20px 24px' }}>
+                  {/* Form Stepper Header */}
+                  <div className="form-stepper">
+                    <button
+                      type="button"
+                      className={`step-tab-btn ${formStep === 1 ? 'active' : ''} ${formData.title ? 'completed' : ''}`}
+                      onClick={() => setFormStep(1)}
+                    >
+                      <div className="step-number">1</div>
+                      <div className="step-info">
+                        <span className="step-title">Step 1: Hero Identity & Copy</span>
+                        <span className="step-desc">Target slot, headings, subtitle & CTA</span>
+                      </div>
+                    </button>
+                    <div className="step-divider">›</div>
+                    <button
+                      type="button"
+                      className={`step-tab-btn ${formStep === 2 ? 'active' : ''} ${formData.expiryDate ? 'completed' : ''}`}
+                      onClick={() => setFormStep(2)}
+                    >
+                      <div className="step-number">2</div>
+                      <div className="step-info">
+                        <span className="step-title">Step 2: Media, Expiry & Launch</span>
+                        <span className="step-desc">Creatives, mandatory expiry & status</span>
+                      </div>
+                    </button>
+                  </div>
+
+                  {/* Two Column Layout: Left Step Pane + Right Sticky Dynamic Hero Preview */}
                   <div style={{
                     display: 'grid',
                     gridTemplateColumns: '1fr 340px',
                     gap: '24px',
                     alignItems: 'start'
                   }}>
-                    {/* ── LEFT FORM FIELDS ── */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                      {/* Target Page Slot Selector */}
-                      <div className="form-group">
-                        <label style={{ fontWeight: 700, color: '#0f172a' }}>
-                          Target Page & Hero Slot *
-                        </label>
-                        <select
-                          value={formData.targetPage || 'home-hero'}
-                          onChange={(e) => handleTargetPageChange(e.target.value as TargetPageType)}
-                          style={{
-                            width: '100%',
-                            padding: '10px 12px',
-                            borderRadius: '8px',
-                            border: '2px solid #e2e8f0',
-                            fontWeight: 600,
-                            background: '#f8fafc',
-                            fontSize: '0.92rem'
-                          }}
-                        >
-                          {TARGET_PAGES.map(p => (
-                            <option key={p.value} value={p.value}>
-                              {p.label} — ({p.recommendedSize})
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      {/* Banner Name */}
-                      <div className="form-group">
-                        <label style={{ fontWeight: 700, color: '#0f172a' }}>
-                          Internal Banner Title *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          placeholder="e.g. Diwali Mega Sale Hero 2026"
-                          value={formData.title || ''}
-                          onChange={(e) => setFormData(f => ({ ...f, title: e.target.value }))}
-                        />
-                      </div>
-
-                      {/* Badge Text & Accent Theme Color */}
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label>Hero Top Badge / Tag</label>
-                          <input
-                            type="text"
-                            placeholder="e.g. INDIA'S #1 PLATFORM or ⚡ FLASH DROP"
-                            value={formData.badgeText || ''}
-                            onChange={(e) => setFormData(f => ({ ...f, badgeText: e.target.value }))}
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label>Accent Brand Color</label>
-                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                            <input
-                              type="color"
-                              value={formData.themeColor || '#E31E25'}
-                              onChange={(e) => setFormData(f => ({ ...f, themeColor: e.target.value }))}
-                              style={{ width: '44px', height: '38px', padding: '2px', borderRadius: '6px', cursor: 'pointer' }}
-                            />
-                            <input
-                              type="text"
-                              value={formData.themeColor || '#E31E25'}
-                              onChange={(e) => setFormData(f => ({ ...f, themeColor: e.target.value }))}
-                              style={{ flex: 1 }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Dynamic Headings */}
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label>Heading Line 1 *</label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="e.g. India's #1 or Shop at"
-                            value={formData.headingLine1 || ''}
-                            onChange={(e) => setFormData(f => ({ ...f, headingLine1: e.target.value }))}
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label>Heading Line 2 (Highlighted) *</label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="e.g. Deal Hunt or 100+ Verified Stores"
-                            value={formData.headingLine2 || ''}
-                            onChange={(e) => setFormData(f => ({ ...f, headingLine2: e.target.value }))}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Optional Heading Line 3 (for multi-line landing heroes) */}
-                      {formData.targetPage === 'home-hero' && (
-                        <div className="form-group">
-                          <label>Heading Line 3 (Optional)</label>
-                          <input
-                            type="text"
-                            placeholder="e.g. Platform"
-                            value={formData.headingLine3 || ''}
-                            onChange={(e) => setFormData(f => ({ ...f, headingLine3: e.target.value }))}
-                          />
-                        </div>
-                      )}
-
-                      {/* Description / Subheading */}
-                      <div className="form-group">
-                        <label>Hero Description / Subtitle</label>
-                        <textarea
-                          rows={2}
-                          placeholder="Find verified coupons, loot deals & credit card rewards from 500+ top brands."
-                          value={formData.description || ''}
-                          onChange={(e) => setFormData(f => ({ ...f, description: e.target.value }))}
-                          style={{
-                            width: '100%',
-                            padding: '10px 12px',
-                            borderRadius: '8px',
-                            border: '1px solid #e2e8f0',
-                            fontFamily: 'inherit',
-                            fontSize: '0.9rem'
-                          }}
-                        />
-                      </div>
-
-                      {/* CTA Button Text & Destination URL */}
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label>CTA Button Label *</label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="e.g. Explore Deals"
-                            value={formData.ctaText || ''}
-                            onChange={(e) => setFormData(f => ({ ...f, ctaText: e.target.value }))}
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label>Destination Target Link *</label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="e.g. /deals or https://..."
-                            value={formData.targetLink || ''}
-                            onChange={(e) => setFormData(f => ({ ...f, targetLink: e.target.value }))}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Primary Hero Graphic Image (URL + File Upload) */}
-                      <div className="form-group">
-                        <label style={{ fontWeight: 700, color: '#0f172a' }}>
-                          Primary Hero Graphic / Character Image
-                        </label>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          <input
-                            type="text"
-                            placeholder="https://... or upload local image"
-                            value={formData.primaryImage || ''}
-                            onChange={(e) => setFormData(f => ({ ...f, primaryImage: e.target.value }))}
-                            style={{ flex: 1 }}
-                          />
-                          <input
-                            type="file"
-                            ref={primaryFileRef}
-                            accept="image/*"
-                            style={{ display: 'none' }}
-                            onChange={(e) => handleFileUpload(e, 'primaryImage')}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => primaryFileRef.current?.click()}
-                            style={{
-                              padding: '10px 14px',
-                              background: '#f1f5f9',
-                              border: '1px solid #cbd5e1',
-                              borderRadius: '8px',
-                              fontWeight: 600,
-                              fontSize: '0.85rem',
-                              cursor: 'pointer',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '6px'
-                            }}
-                          >
-                            <Upload size={15} /> Upload
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Secondary Graphic (Stores Cart / Backdrop / Deals Icon) */}
-                      {(formData.targetPage === 'stores-hero' || formData.targetPage === 'home-hero') && (
-                        <div className="form-group">
-                          <label>
-                            {formData.targetPage === 'stores-hero' ? 'Secondary Cart / Backdrop Graphic' : 'Secondary Graphic Element'}
-                          </label>
-                          <div style={{ display: 'flex', gap: '8px' }}>
-                            <input
-                              type="text"
-                              placeholder="https://... or upload image"
-                              value={formData.secondaryImage || ''}
-                              onChange={(e) => setFormData(f => ({ ...f, secondaryImage: e.target.value }))}
-                              style={{ flex: 1 }}
-                            />
-                            <input
-                              type="file"
-                              ref={secondaryFileRef}
-                              accept="image/*"
-                              style={{ display: 'none' }}
-                              onChange={(e) => handleFileUpload(e, 'secondaryImage')}
-                            />
-                            <button
-                              type="button"
-                              onClick={() => secondaryFileRef.current?.click()}
+                    {/* ── LEFT STEP CONTENT ── */}
+                    <div>
+                      {formStep === 1 && (
+                        <div className="form-step-pane">
+                          {/* Target Page Slot Selector */}
+                          <div className="form-group">
+                            <label style={{ fontWeight: 700, color: '#0f172a' }}>
+                              Target Page & Hero Slot *
+                            </label>
+                            <select
+                              value={formData.targetPage || 'home-hero'}
+                              onChange={(e) => handleTargetPageChange(e.target.value as TargetPageType)}
                               style={{
-                                padding: '10px 14px',
-                                background: '#f1f5f9',
-                                border: '1px solid #cbd5e1',
+                                width: '100%',
+                                padding: '10px 12px',
                                 borderRadius: '8px',
+                                border: '2px solid #e2e8f0',
                                 fontWeight: 600,
-                                fontSize: '0.85rem',
-                                cursor: 'pointer',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '6px'
+                                background: '#f8fafc',
+                                fontSize: '0.92rem'
                               }}
                             >
-                              <Upload size={15} /> Upload
-                            </button>
+                              {TARGET_PAGES.map(p => (
+                                <option key={p.value} value={p.value}>
+                                  {p.label} — ({p.recommendedSize})
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* Banner Name */}
+                          <div className="form-group">
+                            <label style={{ fontWeight: 700, color: '#0f172a' }}>
+                              Internal Banner Title *
+                            </label>
+                            <input
+                              type="text"
+                              required
+                              placeholder="e.g. Diwali Mega Sale Hero 2026"
+                              value={formData.title || ''}
+                              onChange={(e) => setFormData(f => ({ ...f, title: e.target.value }))}
+                            />
+                          </div>
+
+                          {/* Badge Text & Accent Theme Color */}
+                          <div className="form-row">
+                            <div className="form-group">
+                              <label>Hero Top Badge / Tag</label>
+                              <input
+                                type="text"
+                                placeholder="e.g. INDIA'S #1 PLATFORM or ⚡ FLASH DROP"
+                                value={formData.badgeText || ''}
+                                onChange={(e) => setFormData(f => ({ ...f, badgeText: e.target.value }))}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>Accent Brand Color</label>
+                              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                <input
+                                  type="color"
+                                  value={formData.themeColor || '#E31E25'}
+                                  onChange={(e) => setFormData(f => ({ ...f, themeColor: e.target.value }))}
+                                  style={{ width: '44px', height: '38px', padding: '2px', borderRadius: '6px', cursor: 'pointer' }}
+                                />
+                                <input
+                                  type="text"
+                                  value={formData.themeColor || '#E31E25'}
+                                  onChange={(e) => setFormData(f => ({ ...f, themeColor: e.target.value }))}
+                                  style={{ flex: 1 }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Dynamic Headings */}
+                          <div className="form-row">
+                            <div className="form-group">
+                              <label>Heading Line 1 *</label>
+                              <input
+                                type="text"
+                                required
+                                placeholder="e.g. India's #1 or Shop at"
+                                value={formData.headingLine1 || ''}
+                                onChange={(e) => setFormData(f => ({ ...f, headingLine1: e.target.value }))}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>Heading Line 2 (Highlighted) *</label>
+                              <input
+                                type="text"
+                                required
+                                placeholder="e.g. Deal Hunt or 100+ Verified Stores"
+                                value={formData.headingLine2 || ''}
+                                onChange={(e) => setFormData(f => ({ ...f, headingLine2: e.target.value }))}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Optional Heading Line 3 */}
+                          {formData.targetPage === 'home-hero' && (
+                            <div className="form-group">
+                              <label>Heading Line 3 (Optional)</label>
+                              <input
+                                type="text"
+                                placeholder="e.g. Platform"
+                                value={formData.headingLine3 || ''}
+                                onChange={(e) => setFormData(f => ({ ...f, headingLine3: e.target.value }))}
+                              />
+                            </div>
+                          )}
+
+                          {/* Description / Subheading */}
+                          <div className="form-group">
+                            <label>Hero Description / Subtitle</label>
+                            <textarea
+                              rows={2}
+                              placeholder="Find verified coupons, loot deals & credit card rewards from 500+ top brands."
+                              value={formData.description || ''}
+                              onChange={(e) => setFormData(f => ({ ...f, description: e.target.value }))}
+                              style={{
+                                width: '100%',
+                                padding: '10px 12px',
+                                borderRadius: '8px',
+                                border: '1px solid #e2e8f0',
+                                fontFamily: 'inherit',
+                                fontSize: '0.9rem'
+                              }}
+                            />
+                          </div>
+
+                          {/* CTA Button Text & Destination URL */}
+                          <div className="form-row">
+                            <div className="form-group">
+                              <label>CTA Button Label *</label>
+                              <input
+                                type="text"
+                                required
+                                placeholder="e.g. Explore Deals"
+                                value={formData.ctaText || ''}
+                                onChange={(e) => setFormData(f => ({ ...f, ctaText: e.target.value }))}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>Destination Target Link *</label>
+                              <input
+                                type="text"
+                                required
+                                placeholder="e.g. /deals or https://..."
+                                value={formData.targetLink || ''}
+                                onChange={(e) => setFormData(f => ({ ...f, targetLink: e.target.value }))}
+                              />
+                            </div>
                           </div>
                         </div>
                       )}
 
-                      {/* Deal Chips (For Home Hero) */}
-                      {formData.targetPage === 'home-hero' && (
-                        <div className="form-row">
+                      {formStep === 2 && (
+                        <div className="form-step-pane">
+                          {/* Primary Hero Graphic Image (URL + File Upload) */}
                           <div className="form-group">
-                            <label>Floating Deal Chip 1</label>
-                            <input
-                              type="text"
-                              placeholder="e.g. Instant Deals"
-                              value={formData.dealChip1 || ''}
-                              onChange={(e) => setFormData(f => ({ ...f, dealChip1: e.target.value }))}
-                            />
+                            <label style={{ fontWeight: 700, color: '#0f172a' }}>
+                              Primary Hero Graphic / Character Image
+                            </label>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <input
+                                type="text"
+                                placeholder="https://... or upload local image"
+                                value={formData.primaryImage || ''}
+                                onChange={(e) => setFormData(f => ({ ...f, primaryImage: e.target.value }))}
+                                style={{ flex: 1 }}
+                              />
+                              <input
+                                type="file"
+                                ref={primaryFileRef}
+                                accept="image/*"
+                                style={{ display: 'none' }}
+                                onChange={(e) => handleFileUpload(e, 'primaryImage')}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => primaryFileRef.current?.click()}
+                                style={{
+                                  padding: '10px 14px',
+                                  background: '#f1f5f9',
+                                  border: '1px solid #cbd5e1',
+                                  borderRadius: '8px',
+                                  fontWeight: 600,
+                                  fontSize: '0.85rem',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px'
+                                }}
+                              >
+                                <Upload size={15} /> Upload
+                              </button>
+                            </div>
                           </div>
-                          <div className="form-group">
-                            <label>Floating Deal Chip 2</label>
-                            <input
-                              type="text"
-                              placeholder="e.g. Flat 90% Off"
-                              value={formData.dealChip2 || ''}
-                              onChange={(e) => setFormData(f => ({ ...f, dealChip2: e.target.value }))}
-                            />
+
+                          {/* Secondary Graphic (Stores Cart / Backdrop / Deals Icon) */}
+                          {(formData.targetPage === 'stores-hero' || formData.targetPage === 'home-hero') && (
+                            <div className="form-group">
+                              <label>
+                                {formData.targetPage === 'stores-hero' ? 'Secondary Cart / Backdrop Graphic' : 'Secondary Graphic Element'}
+                              </label>
+                              <div style={{ display: 'flex', gap: '8px' }}>
+                                <input
+                                  type="text"
+                                  placeholder="https://... or upload image"
+                                  value={formData.secondaryImage || ''}
+                                  onChange={(e) => setFormData(f => ({ ...f, secondaryImage: e.target.value }))}
+                                  style={{ flex: 1 }}
+                                />
+                                <input
+                                  type="file"
+                                  ref={secondaryFileRef}
+                                  accept="image/*"
+                                  style={{ display: 'none' }}
+                                  onChange={(e) => handleFileUpload(e, 'secondaryImage')}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => secondaryFileRef.current?.click()}
+                                  style={{
+                                    padding: '10px 14px',
+                                    background: '#f1f5f9',
+                                    border: '1px solid #cbd5e1',
+                                    borderRadius: '8px',
+                                    fontWeight: 600,
+                                    fontSize: '0.85rem',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
+                                  }}
+                                >
+                                  <Upload size={15} /> Upload
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Deal Chips (For Home Hero) */}
+                          {formData.targetPage === 'home-hero' && (
+                            <div className="form-row">
+                              <div className="form-group">
+                                <label>Floating Deal Chip 1</label>
+                                <input
+                                  type="text"
+                                  placeholder="e.g. Instant Deals"
+                                  value={formData.dealChip1 || ''}
+                                  onChange={(e) => setFormData(f => ({ ...f, dealChip1: e.target.value }))}
+                                />
+                              </div>
+                              <div className="form-group">
+                                <label>Floating Deal Chip 2</label>
+                                <input
+                                  type="text"
+                                  placeholder="e.g. Flat 90% Off"
+                                  value={formData.dealChip2 || ''}
+                                  onChange={(e) => setFormData(f => ({ ...f, dealChip2: e.target.value }))}
+                                />
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Mandatory Expiry Date, Priority & Status */}
+                          <div className="form-row" style={{ background: '#f8fafc', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                            <div className="form-group" style={{ margin: 0 }}>
+                              <label style={{ fontWeight: 800, color: '#dc2626', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <Calendar size={14} /> Mandatory Expiry Date *
+                              </label>
+                              <input
+                                type="date"
+                                required
+                                value={formData.expiryDate || ''}
+                                onChange={(e) => setFormData(f => ({ ...f, expiryDate: e.target.value }))}
+                                style={{ borderColor: '#fca5a5' }}
+                              />
+                            </div>
+
+                            <div className="form-group" style={{ margin: 0 }}>
+                              <label>Display Priority (1 - 10)</label>
+                              <input
+                                type="number"
+                                min={1}
+                                max={10}
+                                value={formData.priority || 5}
+                                onChange={(e) => setFormData(f => ({ ...f, priority: parseInt(e.target.value) || 1 }))}
+                              />
+                            </div>
+
+                            <div className="form-group" style={{ margin: 0 }}>
+                              <label>Status</label>
+                              <select
+                                value={formData.status || 'active'}
+                                onChange={(e) => setFormData(f => ({ ...f, status: e.target.value as BannerStatus }))}
+                              >
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                                <option value="scheduled">Scheduled</option>
+                              </select>
+                            </div>
                           </div>
                         </div>
                       )}
-
-                      {/* Mandatory Expiry Date, Priority & Status */}
-                      <div className="form-row" style={{ background: '#f8fafc', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                        <div className="form-group" style={{ margin: 0 }}>
-                          <label style={{ fontWeight: 800, color: '#dc2626', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <Calendar size={14} /> Mandatory Expiry Date *
-                          </label>
-                          <input
-                            type="date"
-                            required
-                            value={formData.expiryDate || ''}
-                            onChange={(e) => setFormData(f => ({ ...f, expiryDate: e.target.value }))}
-                            style={{ borderColor: '#fca5a5' }}
-                          />
-                        </div>
-
-                        <div className="form-group" style={{ margin: 0 }}>
-                          <label>Display Priority (1 - 10)</label>
-                          <input
-                            type="number"
-                            min={1}
-                            max={10}
-                            value={formData.priority || 5}
-                            onChange={(e) => setFormData(f => ({ ...f, priority: parseInt(e.target.value) || 1 }))}
-                          />
-                        </div>
-
-                        <div className="form-group" style={{ margin: 0 }}>
-                          <label>Status</label>
-                          <select
-                            value={formData.status || 'active'}
-                            onChange={(e) => setFormData(f => ({ ...f, status: e.target.value as BannerStatus }))}
-                          >
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                            <option value="scheduled">Scheduled</option>
-                          </select>
-                        </div>
-                      </div>
                     </div>
 
                     {/* ── RIGHT COLUMN: STICKY DYNAMIC HERO PREVIEW ── */}
@@ -1691,13 +1729,36 @@ export const ExecutiveBannersPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="modal-footer" style={{ flexShrink: 0 }}>
-                  <button type="button" className="btn-cancel" onClick={() => setIsFormOpen(false)}>
-                    Cancel
-                  </button>
-                  <button type="submit" className="btn-save">
-                    {editingBanner ? 'Update Hero Banner' : 'Save & Publish Hero'}
-                  </button>
+                <div className="modal-footer" style={{ flexShrink: 0, justifyContent: 'space-between', display: 'flex' }}>
+                  {formStep === 1 ? (
+                    <>
+                      <button type="button" className="btn-cancel" onClick={() => setIsFormOpen(false)}>
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-save"
+                        onClick={() => {
+                          if (!formData.title?.trim()) {
+                            alert('Please enter a Banner Title before proceeding.')
+                            return
+                          }
+                          setFormStep(2)
+                        }}
+                      >
+                        Next: Media & Expiry &rarr;
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button type="button" className="btn-cancel" onClick={() => setFormStep(1)}>
+                        &larr; Back to Step 1
+                      </button>
+                      <button type="submit" className="btn-save">
+                        {editingBanner ? 'Update Hero Banner' : 'Save & Publish Hero'}
+                      </button>
+                    </>
+                  )}
                 </div>
               </form>
             </div>

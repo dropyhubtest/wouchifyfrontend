@@ -192,6 +192,7 @@ const COLOR_PRESETS = [
 ]
 
 const StoreFormModal: React.FC<StoreFormModalProps> = ({ editing, onClose, onSave }) => {
+  const [formStep, setFormStep] = useState<1 | 2>(1)
   const [form, setForm] = useState<Partial<ManagedStore>>(
     editing ? { ...editing } : { ...EMPTY_FORM }
   )
@@ -223,7 +224,7 @@ const StoreFormModal: React.FC<StoreFormModalProps> = ({ editing, onClose, onSav
 
   return (
     <div className="crud-modal-overlay">
-      <div className="crud-modal" style={{ maxWidth: 860, width: '95vw' }}>
+      <div className="crud-modal" style={{ maxWidth: 880, width: '95vw' }}>
         {/* Header */}
         <div className="modal-header">
           <h3 className="modal-title">
@@ -233,124 +234,161 @@ const StoreFormModal: React.FC<StoreFormModalProps> = ({ editing, onClose, onSav
           <button className="modal-close" onClick={onClose}><X size={20} /></button>
         </div>
 
-        <div className="modal-body" style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 24 }}>
+        {/* Stepper Header */}
+        <div style={{ padding: '0 24px', marginTop: 16 }}>
+          <div className="form-stepper" style={{ marginBottom: 0 }}>
+            <button
+              type="button"
+              className={`step-tab-btn ${formStep === 1 ? 'active' : ''} ${form.name ? 'completed' : ''}`}
+              onClick={() => setFormStep(1)}
+            >
+              <div className="step-number">1</div>
+              <div className="step-info">
+                <span className="step-title">Step 1: Store Details & Links</span>
+                <span className="step-desc">Name, category, offer text & link</span>
+              </div>
+            </button>
+            <div className="step-divider">›</div>
+            <button
+              type="button"
+              className={`step-tab-btn ${formStep === 2 ? 'active' : ''} ${form.logoUrl ? 'completed' : ''}`}
+              onClick={() => setFormStep(2)}
+            >
+              <div className="step-number">2</div>
+              <div className="step-info">
+                <span className="step-title">Step 2: Branding & Appearance</span>
+                <span className="step-desc">Logo upload, color theme & status</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <div className="modal-body" style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 24, paddingTop: 20 }}>
           {/* Form column */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div>
+            {formStep === 1 && (
+              <div className="form-step-pane">
+                {/* Row: Name + Slug */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div className="form-group">
+                    <label>Store Name <span style={{ color: '#ef4444' }}>*</span></label>
+                    <input
+                      type="text"
+                      placeholder="e.g., Amazon"
+                      value={form.name ?? ''}
+                      onChange={e => set('name', e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>URL Slug</label>
+                    <input
+                      type="text"
+                      placeholder="auto-generated"
+                      value={form.slug ?? ''}
+                      onChange={e => set('slug', e.target.value)}
+                    />
+                  </div>
+                </div>
 
-            {/* Row: Name + Slug */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <div className="form-group">
-                <label>Store Name <span style={{ color: '#ef4444' }}>*</span></label>
-                <input
-                  type="text"
-                  placeholder="e.g., Amazon"
-                  value={form.name ?? ''}
-                  onChange={e => set('name', e.target.value)}
-                />
-              </div>
-              <div className="form-group">
-                <label>URL Slug</label>
-                <input
-                  type="text"
-                  placeholder="auto-generated"
-                  value={form.slug ?? ''}
-                  onChange={e => set('slug', e.target.value)}
-                />
-              </div>
-            </div>
+                {/* Category */}
+                <div className="form-group">
+                  <label>Store Category</label>
+                  <select value={form.category ?? 'Fashion'} onChange={e => set('category', e.target.value)}>
+                    {CATEGORY_LIST.filter(c => c !== 'All Stores').map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
 
-            {/* Logo Upload */}
-            <ImageUploadField
-              label="Store Logo"
-              placeholder="https://logo.clearbit.com/amazon.com"
-              value={form.logoUrl as string ?? ''}
-              onChange={val => set('logoUrl', val)}
-            />
-
-            {/* Row: Category + Status */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <div className="form-group">
-                <label>Category</label>
-                <select value={form.category ?? 'Fashion'} onChange={e => set('category', e.target.value)}>
-                  {CATEGORY_LIST.filter(c => c !== 'All Stores').map(c => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Status</label>
-                <select value={form.status ?? 'active'} onChange={e => set('status', e.target.value)}>
-                  <option value="active">Active</option>
-                  <option value="featured">Featured</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Reward + Description */}
-            <div className="form-group">
-              <label>Reward / Offer Text</label>
-              <input
-                type="text"
-                placeholder="e.g., Upto 6.8% rewards"
-                value={form.reward ?? ''}
-                onChange={e => set('reward', e.target.value)}
-              />
-            </div>
-            <div className="form-group">
-              <label>Short Description</label>
-              <input
-                type="text"
-                placeholder="e.g., 5000+ Live deals & Coupons"
-                value={form.description ?? ''}
-                onChange={e => set('description', e.target.value)}
-              />
-            </div>
-
-            {/* Affiliate Link */}
-            <div className="form-group">
-              <label>Affiliate / Tracking Link</label>
-              <input
-                type="url"
-                placeholder="https://amazon.in/?tag=wouchify"
-                value={form.affiliateLink ?? ''}
-                onChange={e => set('affiliateLink', e.target.value)}
-              />
-            </div>
-
-            {/* Color Presets */}
-            <div className="form-group">
-              <label>Card Color Theme</label>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 6 }}>
-                {COLOR_PRESETS.map(p => (
-                  <button
-                    key={p.label}
-                    title={p.label}
-                    onClick={() => { set('cardBg', p.card); set('badgeBg', p.badge) }}
-                    style={{
-                      width: 32, height: 32, borderRadius: 8,
-                      background: p.card, border: form.cardBg === p.card
-                        ? '3px solid #0f172a' : '2px solid #e2e8f0',
-                      cursor: 'pointer', flexShrink: 0,
-                    }}
+                {/* Reward + Description */}
+                <div className="form-group">
+                  <label>Reward / Offer Text</label>
+                  <input
+                    type="text"
+                    placeholder="e.g., Upto 6.8% rewards"
+                    value={form.reward ?? ''}
+                    onChange={e => set('reward', e.target.value)}
                   />
-                ))}
-              </div>
-            </div>
+                </div>
+                <div className="form-group">
+                  <label>Short Tagline / Description</label>
+                  <input
+                    type="text"
+                    placeholder="e.g., 5000+ Live deals & Coupons"
+                    value={form.description ?? ''}
+                    onChange={e => set('description', e.target.value)}
+                  />
+                </div>
 
-            {/* Featured toggle */}
-            <div className="form-group" style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-              <input
-                type="checkbox"
-                id="store-featured"
-                checked={form.isFeatured ?? false}
-                onChange={e => set('isFeatured', e.target.checked)}
-                style={{ width: 18, height: 18, accentColor: '#ef4444' }}
-              />
-              <label htmlFor="store-featured" style={{ margin: 0, cursor: 'pointer' }}>
-                Mark as Featured Store
-              </label>
-            </div>
+                {/* Affiliate Link */}
+                <div className="form-group">
+                  <label>Affiliate / Tracking Link</label>
+                  <input
+                    type="url"
+                    placeholder="https://amazon.in/?tag=wouchify"
+                    value={form.affiliateLink ?? ''}
+                    onChange={e => set('affiliateLink', e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+
+            {formStep === 2 && (
+              <div className="form-step-pane">
+                {/* Logo Upload */}
+                <ImageUploadField
+                  label="Store Logo"
+                  placeholder="https://logo.clearbit.com/amazon.com"
+                  value={form.logoUrl as string ?? ''}
+                  onChange={val => set('logoUrl', val)}
+                />
+
+                {/* Status */}
+                <div className="form-group">
+                  <label>Store Status</label>
+                  <select value={form.status ?? 'active'} onChange={e => set('status', e.target.value)}>
+                    <option value="active">Active</option>
+                    <option value="featured">Featured</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+
+                {/* Color Presets */}
+                <div className="form-group">
+                  <label>Card Color Theme</label>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 6 }}>
+                    {COLOR_PRESETS.map(p => (
+                      <button
+                        key={p.label}
+                        title={p.label}
+                        type="button"
+                        onClick={() => { set('cardBg', p.card); set('badgeBg', p.badge) }}
+                        style={{
+                          width: 32, height: 32, borderRadius: 8,
+                          background: p.card, border: form.cardBg === p.card
+                            ? '3px solid #0f172a' : '2px solid #e2e8f0',
+                          cursor: 'pointer', flexShrink: 0,
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Featured toggle */}
+                <div className="form-group" style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 4 }}>
+                  <input
+                    type="checkbox"
+                    id="store-featured"
+                    checked={form.isFeatured ?? false}
+                    onChange={e => set('isFeatured', e.target.checked)}
+                    style={{ width: 18, height: 18, accentColor: '#ef4444' }}
+                  />
+                  <label htmlFor="store-featured" style={{ margin: 0, cursor: 'pointer', fontWeight: 600 }}>
+                    Mark as Featured Store on Wouchify
+                  </label>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Live Preview column */}
@@ -366,11 +404,32 @@ const StoreFormModal: React.FC<StoreFormModalProps> = ({ editing, onClose, onSav
         </div>
 
         {/* Footer */}
-        <div className="modal-footer">
-          <button className="btn-cancel" onClick={onClose}>Cancel</button>
-          <button className="btn-save" onClick={handleSave}>
-            {editing ? 'Save Changes' : 'Add Store'}
-          </button>
+        <div className="modal-footer" style={{ justifyContent: 'space-between', display: 'flex' }}>
+          {formStep === 1 ? (
+            <>
+              <button type="button" className="btn-cancel" onClick={onClose}>Cancel</button>
+              <button
+                type="button"
+                className="btn-save"
+                onClick={() => {
+                  if (!form.name?.trim()) {
+                    alert('Store name is required')
+                    return
+                  }
+                  setFormStep(2)
+                }}
+              >
+                Next: Branding & Theme &rarr;
+              </button>
+            </>
+          ) : (
+            <>
+              <button type="button" className="btn-cancel" onClick={() => setFormStep(1)}>&larr; Back to Step 1</button>
+              <button type="button" className="btn-save" onClick={handleSave}>
+                {editing ? 'Save Changes' : 'Add Store'}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

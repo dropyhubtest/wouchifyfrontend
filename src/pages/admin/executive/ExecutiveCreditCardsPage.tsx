@@ -371,6 +371,7 @@ const CardPreviewModal: React.FC<{ card: CreditCard; onClose: () => void }> = ({
 interface CardFormProps { editing: CreditCard | null; onClose: () => void; onSave: (c: CreditCard) => void }
 
 const CardFormModal: React.FC<CardFormProps> = ({ editing, onClose, onSave }) => {
+  const [formStep, setFormStep] = useState<1 | 2>(1)
   const [form, setForm] = useState<Partial<CreditCard>>(editing ? { ...editing } : { ...EMPTY_FORM })
   const set = (k: keyof CreditCard, v: unknown) => setForm(f => ({ ...f, [k]: v }))
 
@@ -412,144 +413,181 @@ const CardFormModal: React.FC<CardFormProps> = ({ editing, onClose, onSave }) =>
 
   return (
     <div className="crud-modal-overlay">
-      <div className="crud-modal" style={{ maxWidth: 860, width: '95vw' }}>
+      <div className="crud-modal" style={{ maxWidth: 880, width: '95vw' }}>
         <div className="modal-header">
           <h3 className="modal-title"><CardIcon size={20} style={{ marginRight: 8, color: '#6366f1' }} />{editing ? 'Edit Credit Card' : 'Add New Credit Card'}</h3>
           <button className="modal-close" onClick={onClose}><X size={20} /></button>
         </div>
 
+        {/* Stepper Header */}
+        <div style={{ padding: '0 24px', marginTop: 16 }}>
+          <div className="form-stepper" style={{ marginBottom: 0 }}>
+            <button
+              type="button"
+              className={`step-tab-btn ${formStep === 1 ? 'active' : ''} ${form.cardName && form.bank ? 'completed' : ''}`}
+              onClick={() => setFormStep(1)}
+            >
+              <div className="step-number">1</div>
+              <div className="step-info">
+                <span className="step-title">Step 1: Card Perks & Fees</span>
+                <span className="step-desc">Bank, tier, welcome rewards & fees</span>
+              </div>
+            </button>
+            <div className="step-divider">›</div>
+            <button
+              type="button"
+              className={`step-tab-btn ${formStep === 2 ? 'active' : ''} ${form.offerExpiryDate ? 'completed' : ''}`}
+              onClick={() => setFormStep(2)}
+            >
+              <div className="step-number">2</div>
+              <div className="step-info">
+                <span className="step-title">Step 2: Media, Expiry & Launch</span>
+                <span className="step-desc">Card visual, mandatory expiry & link</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
         {/* Scrollable body */}
-        <div className="modal-body">
+        <div className="modal-body" style={{ paddingTop: 20 }}>
           {/* Two-column layout: scrollable form + sticky preview */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 240px', gap: 24, alignItems: 'start' }}>
 
-          {/* ── Form ── */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {/* ── Form Step Pane ── */}
+          <div>
+            {formStep === 1 && (
+              <div className="form-step-pane">
+                {/* Card Name */}
+                <div className="form-group">
+                  <label>Card Name <span style={{ color: '#ef4444' }}>*</span></label>
+                  <input type="text" placeholder="e.g., HDFC Regalia Gold" value={form.cardName ?? ''} onChange={e => set('cardName', e.target.value)} />
+                </div>
 
-            {/* Card Name */}
-            <div className="form-group">
-              <label>Card Name <span style={{ color: '#ef4444' }}>*</span></label>
-              <input type="text" placeholder="e.g., HDFC Regalia Gold" value={form.cardName ?? ''} onChange={e => set('cardName', e.target.value)} />
-            </div>
+                {/* Bank + Network + Tier */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+                  <div className="form-group">
+                    <label>Bank <span style={{ color: '#ef4444' }}>*</span></label>
+                    <select value={form.bank ?? BANKS[0]} onChange={e => set('bank', e.target.value)}>
+                      {BANKS.map(b => <option key={b} value={b}>{b}</option>)}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Network</label>
+                    <select value={form.network ?? 'Visa'} onChange={e => set('network', e.target.value)}>
+                      {NETWORKS.map(n => <option key={n} value={n}>{n}</option>)}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Tier</label>
+                    <select value={form.tier ?? 'Classic'} onChange={e => set('tier', e.target.value)}>
+                      {TIERS.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  </div>
+                </div>
 
-            {/* Bank + Network + Tier */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
-              <div className="form-group">
-                <label>Bank <span style={{ color: '#ef4444' }}>*</span></label>
-                <select value={form.bank ?? BANKS[0]} onChange={e => set('bank', e.target.value)}>
-                  {BANKS.map(b => <option key={b} value={b}>{b}</option>)}
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Network</label>
-                <select value={form.network ?? 'Visa'} onChange={e => set('network', e.target.value)}>
-                  {NETWORKS.map(n => <option key={n} value={n}>{n}</option>)}
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Tier</label>
-                <select value={form.tier ?? 'Classic'} onChange={e => set('tier', e.target.value)}>
-                  {TIERS.map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
-              </div>
-            </div>
+                {/* Welcome Offer + Reward Rate */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div className="form-group">
+                    <label>Welcome Offer</label>
+                    <input type="text" placeholder="₹1000 Amazon Gift Card on joining" value={form.welcomeOffer ?? ''} onChange={e => set('welcomeOffer', e.target.value)} />
+                  </div>
+                  <div className="form-group">
+                    <label>Reward Rate</label>
+                    <input type="text" placeholder="5% Cashback on Amazon" value={form.rewardRate ?? ''} onChange={e => set('rewardRate', e.target.value)} />
+                  </div>
+                </div>
 
-            {/* Card Image */}
-            <ImageUploadField label="Card Image" placeholder="https://bank.com/card.png" value={form.imageUrl as string ?? ''} onChange={v => set('imageUrl', v)} />
+                {/* Key Benefits */}
+                <div className="form-group">
+                  <label>Key Benefits <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>(comma-separated)</span></label>
+                  <input type="text" placeholder="Fuel surcharge waiver, 2 Lounge passes/qtr, Golf access" value={form.keyBenefits ?? ''} onChange={e => set('keyBenefits', e.target.value)} />
+                </div>
 
-            {/* Bank Logo */}
-            <ImageUploadField label="Bank Logo" placeholder="https://bank.com/logo.png" value={form.bankLogoUrl as string ?? ''} onChange={v => set('bankLogoUrl', v)} />
+                {/* Partner Brands */}
+                <div className="form-group">
+                  <label>Partner Brands <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>(comma-separated)</span></label>
+                  <input type="text" placeholder="Amazon, Flipkart, Swiggy" value={form.partnerBrands ?? ''} onChange={e => set('partnerBrands', e.target.value)} />
+                </div>
 
-            {/* Welcome Offer + Reward Rate */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              <div className="form-group">
-                <label>Welcome Offer</label>
-                <input type="text" placeholder="₹1000 Amazon Gift Card on joining" value={form.welcomeOffer ?? ''} onChange={e => set('welcomeOffer', e.target.value)} />
+                {/* Fees */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+                  <div className="form-group">
+                    <label>Annual Fee</label>
+                    <input type="text" placeholder="₹999" value={form.annualFee ?? ''} onChange={e => set('annualFee', e.target.value)} />
+                  </div>
+                  <div className="form-group">
+                    <label>Joining Fee</label>
+                    <input type="text" placeholder="₹999 or ₹0" value={form.joiningFee ?? ''} onChange={e => set('joiningFee', e.target.value)} />
+                  </div>
+                  <div className="form-group">
+                    <label>Fee Waiver</label>
+                    <input type="text" placeholder="Spend ₹1L/year" value={form.feeWaiver ?? ''} onChange={e => set('feeWaiver', e.target.value)} />
+                  </div>
+                </div>
               </div>
-              <div className="form-group">
-                <label>Reward Rate</label>
-                <input type="text" placeholder="5% Cashback on Amazon" value={form.rewardRate ?? ''} onChange={e => set('rewardRate', e.target.value)} />
-              </div>
-            </div>
+            )}
 
-            {/* Key Benefits */}
-            <div className="form-group">
-              <label>Key Benefits <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>(comma-separated)</span></label>
-              <input type="text" placeholder="Fuel surcharge waiver, 2 Lounge passes/qtr, Golf access" value={form.keyBenefits ?? ''} onChange={e => set('keyBenefits', e.target.value)} />
-            </div>
+            {formStep === 2 && (
+              <div className="form-step-pane">
+                {/* Card Image */}
+                <ImageUploadField label="Card Graphic / Image" placeholder="https://bank.com/card.png" value={form.imageUrl as string ?? ''} onChange={v => set('imageUrl', v)} />
 
-            {/* Partner Brands */}
-            <div className="form-group">
-              <label>Partner Brands <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>(comma-separated)</span></label>
-              <input type="text" placeholder="Amazon, Flipkart, Swiggy" value={form.partnerBrands ?? ''} onChange={e => set('partnerBrands', e.target.value)} />
-            </div>
+                {/* Bank Logo */}
+                <ImageUploadField label="Bank Logo (Optional)" placeholder="https://bank.com/logo.png" value={form.bankLogoUrl as string ?? ''} onChange={v => set('bankLogoUrl', v)} />
 
-            {/* Fees */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
-              <div className="form-group">
-                <label>Annual Fee</label>
-                <input type="text" placeholder="₹999" value={form.annualFee ?? ''} onChange={e => set('annualFee', e.target.value)} />
-              </div>
-              <div className="form-group">
-                <label>Joining Fee</label>
-                <input type="text" placeholder="₹999 or ₹0" value={form.joiningFee ?? ''} onChange={e => set('joiningFee', e.target.value)} />
-              </div>
-              <div className="form-group">
-                <label>Fee Waiver</label>
-                <input type="text" placeholder="Spend ₹1L/year" value={form.feeWaiver ?? ''} onChange={e => set('feeWaiver', e.target.value)} />
-              </div>
-            </div>
+                {/* Affiliate Link */}
+                <div className="form-group">
+                  <label>Affiliate / Apply Link</label>
+                  <input type="url" placeholder="https://bank.com/apply?affid=wouchify" value={form.affiliateLink ?? ''} onChange={e => set('affiliateLink', e.target.value)} />
+                </div>
 
-            {/* Affiliate Link */}
-            <div className="form-group">
-              <label>Affiliate / Apply Link</label>
-              <input type="url" placeholder="https://bank.com/apply?affid=wouchify" value={form.affiliateLink ?? ''} onChange={e => set('affiliateLink', e.target.value)} />
-            </div>
+                {/* Dates — Expiry MANDATORY */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+                  <div className="form-group">
+                    <label>Offer Start Date</label>
+                    <input type="date" value={form.offerStartDate ?? ''} onChange={e => set('offerStartDate', e.target.value)} />
+                  </div>
+                  <div className="form-group">
+                    <label style={{ fontWeight: 800, color: '#dc2626' }}>
+                      Offer Expiry Date *
+                      <span style={{ fontSize: '0.68rem', color: '#ef4444', marginLeft: 4 }}>(Mandatory)</span>
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      value={form.offerExpiryDate ?? ''}
+                      onChange={e => set('offerExpiryDate', e.target.value)}
+                      style={{ borderColor: !form.offerExpiryDate ? '#ef4444' : undefined }}
+                    />
+                    {pill && (
+                      <span style={{ marginTop: 4, display: 'inline-block', background: pill.bg, color: pill.color, borderRadius: 6, padding: '1px 8px', fontSize: '0.7rem', fontWeight: 700 }}>
+                        {pill.label}
+                      </span>
+                    )}
+                  </div>
+                  <div className="form-group">
+                    <label>Status</label>
+                    <select value={form.status ?? 'active'} onChange={e => set('status', e.target.value)}>
+                      <option value="active">Active</option>
+                      <option value="featured">Featured</option>
+                      <option value="inactive">Inactive</option>
+                      <option value="discontinued">Discontinued</option>
+                    </select>
+                  </div>
+                </div>
 
-            {/* Dates — Expiry MANDATORY */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
-              <div className="form-group">
-                <label>Offer Start Date</label>
-                <input type="date" value={form.offerStartDate ?? ''} onChange={e => set('offerStartDate', e.target.value)} />
+                {/* Toggles */}
+                <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', background: '#f8fafc', padding: '12px 16px', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                  {([['isVerified', '✓ Verified Card'], ['isFeatured', '⭐ Featured Card']] as [keyof CreditCard, string][]).map(([key, label]) => (
+                    <label key={key} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.88rem', fontWeight: 600, color: '#334155' }}>
+                      <input type="checkbox" checked={(form[key] as boolean) ?? false} onChange={e => set(key, e.target.checked)}
+                        style={{ width: 16, height: 16, accentColor: '#6366f1' }} />
+                      {label}
+                    </label>
+                  ))}
+                </div>
               </div>
-              <div className="form-group">
-                <label>
-                  Offer Expiry Date <span style={{ color: '#ef4444' }}>*</span>
-                  <span style={{ fontSize: '0.68rem', color: '#ef4444', marginLeft: 4 }}>(Mandatory)</span>
-                </label>
-                <input
-                  type="date"
-                  value={form.offerExpiryDate ?? ''}
-                  onChange={e => set('offerExpiryDate', e.target.value)}
-                  style={{ borderColor: !form.offerExpiryDate ? '#ef4444' : undefined }}
-                />
-                {pill && (
-                  <span style={{ marginTop: 4, display: 'inline-block', background: pill.bg, color: pill.color, borderRadius: 6, padding: '1px 8px', fontSize: '0.7rem', fontWeight: 700 }}>
-                    {pill.label}
-                  </span>
-                )}
-              </div>
-              <div className="form-group">
-                <label>Status</label>
-                <select value={form.status ?? 'active'} onChange={e => set('status', e.target.value)}>
-                  <option value="active">Active</option>
-                  <option value="featured">Featured</option>
-                  <option value="inactive">Inactive</option>
-                  <option value="discontinued">Discontinued</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Toggles */}
-            <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-              {([['isVerified', '✓ Verified'], ['isFeatured', '⭐ Featured']] as [keyof CreditCard, string][]).map(([key, label]) => (
-                <label key={key} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.88rem', fontWeight: 500, color: '#475569' }}>
-                  <input type="checkbox" checked={(form[key] as boolean) ?? false} onChange={e => set(key, e.target.checked)}
-                    style={{ width: 16, height: 16, accentColor: '#6366f1' }} />
-                  {label}
-                </label>
-              ))}
-            </div>
+            )}
           </div>
 
           {/* ── Live Preview (sticky) ── */}
@@ -570,9 +608,34 @@ const CardFormModal: React.FC<CardFormProps> = ({ editing, onClose, onSave }) =>
           </div>{/* end two-column grid */}
         </div>{/* end modal-body */}
 
-        <div className="modal-footer">
-          <button className="btn-cancel" onClick={onClose}>Cancel</button>
-          <button className="btn-save" onClick={handleSave}>{editing ? 'Save Changes' : 'Add Card'}</button>
+        <div className="modal-footer" style={{ justifyContent: 'space-between', display: 'flex' }}>
+          {formStep === 1 ? (
+            <>
+              <button type="button" className="btn-cancel" onClick={onClose}>Cancel</button>
+              <button
+                type="button"
+                className="btn-save"
+                onClick={() => {
+                  if (!form.cardName?.trim()) {
+                    alert('Card name is required')
+                    return
+                  }
+                  if (!form.bank?.trim()) {
+                    alert('Bank name is required')
+                    return
+                  }
+                  setFormStep(2)
+                }}
+              >
+                Next: Media & Expiry &rarr;
+              </button>
+            </>
+          ) : (
+            <>
+              <button type="button" className="btn-cancel" onClick={() => setFormStep(1)}>&larr; Back to Step 1</button>
+              <button type="button" className="btn-save" onClick={handleSave}>{editing ? 'Save Changes' : 'Add Card'}</button>
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -363,6 +363,7 @@ interface CouponFormProps {
 }
 
 const CouponFormModal: React.FC<CouponFormProps> = ({ editing, onClose, onSave }) => {
+  const [formStep, setFormStep] = useState<1 | 2>(1)
   const [form, setForm] = useState<Partial<Coupon>>(editing ? { ...editing } : { ...EMPTY_FORM })
   const set = (k: keyof Coupon, v: unknown) => setForm(f => ({ ...f, [k]: v }))
 
@@ -410,140 +411,204 @@ const CouponFormModal: React.FC<CouponFormProps> = ({ editing, onClose, onSave }
           <button className="modal-close" onClick={onClose}><X size={20} /></button>
         </div>
 
-        <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-
-          {/* Title */}
-          <div className="form-group">
-            <label>Coupon Title <span style={{ color: '#ef4444' }}>*</span></label>
-            <input type="text" placeholder="e.g., Flat 50% Off on First Order"
-              value={form.title ?? ''} onChange={e => set('title', e.target.value)} />
-          </div>
-
-          <div className="form-group">
-            <label>Description / Terms</label>
-            <textarea rows={2} placeholder="e.g., Valid for new users only. No minimum order."
-              value={form.description ?? ''}
-              onChange={e => set('description', e.target.value)}
-              style={{ resize: 'vertical', fontFamily: 'inherit', fontSize: '0.9rem', padding: '8px 12px', borderRadius: 8, border: '1px solid #e2e8f0', outline: 'none', width: '100%' }}
-            />
-          </div>
-
-          {/* Row: Store + Category + Type */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
-            <div className="form-group">
-              <label>Store <span style={{ color: '#ef4444' }}>*</span></label>
-              <select value={form.store ?? ''} onChange={e => set('store', e.target.value)}>
-                {STORE_NAMES.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </div>
-            <div className="form-group">
-              <label>Category</label>
-              <select value={form.category ?? 'Electronics'} onChange={e => set('category', e.target.value)}>
-                {(CATEGORIES_DATA ?? [{ name: 'Electronics' }]).map((c: { name: string }) => (
-                  <option key={c.name} value={c.name}>{c.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group">
-              <label>Coupon Type</label>
-              <select value={form.couponType ?? 'percent'} onChange={e => set('couponType', e.target.value)}>
-                {COUPON_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-              </select>
-            </div>
-          </div>
-
-          {/* Row: Code + Discount text + Discount value */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 120px', gap: 12 }}>
-            <div className="form-group">
-              <label>Coupon Code <span style={{ color: '#ef4444' }}>*</span></label>
-              <input type="text" placeholder="e.g., WELCOME50"
-                value={form.code ?? ''} style={{ fontFamily: 'monospace', letterSpacing: '1px', textTransform: 'uppercase' }}
-                onChange={e => set('code', e.target.value.toUpperCase())} />
-            </div>
-            <div className="form-group">
-              <label>Discount Label</label>
-              <input type="text" placeholder="e.g., 50% OFF"
-                value={form.discount ?? ''} onChange={e => set('discount', e.target.value)} />
-            </div>
-            <div className="form-group">
-              <label>Value</label>
-              <input type="number" placeholder="50"
-                value={form.discountValue ?? ''} onChange={e => set('discountValue', Number(e.target.value))} />
-            </div>
-          </div>
-
-          {/* Row: Min Order + Max Discount + Affiliate */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div className="form-group">
-              <label>Min Order</label>
-              <input type="text" placeholder="e.g., Min ₹999 or No minimum"
-                value={form.minOrder ?? ''} onChange={e => set('minOrder', e.target.value)} />
-            </div>
-            <div className="form-group">
-              <label>Max Discount Cap</label>
-              <input type="text" placeholder="e.g., Max ₹300"
-                value={form.maxDiscount ?? ''} onChange={e => set('maxDiscount', e.target.value)} />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>Affiliate / Tracking Link</label>
-            <input type="url" placeholder="https://swiggy.com/?affid=wouchify"
-              value={form.affiliateLink ?? ''} onChange={e => set('affiliateLink', e.target.value)} />
-          </div>
-
-          {/* Row: Start + Expiry + Status + Cap */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 12 }}>
-            <div className="form-group">
-              <label>Start Date</label>
-              <input type="date" value={form.startDate ?? ''} onChange={e => set('startDate', e.target.value)} />
-            </div>
-            <div className="form-group">
-              <label>Expiry Date <span style={{ color: '#ef4444' }}>*</span></label>
-              <input type="date" value={form.expiryDate ?? ''} onChange={e => set('expiryDate', e.target.value)} />
-            </div>
-            <div className="form-group">
-              <label>Status</label>
-              <select value={form.status ?? 'active'} onChange={e => set('status', e.target.value)}>
-                <option value="active">Active</option>
-                <option value="scheduled">Scheduled</option>
-                <option value="inactive">Inactive</option>
-                <option value="expired">Expired</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label>Usage Cap (0 = ∞)</label>
-              <input type="number" min={0} placeholder="0"
-                value={form.totalUses ?? 0} onChange={e => set('totalUses', Number(e.target.value))} />
-            </div>
-          </div>
-
-          {/* Toggles */}
-          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-            {([
-              ['isVerified',   '✓ Verified'],
-              ['isExclusive',  '⭐ Exclusive'],
-              ['isFeatured',   '🔥 Featured'],
-              ['telegramAlert','📨 Telegram Alert'],
-            ] as [keyof Coupon, string][]).map(([key, label]) => (
-              <label key={key} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.88rem', fontWeight: 500, color: '#475569' }}>
-                <input
-                  type="checkbox"
-                  checked={(form[key] as boolean) ?? false}
-                  onChange={e => set(key, e.target.checked)}
-                  style={{ width: 16, height: 16, accentColor: typeColor }}
-                />
-                {label}
-              </label>
-            ))}
+        {/* Stepper Header */}
+        <div style={{ padding: '0 24px', marginTop: 16 }}>
+          <div className="form-stepper" style={{ marginBottom: 0 }}>
+            <button
+              type="button"
+              className={`step-tab-btn ${formStep === 1 ? 'active' : ''} ${form.title && form.code ? 'completed' : ''}`}
+              onClick={() => setFormStep(1)}
+            >
+              <div className="step-number">1</div>
+              <div className="step-info">
+                <span className="step-title">Step 1: Offer & Code Details</span>
+                <span className="step-desc">Title, store, discount & promo code</span>
+              </div>
+            </button>
+            <div className="step-divider">›</div>
+            <button
+              type="button"
+              className={`step-tab-btn ${formStep === 2 ? 'active' : ''} ${form.expiryDate ? 'completed' : ''}`}
+              onClick={() => setFormStep(2)}
+            >
+              <div className="step-number">2</div>
+              <div className="step-info">
+                <span className="step-title">Step 2: Validity, Links & Tags</span>
+                <span className="step-desc">Expiry date, tracking link & badges</span>
+              </div>
+            </button>
           </div>
         </div>
 
-        <div className="modal-footer">
-          <button className="btn-cancel" onClick={onClose}>Cancel</button>
-          <button className="btn-save" onClick={handleSave}>
-            {editing ? 'Save Changes' : 'Add Coupon'}
-          </button>
+        <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 20, paddingTop: 20 }}>
+          {formStep === 1 && (
+            <div className="form-step-pane">
+              {/* Title */}
+              <div className="form-group">
+                <label>Coupon Title <span style={{ color: '#ef4444' }}>*</span></label>
+                <input type="text" placeholder="e.g., Flat 50% Off on First Order"
+                  value={form.title ?? ''} onChange={e => set('title', e.target.value)} />
+              </div>
+
+              <div className="form-group">
+                <label>Description / Terms</label>
+                <textarea rows={2} placeholder="e.g., Valid for new users only. No minimum order."
+                  value={form.description ?? ''}
+                  onChange={e => set('description', e.target.value)}
+                  style={{ resize: 'vertical', fontFamily: 'inherit', fontSize: '0.9rem', padding: '8px 12px', borderRadius: 8, border: '1px solid #e2e8f0', outline: 'none', width: '100%' }}
+                />
+              </div>
+
+              {/* Row: Store + Category + Type */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+                <div className="form-group">
+                  <label>Store <span style={{ color: '#ef4444' }}>*</span></label>
+                  <select value={form.store ?? ''} onChange={e => set('store', e.target.value)}>
+                    {STORE_NAMES.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Category</label>
+                  <select value={form.category ?? 'Electronics'} onChange={e => set('category', e.target.value)}>
+                    {(CATEGORIES_DATA ?? [{ name: 'Electronics' }]).map((c: { name: string }) => (
+                      <option key={c.name} value={c.name}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Coupon Type</label>
+                  <select value={form.couponType ?? 'percent'} onChange={e => set('couponType', e.target.value)}>
+                    {COUPON_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              {/* Row: Code + Discount text + Discount value */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 120px', gap: 12 }}>
+                <div className="form-group">
+                  <label>Coupon Code <span style={{ color: '#ef4444' }}>*</span></label>
+                  <input type="text" placeholder="e.g., WELCOME50"
+                    value={form.code ?? ''} style={{ fontFamily: 'monospace', letterSpacing: '1px', textTransform: 'uppercase' }}
+                    onChange={e => set('code', e.target.value.toUpperCase())} />
+                </div>
+                <div className="form-group">
+                  <label>Discount Label</label>
+                  <input type="text" placeholder="e.g., 50% OFF"
+                    value={form.discount ?? ''} onChange={e => set('discount', e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label>Value</label>
+                  <input type="number" placeholder="50"
+                    value={form.discountValue ?? ''} onChange={e => set('discountValue', Number(e.target.value))} />
+                </div>
+              </div>
+
+              {/* Row: Min Order + Max Discount */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div className="form-group">
+                  <label>Min Order Requirement</label>
+                  <input type="text" placeholder="e.g., Min ₹999 or No minimum"
+                    value={form.minOrder ?? ''} onChange={e => set('minOrder', e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label>Max Discount Cap</label>
+                  <input type="text" placeholder="e.g., Max ₹300"
+                    value={form.maxDiscount ?? ''} onChange={e => set('maxDiscount', e.target.value)} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {formStep === 2 && (
+            <div className="form-step-pane">
+              <div className="form-group">
+                <label>Affiliate / Destination Link</label>
+                <input type="url" placeholder="https://swiggy.com/?affid=wouchify"
+                  value={form.affiliateLink ?? ''} onChange={e => set('affiliateLink', e.target.value)} />
+              </div>
+
+              {/* Row: Start + Expiry + Status + Cap */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 12 }}>
+                <div className="form-group">
+                  <label>Start Date</label>
+                  <input type="date" value={form.startDate ?? ''} onChange={e => set('startDate', e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontWeight: 800, color: '#dc2626' }}>Expiry Date *</label>
+                  <input type="date" required value={form.expiryDate ?? ''} onChange={e => set('expiryDate', e.target.value)} style={{ borderColor: '#fca5a5' }} />
+                </div>
+                <div className="form-group">
+                  <label>Status</label>
+                  <select value={form.status ?? 'active'} onChange={e => set('status', e.target.value)}>
+                    <option value="active">Active</option>
+                    <option value="scheduled">Scheduled</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="expired">Expired</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Usage Cap (0 = ∞)</label>
+                  <input type="number" min={0} placeholder="0"
+                    value={form.totalUses ?? 0} onChange={e => set('totalUses', Number(e.target.value))} />
+                </div>
+              </div>
+
+              {/* Toggles */}
+              <div className="form-group">
+                <label style={{ marginBottom: 8 }}>Badge & Visibility Tags</label>
+                <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', background: '#f8fafc', padding: '12px 16px', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                  {([
+                    ['isVerified',   '✓ Verified'],
+                    ['isExclusive',  '⭐ Exclusive'],
+                    ['isFeatured',   '🔥 Featured'],
+                    ['telegramAlert','📨 Telegram Alert'],
+                  ] as [keyof Coupon, string][]).map(([key, label]) => (
+                    <label key={key} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.88rem', fontWeight: 600, color: '#334155' }}>
+                      <input
+                        type="checkbox"
+                        checked={(form[key] as boolean) ?? false}
+                        onChange={e => set(key, e.target.checked)}
+                        style={{ width: 16, height: 16, accentColor: typeColor }}
+                      />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="modal-footer" style={{ justifyContent: 'space-between', display: 'flex' }}>
+          {formStep === 1 ? (
+            <>
+              <button type="button" className="btn-cancel" onClick={onClose}>Cancel</button>
+              <button
+                type="button"
+                className="btn-save"
+                onClick={() => {
+                  if (!form.title?.trim()) {
+                    alert('Coupon title is required')
+                    return
+                  }
+                  if (!form.code?.trim()) {
+                    alert('Coupon code is required')
+                    return
+                  }
+                  setFormStep(2)
+                }}
+              >
+                Next: Validity & Tags &rarr;
+              </button>
+            </>
+          ) : (
+            <>
+              <button type="button" className="btn-cancel" onClick={() => setFormStep(1)}>&larr; Back to Step 1</button>
+              <button type="button" className="btn-save" onClick={handleSave}>
+                {editing ? 'Save Changes' : 'Add Coupon'}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

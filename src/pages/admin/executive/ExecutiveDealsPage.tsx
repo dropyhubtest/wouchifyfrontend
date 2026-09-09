@@ -220,6 +220,7 @@ export const ExecutiveDealsPage: React.FC = () => {
   
   // Modals & Previews
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [formStep, setFormStep] = useState<1 | 2>(1)
   const [editingDeal, setEditingDeal] = useState<Deal | null>(null)
   const [previewDeal, setPreviewDeal] = useState<Deal | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
@@ -412,12 +413,14 @@ export const ExecutiveDealsPage: React.FC = () => {
 
   const handleAddDeal = () => {
     setEditingDeal(null)
+    setFormStep(1)
     setForm(emptyDeal)
     setIsModalOpen(true)
   }
 
   const handleEditDeal = (deal: Deal) => {
     setEditingDeal(deal)
+    setFormStep(1)
     setForm({
       ...deal,
       image: deal.image || deal.images[0] || '',
@@ -1335,13 +1338,42 @@ export const ExecutiveDealsPage: React.FC = () => {
               </div>
 
               <div className="modal-body">
-                {/* Section 1: Product & Store Information (Amazon & Flipkart style) */}
-                <div className="form-section">
-                  <div className="form-section-header">
-                    <div className="form-section-icon"><Tag size={16} /></div>
-                    <h4 className="form-section-title">Product & Store Identifiers</h4>
-                    <span className="form-section-desc">Platform affiliation & product details</span>
-                  </div>
+                {/* Form Stepper Header */}
+                <div className="form-stepper" style={{ marginBottom: '20px' }}>
+                  <button
+                    type="button"
+                    className={`step-tab-btn ${formStep === 1 ? 'active' : ''} ${form.title && form.price ? 'completed' : ''}`}
+                    onClick={() => setFormStep(1)}
+                  >
+                    <div className="step-number">1</div>
+                    <div className="step-info">
+                      <span className="step-title">Step 1: Product, Store & Pricing</span>
+                      <span className="step-desc">Title, store, ASIN, price & discounts</span>
+                    </div>
+                  </button>
+                  <div className="step-divider">›</div>
+                  <button
+                    type="button"
+                    className={`step-tab-btn ${formStep === 2 ? 'active' : ''} ${form.image ? 'completed' : ''}`}
+                    onClick={() => setFormStep(2)}
+                  >
+                    <div className="step-number">2</div>
+                    <div className="step-info">
+                      <span className="step-title">Step 2: Media, Expiry & Specs</span>
+                      <span className="step-desc">Images, expiry countdown & guidance</span>
+                    </div>
+                  </button>
+                </div>
+
+                {formStep === 1 && (
+                  <div className="form-step-pane">
+                    {/* Section 1: Product & Store Information (Amazon & Flipkart style) */}
+                    <div className="form-section">
+                      <div className="form-section-header">
+                        <div className="form-section-icon"><Tag size={16} /></div>
+                        <h4 className="form-section-title">Product & Store Identifiers</h4>
+                        <span className="form-section-desc">Platform affiliation & product details</span>
+                      </div>
 
                   <div className="form-group">
                     <label>
@@ -1562,14 +1594,18 @@ export const ExecutiveDealsPage: React.FC = () => {
                     </div>
                   </div>
                 </div>
+              </div>
+            )}
 
-                {/* Section 3: Urgency, Timing & Storefront Placement */}
-                <div className="form-section">
-                  <div className="form-section-header">
-                    <div className="form-section-icon"><Clock size={16} /></div>
-                    <h4 className="form-section-title">Schedule, Badging & Placement</h4>
-                    <span className="form-section-desc">Publishing rules & priority</span>
-                  </div>
+            {formStep === 2 && (
+              <div className="form-step-pane">
+                    {/* Section 3: Urgency, Timing & Storefront Placement */}
+                    <div className="form-section">
+                      <div className="form-section-header">
+                        <div className="form-section-icon"><Clock size={16} /></div>
+                        <h4 className="form-section-title">Schedule, Badging & Placement</h4>
+                        <span className="form-section-desc">Publishing rules & priority</span>
+                      </div>
 
                   <div className="form-row-3">
                     <div className="form-group">
@@ -1909,14 +1945,41 @@ export const ExecutiveDealsPage: React.FC = () => {
                   </div>
                 </div>
               </div>
+            )}
+          </div>
 
-              <div className="modal-footer">
-                <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                  Status: <strong style={{ color: '#0f172a' }}>{editingDeal ? editingDeal.status : 'New Deal (Draft)'}</strong>
-                </div>
-                <div className="modal-footer-actions">
+          <div className="modal-footer" style={{ justifyContent: 'space-between', display: 'flex' }}>
+            <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
+              Status: <strong style={{ color: '#0f172a' }}>{editingDeal ? editingDeal.status : 'New Deal (Draft)'}</strong>
+            </div>
+            <div className="modal-footer-actions">
+              {formStep === 1 ? (
+                <>
                   <button type="button" className="btn-cancel" onClick={() => setIsModalOpen(false)}>
                     Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-save"
+                    onClick={() => {
+                      if (!form.title.trim()) {
+                        showToast('Please enter a Deal Title')
+                        return
+                      }
+                      if (!form.price.trim()) {
+                        showToast('Please enter Offer Price')
+                        return
+                      }
+                      setFormStep(2)
+                    }}
+                  >
+                    Next: Media & Expiry &rarr;
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button type="button" className="btn-cancel" onClick={() => setFormStep(1)}>
+                    &larr; Back to Step 1
                   </button>
                   <button type="button" className="btn-draft" onClick={() => handleSave('Draft')}>
                     <Save size={16} /> Save as Draft
@@ -1924,8 +1987,10 @@ export const ExecutiveDealsPage: React.FC = () => {
                   <button type="button" className="btn-save" onClick={() => handleSave('Pending Approval')}>
                     <Send size={16} /> Submit for Review
                   </button>
-                </div>
-              </div>
+                </>
+              )}
+            </div>
+          </div>
             </div>
           </div>
         )}

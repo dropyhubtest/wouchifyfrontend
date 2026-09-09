@@ -454,6 +454,7 @@ export const ExecutiveAdvertisementsPage: React.FC = () => {
 
   // Modals state
   const [isFormOpen, setIsFormOpen] = useState(false)
+  const [formStep, setFormStep] = useState<1 | 2>(1)
   const [editingAd, setEditingAd] = useState<Advertisement | null>(null)
   const [previewingAd, setPreviewingAd] = useState<Advertisement | null>(null)
 
@@ -522,6 +523,7 @@ export const ExecutiveAdvertisementsPage: React.FC = () => {
   // Handlers
   const handleOpenAdd = () => {
     setEditingAd(null)
+    setFormStep(1)
     const defaultExp = new Date()
     defaultExp.setDate(defaultExp.getDate() + 30)
     setFormData({
@@ -542,6 +544,7 @@ export const ExecutiveAdvertisementsPage: React.FC = () => {
 
   const handleOpenEdit = (ad: Advertisement) => {
     setEditingAd(ad)
+    setFormStep(1)
     setFormData({ ...ad })
     setIsFormOpen(true)
   }
@@ -967,196 +970,231 @@ export const ExecutiveAdvertisementsPage: React.FC = () => {
               </div>
 
               <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
-                <div className="modal-body" style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '24px' }}>
+                <div className="modal-body" style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '20px 24px' }}>
+                  {/* Form Stepper Header */}
+                  <div className="form-stepper">
+                    <button
+                      type="button"
+                      className={`step-tab-btn ${formStep === 1 ? 'active' : ''} ${formData.title ? 'completed' : ''}`}
+                      onClick={() => setFormStep(1)}
+                    >
+                      <div className="step-number">1</div>
+                      <div className="step-info">
+                        <span className="step-title">Step 1: Campaign Details & Slot</span>
+                        <span className="step-desc">Placement, brand, copy & target link</span>
+                      </div>
+                    </button>
+                    <div className="step-divider">›</div>
+                    <button
+                      type="button"
+                      className={`step-tab-btn ${formStep === 2 ? 'active' : ''} ${formData.expiryDate ? 'completed' : ''}`}
+                      onClick={() => setFormStep(2)}
+                    >
+                      <div className="step-number">2</div>
+                      <div className="step-info">
+                        <span className="step-title">Step 2: Creative, Expiry & Billing</span>
+                        <span className="step-desc">Upload banner, mandatory expiry & rate</span>
+                      </div>
+                    </button>
+                  </div>
+
                   <div style={{
                     display: 'grid',
                     gridTemplateColumns: '1fr 320px',
                     gap: '24px',
                     alignItems: 'start'
                   }}>
-                    {/* Left Form */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                      <div className="form-group">
-                        <label style={{ fontWeight: 700, color: '#0f172a' }}>
-                          Placement Slot *
-                        </label>
-                        <select
-                          value={formData.placement || 'sidebar-300x250'}
-                          onChange={(e) => setFormData(f => ({ ...f, placement: e.target.value as AdPlacementType }))}
-                          style={{
-                            width: '100%',
-                            padding: '10px 12px',
-                            borderRadius: '8px',
-                            border: '2px solid #e2e8f0',
-                            fontWeight: 600,
-                            background: '#f8fafc',
-                            fontSize: '0.92rem'
-                          }}
-                        >
-                          {AD_PLACEMENTS.map(p => (
-                            <option key={p.value} value={p.value}>
-                              {p.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                    {/* Left Form Pane */}
+                    <div>
+                      {formStep === 1 && (
+                        <div className="form-step-pane">
+                          <div className="form-group">
+                            <label style={{ fontWeight: 700, color: '#0f172a' }}>
+                              Placement Slot *
+                            </label>
+                            <select
+                              value={formData.placement || 'sidebar-300x250'}
+                              onChange={(e) => setFormData(f => ({ ...f, placement: e.target.value as AdPlacementType }))}
+                              style={{
+                                width: '100%',
+                                padding: '10px 12px',
+                                borderRadius: '8px',
+                                border: '2px solid #e2e8f0',
+                                fontWeight: 600,
+                                background: '#f8fafc',
+                                fontSize: '0.92rem'
+                              }}
+                            >
+                              {AD_PLACEMENTS.map(p => (
+                                <option key={p.value} value={p.value}>
+                                  {p.label}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
 
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label style={{ fontWeight: 700, color: '#0f172a' }}>
-                            Campaign Title *
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="e.g. SBI SimplyCLICK 10X Points"
-                            value={formData.title || ''}
-                            onChange={(e) => setFormData(f => ({ ...f, title: e.target.value }))}
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label style={{ fontWeight: 700, color: '#0f172a' }}>
-                            Advertiser / Brand Name *
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="e.g. SBI Cards, Amazon, Myntra"
-                            value={formData.advertiser || ''}
-                            onChange={(e) => setFormData(f => ({ ...f, advertiser: e.target.value }))}
-                          />
-                        </div>
-                      </div>
+                          <div className="form-row">
+                            <div className="form-group">
+                              <label style={{ fontWeight: 700, color: '#0f172a' }}>
+                                Campaign Title *
+                              </label>
+                              <input
+                                type="text"
+                                required
+                                placeholder="e.g. SBI SimplyCLICK 10X Points"
+                                value={formData.title || ''}
+                                onChange={(e) => setFormData(f => ({ ...f, title: e.target.value }))}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label style={{ fontWeight: 700, color: '#0f172a' }}>
+                                Advertiser / Brand Name *
+                              </label>
+                              <input
+                                type="text"
+                                required
+                                placeholder="e.g. SBI Cards, Amazon, Myntra"
+                                value={formData.advertiser || ''}
+                                onChange={(e) => setFormData(f => ({ ...f, advertiser: e.target.value }))}
+                              />
+                            </div>
+                          </div>
 
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label>Sponsor Badge Tag</label>
-                          <input
-                            type="text"
-                            placeholder="e.g. SPONSORED, PROMOTED"
-                            value={formData.badgeText || ''}
-                            onChange={(e) => setFormData(f => ({ ...f, badgeText: e.target.value }))}
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label>CTA Button Label *</label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="e.g. Shop Now, Apply Now"
-                            value={formData.ctaText || ''}
-                            onChange={(e) => setFormData(f => ({ ...f, ctaText: e.target.value }))}
-                          />
-                        </div>
-                      </div>
+                          <div className="form-row">
+                            <div className="form-group">
+                              <label>Sponsor Badge Tag</label>
+                              <input
+                                type="text"
+                                placeholder="e.g. SPONSORED, PROMOTED"
+                                value={formData.badgeText || ''}
+                                onChange={(e) => setFormData(f => ({ ...f, badgeText: e.target.value }))}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>CTA Button Label *</label>
+                              <input
+                                type="text"
+                                required
+                                placeholder="e.g. Shop Now, Apply Now"
+                                value={formData.ctaText || ''}
+                                onChange={(e) => setFormData(f => ({ ...f, ctaText: e.target.value }))}
+                              />
+                            </div>
+                          </div>
 
-                      <div className="form-group">
-                        <label style={{ fontWeight: 700, color: '#0f172a' }}>
-                          Destination / Affiliate Link *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          placeholder="https://brand.com/offer?utm_source=wouchify"
-                          value={formData.targetLink || ''}
-                          onChange={(e) => setFormData(f => ({ ...f, targetLink: e.target.value }))}
-                        />
-                      </div>
+                          <div className="form-group">
+                            <label style={{ fontWeight: 700, color: '#0f172a' }}>
+                              Destination / Affiliate Link *
+                            </label>
+                            <input
+                              type="text"
+                              required
+                              placeholder="https://brand.com/offer?utm_source=wouchify"
+                              value={formData.targetLink || ''}
+                              onChange={(e) => setFormData(f => ({ ...f, targetLink: e.target.value }))}
+                            />
+                          </div>
+                        </div>
+                      )}
 
-                      {/* Creative Image with URL + Upload */}
-                      <div className="form-group">
-                        <label style={{ fontWeight: 700, color: '#0f172a' }}>
-                          Ad Creative Image (URL + File Upload) *
-                        </label>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          <input
-                            type="text"
-                            placeholder="https://... or upload local image file"
-                            value={formData.imageUrl || ''}
-                            onChange={(e) => setFormData(f => ({ ...f, imageUrl: e.target.value }))}
-                            style={{ flex: 1 }}
-                          />
-                          <input
-                            type="file"
-                            ref={fileInputRef}
-                            accept="image/*"
-                            style={{ display: 'none' }}
-                            onChange={handleFileUpload}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => fileInputRef.current?.click()}
-                            style={{
-                              padding: '10px 14px',
-                              background: '#f1f5f9',
-                              border: '1px solid #cbd5e1',
-                              borderRadius: '8px',
-                              fontWeight: 600,
-                              fontSize: '0.85rem',
-                              cursor: 'pointer',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '6px'
-                            }}
-                          >
-                            <Upload size={15} /> Upload
-                          </button>
-                        </div>
-                      </div>
+                      {formStep === 2 && (
+                        <div className="form-step-pane">
+                          {/* Creative Image with URL + Upload */}
+                          <div className="form-group">
+                            <label style={{ fontWeight: 700, color: '#0f172a' }}>
+                              Ad Creative Image (URL + File Upload) *
+                            </label>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <input
+                                type="text"
+                                placeholder="https://... or upload local image file"
+                                value={formData.imageUrl || ''}
+                                onChange={(e) => setFormData(f => ({ ...f, imageUrl: e.target.value }))}
+                                style={{ flex: 1 }}
+                              />
+                              <input
+                                type="file"
+                                ref={fileInputRef}
+                                accept="image/*"
+                                style={{ display: 'none' }}
+                                onChange={handleFileUpload}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                style={{
+                                  padding: '10px 14px',
+                                  background: '#f1f5f9',
+                                  border: '1px solid #cbd5e1',
+                                  borderRadius: '8px',
+                                  fontWeight: 600,
+                                  fontSize: '0.85rem',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px'
+                                }}
+                              >
+                                <Upload size={15} /> Upload
+                              </button>
+                            </div>
+                          </div>
 
-                      {/* Pricing Model & Budget */}
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label>Billing Model</label>
-                          <select
-                            value={formData.pricingModel || 'CPC'}
-                            onChange={(e) => setFormData(f => ({ ...f, pricingModel: e.target.value as any }))}
-                          >
-                            <option value="CPC">CPC (Cost Per Click)</option>
-                            <option value="CPM">CPM (Cost Per 1000 Views)</option>
-                            <option value="Flat Monthly">Flat Monthly Retainer</option>
-                            <option value="Affiliate">Affiliate Commission</option>
-                          </select>
-                        </div>
-                        <div className="form-group">
-                          <label>Rate / Budget Info</label>
-                          <input
-                            type="text"
-                            placeholder="e.g. ₹15 / click or ₹25,000 / mo"
-                            value={formData.budgetOrRate || ''}
-                            onChange={(e) => setFormData(f => ({ ...f, budgetOrRate: e.target.value }))}
-                          />
-                        </div>
-                      </div>
+                          {/* Pricing Model & Budget */}
+                          <div className="form-row">
+                            <div className="form-group">
+                              <label>Billing Model</label>
+                              <select
+                                value={formData.pricingModel || 'CPC'}
+                                onChange={(e) => setFormData(f => ({ ...f, pricingModel: e.target.value as any }))}
+                              >
+                                <option value="CPC">CPC (Cost Per Click)</option>
+                                <option value="CPM">CPM (Cost Per 1000 Views)</option>
+                                <option value="Flat Monthly">Flat Monthly Retainer</option>
+                                <option value="Affiliate">Affiliate Commission</option>
+                              </select>
+                            </div>
+                            <div className="form-group">
+                              <label>Rate / Budget Info</label>
+                              <input
+                                type="text"
+                                placeholder="e.g. ₹15 / click or ₹25,000 / mo"
+                                value={formData.budgetOrRate || ''}
+                                onChange={(e) => setFormData(f => ({ ...f, budgetOrRate: e.target.value }))}
+                              />
+                            </div>
+                          </div>
 
-                      {/* Mandatory Expiry Date & Status */}
-                      <div className="form-row" style={{ background: '#f8fafc', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                        <div className="form-group" style={{ margin: 0 }}>
-                          <label style={{ fontWeight: 800, color: '#dc2626', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <Calendar size={14} /> Campaign Expiry Date *
-                          </label>
-                          <input
-                            type="date"
-                            required
-                            value={formData.expiryDate || ''}
-                            onChange={(e) => setFormData(f => ({ ...f, expiryDate: e.target.value }))}
-                            style={{ borderColor: '#fca5a5' }}
-                          />
-                        </div>
+                          {/* Mandatory Expiry Date & Status */}
+                          <div className="form-row" style={{ background: '#f8fafc', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                            <div className="form-group" style={{ margin: 0 }}>
+                              <label style={{ fontWeight: 800, color: '#dc2626', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <Calendar size={14} /> Campaign Expiry Date *
+                              </label>
+                              <input
+                                type="date"
+                                required
+                                value={formData.expiryDate || ''}
+                                onChange={(e) => setFormData(f => ({ ...f, expiryDate: e.target.value }))}
+                                style={{ borderColor: '#fca5a5' }}
+                              />
+                            </div>
 
-                        <div className="form-group" style={{ margin: 0 }}>
-                          <label>Campaign Status</label>
-                          <select
-                            value={formData.status || 'active'}
-                            onChange={(e) => setFormData(f => ({ ...f, status: e.target.value as AdStatus }))}
-                          >
-                            <option value="active">Active</option>
-                            <option value="paused">Paused</option>
-                            <option value="inactive">Inactive</option>
-                            <option value="scheduled">Scheduled</option>
-                          </select>
+                            <div className="form-group" style={{ margin: 0 }}>
+                              <label>Campaign Status</label>
+                              <select
+                                value={formData.status || 'active'}
+                                onChange={(e) => setFormData(f => ({ ...f, status: e.target.value as AdStatus }))}
+                              >
+                                <option value="active">Active</option>
+                                <option value="paused">Paused</option>
+                                <option value="inactive">Inactive</option>
+                                <option value="scheduled">Scheduled</option>
+                              </select>
+                            </div>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
 
                     {/* Right Sticky Preview */}
@@ -1186,13 +1224,40 @@ export const ExecutiveAdvertisementsPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="modal-footer" style={{ flexShrink: 0 }}>
-                  <button type="button" className="btn-cancel" onClick={() => setIsFormOpen(false)}>
-                    Cancel
-                  </button>
-                  <button type="submit" className="btn-save">
-                    {editingAd ? 'Update Advertisement' : 'Launch Ad Campaign'}
-                  </button>
+                <div className="modal-footer" style={{ flexShrink: 0, justifyContent: 'space-between', display: 'flex' }}>
+                  {formStep === 1 ? (
+                    <>
+                      <button type="button" className="btn-cancel" onClick={() => setIsFormOpen(false)}>
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-save"
+                        onClick={() => {
+                          if (!formData.title?.trim()) {
+                            alert('Please enter a Campaign Title before proceeding.')
+                            return
+                          }
+                          if (!formData.advertiser?.trim()) {
+                            alert('Please enter Advertiser / Brand Name before proceeding.')
+                            return
+                          }
+                          setFormStep(2)
+                        }}
+                      >
+                        Next: Creative & Expiry &rarr;
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button type="button" className="btn-cancel" onClick={() => setFormStep(1)}>
+                        &larr; Back to Step 1
+                      </button>
+                      <button type="submit" className="btn-save">
+                        {editingAd ? 'Update Advertisement' : 'Launch Ad Campaign'}
+                      </button>
+                    </>
+                  )}
                 </div>
               </form>
             </div>

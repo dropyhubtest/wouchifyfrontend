@@ -370,6 +370,7 @@ export const ExecutiveLootDealsPage: React.FC = () => {
   const [itemsPerPage] = useState(10)
 
   // Form State
+  const [formStep, setFormStep] = useState<1 | 2>(1)
   const emptyLootDeal: LootDeal = {
     id: '',
     title: '',
@@ -532,6 +533,7 @@ export const ExecutiveLootDealsPage: React.FC = () => {
   const handleAddDeal = () => {
     setEditingDeal(null)
     setForm(emptyLootDeal)
+    setFormStep(1)
     setIsModalOpen(true)
   }
 
@@ -542,6 +544,7 @@ export const ExecutiveLootDealsPage: React.FC = () => {
       image: deal.image || deal.images[0] || '',
       images: deal.images?.length ? deal.images : [deal.image || '']
     })
+    setFormStep(1)
     setIsModalOpen(true)
   }
 
@@ -1376,491 +1379,566 @@ export const ExecutiveLootDealsPage: React.FC = () => {
               </div>
 
               <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
-                
-                {/* Section 1: Core Loot Details & Identity */}
-                <div className="form-section">
-                  <div className="form-section-header">
-                    <div className="form-section-icon" style={{ background: '#fee2e2', color: 'var(--color-red, #E31E25)' }}><Flame size={16} /></div>
-                    <h4 className="form-section-title">Loot Deal Identity & Store</h4>
-                    <span className="form-section-desc">Headline, store & classification</span>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Loot Deal Headline / Title <span className="required-star">*</span></label>
-                    <input 
-                      type="text" 
-                      placeholder="e.g. 92% OFF: Philips Wireless Bluetooth Speaker at ₹199 only" 
-                      value={form.title}
-                      onChange={(e) => setForm({ ...form, title: e.target.value })}
-                      required
-                    />
-                    <span className="field-hint">High-converting catchy title emphasizing massive discount</span>
-                  </div>
-
-                  <div className="form-row-3" style={{ marginTop: '12px' }}>
-                    <div className="form-group">
-                      <label>Store Partner <span className="required-star">*</span></label>
-                      <select 
-                        value={form.store}
-                        onChange={(e) => setForm({ ...form, store: e.target.value })}
-                      >
-                        {storeOptions.map(s => <option key={s} value={s}>{s}</option>)}
-                      </select>
+                {/* 2-Step Form Stepper */}
+                <div className="form-stepper">
+                  <button 
+                    type="button" 
+                    className={`step-tab-btn ${formStep === 1 ? 'active' : 'completed'}`}
+                    onClick={() => setFormStep(1)}
+                  >
+                    <span className="step-number">{formStep > 1 ? '✓' : '1'}</span>
+                    <div className="step-info">
+                      <span className="step-title">Step 1: Loot Identity & Pricing</span>
+                      <span className="step-desc">Headline, store, category & pricing math</span>
                     </div>
+                  </button>
 
-                    <div className="form-group">
-                      <label>Product Brand</label>
-                      <input 
-                        type="text" 
-                        placeholder="e.g. Philips, boAt, Apple" 
-                        value={form.brand || ''}
-                        onChange={(e) => setForm({ ...form, brand: e.target.value })}
-                      />
+                  <div className="step-divider" />
+
+                  <button 
+                    type="button" 
+                    className={`step-tab-btn ${formStep === 2 ? 'active' : ''}`}
+                    onClick={() => {
+                      if (!form.title.trim()) {
+                        alert('Please enter a Loot Deal Title in Step 1 first.')
+                        return
+                      }
+                      if (!form.price.trim()) {
+                        alert('Please enter a Loot Selling Price in Step 1 first.')
+                        return
+                      }
+                      setFormStep(2)
+                    }}
+                  >
+                    <span className="step-number">2</span>
+                    <div className="step-info">
+                      <span className="step-title">Step 2: Media, Expiry & Broadcast</span>
+                      <span className="step-desc">Product image, urgency countdown, trick & preview</span>
                     </div>
-
-                    <div className="form-group">
-                      <label>Category</label>
-                      <select 
-                        value={form.category}
-                        onChange={(e) => setForm({ ...form, category: e.target.value })}
-                      >
-                        {categoryOptions.map(c => <option key={c} value={c}>{c}</option>)}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="form-row-3" style={{ marginTop: '12px' }}>
-                    <div className="form-group">
-                      <label>Loot Classification <span className="required-star">*</span></label>
-                      <select 
-                        value={form.lootType}
-                        onChange={(e) => {
-                          const val = e.target.value as LootDeal['lootType']
-                          let defaultBadge = '💥 PRICE ERROR'
-                          if (val === 'flash') defaultBadge = '⚡ FLASH DROP'
-                          if (val === 'steal') defaultBadge = '🔥 80%+ STEAL'
-                          if (val === 'under99') defaultBadge = '🏷️ UNDER ₹99 LOOT'
-                          if (val === 'under199') defaultBadge = '🏷️ UNDER ₹199 LOOT'
-                          if (val === 'freebie') defaultBadge = '🎁 100% FREEBIE'
-                          setForm({ ...form, lootType: val, badge: defaultBadge })
-                        }}
-                      >
-                        <option value="glitch">💥 Price Glitch / Error</option>
-                        <option value="flash">⚡ Flash Loot Drop</option>
-                        <option value="steal">🔥 80%+ Steal Deal</option>
-                        <option value="under99">🏷️ Under ₹99 Store</option>
-                        <option value="under199">🏷️ Under ₹199 Store</option>
-                        <option value="freebie">🎁 100% Freebie / Cashback</option>
-                      </select>
-                    </div>
-
-                    <div className="form-group">
-                      <label>Storefront Badge Text</label>
-                      <input 
-                        type="text" 
-                        placeholder="e.g. 💥 PRICE ERROR, ⚡ FLASH DROP" 
-                        value={form.badge}
-                        onChange={(e) => setForm({ ...form, badge: e.target.value })}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>ASIN / SKU / FSN</label>
-                      <input 
-                        type="text" 
-                        placeholder="e.g. B0CH9871XY" 
-                        value={form.asinOrSku || ''}
-                        onChange={(e) => setForm({ ...form, asinOrSku: e.target.value.toUpperCase() })}
-                        style={{ fontFamily: 'monospace' }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-group" style={{ marginTop: '12px' }}>
-                    <label>Destination Affiliate URL <span className="required-star">*</span></label>
-                    <input 
-                      type="text" 
-                      placeholder="e.g. https://amazon.in/dp/... or https://flipkart.com/..." 
-                      value={form.link}
-                      onChange={(e) => setForm({ ...form, link: e.target.value })}
-                      required
-                    />
-                    <span className="field-hint">Users will be redirected directly to this 1-click cart/product page</span>
-                  </div>
+                  </button>
                 </div>
 
-                {/* Section 2: Pricing, Loot Math & Financials */}
-                <div className="form-section">
-                  <div className="form-section-header">
-                    <div className="form-section-icon"><Zap size={16} /></div>
-                    <h4 className="form-section-title">Pricing, Loot Math & Financials</h4>
-                    <span className="form-section-desc">Discount calculations & wallet rewards</span>
-                  </div>
+                {/* ── STEP 1: IDENTITY, STORE & PRICING MATH ── */}
+                {formStep === 1 && (
+                  <div className="form-step-pane">
+                    {/* Section 1: Core Loot Details & Identity */}
+                    <div className="form-section">
+                      <div className="form-section-header">
+                        <div className="form-section-icon" style={{ background: '#fee2e2', color: 'var(--color-red, #E31E25)' }}><Flame size={16} /></div>
+                        <h4 className="form-section-title">Loot Deal Identity & Store</h4>
+                        <span className="form-section-desc">Headline, store & classification</span>
+                      </div>
 
-                  <div className="form-row-3">
-                    <div className="form-group highlight-input">
-                      <label>Loot Selling Price (₹) <span className="required-star">*</span></label>
-                      <div className="input-with-symbol">
-                        <span className="input-symbol">₹</span>
+                      <div className="form-group">
+                        <label>Loot Deal Headline / Title <span className="required-star">*</span></label>
                         <input 
                           type="text" 
-                          placeholder="199" 
-                          value={form.price.replace('₹', '')}
-                          onChange={(e) => handlePriceChange(e.target.value)}
+                          placeholder="e.g. 92% OFF: Philips Wireless Bluetooth Speaker at ₹199 only" 
+                          value={form.title}
+                          onChange={(e) => setForm({ ...form, title: e.target.value })}
                           required
                         />
+                        <span className="field-hint">High-converting catchy title emphasizing massive discount</span>
                       </div>
-                      <span className="field-hint">Lowest drop price</span>
-                    </div>
 
-                    <div className="form-group">
-                      <label>Original MRP (₹) <span className="required-star">*</span></label>
-                      <div className="input-with-symbol">
-                        <span className="input-symbol">₹</span>
+                      <div className="form-row-3" style={{ marginTop: '12px' }}>
+                        <div className="form-group">
+                          <label>Store Partner <span className="required-star">*</span></label>
+                          <select 
+                            value={form.store}
+                            onChange={(e) => setForm({ ...form, store: e.target.value })}
+                          >
+                            {storeOptions.map(s => <option key={s} value={s}>{s}</option>)}
+                          </select>
+                        </div>
+
+                        <div className="form-group">
+                          <label>Product Brand</label>
+                          <input 
+                            type="text" 
+                            placeholder="e.g. Philips, boAt, Apple" 
+                            value={form.brand || ''}
+                            onChange={(e) => setForm({ ...form, brand: e.target.value })}
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label>Category</label>
+                          <select 
+                            value={form.category}
+                            onChange={(e) => setForm({ ...form, category: e.target.value })}
+                          >
+                            {categoryOptions.map(c => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="form-row-3" style={{ marginTop: '12px' }}>
+                        <div className="form-group">
+                          <label>Loot Classification <span className="required-star">*</span></label>
+                          <select 
+                            value={form.lootType}
+                            onChange={(e) => {
+                              const val = e.target.value as LootDeal['lootType']
+                              let defaultBadge = '💥 PRICE ERROR'
+                              if (val === 'flash') defaultBadge = '⚡ FLASH DROP'
+                              if (val === 'steal') defaultBadge = '🔥 80%+ STEAL'
+                              if (val === 'under99') defaultBadge = '🏷️ UNDER ₹99 LOOT'
+                              if (val === 'under199') defaultBadge = '🏷️ UNDER ₹199 LOOT'
+                              if (val === 'freebie') defaultBadge = '🎁 100% FREEBIE'
+                              setForm({ ...form, lootType: val, badge: defaultBadge })
+                            }}
+                          >
+                            <option value="glitch">💥 Price Glitch / Error</option>
+                            <option value="flash">⚡ Flash Loot Drop</option>
+                            <option value="steal">🔥 80%+ Steal Deal</option>
+                            <option value="under99">🏷️ Under ₹99 Store</option>
+                            <option value="under199">🏷️ Under ₹199 Store</option>
+                            <option value="freebie">🎁 100% Freebie / Cashback</option>
+                          </select>
+                        </div>
+
+                        <div className="form-group">
+                          <label>Storefront Badge Text</label>
+                          <input 
+                            type="text" 
+                            placeholder="e.g. 💥 PRICE ERROR, ⚡ FLASH DROP" 
+                            value={form.badge}
+                            onChange={(e) => setForm({ ...form, badge: e.target.value })}
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label>ASIN / SKU / FSN</label>
+                          <input 
+                            type="text" 
+                            placeholder="e.g. B0CH9871XY" 
+                            value={form.asinOrSku || ''}
+                            onChange={(e) => setForm({ ...form, asinOrSku: e.target.value.toUpperCase() })}
+                            style={{ fontFamily: 'monospace' }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-group" style={{ marginTop: '12px' }}>
+                        <label>Destination Affiliate URL <span className="required-star">*</span></label>
                         <input 
                           type="text" 
-                          placeholder="2,499" 
-                          value={form.originalPrice.replace('₹', '')}
-                          onChange={(e) => handleMrpChange(e.target.value)}
+                          placeholder="e.g. https://amazon.in/dp/... or https://flipkart.com/..." 
+                          value={form.link}
+                          onChange={(e) => setForm({ ...form, link: e.target.value })}
+                          required
                         />
+                        <span className="field-hint">Users will be redirected directly to this 1-click cart/product page</span>
                       </div>
-                      <span className="field-hint">Regular retail MRP</span>
                     </div>
 
-                    <div className="form-group">
-                      <label>Discount Badge</label>
-                      <input 
-                        type="text" 
-                        placeholder="92% OFF" 
-                        value={form.discountLabel}
-                        onChange={(e) => setForm({ ...form, discountLabel: e.target.value })}
-                      />
-                      <span className="field-hint">Auto-calculated or custom</span>
-                    </div>
-                  </div>
-
-                  <div className="form-row-3" style={{ marginTop: '12px' }}>
-                    <div className="form-group">
-                      <label>Effective Price after Coins/Cashback</label>
-                      <input 
-                        type="text" 
-                        placeholder="e.g. ₹149 (with SuperCoins)" 
-                        value={form.effectivePrice || ''}
-                        onChange={(e) => setForm({ ...form, effectivePrice: e.target.value.startsWith('₹') ? e.target.value : `₹${e.target.value}` })}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Coupon Code (Optional)</label>
-                      <input 
-                        type="text" 
-                        placeholder="e.g. LOOT90" 
-                        value={form.code}
-                        onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
-                        style={{ fontFamily: 'monospace', letterSpacing: '1px' }}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Extra Wouchify Cashback / Rewards</label>
-                      <input 
-                        type="text" 
-                        placeholder="e.g. + ₹50 Instant Cash" 
-                        value={form.cashback || ''}
-                        onChange={(e) => setForm({ ...form, cashback: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Section 3: Stock Claimed, Urgency & Expiry */}
-                <div className="form-section">
-                  <div className="form-section-header">
-                    <div className="form-section-icon"><Clock size={16} /></div>
-                    <h4 className="form-section-title">Stock Claimed, Urgency & Expiry</h4>
-                    <span className="form-section-desc">Countdown timers & claimed meter controls</span>
-                  </div>
-
-                  <div className="form-row-3">
-                    <div className="form-group">
-                      <label>Stock Claimed % (0 - 100)</label>
-                      <input 
-                        type="number" 
-                        min="1" 
-                        max="100" 
-                        value={form.stockClaimedPercent}
-                        onChange={(e) => setForm({ ...form, stockClaimedPercent: Number(e.target.value) || 50 })}
-                      />
-                      <span className="field-hint">Renders visual urgency progress bar</span>
-                    </div>
-
-                    <div className="form-group">
-                      <label>Quantity Alert Badge</label>
-                      <input 
-                        type="text" 
-                        placeholder="e.g. Hurry! Only 4 units left" 
-                        value={form.quantityAlert || ''}
-                        onChange={(e) => setForm({ ...form, quantityAlert: e.target.value })}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Loot Priority Level</label>
-                      <select 
-                        value={form.priority}
-                        onChange={(e) => setForm({ ...form, priority: e.target.value as LootDeal['priority'] })}
-                      >
-                        <option value="Normal">Normal</option>
-                        <option value="High">High</option>
-                        <option value="Critical">🔥 Critical (Top Banner)</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="form-row-2" style={{ marginTop: '12px' }}>
-                    <div className="form-group">
-                      <label>Deal Posted Date & Time</label>
-                      <input 
-                        type="text" 
-                        value={form.postedAt}
-                        onChange={(e) => setForm({ ...form, postedAt: e.target.value })}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Expiry Date & Time</label>
-                      <input 
-                        type="datetime-local" 
-                        value={form.expiresAt}
-                        onChange={(e) => setForm({ ...form, expiresAt: e.target.value })}
-                      />
-                      <div className="quick-preset-wrap">
-                        <span style={{ fontSize: '0.72rem', color: '#64748b', alignSelf: 'center', marginRight: '2px' }}>Presets:</span>
-                        <button type="button" className="quick-preset-btn" onClick={() => handleSetExpiryPreset(1)}>+1h (Glitch)</button>
-                        <button type="button" className="quick-preset-btn" onClick={() => handleSetExpiryPreset(3)}>+3h</button>
-                        <button type="button" className="quick-preset-btn" onClick={() => handleSetExpiryPreset(6)}>+6h</button>
-                        <button type="button" className="quick-preset-btn" onClick={() => handleSetExpiryPreset(12)}>+12h</button>
-                        <button type="button" className="quick-preset-btn" onClick={() => handleSetExpiryPreset(24)}>+24h</button>
-                        <button type="button" className="quick-preset-btn" onClick={() => handleSetExpiryPreset(72)}>+3 Days</button>
-                        <button type="button" className="quick-preset-btn" onClick={() => handleSetExpiryPreset(null)} style={{ color: '#ef4444' }}>Clear</button>
+                    {/* Section 2: Pricing, Loot Math & Financials */}
+                    <div className="form-section">
+                      <div className="form-section-header">
+                        <div className="form-section-icon"><Zap size={16} /></div>
+                        <h4 className="form-section-title">Pricing, Loot Math & Financials</h4>
+                        <span className="form-section-desc">Discount calculations & wallet rewards</span>
                       </div>
-                      <span className="field-hint">Offer end schedule for countdown timers</span>
+
+                      <div className="form-row-3">
+                        <div className="form-group highlight-input">
+                          <label>Loot Selling Price (₹) <span className="required-star">*</span></label>
+                          <div className="input-with-symbol">
+                            <span className="input-symbol">₹</span>
+                            <input 
+                              type="text" 
+                              placeholder="199" 
+                              value={form.price.replace('₹', '')}
+                              onChange={(e) => handlePriceChange(e.target.value)}
+                              required
+                            />
+                          </div>
+                          <span className="field-hint">Lowest drop price</span>
+                        </div>
+
+                        <div className="form-group">
+                          <label>Original MRP (₹) <span className="required-star">*</span></label>
+                          <div className="input-with-symbol">
+                            <span className="input-symbol">₹</span>
+                            <input 
+                              type="text" 
+                              placeholder="2,499" 
+                              value={form.originalPrice.replace('₹', '')}
+                              onChange={(e) => handleMrpChange(e.target.value)}
+                            />
+                          </div>
+                          <span className="field-hint">Regular retail MRP</span>
+                        </div>
+
+                        <div className="form-group">
+                          <label>Discount Badge</label>
+                          <input 
+                            type="text" 
+                            placeholder="92% OFF" 
+                            value={form.discountLabel}
+                            onChange={(e) => setForm({ ...form, discountLabel: e.target.value })}
+                          />
+                          <span className="field-hint">Auto-calculated or custom</span>
+                        </div>
+                      </div>
+
+                      <div className="form-row-3" style={{ marginTop: '12px' }}>
+                        <div className="form-group">
+                          <label>Effective Price after Coins/Cashback</label>
+                          <input 
+                            type="text" 
+                            placeholder="e.g. ₹149 (with SuperCoins)" 
+                            value={form.effectivePrice || ''}
+                            onChange={(e) => setForm({ ...form, effectivePrice: e.target.value.startsWith('₹') ? e.target.value : `₹${e.target.value}` })}
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label>Coupon Code (Optional)</label>
+                          <input 
+                            type="text" 
+                            placeholder="e.g. LOOT90" 
+                            value={form.code}
+                            onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
+                            style={{ fontFamily: 'monospace', letterSpacing: '1px' }}
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label>Extra Wouchify Cashback / Rewards</label>
+                          <input 
+                            type="text" 
+                            placeholder="e.g. + ₹50 Instant Cash" 
+                            value={form.cashback || ''}
+                            onChange={(e) => setForm({ ...form, cashback: e.target.value })}
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
-                {/* Section 4: "Trick to Grab" (Instructions & Terms) */}
-                <div className="form-section">
-                  <div className="form-section-header">
-                    <div className="form-section-icon"><FileText size={16} /></div>
-                    <h4 className="form-section-title">"Trick to Grab" & Steps</h4>
-                    <span className="form-section-desc">Instructions for price glitch or coupon tricks</span>
-                  </div>
+                {/* ── STEP 2: MEDIA, EXPIRY, BROADCAST & LIVE PREVIEW ── */}
+                {formStep === 2 && (
+                  <div className="form-step-pane">
+                    {/* Section 3: Stock Claimed, Urgency & Expiry */}
+                    <div className="form-section">
+                      <div className="form-section-header">
+                        <div className="form-section-icon"><Clock size={16} /></div>
+                        <h4 className="form-section-title">Stock Claimed, Urgency & Expiry</h4>
+                        <span className="form-section-desc">Countdown timers & claimed meter controls</span>
+                      </div>
 
-                  <div className="form-group">
-                    <label>Step-by-Step Trick Instructions</label>
-                    <textarea 
-                      rows={3}
-                      placeholder={`1. Click "Grab Loot" to open partner store.\n2. Apply coupon LOOT90 at payment page.\n3. Pay via UPI for instant extra discount.`}
-                      value={form.trickSteps || ''}
-                      onChange={(e) => setForm({ ...form, trickSteps: e.target.value })}
-                    />
-                    <span className="field-hint">Displayed as clear step-by-step numbered cards on the buyer deal page</span>
-                  </div>
+                      <div className="form-row-3">
+                        <div className="form-group">
+                          <label>Stock Claimed % (0 - 100)</label>
+                          <input 
+                            type="number" 
+                            min="1" 
+                            max="100" 
+                            value={form.stockClaimedPercent}
+                            onChange={(e) => setForm({ ...form, stockClaimedPercent: Number(e.target.value) || 50 })}
+                          />
+                          <span className="field-hint">Renders visual urgency progress bar</span>
+                        </div>
 
-                  <div className="form-row-2" style={{ marginTop: '12px' }}>
-                    <div className="form-group">
-                      <label>Price Proof Note / Verification</label>
-                      <input 
-                        type="text" 
-                        placeholder="e.g. Price drop verified on official store app" 
-                        value={form.proofNote || ''}
-                        onChange={(e) => setForm({ ...form, proofNote: e.target.value })}
-                      />
+                        <div className="form-group">
+                          <label>Quantity Alert Badge</label>
+                          <input 
+                            type="text" 
+                            placeholder="e.g. Hurry! Only 4 units left" 
+                            value={form.quantityAlert || ''}
+                            onChange={(e) => setForm({ ...form, quantityAlert: e.target.value })}
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label>Loot Priority Level</label>
+                          <select 
+                            value={form.priority}
+                            onChange={(e) => setForm({ ...form, priority: e.target.value as LootDeal['priority'] })}
+                          >
+                            <option value="Normal">Normal</option>
+                            <option value="High">High</option>
+                            <option value="Critical">🔥 Critical (Top Banner)</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="form-row-2" style={{ marginTop: '12px' }}>
+                        <div className="form-group">
+                          <label>Deal Posted Date & Time</label>
+                          <input 
+                            type="text" 
+                            value={form.postedAt}
+                            onChange={(e) => setForm({ ...form, postedAt: e.target.value })}
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label>Expiry Date & Time</label>
+                          <input 
+                            type="datetime-local" 
+                            value={form.expiresAt}
+                            onChange={(e) => setForm({ ...form, expiresAt: e.target.value })}
+                          />
+                          <div className="quick-preset-wrap">
+                            <span style={{ fontSize: '0.72rem', color: '#64748b', alignSelf: 'center', marginRight: '2px' }}>Presets:</span>
+                            <button type="button" className="quick-preset-btn" onClick={() => handleSetExpiryPreset(1)}>+1h (Glitch)</button>
+                            <button type="button" className="quick-preset-btn" onClick={() => handleSetExpiryPreset(3)}>+3h</button>
+                            <button type="button" className="quick-preset-btn" onClick={() => handleSetExpiryPreset(6)}>+6h</button>
+                            <button type="button" className="quick-preset-btn" onClick={() => handleSetExpiryPreset(12)}>+12h</button>
+                            <button type="button" className="quick-preset-btn" onClick={() => handleSetExpiryPreset(24)}>+24h</button>
+                            <button type="button" className="quick-preset-btn" onClick={() => handleSetExpiryPreset(72)}>+3 Days</button>
+                            <button type="button" className="quick-preset-btn" onClick={() => handleSetExpiryPreset(null)} style={{ color: '#ef4444' }}>Clear</button>
+                          </div>
+                          <span className="field-hint">Offer end schedule for countdown timers</span>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="form-group">
-                      <label>Disclaimer & Terms</label>
-                      <input 
-                        type="text" 
-                        placeholder="e.g. Price may revert anytime. Fast checkout recommended." 
-                        value={form.terms || ''}
-                        onChange={(e) => setForm({ ...form, terms: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Section 5: Broadcast & Channel Controls */}
-                <div className="form-section">
-                  <div className="form-section-header">
-                    <div className="form-section-icon"><SendHorizontal size={16} /></div>
-                    <h4 className="form-section-title">Broadcast & Notification Controls</h4>
-                    <span className="form-section-desc">Multi-channel instant blast</span>
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                    <label className="feature-checkbox-label">
-                      <input 
-                        type="checkbox" 
-                        checked={form.telegramAlert} 
-                        onChange={(e) => setForm({ ...form, telegramAlert: e.target.checked })} 
-                      />
-                      <div>
-                        <div>✈️ Broadcast to Telegram Loot Channel</div>
-                        <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 400 }}>Instantly alerts 50,000+ subscribers</div>
+                    {/* Section 4: "Trick to Grab" (Instructions & Terms) */}
+                    <div className="form-section">
+                      <div className="form-section-header">
+                        <div className="form-section-icon"><FileText size={16} /></div>
+                        <h4 className="form-section-title">"Trick to Grab" & Steps</h4>
+                        <span className="form-section-desc">Instructions for price glitch or coupon tricks</span>
                       </div>
-                    </label>
 
-                    <label className="feature-checkbox-label">
-                      <input 
-                        type="checkbox" 
-                        checked={form.pushNotification} 
-                        onChange={(e) => setForm({ ...form, pushNotification: e.target.checked })} 
-                      />
-                      <div>
-                        <div>🔔 Send Mobile App Push Alert</div>
-                        <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 400 }}>High-priority drop ping to mobile app users</div>
-                      </div>
-                    </label>
-
-                    <label className="feature-checkbox-label">
-                      <input 
-                        type="checkbox" 
-                        checked={form.isFeatured} 
-                        onChange={(e) => setForm({ ...form, isFeatured: e.target.checked })} 
-                      />
-                      <div>
-                        <div>🌟 Feature in Top Flash Loot Banner</div>
-                        <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 400 }}>Pinned to top storefront carousel</div>
-                      </div>
-                    </label>
-
-                    <label className="feature-checkbox-label">
-                      <input 
-                        type="checkbox" 
-                        checked={form.isVerified} 
-                        onChange={(e) => setForm({ ...form, isVerified: e.target.checked })} 
-                      />
-                      <div>
-                        <div>✓ Verified Loot Seal (Blue Tick)</div>
-                        <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 400 }}>Shows verified authentic badge</div>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Section 6: Media & Live Card Preview */}
-                <div className="form-section">
-                  <div className="form-section-header">
-                    <div className="form-section-icon"><ImageIcon size={16} /></div>
-                    <h4 className="form-section-title">Product Image</h4>
-                    <span className="form-section-desc">Image URL & quick presets</span>
-                  </div>
-
-                  <ImageUploadField
-                    label="Main Product Image"
-                    placeholder="Paste URL or upload from device…"
-                    value={form.image}
-                    onChange={(val) => handleImageUrlChange(val)}
-                  />
-
-                  <div style={{ marginTop: '10px' }}>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>Quick Sample Presets:</span>
-                    <div className="image-preset-list">
-                      {DEAL_PRODUCT_PRESETS.map((preset) => (
-                        <button
-                          key={preset.label}
-                          type="button"
-                          className={`image-preset-chip ${form.image === preset.image ? 'active' : ''}`}
-                          onClick={() => handleImageUrlChange(preset.image)}
-                        >
-                          {preset.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Live Preview Strip */}
-                <div className="form-section" style={{ background: '#f8fafc' }}>
-                  <div className="deal-live-preview-box">
-                    <span className="preview-header-text">Live Storefront Card Preview</span>
-                    <div className="preview-deal-card">
-                      <div className="preview-deal-image-wrap">
-                        <img 
-                          src={form.image || 'https://via.placeholder.com/320x150?text=Loot+Image'} 
-                          alt="Live Preview" 
-                          onError={(e) => { (e.target as any).src = 'https://via.placeholder.com/320x150?text=Image+Preview' }}
+                      <div className="form-group">
+                        <label>Step-by-Step Trick Instructions</label>
+                        <textarea 
+                          rows={3}
+                          placeholder={`1. Click "Grab Loot" to open partner store.\n2. Apply coupon LOOT90 at payment page.\n3. Pay via UPI for instant extra discount.`}
+                          value={form.trickSteps || ''}
+                          onChange={(e) => setForm({ ...form, trickSteps: e.target.value })}
                         />
+                        <span className="field-hint">Displayed as clear step-by-step numbered cards on the buyer deal page</span>
                       </div>
-                      <div className="preview-deal-body">
-                        <div className="preview-store-strip">
-                          <div className="preview-store-name" title={form.store}>
-                            <img src={getStoreLogo(form.store)} alt={form.store} style={{ height: '18px', maxWidth: '65px', objectFit: 'contain' }} />
-                          </div>
-                          <span className={`loot-type-badge ${form.lootType}`}>
-                            {form.badge || '💥 PRICE ERROR'}
-                          </span>
+
+                      <div className="form-row-2" style={{ marginTop: '12px' }}>
+                        <div className="form-group">
+                          <label>Price Proof Note / Verification</label>
+                          <input 
+                            type="text" 
+                            placeholder="e.g. Price drop verified on official store app" 
+                            value={form.proofNote || ''}
+                            onChange={(e) => setForm({ ...form, proofNote: e.target.value })}
+                          />
                         </div>
 
-                        {form.brand && (
-                          <div style={{ fontSize: '0.72rem', color: 'var(--color-red, #E31E25)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: '4px' }}>
-                            {form.brand}
-                          </div>
-                        )}
-
-                        <h5 className="preview-deal-title" style={{ margin: '2px 0 6px' }}>{form.title || 'Loot Title Will Appear Here'}</h5>
-                        
-                        <div className="preview-price-strip">
-                          <span className="preview-offer-price" style={{ color: 'var(--color-red, #E31E25)' }}>{form.price || '₹0'}</span>
-                          {form.originalPrice && <span className="preview-mrp-price">{form.originalPrice}</span>}
-                          {form.discountLabel && <span className="preview-discount-badge" style={{ background: '#fef2f2', color: 'var(--color-red, #E31E25)' }}>{form.discountLabel}</span>}
+                        <div className="form-group">
+                          <label>Disclaimer & Terms</label>
+                          <input 
+                            type="text" 
+                            placeholder="e.g. Price may revert anytime. Fast checkout recommended." 
+                            value={form.terms || ''}
+                            onChange={(e) => setForm({ ...form, terms: e.target.value })}
+                          />
                         </div>
+                      </div>
+                    </div>
 
-                        {/* Claimed progress preview */}
-                        <div className="loot-claimed-meter" style={{ margin: '6px 0' }}>
-                          <div className="loot-claimed-header">
-                            <span style={{ fontSize: '0.72rem', color: '#dc2626' }}>🔥 {form.stockClaimedPercent}% Claimed</span>
-                            {form.quantityAlert && <span style={{ fontSize: '0.68rem', color: '#dc2626' }}>{form.quantityAlert}</span>}
+                    {/* Section 5: Broadcast & Channel Controls */}
+                    <div className="form-section">
+                      <div className="form-section-header">
+                        <div className="form-section-icon"><SendHorizontal size={16} /></div>
+                        <h4 className="form-section-title">Broadcast & Notification Controls</h4>
+                        <span className="form-section-desc">Multi-channel instant blast</span>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <label className="feature-checkbox-label">
+                          <input 
+                            type="checkbox" 
+                            checked={form.telegramAlert} 
+                            onChange={(e) => setForm({ ...form, telegramAlert: e.target.checked })} 
+                          />
+                          <div>
+                            <div>✈️ Broadcast to Telegram Loot Channel</div>
+                            <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 400 }}>Instantly alerts 50,000+ subscribers</div>
                           </div>
-                          <div className="loot-claimed-bar">
-                            <div className="loot-claimed-fill high" style={{ width: `${form.stockClaimedPercent}%` }} />
+                        </label>
+
+                        <label className="feature-checkbox-label">
+                          <input 
+                            type="checkbox" 
+                            checked={form.pushNotification} 
+                            onChange={(e) => setForm({ ...form, pushNotification: e.target.checked })} 
+                          />
+                          <div>
+                            <div>🔔 Send Mobile App Push Alert</div>
+                            <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 400 }}>High-priority drop ping to mobile app users</div>
+                          </div>
+                        </label>
+
+                        <label className="feature-checkbox-label">
+                          <input 
+                            type="checkbox" 
+                            checked={form.isFeatured} 
+                            onChange={(e) => setForm({ ...form, isFeatured: e.target.checked })} 
+                          />
+                          <div>
+                            <div>🌟 Feature in Top Flash Loot Banner</div>
+                            <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 400 }}>Pinned to top storefront carousel</div>
+                          </div>
+                        </label>
+
+                        <label className="feature-checkbox-label">
+                          <input 
+                            type="checkbox" 
+                            checked={form.isVerified} 
+                            onChange={(e) => setForm({ ...form, isVerified: e.target.checked })} 
+                          />
+                          <div>
+                            <div>✓ Verified Loot Seal (Blue Tick)</div>
+                            <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 400 }}>Shows verified authentic badge</div>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Section 6: Media & Live Card Preview */}
+                    <div className="form-section">
+                      <div className="form-section-header">
+                        <div className="form-section-icon"><ImageIcon size={16} /></div>
+                        <h4 className="form-section-title">Product Image</h4>
+                        <span className="form-section-desc">Image URL & quick presets</span>
+                      </div>
+
+                      <ImageUploadField
+                        label="Main Product Image"
+                        placeholder="Paste URL or upload from device…"
+                        value={form.image}
+                        onChange={(val) => handleImageUrlChange(val)}
+                      />
+
+                      <div style={{ marginTop: '10px' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>Quick Sample Presets:</span>
+                        <div className="image-preset-list">
+                          {DEAL_PRODUCT_PRESETS.map((preset) => (
+                            <button
+                              key={preset.label}
+                              type="button"
+                              className={`image-preset-chip ${form.image === preset.image ? 'active' : ''}`}
+                              onClick={() => handleImageUrlChange(preset.image)}
+                            >
+                              {preset.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 7: Live Preview Strip */}
+                    <div className="form-section" style={{ background: '#f8fafc' }}>
+                      <div className="deal-live-preview-box">
+                        <span className="preview-header-text">Live Storefront Card Preview</span>
+                        <div className="preview-deal-card">
+                          <div className="preview-deal-image-wrap">
+                            <img 
+                              src={form.image || 'https://via.placeholder.com/320x150?text=Loot+Image'} 
+                              alt="Live Preview" 
+                              onError={(e) => { (e.target as any).src = 'https://via.placeholder.com/320x150?text=Image+Preview' }}
+                            />
+                          </div>
+                          <div className="preview-deal-body">
+                            <div className="preview-store-strip">
+                              <div className="preview-store-name" title={form.store}>
+                                <img src={getStoreLogo(form.store)} alt={form.store} style={{ height: '18px', maxWidth: '65px', objectFit: 'contain' }} />
+                              </div>
+                              <span className={`loot-type-badge ${form.lootType}`}>
+                                {form.badge || '💥 PRICE ERROR'}
+                              </span>
+                            </div>
+
+                            {form.brand && (
+                              <div style={{ fontSize: '0.72rem', color: 'var(--color-red, #E31E25)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: '4px' }}>
+                                {form.brand}
+                              </div>
+                            )}
+
+                            <h5 className="preview-deal-title" style={{ margin: '2px 0 6px' }}>{form.title || 'Loot Title Will Appear Here'}</h5>
+                            
+                            <div className="preview-price-strip">
+                              <span className="preview-offer-price" style={{ color: 'var(--color-red, #E31E25)' }}>{form.price || '₹0'}</span>
+                              {form.originalPrice && <span className="preview-mrp-price">{form.originalPrice}</span>}
+                              {form.discountLabel && <span className="preview-discount-badge" style={{ background: '#fef2f2', color: 'var(--color-red, #E31E25)' }}>{form.discountLabel}</span>}
+                            </div>
+
+                            {/* Claimed progress preview */}
+                            <div className="loot-claimed-meter" style={{ margin: '6px 0' }}>
+                              <div className="loot-claimed-header">
+                                <span style={{ fontSize: '0.72rem', color: '#dc2626' }}>🔥 {form.stockClaimedPercent}% Claimed</span>
+                                {form.quantityAlert && <span style={{ fontSize: '0.68rem', color: '#dc2626' }}>{form.quantityAlert}</span>}
+                              </div>
+                              <div className="loot-claimed-bar">
+                                <div className="loot-claimed-fill high" style={{ width: `${form.stockClaimedPercent}%` }} />
+                              </div>
+                            </div>
+
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '5px', fontSize: '0.74rem', color: '#64748b', margin: '4px 0 10px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <Clock size={11} style={{ color: 'var(--color-red, #E31E25)' }} />
+                                <span>{form.postedAt || 'Today'}</span>
+                              </div>
+                              {form.expiresAt && (
+                                <span className={`expiry-pill ${getExpiryCountdown(form.expiresAt).status}`}>
+                                  ⏳ {getExpiryCountdown(form.expiresAt).text}
+                                </span>
+                              )}
+                            </div>
+                            <button type="button" className="preview-cta-btn" style={{ background: 'linear-gradient(135deg, #e31e25 0%, #b91c1c 100%)' }}>GRAB LOOT DEAL</button>
                           </div>
                         </div>
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '5px', fontSize: '0.74rem', color: '#64748b', margin: '4px 0 10px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <Clock size={11} style={{ color: 'var(--color-red, #E31E25)' }} />
-                            <span>{form.postedAt || 'Today'}</span>
-                          </div>
-                          {form.expiresAt && (
-                            <span className={`expiry-pill ${getExpiryCountdown(form.expiresAt).status}`}>
-                              ⏳ {getExpiryCountdown(form.expiresAt).text}
-                            </span>
-                          )}
-                        </div>
-                        <button type="button" className="preview-cta-btn" style={{ background: 'linear-gradient(135deg, #e31e25 0%, #b91c1c 100%)' }}>GRAB LOOT DEAL</button>
                       </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
 
               <div className="modal-footer">
                 <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                  Status: <strong style={{ color: '#0f172a' }}>{editingDeal ? editingDeal.status : 'New Loot (Draft)'}</strong>
+                  Step <strong>{formStep} of 2</strong> • Status: <strong style={{ color: '#0f172a' }}>{editingDeal ? editingDeal.status : 'New Loot (Draft)'}</strong>
                 </div>
                 <div className="modal-footer-actions">
-                  <button type="button" className="btn-cancel" onClick={() => setIsModalOpen(false)}>
-                    Cancel
-                  </button>
-                  <button type="button" className="btn-draft" onClick={() => handleSave('Draft')}>
-                    <Save size={16} /> Save as Draft
-                  </button>
-                  <button type="button" className="btn-save" onClick={() => handleSave('Approved')}>
-                    <Send size={16} /> Publish / Approve
-                  </button>
+                  {formStep === 1 ? (
+                    <>
+                      <button type="button" className="btn-cancel" onClick={() => setIsModalOpen(false)}>
+                        Cancel
+                      </button>
+                      <button 
+                        type="button" 
+                        className="btn-save" 
+                        onClick={() => {
+                          if (!form.title.trim()) {
+                            alert('Please enter a Loot Deal Title')
+                            return
+                          }
+                          if (!form.price.trim()) {
+                            alert('Please enter an Offer Price')
+                            return
+                          }
+                          setFormStep(2)
+                        }}
+                      >
+                        Next: Media, Expiry & Broadcast →
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button type="button" className="btn-cancel" onClick={() => setFormStep(1)}>
+                        ← Back to Step 1
+                      </button>
+                      <button type="button" className="btn-draft" onClick={() => handleSave('Draft')}>
+                        <Save size={16} /> Save as Draft
+                      </button>
+                      <button type="button" className="btn-save" onClick={() => handleSave('Approved')}>
+                        <Send size={16} /> Publish / Approve
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
