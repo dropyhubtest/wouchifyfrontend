@@ -55,6 +55,12 @@ import { StaffLoginPage } from './pages/admin/StaffLoginPage'
 import { ExecutiveDashboardPage } from './pages/admin/executive/ExecutiveDashboardPage'
 import { ExecutiveDealsPage } from './pages/admin/executive/ExecutiveDealsPage'
 import { ExecutiveLootDealsPage } from './pages/admin/executive/ExecutiveLootDealsPage'
+import { ExecutiveStoresPage } from './pages/admin/executive/ExecutiveStoresPage'
+import { ExecutiveCouponsPage } from './pages/admin/executive/ExecutiveCouponsPage'
+import { ExecutiveCreditCardsPage } from './pages/admin/executive/ExecutiveCreditCardsPage'
+import { ExecutiveGiveawaysPage } from './pages/admin/executive/ExecutiveGiveawaysPage'
+import { ExecutiveBannersPage } from './pages/admin/executive/ExecutiveBannersPage'
+import { ExecutiveAdvertisementsPage } from './pages/admin/executive/ExecutiveAdvertisementsPage'
 import { WelcomeToast } from './components/auth/WelcomeToast'
 
 function resolveCurrentPath(): string {
@@ -511,6 +517,12 @@ export default function App() {
     if (isExecutiveRoute) {
       if (currentPath === '/executive/deals') return <ExecutiveDealsPage />
       if (currentPath === '/executive/loot-deals') return <ExecutiveLootDealsPage />
+      if (currentPath === '/executive/stores') return <ExecutiveStoresPage />
+      if (currentPath === '/executive/coupons') return <ExecutiveCouponsPage />
+      if (currentPath === '/executive/credit-cards') return <ExecutiveCreditCardsPage />
+      if (currentPath === '/executive/giveaways') return <ExecutiveGiveawaysPage />
+      if (currentPath === '/executive/banners') return <ExecutiveBannersPage />
+      if (currentPath === '/executive/advertisements') return <ExecutiveAdvertisementsPage />
       return <ExecutiveDashboardPage />
     }
 
