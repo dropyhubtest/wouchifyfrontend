@@ -1,0 +1,176 @@
+/* ==========================================================================
+   MobileAdvertisePage Styles (Viewport <= 768px, Reference Width ~390px)
+   Exact match to design reference media_1788935735597.png
+   ========================================================================== */
+
+.mobileAdvertisePage {
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background-color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: 0.025em;
+  color: #333333;
+}
+
+.headerWrapper {
+  width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: #F0F1FF;
+}
+
+/* --------------------------------------------------------------------------
+   Hero Section: Back Link, Watermark & Red Headline
+   -------------------------------------------------------------------------- */
+.heroSection {
+  position: relative;
+  padding: 16px 20px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  overflow: visible;
+}
+
+/* Top-Right Animated W Watermark */
+.watermarkWrap {
+  position: absolute;
+  top: 8px;
+  right: 0px;
+  width: 130px;
+  height: 95px;
+  opacity: 0.8;
+  filter: brightness(1.2) contrast(1.1);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Back Link: '<< Advertise with us' */
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #282D78;
+  text-decoration: none;
+  margin-bottom: 22px;
+  position: relative;
+  z-index: 1;
+}
+
+.backLinkText {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* 3-line Red Headline */
+.title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #E31E25;
+  margin: 0 0 24px 0;
+  letter-spacing: 0.025em;
+  position: relative;
+  z-index: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Main Content Sections
+   -------------------------------------------------------------------------- */
+.mainContent {
+  padding: 0 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  position: relative;
+  z-index: 1;
+}
+
+.contentSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.sectionHeading {
+  font-family: 'Poppins', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.35;
+  margin: 0 0 10px 0;
+  letter-spacing: 0.025em;
+}
+
+.navyHeading {
+  color: #282D78;
+}
+
+.redHeading {
+  color: #E31E25;
+}
+
+/* Bullet Lists */
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.list li {
+  font-family: 'Poppins', sans-serif;
+  font-size: 10.5px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #333333;
+  letter-spacing: 0.025em;
+}
+
+/* Partner With Us Paragraphs */
+.paragraph {
+  font-family: 'Poppins', sans-serif;
+  font-size: 10.5px;
+  font-weight: 400;
+  line-height: 1.55;
+  color: #333333;
+  margin: 0 0 6px 0;
+  letter-spacing: 0.025em;
+}
+
+.actionParagraph {
+  margin: 2px 0 6px 0;
+}
+
+.advertiseActionLink {
+  font-family: 'Poppins', sans-serif;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: #282D78;
+  text-decoration: none;
+  letter-spacing: 0.025em;
+  display: inline-block;
+  transition: color 0.15s ease;
+}
+
+.advertiseActionLink:hover {
+  color: #E31E25;
+}
+
+/* Dashed Red Separator Line */
+.dashedSeparator {
+  width: 100%;
+  border-top: 1.5px dashed #E31E25;
+  margin: 8px 0 0;
+}

@@ -1,0 +1,155 @@
+/* ==========================================================================
+   Mobile FAQ Page Styles
+   Matching Figma Mobile Specs (media_1788952003189.png & media_1788952003190.png)
+   ========================================================================== */
+
+.mobileFaqPage {
+  width: 100%;
+  max-width: 440px;
+  min-height: 100vh;
+  margin: 0 auto;
+  background-color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: 0.025em;
+  color: #333333;
+}
+
+/* 1. Sticky Minimal Header Wrapper */
+.headerWrapper {
+  width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: #EEEFFF;
+  border-bottom: 1px solid #E8E8F0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* 2. Top Hero Section with Back Link and Watermark */
+.heroSection {
+  position: relative;
+  width: 100%;
+  padding: 16px 18px 8px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 52px;
+}
+
+/* Floating Big W Watermark on Top-Right Corner */
+.watermarkWrap {
+  position: absolute;
+  top: -2px;
+  right: -8px;
+  width: 140px;
+  height: 98px;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+  opacity: 0.85;
+}
+
+/* Back Link: '<< Frequently asked questions' */
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #E31E25;
+  text-decoration: none;
+  position: relative;
+  z-index: 2;
+  letter-spacing: 0.015em;
+}
+
+.backLinkText {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: #E31E25;
+}
+
+/* 3. Main Content: Cards List */
+.mainContent {
+  width: 100%;
+  padding: 10px 16px 40px 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 2;
+}
+
+.cardsList {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.cardContainer {
+  width: 100%;
+}
+
+/* Overrides for mobile cards inside MobileFAQPage to match Image 2 */
+.cardContainer :global(.faq-card-wrapper) {
+  height: 124px;
+  max-width: 100%;
+}
+
+.cardContainer :global(.faq-card-inner) {
+  border-radius: 22px;
+}
+
+.cardContainer :global(.faq-card-face) {
+  border-radius: 22px;
+  padding: 16px 24px;
+  box-shadow: 0 8px 18px -4px rgba(0, 0, 0, 0.28), 0 3px 6px -1px rgba(0, 0, 0, 0.16);
+}
+
+.cardContainer :global(.faq-card-question-text) {
+  font-family: 'Poppins', sans-serif;
+  font-size: 20.5px;
+  font-weight: 700;
+  line-height: 1.28;
+  letter-spacing: 0.01em;
+  max-width: 250px;
+  text-align: center;
+}
+
+.cardContainer :global(.faq-card-answer-text) {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.48;
+  color: #E31E25;
+  text-align: center;
+  max-width: 100%;
+}
+
+/* Card 4 (Other Queries) single line fit */
+.cardContainer:nth-child(4) :global(.faq-card-question-text) {
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+/* Small mobile screens */
+@media (max-width: 360px) {
+  .cardContainer :global(.faq-card-wrapper) {
+    height: 115px;
+  }
+  .cardContainer :global(.faq-card-question-text) {
+    font-size: 18px;
+    max-width: 220px;
+  }
+  .cardContainer :global(.faq-card-face) {
+    border-radius: 18px;
+    padding: 12px 18px;
+  }
+}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import logo from '../../assets/navbar/wouchify-logo.png'
-import cartIcon from '../../assets/navbar/cart.svg'
+import favoriteIcon from '../../assets/mobile/navigation/favorite.svg'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
 import { SearchOverlay } from '../search/SearchOverlay'
 import './Navbar.css'
@@ -143,21 +143,21 @@ export const Navbar: React.FC<NavbarProps> = ({ activeNav, transparent = false }
             </svg>
           </button>
 
-          {/* Cart Button: left: 1707px, top: 48px, 31 x 31 */}
-          <button
-            type="button"
-            className="action-btn cart-btn"
-            aria-label="Shopping Cart"
+          {/* Wishlist Button: replaced Cart button as requested */}
+          <a
+            href="/favorites"
+            className="action-btn wishlist-btn"
+            aria-label="Wishlist"
           >
             <img
-              src={cartIcon}
+              src={favoriteIcon}
               alt=""
               aria-hidden="true"
               className="action-icon-img"
               width="20"
               height="20"
             />
-          </button>
+          </a>
 
           {/* Wallet Button */}
           <a

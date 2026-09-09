@@ -1,0 +1,132 @@
+/* ==========================================================================
+   FAQ Card - Interactive Flip Transition (Question <-> Answer)
+   ========================================================================== */
+
+.faq-card-wrapper {
+  width: 100%;
+  max-width: 1024px;
+  height: 94px;
+  perspective: 1200px;
+  margin: 0 auto;
+}
+
+.faq-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.45s cubic-bezier(0.34, 1.3, 0.64, 1);
+  transform-style: preserve-3d;
+  cursor: pointer;
+  border-radius: 16px;
+}
+
+/* Flip state when clicked/tapped (works on both mobile & desktop) */
+.faq-card-wrapper.is-flipped .faq-card-inner {
+  transform: rotateX(180deg);
+}
+
+/* Hover flip enabled only on fine pointer devices (desktop mouse) */
+@media (hover: hover) and (pointer: fine) {
+  .faq-card-wrapper:hover .faq-card-inner {
+    transform: rotateX(180deg);
+  }
+}
+
+/* Base side face */
+.faq-card-face {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 12px 28px;
+  user-select: none;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -1px rgba(0, 0, 0, 0.15);
+  transition: box-shadow 0.25s ease, filter 0.25s ease;
+}
+
+/* --------------------------------------------------------------------------
+   Front Side: Question Card (Red or Navy)
+   -------------------------------------------------------------------------- */
+.faq-card-front {
+  transform: rotateX(0deg);
+}
+
+.faq-card-front.theme-red {
+  background-color: #E31E25;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.faq-card-front.theme-navy {
+  background-color: #282D78;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.faq-card-question-text {
+  color: #FFFFFF;
+  font-family: 'Poppins', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: center;
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+/* --------------------------------------------------------------------------
+   Back Side: Answer Card (White background, thin border, red text)
+   -------------------------------------------------------------------------- */
+.faq-card-back {
+  background-color: #FFFFFF;
+  border: 1.5px solid #D1D5DB;
+  transform: rotateX(180deg);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.faq-card-answer-text {
+  color: #E31E25;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14.5px;
+  font-weight: 500;
+  line-height: 1.55;
+  text-align: center;
+  margin: 0;
+  max-width: 900px;
+  letter-spacing: 0.015em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .faq-card-wrapper {
+    height: 98px;
+  }
+  .faq-card-question-text {
+    font-size: 22px;
+  }
+  .faq-card-answer-text {
+    font-size: 13.5px;
+  }
+}
+
+@media (max-width: 768px) {
+  .faq-card-wrapper {
+    height: 105px;
+  }
+  .faq-card-face {
+    padding: 10px 18px;
+    border-radius: 14px;
+  }
+  .faq-card-question-text {
+    font-size: 19px;
+  }
+  .faq-card-answer-text {
+    font-size: 12.5px;
+  }
+}

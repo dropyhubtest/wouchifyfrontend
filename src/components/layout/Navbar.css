@@ -245,8 +245,9 @@
   outline-offset: -2px;
 }
 
-/* Cart Button */
-.cart-btn {
+/* Cart & Wishlist Button */
+.cart-btn,
+.wishlist-btn {
   position: relative;
   width: 42px;
   height: 42px;
@@ -260,20 +261,24 @@
   padding: 0;
   transition: all 0.2s ease;
   box-sizing: border-box;
+  text-decoration: none;
 }
 
-.cart-btn:hover {
+.cart-btn:hover,
+.wishlist-btn:hover {
   background: #FFFFFF;
   border-color: #282D78;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(40, 45, 120, 0.12);
 }
 
-.cart-btn:active {
+.cart-btn:active,
+.wishlist-btn:active {
   transform: translateY(0);
 }
 
-.cart-btn:focus-visible {
+.cart-btn:focus-visible,
+.wishlist-btn:focus-visible {
   outline: 2px solid var(--color-navy);
   outline-offset: 3px;
   border-radius: 50%;

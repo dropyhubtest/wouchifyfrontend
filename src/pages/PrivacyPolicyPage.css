@@ -1,0 +1,170 @@
+/* ==========================================================================
+   Privacy Policy Page Styles (Matching Reference Design)
+   Typography: Poppins, Mixed case, 25 tracking (0.025em letter-spacing)
+   ========================================================================== */
+
+.privacy-page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+  text-transform: none;
+  letter-spacing: 0.025em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Main Container (Centered, Natural Document Flow at 1180px max-width) */
+.privacy-page__container {
+  width: 100%;
+  max-width: 1180px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 56px 24px 30px 24px;
+  margin: 0 auto;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: 0.025em;
+}
+
+/* Big Animated W Watermark on Top-Left */
+.privacy-page__watermark-wrap {
+  position: absolute;
+  top: 15px;
+  left: -40px;
+  width: 320px;
+  height: 210px;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+}
+
+/* Page Title (Centered, 34px bold, black, Poppins mixed case) */
+.privacy-page__title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 34px;
+  font-weight: 700;
+  color: #000000;
+  text-align: center;
+  margin: 10px 0 36px 0;
+  letter-spacing: 0.025em;
+  text-transform: none;
+  line-height: 1.25;
+  position: relative;
+  z-index: 2;
+}
+
+/* Document Content Container */
+.privacy-page__content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: 0.025em;
+}
+
+/* Section */
+.privacy-page__section {
+  margin-bottom: 24px;
+}
+
+/* Section Titles: 18.5px, bold Poppins, mixed case, 25 letter-spacing */
+.privacy-page__section-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 18.5px;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+  text-transform: none;
+  margin: 0 0 8px 0;
+  line-height: 1.35;
+}
+
+/* Alternating Red / Navy Starting with 1. Introduction (Red) */
+/* Odd sections: 1. Introduction, 3. How We Use..., 5. Sharing..., 7. Third-Party..., 9. Policy Updates */
+.privacy-page__section:nth-of-type(odd) .privacy-page__section-title {
+  color: var(--color-red, #E31E25);
+}
+
+/* Even sections: 2. Information We Collect, 4. Cookies..., 6. Data Security, 8. Your Choices, 10. Contact Us */
+.privacy-page__section:nth-of-type(even) .privacy-page__section-title {
+  color: #282D78;
+}
+
+/* Paragraph with uniform 1.65 line height, Poppins 500, mixed case, 25 letter-spacing */
+.privacy-page__paragraph {
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: #222222;
+  line-height: 1.65;
+  margin: 0 0 8px 0;
+  letter-spacing: 0.025em;
+  text-transform: none;
+}
+
+/* Bullet list */
+.privacy-page__list {
+  margin: 4px 0 12px 0;
+  padding-left: 24px;
+  list-style-type: disc;
+}
+
+.privacy-page__list li {
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: #222222;
+  line-height: 1.65;
+  margin-bottom: 4px;
+  letter-spacing: 0.025em;
+  text-transform: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .privacy-page__container {
+    padding: 40px 20px 24px 20px;
+  }
+  .privacy-page__title {
+    font-size: 30px;
+    margin-bottom: 28px;
+  }
+  .privacy-page__watermark-wrap {
+    width: 240px;
+    height: 160px;
+    top: 10px;
+    left: -20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .privacy-page__container {
+    padding: 30px 16px 20px 16px;
+  }
+  .privacy-page__title {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
+  .privacy-page__section-title {
+    font-size: 16.5px;
+  }
+  .privacy-page__paragraph,
+  .privacy-page__list li {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .privacy-page__watermark-wrap {
+    display: none;
+  }
+}

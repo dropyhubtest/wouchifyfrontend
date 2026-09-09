@@ -181,9 +181,13 @@ const StoreCard: React.FC<{ store: StoreItem }> = ({ store }) => {
         
         <div className="mobile-stores__card-desc">{description}</div>
         
-        <button className="mobile-stores__card-btn">
+        <a 
+          href={`/brands/${store.slug}`}
+          className="mobile-stores__card-btn"
+          style={{ textDecoration: 'none' }}
+        >
           View Details &gt;&gt;
-        </button>
+        </a>
       </div>
     </div>
   )

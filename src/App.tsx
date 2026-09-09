@@ -37,14 +37,17 @@ import { SignUpPage } from './pages/SignUpPage'
 import { LoginPage } from './pages/LoginPage'
 import { TermsPage } from './pages/TermsPage'
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage'
+import { MobilePrivacyPolicyPage } from './pages/MobilePrivacyPolicyPage'
+import { AdvertisePage } from './pages/AdvertisePage'
+import { MobileAdvertisePage } from './pages/MobileAdvertisePage'
 import { AboutUsPage } from './pages/AboutUsPage'
 import { FAQPage } from './pages/FAQPage'
+import { MobileFAQPage } from './pages/MobileFAQPage'
 import { ContactUsPage } from './pages/ContactUsPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { WalletPage } from './pages/WalletPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { OrdersPage } from './pages/OrdersPage'
-import { CartPage } from './pages/CartPage'
 import { FavoritesPage } from './pages/FavoritesPage'
 import { NotificationsPage } from './pages/NotificationsPage'
 import { ReferPage } from './pages/ReferPage'
@@ -169,10 +172,28 @@ function resolveCurrentPath(): string {
     return '/terms'
   }
 
-  // Static Pages (/privacy, /about, /faq, /contact)
+  // Static Pages (/privacy, /about, /faq, /contact, /advertise)
   if (pathname === '/privacy' || page === 'privacy' || page === 'privacy-policy') return '/privacy'
+  if (
+    pathname === '/advertise' ||
+    pathname === '/advertise-with-us' ||
+    page === 'advertise' ||
+    page === 'advertise-with-us'
+  ) {
+    return '/advertise'
+  }
   if (pathname === '/about' || page === 'about' || page === 'about-us') return '/about'
-  if (pathname === '/faq' || page === 'faq') return '/faq'
+  if (
+    pathname === '/faq' ||
+    pathname === '/help' ||
+    pathname === '/help-faq' ||
+    pathname === '/questions' ||
+    page === 'faq' ||
+    page === 'help' ||
+    page === 'questions'
+  ) {
+    return '/faq'
+  }
   if (pathname === '/contact' || pathname === '/contact-us' || page === 'contact' || page === 'contact-us') return '/contact'
 
   // Coupons landing page (/coupons)
@@ -182,6 +203,17 @@ function resolveCurrentPath(): string {
     page === 'coupons'
   ) {
     return '/coupons'
+  }
+
+  // Brand pages (/brands/:slug or /amazon or /stores/amazon)
+  if (pathname === '/amazon' || page === 'amazon') {
+    return '/brands/amazon'
+  }
+  if (pathname === '/stores/amazon' || (page === 'stores' && searchParams.get('store') === 'amazon')) {
+    return '/brands/amazon'
+  }
+  if (pathname.startsWith('/brands/')) {
+    return pathname
   }
 
   // Stores hero/landing page (/stores)
@@ -195,8 +227,8 @@ function resolveCurrentPath(): string {
   if (pathname === '/profile' || page === 'profile') return '/profile'
   // Orders page
   if (pathname === '/orders' || page === 'orders') return '/orders'
-  // Cart page
-  if (pathname === '/cart' || page === 'cart') return '/cart'
+  // Cart redirected to Favorites / Wishlist
+  if (pathname === '/cart' || page === 'cart') return '/favorites'
   // Favorites page
   if (pathname === '/favorites' || pathname === '/wishlist' || page === 'favorites') return '/favorites'
   // Notifications page
@@ -212,11 +244,6 @@ function resolveCurrentPath(): string {
   // Admin dashboard
   if (pathname === '/admin/dashboard' || page === 'admin-dashboard') {
     return '/admin/dashboard'
-  }
-
-  // Brand pages (/brands/:slug)
-  if (pathname.startsWith('/brands/')) {
-    return pathname
   }
 
   // Deals hero/landing page (/deals)
@@ -315,6 +342,7 @@ export default function App() {
     currentPath === '/terms-of-use' ||
     currentPath === '/terms-of-service'
   const isPrivacyRoute = currentPath === '/privacy'
+  const isAdvertiseRoute = currentPath === '/advertise'
   const isAboutRoute = currentPath === '/about'
   const isFaqRoute = currentPath === '/faq'
   const isContactRoute = currentPath === '/contact'
@@ -374,6 +402,15 @@ export default function App() {
       if (isTermsRoute) {
         return <MobileTermsPage />
       }
+      if (isPrivacyRoute) {
+        return <MobilePrivacyPolicyPage />
+      }
+      if (isAdvertiseRoute) {
+        return <MobileAdvertisePage />
+      }
+      if (isFaqRoute) {
+        return <MobileFAQPage />
+      }
       if (isStoresRoute) {
         return <MobileStoresPage />
       }
@@ -386,7 +423,7 @@ export default function App() {
       if (isWalletRoute) return <WalletPage />
       if (isProfileRoute) return <ProfilePage />
       if (isOrdersRoute) return <OrdersPage />
-      if (isCartRoute) return <CartPage />
+      if (isCartRoute) return <FavoritesPage />
       if (isFavoritesRoute) return <FavoritesPage />
       if (isNotificationsRoute) return <NotificationsPage />
       if (isReferRoute) return <ReferPage />
@@ -443,6 +480,9 @@ export default function App() {
     if (isPrivacyRoute) {
       return <PrivacyPolicyPage />
     }
+    if (isAdvertiseRoute) {
+      return <AdvertisePage />
+    }
     if (isAboutRoute) {
       return <AboutUsPage />
     }
@@ -472,7 +512,7 @@ export default function App() {
     if (isWalletRoute) return <WalletPage />
     if (isProfileRoute) return <ProfilePage />
     if (isOrdersRoute) return <OrdersPage />
-    if (isCartRoute) return <CartPage />
+    if (isCartRoute) return <FavoritesPage />
     if (isFavoritesRoute) return <FavoritesPage />
     if (isNotificationsRoute) return <NotificationsPage />
     if (isReferRoute) return <ReferPage />

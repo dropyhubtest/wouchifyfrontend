@@ -78,7 +78,7 @@ export const DEALS_FAVOURITE_STORES: DealsFavouriteStoreItem[] = [
     logo: amazonLogo,
     discountBadge: '80% off',
     badgeBg: '#D1E8FF',
-    href: '/stores#amazon',
+    href: '/brands/amazon',
   },
   {
     id: 'ajio',

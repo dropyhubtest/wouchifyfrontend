@@ -80,7 +80,7 @@ export const PopularStores: React.FC = () => {
         {POPULAR_STORES.map((store) => (
           <a
             key={store.slug}
-            href={`/stores#${store.slug}`}
+            href={store.slug === 'amazon' ? '/brands/amazon' : `/stores#${store.slug}`}
             className="popular-stores-sidebar__circle"
             style={{ backgroundColor: store.bgColor || '#FFFFFF' }}
             title={store.name}

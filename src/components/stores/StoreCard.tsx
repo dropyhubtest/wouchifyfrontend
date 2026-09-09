@@ -38,7 +38,7 @@ export const StoreCard: React.FC<StoreCardProps> = ({ store }) => {
       <p className="store-card__description">{store.description}</p>
 
       {/* View Details button positioned on the right side */}
-      <a href={`#store-${store.slug}`} className="store-card__details-btn">
+      <a href={`/brands/${store.slug}`} className="store-card__details-btn">
         View Details &gt;&gt;
       </a>
     </div>

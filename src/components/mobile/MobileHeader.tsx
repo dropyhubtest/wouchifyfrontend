@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import mobileWouchifyLogo from '../../assets/mobile/wouchify-mobile-cropped-v2.png'
 import favoriteIcon from '../../assets/mobile/navigation/favorite.svg'
-import cartIcon from '../../assets/navbar/cart.svg'
 import accountIcon from '../../assets/navbar/account.svg'
 import { NAV_LINKS, resolveActiveNav } from '../../data/navigation'
 import { SearchOverlay } from '../search/SearchOverlay'
@@ -9,9 +8,10 @@ import './MobileHeader.css'
 
 export interface MobileHeaderProps {
   activeNav?: string
+  variant?: 'default' | 'minimal'
 }
 
-export const MobileHeader: React.FC<MobileHeaderProps> = ({ activeNav }) => {
+export const MobileHeader: React.FC<MobileHeaderProps> = ({ activeNav, variant = 'default' }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
@@ -87,76 +87,81 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ activeNav }) => {
         {/* Right-side action icons */}
         <div className="mobile-header__actions">
           {/* Search icon */}
-          <button
-            type="button"
-            className="mobile-header__action-btn"
-            aria-label="Search"
-            onClick={() => setIsSearchOpen(true)}
-          >
-            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#2A3189" strokeWidth="2" aria-hidden="true">
-              <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-            </svg>
-          </button>
+          {variant !== 'minimal' && (
+            <button
+              type="button"
+              className="mobile-header__action-btn"
+              aria-label="Search"
+              onClick={() => setIsSearchOpen(true)}
+            >
+              <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#2A3189" strokeWidth="2" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+              </svg>
+            </button>
+          )}
 
           <a className="mobile-header__action-btn" href="/favorites" aria-label="View favourites">
             <img src={favoriteIcon} alt="" aria-hidden="true" />
           </a>
 
-          <a className="mobile-header__action-btn" href="/cart" aria-label="View cart">
-            <img src={cartIcon} alt="" aria-hidden="true" />
-          </a>
-
-          <a className="mobile-header__action-btn mobile-header__wallet" href="/wallet" aria-label="My Wallet">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <rect x="2" y="6" width="20" height="14" rx="2" stroke="#2A3189" strokeWidth="1.8" fill="none"/>
-              <path d="M2 10h20" stroke="#2A3189" strokeWidth="1.8"/>
-              <path d="M16 10V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v4" stroke="#2A3189" strokeWidth="1.8"/>
-              <circle cx="17" cy="16" r="1.5" fill="#2A3189"/>
-            </svg>
-          </a>
-
-          {userInfo ? (
-            <div className="mobile-header__user-wrap" style={{ position: 'relative' }}>
-              <button
-                type="button"
-                className="mobile-header__action-btn mobile-header__avatar"
-                onClick={() => setShowUserMenu(!showUserMenu)}
-                aria-label="My Profile"
-                style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer' }}
-              >
-                {getInitial() ? (
-                  <span className="mobile-header__avatar-initial">{getInitial()}</span>
-                ) : (
-                  <img src={accountIcon} alt="" aria-hidden="true" />
-                )}
-              </button>
-
-              {showUserMenu && (
-                <div className="mobile-header__user-menu">
-                  <div className="mobile-header__user-menu-header">
-                    <div className="mobile-header__avatar-initial mobile-header__avatar-initial--lg">{getInitial()}</div>
-                    <div>
-                      <p className="mobile-header__user-menu-name">{displayName}</p>
-                      <p className="mobile-header__user-menu-email">{userInfo.email}</p>
-                    </div>
-                  </div>
-                  <div className="mobile-header__user-menu-divider" />
-                  <a className="mobile-header__user-menu-link" href="/profile">👤 My Profile</a>
-                  <a className="mobile-header__user-menu-link" href="/orders">🛍️ My Orders</a>
-                  <a className="mobile-header__user-menu-link" href="/wallet">💰 My Wallet</a>
-                  <a className="mobile-header__user-menu-link" href="/notifications">🔔 Notifications</a>
-                  <a className="mobile-header__user-menu-link" href="/refer">🎁 Refer &amp; Earn</a>
-                  <div className="mobile-header__user-menu-divider" />
-                  <button className="mobile-header__user-menu-logout" onClick={handleLogout}>
-                    Sign Out
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <a className="mobile-header__action-btn mobile-header__avatar" href="/login" aria-label="Login">
-              <img src={accountIcon} alt="" aria-hidden="true" />
+          {variant !== 'minimal' && (
+            <a className="mobile-header__action-btn mobile-header__wallet" href="/wallet" aria-label="My Wallet">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="2" y="6" width="20" height="14" rx="2" stroke="#2A3189" strokeWidth="1.8" fill="none"/>
+                <path d="M2 10h20" stroke="#2A3189" strokeWidth="1.8"/>
+                <path d="M16 10V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v4" stroke="#2A3189" strokeWidth="1.8"/>
+                <circle cx="17" cy="16" r="1.5" fill="#2A3189"/>
+              </svg>
             </a>
+          )}
+
+          {variant !== 'minimal' && (
+            userInfo ? (
+              <div className="mobile-header__user-wrap" style={{ position: 'relative' }}>
+                <button
+                  type="button"
+                  className="mobile-header__action-btn mobile-header__avatar"
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  aria-label="My Profile"
+                  style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer' }}
+                >
+                  {getInitial() ? (
+                    <span className="mobile-header__avatar-initial">{getInitial()}</span>
+                  ) : (
+                    <img src={accountIcon} alt="" aria-hidden="true" />
+                  )}
+                </button>
+
+                {showUserMenu && (
+                  <div className="mobile-header__user-menu">
+                    <div className="mobile-header__user-menu-header">
+                      <div className="mobile-header__avatar-initial mobile-header__avatar-initial--lg">{getInitial()}</div>
+                      <div>
+                        <p className="mobile-header__user-menu-name">{displayName}</p>
+                        <p className="mobile-header__user-menu-email">{userInfo.email}</p>
+                      </div>
+                    </div>
+                    <div className="mobile-header__user-menu-divider" />
+                    <a href="/profile" className="mobile-header__user-menu-item">My Profile</a>
+                    <a href="/wallet" className="mobile-header__user-menu-item">My Wallet</a>
+                    <a href="/orders" className="mobile-header__user-menu-item">My Orders</a>
+                    <a href="/favorites" className="mobile-header__user-menu-item">Saved Items</a>
+                    <div className="mobile-header__user-menu-divider" />
+                    <button
+                      type="button"
+                      className="mobile-header__user-menu-item mobile-header__user-menu-item--danger"
+                      onClick={handleLogout}
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <a className="mobile-header__action-btn mobile-header__avatar" href="/login" aria-label="Sign In">
+                <img src={accountIcon} alt="" aria-hidden="true" />
+              </a>
+            )
           )}
         </div>
 

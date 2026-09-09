@@ -1,0 +1,112 @@
+/* ==========================================================================
+   Desktop Frequently Asked Questions (FAQ) Page Styles
+   Matching Figma Reference Images (Image 1, Image 2, Image 3)
+   ========================================================================== */
+
+.faq-page {
+  min-height: 100vh;
+  width: 100%;
+  background-color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: 0.025em;
+  color: #333333;
+}
+
+/* Main Content Area */
+.faq-page__content {
+  flex: 1;
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 84px 24px 80px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Header with Title & Animated Watermark */
+.faq-page__header {
+  position: relative;
+  width: 100%;
+  max-width: 1024px;
+  margin: 0 auto 36px auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.faq-page__title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #111827;
+  margin: 0;
+  letter-spacing: 0.015em;
+  position: relative;
+  z-index: 2;
+}
+
+/* Animated W Watermark in Upper Right */
+.faq-page__watermark {
+  position: absolute;
+  right: -20px;
+  top: -30px;
+  width: 260px;
+  height: 175px;
+  opacity: 0.7;
+  filter: brightness(1.2) contrast(1.1);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Cards Stack */
+.faq-page__list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .faq-page__content {
+    padding: 64px 20px 60px;
+  }
+  .faq-page__title {
+    font-size: 28px;
+  }
+  .faq-page__watermark {
+    width: 200px;
+    height: 135px;
+    right: 0px;
+    top: -20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .faq-page__content {
+    padding: 48px 16px 48px;
+  }
+  .faq-page__header {
+    margin-bottom: 24px;
+  }
+  .faq-page__title {
+    font-size: 24px;
+  }
+  .faq-page__list {
+    gap: 18px;
+  }
+  .faq-page__watermark {
+    width: 160px;
+    height: 110px;
+    top: -15px;
+  }
+}
