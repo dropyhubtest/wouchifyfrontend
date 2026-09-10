@@ -16,7 +16,6 @@ import {
   Tag,
   ImageIcon,
   UserCheck,
-  Filter,
   AlertTriangle,
   AlertCircle,
   Download,
