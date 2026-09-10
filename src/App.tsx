@@ -67,6 +67,12 @@ import { ExecutiveCouponsPage } from './pages/admin/executive/ExecutiveCouponsPa
 import { ExecutiveCreditCardsPage } from './pages/admin/executive/ExecutiveCreditCardsPage'
 import { ExecutiveBannersPage } from './pages/admin/executive/ExecutiveBannersPage'
 import { ExecutiveAdvertisementsPage } from './pages/admin/executive/ExecutiveAdvertisementsPage'
+import { OperationsDashboardPage } from './pages/admin/operations/OperationsDashboardPage'
+import { OperationsApprovalsPage } from './pages/admin/operations/OperationsApprovalsPage'
+import { OperationsCashbacksPage } from './pages/admin/operations/OperationsCashbacksPage'
+import { OperationsSupportPage } from './pages/admin/operations/OperationsSupportPage'
+import { OperationsStaffActivityPage } from './pages/admin/operations/OperationsStaffActivityPage'
+import { OperationsMerchantsPage } from './pages/admin/operations/OperationsMerchantsPage'
 import { WelcomeToast } from './components/auth/WelcomeToast'
 
 function resolveCurrentPath(): string {
@@ -158,10 +164,11 @@ function resolveCurrentPath(): string {
     pathname === '/admin/login' ||
     pathname === '/admin/dashboard' ||
     pathname === '/operational-manager/login' ||
-    pathname === '/operational-manager/dashboard' ||
+    pathname === '/operational-manager' ||
+    pathname.startsWith('/operational-manager/') ||
     pathname.startsWith('/executive/')
   ) {
-    return pathname
+    return pathname === '/operational-manager' ? '/operational-manager/dashboard' : pathname
   }
 
   // Sign Up page
@@ -397,8 +404,9 @@ export default function App() {
   const isStaffLoginRoute = 
     currentPath === '/operational-manager/login' || 
     currentPath === '/executive/login'
-  const isStaffDashboardRoute = 
-    currentPath === '/operational-manager/dashboard'
+  const isOperationsRoute = 
+    (currentPath.startsWith('/operational-manager/') || currentPath === '/operational-manager') && 
+    currentPath !== '/operational-manager/login'
   const isExecutiveRoute = currentPath.startsWith('/executive/') && currentPath !== '/executive/login'
   const isBrandRoute = currentPath.startsWith('/brands/')
   const isNotFoundRoute = currentPath === '/404'
@@ -478,6 +486,27 @@ export default function App() {
       }
       if (isAdminDashboardRoute) {
         return <AdminDashboardPage />
+      }
+      if (isStaffLoginRoute) {
+        return <StaffLoginPage />
+      }
+      if (isOperationsRoute) {
+        if (currentPath === '/operational-manager/approvals') return <OperationsApprovalsPage />
+        if (currentPath === '/operational-manager/cashbacks') return <OperationsCashbacksPage />
+        if (currentPath === '/operational-manager/support') return <OperationsSupportPage />
+        if (currentPath === '/operational-manager/staff-activity') return <OperationsStaffActivityPage />
+        if (currentPath === '/operational-manager/merchants') return <OperationsMerchantsPage />
+        return <OperationsDashboardPage />
+      }
+      if (isExecutiveRoute) {
+        if (currentPath === '/executive/deals') return <ExecutiveDealsPage />
+        if (currentPath === '/executive/loot-deals') return <ExecutiveLootDealsPage />
+        if (currentPath === '/executive/stores') return <ExecutiveStoresPage />
+        if (currentPath === '/executive/coupons') return <ExecutiveCouponsPage />
+        if (currentPath === '/executive/credit-cards') return <ExecutiveCreditCardsPage />
+        if (currentPath === '/executive/banners') return <ExecutiveBannersPage />
+        if (currentPath === '/executive/advertisements') return <ExecutiveAdvertisementsPage />
+        return <ExecutiveDashboardPage />
       }
       if (isBrandRoute) {
         return <MobileBrandPage brandSlug={brandSlug} />
@@ -575,7 +604,14 @@ export default function App() {
       return <StaffLoginPage />
     }
 
-
+    if (isOperationsRoute) {
+      if (currentPath === '/operational-manager/approvals') return <OperationsApprovalsPage />
+      if (currentPath === '/operational-manager/cashbacks') return <OperationsCashbacksPage />
+      if (currentPath === '/operational-manager/support') return <OperationsSupportPage />
+      if (currentPath === '/operational-manager/staff-activity') return <OperationsStaffActivityPage />
+      if (currentPath === '/operational-manager/merchants') return <OperationsMerchantsPage />
+      return <OperationsDashboardPage />
+    }
 
     if (isExecutiveRoute) {
       if (currentPath === '/executive/deals') return <ExecutiveDealsPage />
@@ -586,10 +622,6 @@ export default function App() {
       if (currentPath === '/executive/banners') return <ExecutiveBannersPage />
       if (currentPath === '/executive/advertisements') return <ExecutiveAdvertisementsPage />
       return <ExecutiveDashboardPage />
-    }
-
-    if (isStaffDashboardRoute) {
-      return <NotFoundPage />
     }
 
     if (isAdminDashboardRoute) {
@@ -633,7 +665,7 @@ export default function App() {
   return (
     <GoogleOAuthProvider clientId="938902651101-d98pjaqlcnpel7b3ig2du9s63glbsoh9.apps.googleusercontent.com">
       <WelcomeToast />
-      <div key={currentPath} className="page-transition-wrapper">
+      <div className="page-transition-wrapper">
         {renderContent()}
       </div>
     </GoogleOAuthProvider>

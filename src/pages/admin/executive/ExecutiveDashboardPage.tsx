@@ -888,7 +888,8 @@ export const ExecutiveDashboardPage: React.FC = () => {
                           fontSize: '0.82rem',
                           display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '4px'
+                          gap: '4px',
+                          whiteSpace: 'nowrap'
                         }}
                       >
                         Manage →
