@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 96" fill="none">
+  <defs>
+    <linearGradient id="tataNeuGradLeft" x1="0%" y1="100%" x2="60%" y2="0%">
+      <stop offset="0%" stop-color="#007BFF"/>
+      <stop offset="50%" stop-color="#5B21B6"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="tataNeuGradMain" x1="10%" y1="90%" x2="90%" y2="10%">
+      <stop offset="0%" stop-color="#E11D48"/>
+      <stop offset="35%" stop-color="#F43F5E"/>
+      <stop offset="70%" stop-color="#FB923C"/>
+      <stop offset="100%" stop-color="#FBBF24"/>
+    </linearGradient>
+  </defs>
+  <!-- TATA Text -->
+  <path d="M 6 22 L 20 22 L 20 26 L 15 26 L 15 37 L 11 37 L 11 26 L 6 26 Z" fill="#000000"/>
+  <path d="M 22 37 L 27.5 22 L 32.5 22 L 38 37 L 33.5 37 L 32.5 34 L 27.5 34 L 26.5 37 Z M 28.5 30.5 L 31.5 30.5 L 30 25.5 Z" fill="#000000"/>
+  <path d="M 40 22 L 54 22 L 54 26 L 49 26 L 49 37 L 45 37 L 45 26 L 40 26 Z" fill="#000000"/>
+  <path d="M 56 37 L 61.5 22 L 66.5 22 L 72 37 L 67.5 37 L 66.5 34 L 61.5 34 L 60.5 37 Z M 62.5 30.5 L 65.5 30.5 L 64 25.5 Z" fill="#000000"/>
+
+  <!-- NEU Text -->
+  <path d="M 6 49 L 14 49 L 26 73 L 26 49 L 33 49 L 33 87 L 25 87 L 13 63 L 13 87 L 6 87 Z" fill="#000000"/>
+  <path d="M 39 49 L 63 49 L 63 56 L 47 56 L 47 64 L 61 64 L 61 71 L 47 71 L 47 80 L 63 80 L 63 87 L 39 87 Z" fill="#000000"/>
+  <path d="M 69 49 L 77 49 L 77 74 C 77 79 80 82 85 82 C 90 82 93 79 93 74 L 93 49 L 101 49 L 101 74 C 101 84 94 88 85 88 C 76 88 69 84 69 74 Z" fill="#000000"/>
+
+  <!-- Glowing Folded N Ribbon -->
+  <g>
+    <path d="M 80 43 C 78 38 80 26 89 17 C 96 9 104 7 108 14 C 111 20 106 31 96 46 Z" fill="url(#tataNeuGradLeft)"/>
+    <path d="M 89 36 C 96 24 102 12 110 9 C 118 7 125 13 120 27 C 113 42 103 62 98 67 C 93 72 87 69 87 61 C 86 54 87 45 89 36 Z" fill="url(#tataNeuGradMain)"/>
+  </g>
+</svg>

@@ -1,20 +1,26 @@
 /* ==========================================================================
-   Wouchify Desktop Navbar Styles
-   1920 x 131 Figma Reference Canvas Layer Architecture
+   Wouchify Desktop Navbar Styles (Responsive Flexbox Architecture)
    ========================================================================== */
+
+/* Header Spacer to prevent content jump under fixed navbar */
+.wouchify-header-spacer {
+  height: 84px;
+  width: 100%;
+  flex-shrink: 0;
+}
 
 /* Outer Navbar Wrapper */
 .wouchify-header {
   width: 100%;
-  background-color: var(--color-lavender);
+  height: 84px;
+  background-color: var(--color-lavender, #E5E7FF);
   position: fixed;
   top: 0;
   left: 0;
   z-index: 1000;
   box-sizing: border-box;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   border: none;
   box-shadow: none;
   margin: 0;
@@ -34,254 +40,151 @@
 }
 
 .wouchify-header.is-scrolled {
-  background-color: var(--color-lavender);
+  background-color: var(--color-lavender, #E5E7FF);
   box-shadow: 0 4px 16px rgba(47, 54, 140, 0.08);
 }
 
-
-/* Inner 1920 x 131 Reference Canvas */
-.wouchify-navbar-canvas {
-  width: 1920px;
-  height: 131px;
-  position: relative;
-  flex-shrink: 0;
-  transform-origin: top center;
-  transform: scale(var(--header-scale, 1));
+/* Responsive Inner Flexbox Container */
+.wouchify-navbar-inner {
+  width: 100%;
+  max-width: 1540px;
+  margin: 0 auto;
+  padding: 0 40px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
   box-sizing: border-box;
 }
 
 /* ==========================================================================
    1. Brand Logo Frame
-   Figma Frame: left: 7px; width: 401px; height: 207px;
-   Optically adjusted top: -20px (centers the visible artwork at Y = 65.5px)
    ========================================================================== */
 
 .navbar-brand {
-  position: absolute;
-  left: 60px;
-  top: 32px;
-  width: 330px;
-  height: 68px;
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .navbar-logo-link {
   display: flex;
   align-items: center;
-  width: 100%;
-  height: 100%;
 }
 
 .navbar-logo-link:focus-visible {
-  outline: 2px solid var(--color-navy);
+  outline: 2px solid var(--color-navy, #282D78);
   outline-offset: 4px;
   border-radius: 4px;
 }
 
 .navbar-logo-img {
+  height: 48px;
   width: auto;
-  height: 100%;
-  max-width: 100%;
+  max-width: 240px;
   object-fit: contain;
   display: block;
 }
 
 /* ==========================================================================
    2. Navigation Row
-   Figma: left: 563px; top: 49px;
    ========================================================================== */
 
 .navbar-nav {
-  position: absolute;
-  left: 510px;
-  top: 50px;
-  height: 30px;
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  justify-content: center;
 }
 
 .nav-list {
   display: flex;
   align-items: center;
+  gap: clamp(10px, 1.8vw, 24px);
   margin: 0;
   padding: 0;
   list-style: none;
-  height: 30px;
 }
 
 .nav-item {
-  height: 30px;
   display: inline-flex;
   align-items: center;
 }
 
 .nav-link {
   display: inline-block;
-  height: 30px;
-  font-family: var(--font-family-primary);
-  font-size: 20px;
-  line-height: 30px;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: clamp(13px, 0.95vw, 16px);
   font-weight: 600;
   text-transform: uppercase;
-  color: var(--color-navy);
+  color: var(--color-navy, #282D78);
   text-decoration: none;
   white-space: nowrap;
+  letter-spacing: 0.2px;
   transition: color 0.2s ease;
 }
 
 .nav-link:hover {
-  color: var(--color-red);
-}
-
-.nav-link:focus-visible {
-  outline: 2px solid var(--color-navy);
-  outline-offset: 2px;
-  border-radius: 2px;
-}
-
-/* Exact Nav Item Widths and Custom Gaps */
-.nav-item-home {
-  width: 61px;
+  color: var(--color-red, #E31E25);
 }
 
 .nav-link.active,
 .nav-link[aria-current="page"] {
-  color: var(--color-red);
+  color: var(--color-red, #E31E25);
   font-weight: 800;
 }
 
-/* Gap after HOME: 20px */
-.nav-item-categories {
-  width: 125px;
-  margin-left: 20px;
-}
-
-.nav-item-categories .nav-link {
-  width: 125px;
-}
-
-/* Gap after CATEGORIES: 20px */
-.nav-item-stores {
-  width: 76px;
-  margin-left: 20px;
-}
-
-.nav-item-stores .nav-link {
-  width: 76px;
-}
-
-/* Gap after STORES: 20px */
-.nav-item-deals {
-  width: 61px;
-  margin-left: 20px;
-}
-
-.nav-item-deals .nav-link {
-  width: 61px;
-}
-
-/* Gap after DEALS: 20px */
-.nav-item-loot-deals {
-  width: 118px;
-  margin-left: 20px;
-}
-
-.nav-item-loot-deals .nav-link {
-  width: 118px;
-}
-
-/* Gap after LOOT DEALS: 20px */
-.nav-item-coupons {
-  width: 100px;
-  margin-left: 20px;
-}
-
-.nav-item-coupons .nav-link {
-  width: 100px;
+.nav-link:focus-visible {
+  outline: 2px solid var(--color-navy, #282D78);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 /* ==========================================================================
-   3. Header Actions (Search, Cart, Wallet, Account)
-   Clean Flex Architecture with Standardized 42px Control Heights
+   3. Header Actions (Search, Wishlist, Account)
    ========================================================================== */
 
 .navbar-actions {
-  position: absolute;
-  right: 60px;
-  top: 44px;
-  height: 42px;
   display: flex;
   align-items: center;
-  gap: 14px;
-  z-index: 50;
+  gap: clamp(8px, 1vw, 14px);
+  flex-shrink: 0;
 }
 
-/* Search Button: opens search overlay */
-.search-overlay-trigger {
+/* White rounded rectangular tile for Search and Wishlist (38x38px, radius 8px) */
+.navbar-action-tile {
   position: relative;
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.6);
-  border: 1.5px solid rgba(40, 45, 120, 0.15);
-  border-radius: 50%;
-  cursor: pointer;
-  padding: 0;
-  z-index: 2;
-  transition: all 0.2s ease;
-  box-sizing: border-box;
-}
-
-.search-overlay-trigger:hover {
   background: #FFFFFF;
-  border-color: #282D78;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(40, 45, 120, 0.12);
-}
-
-.search-overlay-trigger:focus-visible {
-  outline: 2px solid var(--color-navy);
-  outline-offset: -2px;
-}
-
-/* Cart & Wishlist Button */
-.cart-btn,
-.wishlist-btn {
-  position: relative;
-  width: 42px;
-  height: 42px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.6);
-  border: 1.5px solid rgba(40, 45, 120, 0.15);
-  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
   cursor: pointer;
   padding: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   transition: all 0.2s ease;
   box-sizing: border-box;
   text-decoration: none;
+  flex-shrink: 0;
 }
 
-.cart-btn:hover,
-.wishlist-btn:hover {
+.navbar-action-tile:hover {
   background: #FFFFFF;
-  border-color: #282D78;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(40, 45, 120, 0.12);
+  box-shadow: 0 3px 8px rgba(40, 45, 120, 0.15);
 }
 
-.cart-btn:active,
-.wishlist-btn:active {
+.navbar-action-tile:active {
   transform: translateY(0);
 }
 
-.cart-btn:focus-visible,
-.wishlist-btn:focus-visible {
-  outline: 2px solid var(--color-navy);
-  outline-offset: 3px;
-  border-radius: 50%;
+.navbar-action-tile:focus-visible {
+  outline: 2px solid var(--color-navy, #282D78);
+  outline-offset: 2px;
 }
 
 .action-icon-img {
@@ -289,132 +192,129 @@
   object-fit: contain;
 }
 
-/* Wallet Pill & Proportional Coin Animation */
+/* ============================================================
+   Wallet Button with Continuous Dropping Coins Animation
+   ============================================================ */
 .wallet-btn {
-  position: relative;
   display: inline-flex;
+  align-items: center;
   text-decoration: none;
   transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.wallet-pill {
+  background-color: #E31E25;
+  color: #FFFFFF;
+  border-radius: 24px;
+  padding: 0 16px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-weight: 700;
+  font-size: 15px;
+  box-shadow: 0 3px 8px rgba(227, 30, 37, 0.25);
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  box-sizing: border-box;
 }
 
 .wallet-btn:hover {
   transform: translateY(-1px);
 }
 
-.wallet-pill {
-  height: 42px;
-  background-color: var(--color-red, #E31E25);
-  color: #FFFFFF;
-  border-radius: 999px;
-  padding: 0 16px 0 12px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-family-primary);
-  font-weight: 700;
-  font-size: 14px;
-  box-shadow: 0 3px 10px rgba(227, 30, 37, 0.28);
-  transition: background-color 0.2s ease, box-shadow 0.2s ease;
-  box-sizing: border-box;
-}
-
 .wallet-btn:hover .wallet-pill {
   background-color: #c8181f;
-  box-shadow: 0 5px 14px rgba(227, 30, 37, 0.38);
+  box-shadow: 0 5px 12px rgba(227, 30, 37, 0.35);
 }
 
 .wallet-anim-container {
   position: relative;
-  width: 22px;
-  height: 22px;
+  width: 28px;
+  height: 28px;
+  margin-right: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: visible;
 }
 
 .wallet-purse-icon {
-  width: 19px;
-  height: 19px;
+  width: 22px;
+  height: 22px;
   color: #FFFFFF;
   position: relative;
   z-index: 2;
-  stroke-width: 2.2;
 }
 
 .falling-coin {
   position: absolute;
-  top: -18px;
-  width: 11px;
-  height: 11px;
-  background: #FFD700;
+  top: -20px;
+  width: 16px;
+  height: 16px;
+  background: #FFD700; /* Gold */
   border-radius: 50%;
-  color: #78350F;
-  font-size: 7.5px;
+  color: #B8860B; /* Dark gold text */
+  font-size: 11px;
   font-weight: 900;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
   z-index: 1;
-  box-shadow: 0 1px 0 #B45309;
-  animation: dropCoinAnim 1.4s linear infinite;
+  box-shadow: 0 1px 0 #DAA520;
+  animation: dropCoinAnim 1.2s linear infinite;
 }
 
 .falling-coin.coin-1 {
   animation-delay: 0s;
-  left: 5px;
+  left: 6px;
 }
 
 .falling-coin.coin-2 {
-  animation-delay: 0.45s;
+  animation-delay: 0.4s;
   left: 2px;
 }
 
 .falling-coin.coin-3 {
-  animation-delay: 0.9s;
-  left: 9px;
+  animation-delay: 0.8s;
+  left: 10px;
 }
 
 @keyframes dropCoinAnim {
   0% {
-    top: -18px;
+    top: -24px;
     opacity: 0;
-    transform: scale(0.6) rotateY(0deg);
+    transform: scale(0.5) rotateY(0deg);
   }
-
   20% {
     opacity: 1;
     transform: scale(1) rotateY(90deg);
   }
-
   70% {
     opacity: 1;
   }
-
   100% {
     top: 10px;
     opacity: 0;
-    transform: scale(0.6) rotateY(180deg);
+    transform: scale(0.5) rotateY(180deg);
   }
 }
 
 .wallet-balance {
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1;
+  letter-spacing: 0.3px;
+  color: #FFFFFF;
 }
 
 /* ============================================================
-   Auth: Login Button (Pill Styled 42px Height)
+   Auth: Login Button (Pill Styled 38px Height)
    ============================================================ */
 .navbar-login-btn {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 42px;
-  padding: 0 22px;
+  height: 38px;
+  padding: 0 20px;
   border-radius: 999px;
   background: #282D78;
   color: #FFFFFF;
@@ -593,3 +493,80 @@
   background: #EEEFFF;
   color: #2A3189;
 }
+
+/* ==========================================================================
+   Responsive Breakpoints for Desktop/Tablet Viewports
+   ========================================================================== */
+
+@media (max-width: 1280px) {
+  .wouchify-navbar-inner {
+    padding: 0 24px;
+    gap: 16px;
+  }
+  .navbar-logo-img {
+    height: 42px;
+  }
+  .nav-list {
+    gap: 14px;
+  }
+  .nav-link {
+    font-size: 14px;
+  }
+  .wallet-pill {
+    height: 36px;
+    padding: 0 14px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .wouchify-navbar-inner {
+    padding: 0 16px;
+    gap: 12px;
+  }
+  .navbar-logo-img {
+    height: 38px;
+  }
+  .nav-list {
+    gap: 10px;
+  }
+  .nav-link {
+    font-size: 12.5px;
+  }
+  .navbar-login-btn {
+    height: 34px;
+    padding: 0 16px;
+    font-size: 13px;
+  }
+  .navbar-action-tile {
+    width: 34px;
+    height: 34px;
+  }
+  .wallet-pill {
+    height: 34px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+  .wallet-anim-container {
+    width: 24px;
+    height: 24px;
+    margin-right: 6px;
+  }
+  .wallet-purse-icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 860px) {
+  .nav-list {
+    gap: 8px;
+  }
+  .nav-link {
+    font-size: 11.5px;
+  }
+  .wallet-pill {
+    padding: 0 10px;
+    font-size: 12px;
+  }
+}

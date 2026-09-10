@@ -1,0 +1,635 @@
+/* ==========================================================================
+   MobileCreditCardsPage Styles (440px Max Mobile Architecture)
+   Matching Figma Reference media_1789040015164.png
+   ========================================================================== */
+
+.mobile-credit-cards-page {
+  width: 100%;
+  max-width: 440px;
+  min-height: 100vh;
+  margin: 0 auto;
+  background-color: #FFFFFF;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+  color: #333333;
+}
+
+/* ==========================================================================
+   1. Breadcrumbs Bar
+   ========================================================================== */
+
+.mobile-cc__breadcrumb {
+  padding: 12px 18px 4px 18px;
+}
+
+.mobile-cc__back-link {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #282D78;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.mobile-cc__back-link:hover {
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   2. Search Bar
+   ========================================================================== */
+
+.mobile-cc__search-wrap {
+  padding: 6px 18px 12px 18px;
+}
+
+.mobile-cc__search-box {
+  position: relative;
+  width: 100%;
+  height: 36px;
+}
+
+.mobile-cc__search-input {
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  border: 1px solid #CCCCCC;
+  outline: none;
+  padding: 0 38px 0 16px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  color: #222222;
+  box-sizing: border-box;
+  background-color: #FFFFFF;
+}
+
+.mobile-cc__search-input::placeholder {
+  color: #999999;
+}
+
+.mobile-cc__search-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ==========================================================================
+   3. Section Headers (Semicircular accent on left edge)
+   ========================================================================== */
+
+.mobile-cc__section {
+  margin: 10px 0 20px 0;
+  position: relative;
+}
+
+.mobile-cc__section-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding-left: 20px;
+  margin-bottom: 12px;
+}
+
+.mobile-cc__accent {
+  position: absolute;
+  left: -7px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.mobile-cc__accent--navy {
+  background-color: #282D78;
+}
+
+.mobile-cc__accent--red {
+  background-color: #E31E25;
+}
+
+.mobile-cc__section-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 16.5px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #000000;
+  margin: 0 0 0 8px;
+  letter-spacing: -0.2px;
+}
+
+/* ==========================================================================
+   4. Horizontal Scroll Carousel
+   ========================================================================== */
+
+.mobile-cc__carousel {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 8px 20px 24px 20px;
+  scroll-padding-left: 20px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  box-sizing: border-box;
+}
+
+.mobile-cc__carousel::-webkit-scrollbar {
+  display: none;
+}
+
+/* ==========================================================================
+   5. Mobile Card Tile Architecture
+   ========================================================================== */
+
+.mobile-cc-card {
+  width: 304px;
+  min-width: 304px;
+  max-width: 304px;
+  min-height: 195px;
+  border-radius: 16px;
+  overflow: hidden;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* ── Theme 1: White Card with Blue Accents (IndusInd) ── */
+.mobile-cc-card--white-blue {
+  background-color: #FFFFFF;
+  border: 1px solid #D5D5D5;
+  box-shadow:
+    inset 0 3px 6px rgba(0, 0, 0, 0.22),
+    0 8px 22px rgba(0, 0, 0, 0.18),
+    0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.mobile-cc-card--white-blue .mobile-cc-card__tag {
+  color: #FFFFFF;
+  background-color: #282D78;
+}
+
+.mobile-cc-card--white-blue .mobile-cc-card__name {
+  color: #282D78;
+}
+
+.mobile-cc-card--white-blue .mobile-cc-card__logo-box {
+  background-color: transparent;
+}
+
+.mobile-cc-card--white-blue .mobile-cc-card__banner {
+  background-color: #282D78;
+}
+
+.mobile-cc-card--white-blue .mobile-cc-card__banner-label {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.mobile-cc-card--white-blue .mobile-cc-card__banner-value {
+  color: #FFFFFF;
+}
+
+.mobile-cc-card--white-blue .mobile-cc-card__partners-label {
+  color: #000000;
+}
+
+.mobile-cc-card--white-blue .mobile-cc-card__partner-pill {
+  background-color: #282D78;
+  color: #FFFFFF;
+}
+
+.mobile-cc-card--white-blue .mobile-cc-card__divider {
+  background-color: #E0E0E0;
+}
+
+.mobile-cc-card--white-blue .mobile-cc-card__avatar {
+  background-color: #DDE4FF;
+  border: 1px solid #BAC8F8;
+  color: #282D78;
+}
+
+.mobile-cc-card--white-blue .mobile-cc-card__user-count {
+  color: #000000;
+}
+
+.mobile-cc-card--white-blue .mobile-cc-card__apply-btn {
+  background-color: #282D78;
+  color: #FFFFFF;
+}
+
+/* ── Theme 2: White Card with Red Accents (ICICI & IDFC) ── */
+.mobile-cc-card--white-red {
+  background-color: #FFFFFF;
+  border: 1px solid #D5D5D5;
+  box-shadow:
+    inset 0 3px 6px rgba(0, 0, 0, 0.22),
+    0 8px 22px rgba(0, 0, 0, 0.18),
+    0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.mobile-cc-card--white-red .mobile-cc-card__tag {
+  color: #FFFFFF;
+  background-color: #E31E25;
+}
+
+.mobile-cc-card--white-red .mobile-cc-card__name {
+  color: #E31E25;
+}
+
+.mobile-cc-card--white-red .mobile-cc-card__logo-box {
+  background-color: transparent;
+}
+
+.mobile-cc-card--white-red .mobile-cc-card__banner {
+  background-color: #E31E25;
+}
+
+.mobile-cc-card--white-red .mobile-cc-card__banner-label {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.mobile-cc-card--white-red .mobile-cc-card__banner-value {
+  color: #FFFFFF;
+}
+
+.mobile-cc-card--white-red .mobile-cc-card__partners-label {
+  color: #000000;
+}
+
+.mobile-cc-card--white-red .mobile-cc-card__partner-pill {
+  background-color: #E31E25;
+  color: #FFFFFF;
+}
+
+.mobile-cc-card--white-red .mobile-cc-card__divider {
+  background-color: #E0E0E0;
+}
+
+.mobile-cc-card--white-red .mobile-cc-card__avatar {
+  background-color: #FCE4D6;
+  border: 1px solid #F8C4B4;
+  color: #E31E25;
+}
+
+.mobile-cc-card--white-red .mobile-cc-card__user-count {
+  color: #000000;
+}
+
+.mobile-cc-card--white-red .mobile-cc-card__apply-btn {
+  background-color: #E31E25;
+  color: #FFFFFF;
+}
+
+/* ── Theme 3: Solid Red Card (Tata Neu 1) ── */
+.mobile-cc-card--red-card {
+  background-color: #E31E25;
+  box-shadow:
+    inset 0 4px 8px rgba(0, 0, 0, 0.28),
+    0 10px 26px rgba(227, 30, 37, 0.38),
+    0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.mobile-cc-card--red-card .mobile-cc-card__tag {
+  background-color: #FFFFFF;
+  color: #000000;
+}
+
+.mobile-cc-card--red-card .mobile-cc-card__name {
+  color: #FFFFFF;
+}
+
+.mobile-cc-card--red-card .mobile-cc-card__logo-box {
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  padding: 3px 8px;
+  width: auto;
+  min-width: 48px;
+  max-width: 64px;
+  height: 28px;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.10);
+}
+
+.mobile-cc-card--red-card .mobile-cc-card__banner {
+  background-color: #FFFFFF;
+}
+
+.mobile-cc-card--red-card .mobile-cc-card__banner-label {
+  color: #000000;
+}
+
+.mobile-cc-card--red-card .mobile-cc-card__banner-value {
+  color: #E31E25;
+}
+
+.mobile-cc-card--red-card .mobile-cc-card__partners-label {
+  color: #FFFFFF;
+}
+
+.mobile-cc-card--red-card .mobile-cc-card__partner-pill {
+  background-color: #FFFFFF;
+  color: #000000;
+}
+
+.mobile-cc-card--red-card .mobile-cc-card__divider {
+  background-color: rgba(255, 255, 255, 0.35);
+}
+
+.mobile-cc-card--red-card .mobile-cc-card__avatar {
+  background-color: #FFEAEA;
+  border: 1px solid #FFFFFF;
+  color: #E31E25;
+}
+
+.mobile-cc-card--red-card .mobile-cc-card__user-count {
+  color: #FFFFFF;
+}
+
+.mobile-cc-card--red-card .mobile-cc-card__apply-btn {
+  background-color: #FFFFFF;
+  color: #E31E25;
+}
+
+/* ── Theme 4: Solid Navy Card (Axis Bank & Tata Neu 2) ── */
+.mobile-cc-card--navy-card {
+  background-color: #282D78;
+  box-shadow:
+    inset 0 4px 8px rgba(0, 0, 0, 0.32),
+    0 10px 26px rgba(40, 45, 120, 0.40),
+    0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.mobile-cc-card--navy-card .mobile-cc-card__tag {
+  background-color: #FFFFFF;
+  color: #282D78;
+}
+
+.mobile-cc-card--navy-card .mobile-cc-card__name {
+  color: #FFFFFF;
+}
+
+.mobile-cc-card--navy-card .mobile-cc-card__logo-box {
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  padding: 3px 8px;
+  width: auto;
+  min-width: 48px;
+  max-width: 64px;
+  height: 28px;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.10);
+}
+
+.mobile-cc-card--navy-card .mobile-cc-card__banner {
+  background-color: #FFFFFF;
+}
+
+.mobile-cc-card--navy-card .mobile-cc-card__banner-label {
+  color: #000000;
+}
+
+.mobile-cc-card--navy-card .mobile-cc-card__banner-value {
+  color: #282D78;
+}
+
+.mobile-cc-card--navy-card .mobile-cc-card__partners-label {
+  color: #FFFFFF;
+}
+
+.mobile-cc-card--navy-card .mobile-cc-card__partner-pill {
+  background-color: #FFFFFF;
+  color: #000000;
+}
+
+.mobile-cc-card--navy-card .mobile-cc-card__divider {
+  background-color: rgba(255, 255, 255, 0.35);
+}
+
+.mobile-cc-card--navy-card .mobile-cc-card__avatar {
+  background-color: #E0E6FF;
+  border: 1px solid #FFFFFF;
+  color: #282D78;
+}
+
+.mobile-cc-card--navy-card .mobile-cc-card__user-count {
+  color: #FFFFFF;
+}
+
+.mobile-cc-card--navy-card .mobile-cc-card__apply-btn {
+  background-color: #FFFFFF;
+  color: #282D78;
+}
+
+/* ==========================================================================
+   6. Mobile Card Sub-Elements Layout
+   ========================================================================== */
+
+/* Top Row */
+.mobile-cc-card__top {
+  padding: 12px 14px 8px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.mobile-cc-card__left-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.mobile-cc-card__tag {
+  font-family: 'Poppins', sans-serif;
+  font-size: 7.5px;
+  font-weight: 400;
+  padding: 2px 7px;
+  border-radius: 999px;
+  letter-spacing: 0.3px;
+}
+
+.mobile-cc-card__name {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+.mobile-cc-card__logo-box {
+  width: 64px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.mobile-cc-card__logo {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* Middle Banner */
+.mobile-cc-card__banner {
+  width: 100%;
+  height: 44px;
+  padding: 6px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.mobile-cc-card__banner-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.mobile-cc-card__banner-col--right {
+  align-items: flex-start;
+}
+
+.mobile-cc-card__banner-label {
+  font-family: 'Poppins', sans-serif;
+  font-size: 6.5px;
+  font-weight: 400;
+  letter-spacing: 0.4px;
+  margin-bottom: 1px;
+  text-transform: uppercase;
+}
+
+.mobile-cc-card__banner-value {
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.2px;
+}
+
+/* Bottom Content */
+.mobile-cc-card__bottom {
+  padding: 8px 14px 10px 14px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.mobile-cc-card__partners {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.mobile-cc-card__partners-label {
+  font-family: 'Poppins', sans-serif;
+  font-size: 6.5px;
+  font-weight: 400;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.mobile-cc-card__partners-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.mobile-cc-card__partner-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 7.5px;
+  font-weight: 400;
+  letter-spacing: 0.2px;
+}
+
+/* Thin Divider Line */
+.mobile-cc-card__divider {
+  width: 100%;
+  height: 0.5px;
+  margin: 7px 0 6px 0;
+}
+
+/* Footer Row */
+.mobile-cc-card__footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobile-cc-card__users {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mobile-cc-card__avatar-stack {
+  display: flex;
+  align-items: center;
+}
+
+.mobile-cc-card__avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-family: 'Poppins', sans-serif;
+  font-size: 7px;
+  font-weight: 400;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: -6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+.mobile-cc-card__avatar:first-child {
+  margin-left: 0;
+}
+
+.mobile-cc-card__user-count {
+  font-family: 'Poppins', sans-serif;
+  font-size: 9px;
+  font-weight: 400;
+}
+
+.mobile-cc-card__apply-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 8px;
+  font-weight: 400;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.mobile-cc-card__apply-arrow {
+  font-size: 7px;
+  font-weight: 400;
+  letter-spacing: -0.5px;
+}
+

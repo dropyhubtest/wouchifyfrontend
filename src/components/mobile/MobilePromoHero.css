@@ -47,9 +47,13 @@
   text-decoration: none;
   scroll-snap-align: center;
   flex-shrink: 0;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  box-shadow:
+    inset 0 4px 8px rgba(0, 0, 0, 0.35),
+    0 8px 24px -2px rgba(0, 0, 0, 0.28),
+    0 4px 10px rgba(0, 0, 0, 0.16);
   transition: transform 0.15s ease;
   background: #000000;
+  position: relative;
 }
 
 .mobile-promo-banner:active {

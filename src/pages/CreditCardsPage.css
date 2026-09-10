@@ -1,0 +1,677 @@
+/* ==========================================================================
+   CreditCardsPage Styles (1920px Reference Canvas Architecture)
+   Matching Exact Figma References & media_1789039835994.png
+   ========================================================================== */
+
+.credit-cards-page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #FFFFFF;
+  position: relative;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  color: #333333;
+}
+
+/* ==========================================================================
+   1. Canvas Container & Controls
+   ========================================================================== */
+
+.credit-cards-canvas-outer {
+  width: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  overflow: visible;
+}
+
+.credit-cards-canvas {
+  width: 1920px;
+  position: relative;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  padding: 30px 60px 0 60px;
+  overflow: visible;
+}
+
+/* ==========================================================================
+   2. Search Bar (Right 50% Area Covered, Left 50% Empty)
+   ========================================================================== */
+
+.credit-cards-search-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end; /* Covers right area, left side empty */
+  margin-bottom: 40px;
+}
+
+.credit-cards-search-box {
+  position: relative;
+  width: calc(50% - 18px); /* Covers the right 50% area */
+  max-width: 880px;
+  min-width: 650px;
+  height: 56px;
+  box-sizing: border-box;
+}
+
+.credit-cards-search-input {
+  width: 100%;
+  height: 100%;
+  background-color: #E5E7FF;
+  border-radius: 999px;
+  border: none;
+  outline: none;
+  padding: 0 56px 0 32px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: #1E1E1E;
+  box-sizing: border-box;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.credit-cards-search-input::placeholder {
+  color: #FFFFFF !important; /* Placeholder in white */
+  opacity: 0.95;
+}
+
+.credit-cards-search-icon-wrap {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ==========================================================================
+   3. Section Headers with Left Edge Semi-Circle Accent
+   ========================================================================== */
+
+.credit-cards-section {
+  width: 100%;
+  margin: 0 0 50px 0;
+  padding: 0;
+}
+
+.credit-cards-section-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin: 0 0 28px 0;
+  padding: 0;
+}
+
+.credit-cards-heading-accent {
+  position: absolute;
+  left: -60px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 72px;
+  border-radius: 0 72px 72px 0;
+  pointer-events: none;
+}
+
+.credit-cards-heading-accent--red {
+  background-color: #E31E25;
+}
+
+.credit-cards-heading-accent--navy {
+  background-color: #2F368C;
+}
+
+.credit-cards-section-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 42px;
+  color: #000000;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+/* ==========================================================================
+   4. Centered 2-Column Grid (Left card centered in left half, right in right)
+   ========================================================================== */
+
+.credit-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  row-gap: 36px;
+  column-gap: 36px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.credit-cards-grid-col {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+/* ==========================================================================
+   5. Card Tile Architecture (Compact 690px × 415px Balanced Layout)
+   ========================================================================== */
+
+.cc-card-tile {
+  width: 690px;
+  min-height: 415px;
+  border-radius: 28px;
+  overflow: hidden; /* Clips full-width banner to rounded corners */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.cc-card-tile:hover {
+  transform: translateY(-5px);
+}
+
+/* ── Theme 1: White Card with Blue Accents (IndusInd) ── */
+.cc-card-tile--white-blue {
+  background-color: #FFFFFF;
+  border: 1.5px solid #D0D0D0;
+  box-shadow:
+    inset 0 4px 8px rgba(0, 0, 0, 0.22),
+    0 12px 28px rgba(0, 0, 0, 0.18),
+    0 3px 6px rgba(0, 0, 0, 0.08);
+}
+
+.cc-card-tile--white-blue:hover {
+  box-shadow:
+    inset 0 4px 8px rgba(0, 0, 0, 0.20),
+    0 20px 42px rgba(0, 0, 0, 0.24);
+}
+
+.cc-card-tile--white-blue .cc-card-tag {
+  color: #FFFFFF;
+  background-color: #282D78;
+}
+
+.cc-card-tile--white-blue .cc-card-name {
+  color: #282D78;
+}
+
+.cc-card-tile--white-blue .cc-card-full-banner {
+  background-color: #282D78;
+}
+
+.cc-card-tile--white-blue .cc-card-banner-label {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.cc-card-tile--white-blue .cc-card-banner-value {
+  color: #FFFFFF;
+}
+
+.cc-card-tile--white-blue .cc-card-suited-label {
+  color: #000000;
+}
+
+.cc-card-tile--white-blue .cc-card-suited-pill {
+  background-color: #282D78;
+  color: #FFFFFF;
+}
+
+.cc-card-tile--white-blue .cc-card-divider-line {
+  background-color: #D0D0D0;
+}
+
+.cc-card-tile--white-blue .cc-card-avatar {
+  background-color: #DDE4FF;
+  border: 1.5px solid #BAC8F8;
+  color: #282D78;
+}
+
+.cc-card-tile--white-blue .cc-card-user-count {
+  color: #000000;
+}
+
+.cc-card-tile--white-blue .cc-card-apply-btn {
+  background-color: #282D78;
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(40, 45, 120, 0.35);
+}
+
+/* ── Theme 2: White Card with Red Accents (ICICI & IDFC) ── */
+.cc-card-tile--white-red {
+  background-color: #FFFFFF;
+  border: 1.5px solid #D0D0D0;
+  box-shadow:
+    inset 0 4px 8px rgba(0, 0, 0, 0.22),
+    0 12px 28px rgba(0, 0, 0, 0.18),
+    0 3px 6px rgba(0, 0, 0, 0.08);
+}
+
+.cc-card-tile--white-red:hover {
+  box-shadow:
+    inset 0 4px 8px rgba(0, 0, 0, 0.20),
+    0 20px 42px rgba(0, 0, 0, 0.24);
+}
+
+.cc-card-tile--white-red .cc-card-tag {
+  color: #FFFFFF;
+  background-color: #E31E25;
+}
+
+.cc-card-tile--white-red .cc-card-name {
+  color: #E31E25;
+}
+
+.cc-card-tile--white-red .cc-card-full-banner {
+  background-color: #E31E25;
+}
+
+.cc-card-tile--white-red .cc-card-banner-label {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.cc-card-tile--white-red .cc-card-banner-value {
+  color: #FFFFFF;
+}
+
+.cc-card-tile--white-red .cc-card-suited-label {
+  color: #000000;
+}
+
+.cc-card-tile--white-red .cc-card-suited-pill {
+  background-color: #E31E25;
+  color: #FFFFFF;
+}
+
+.cc-card-tile--white-red .cc-card-divider-line {
+  background-color: #D0D0D0;
+}
+
+.cc-card-tile--white-red .cc-card-avatar {
+  background-color: #FCE4D6;
+  border: 1.5px solid #F8C4B4;
+  color: #E31E25;
+}
+
+.cc-card-tile--white-red .cc-card-user-count {
+  color: #000000;
+}
+
+.cc-card-tile--white-red .cc-card-apply-btn {
+  background-color: #E31E25;
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(227, 30, 37, 0.35);
+}
+
+/* ── Theme 3: Solid Red Card (Tata Neu 1) ── */
+.cc-card-tile--red-card {
+  background-color: #E31E25;
+  box-shadow:
+    inset 0 4px 8px rgba(0, 0, 0, 0.28),
+    0 14px 32px rgba(227, 30, 37, 0.42),
+    0 3px 6px rgba(0, 0, 0, 0.12);
+}
+
+.cc-card-tile--red-card:hover {
+  box-shadow:
+    inset 0 4px 8px rgba(0, 0, 0, 0.24),
+    0 22px 46px rgba(227, 30, 37, 0.52);
+}
+
+.cc-card-tile--red-card .cc-card-tag {
+  background-color: #FFFFFF;
+  color: #000000;
+}
+
+.cc-card-tile--red-card .cc-card-name {
+  color: #FFFFFF;
+}
+
+.cc-card-tile--red-card .cc-card-full-banner {
+  background-color: #FFFFFF;
+}
+
+.cc-card-tile--red-card .cc-card-banner-label {
+  color: #000000;
+}
+
+.cc-card-tile--red-card .cc-card-banner-value {
+  color: #E31E25;
+}
+
+.cc-card-tile--red-card .cc-card-suited-label {
+  color: #FFFFFF;
+}
+
+.cc-card-tile--red-card .cc-card-suited-pill {
+  background-color: #FFFFFF;
+  color: #000000;
+}
+
+.cc-card-tile--red-card .cc-card-divider-line {
+  background-color: rgba(255, 255, 255, 0.35);
+}
+
+.cc-card-tile--red-card .cc-card-avatar {
+  background-color: #FFEAEA;
+  border: 1.5px solid #FFFFFF;
+  color: #E31E25;
+}
+
+.cc-card-tile--red-card .cc-card-user-count {
+  color: #FFFFFF;
+}
+
+.cc-card-tile--red-card .cc-card-apply-btn {
+  background-color: #FFFFFF;
+  color: #E31E25;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* ── Theme 4: Solid Navy Card (Axis Bank & Tata Neu 2) ── */
+.cc-card-tile--navy-card {
+  background-color: #282D78;
+  box-shadow:
+    inset 0 4px 8px rgba(0, 0, 0, 0.32),
+    0 14px 32px rgba(40, 45, 120, 0.42),
+    0 3px 6px rgba(0, 0, 0, 0.12);
+}
+
+.cc-card-tile--navy-card:hover {
+  box-shadow:
+    inset 0 4px 8px rgba(0, 0, 0, 0.28),
+    0 22px 46px rgba(40, 45, 120, 0.52);
+}
+
+.cc-card-tile--navy-card .cc-card-tag {
+  background-color: #FFFFFF;
+  color: #282D78;
+}
+
+.cc-card-tile--navy-card .cc-card-name {
+  color: #FFFFFF;
+}
+
+.cc-card-tile--navy-card .cc-card-full-banner {
+  background-color: #FFFFFF;
+}
+
+.cc-card-tile--navy-card .cc-card-banner-label {
+  color: #000000;
+}
+
+.cc-card-tile--navy-card .cc-card-banner-value {
+  color: #282D78;
+}
+
+.cc-card-tile--navy-card .cc-card-suited-label {
+  color: #FFFFFF;
+}
+
+.cc-card-tile--navy-card .cc-card-suited-pill {
+  background-color: #FFFFFF;
+  color: #000000;
+}
+
+.cc-card-tile--navy-card .cc-card-divider-line {
+  background-color: rgba(255, 255, 255, 0.35);
+}
+
+.cc-card-tile--navy-card .cc-card-avatar {
+  background-color: #E0E6FF;
+  border: 1.5px solid #FFFFFF;
+  color: #282D78;
+}
+
+.cc-card-tile--navy-card .cc-card-user-count {
+  color: #FFFFFF;
+}
+
+.cc-card-tile--navy-card .cc-card-apply-btn {
+  background-color: #FFFFFF;
+  color: #282D78;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* ==========================================================================
+   6. Sub-Elements Layout: Top Content, Full Banner, Bottom Content
+   ========================================================================== */
+
+/* 1. Top Content Header */
+.cc-card-top-content {
+  padding: 28px 34px 22px 34px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.cc-card-left-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.cc-card-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.4px;
+}
+
+.cc-card-name {
+  font-family: 'Poppins', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0;
+  letter-spacing: -0.4px;
+}
+
+/* Logo Box Base */
+.cc-card-logo-box {
+  width: 140px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+/* White cards: transparent container, aligned to right */
+.cc-card-tile--white-blue .cc-card-logo-box,
+.cc-card-tile--white-red .cc-card-logo-box {
+  background-color: transparent;
+  justify-content: flex-end;
+  padding: 0;
+}
+
+/* Red and Navy cards (Tata Neu, Axis Bank, Bajaj): Clean white rounded container */
+.cc-card-tile--red-card .cc-card-logo-box,
+.cc-card-tile--navy-card .cc-card-logo-box {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  padding: 6px 14px;
+  width: auto;
+  min-width: 90px;
+  max-width: 130px;
+  height: 56px;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.cc-card-logo {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* 2. Full-Width Edge-to-Edge Middle Banner */
+.cc-card-full-banner {
+  width: 100%;
+  height: 88px;
+  padding: 14px 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.cc-card-banner-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.cc-card-banner-col--right {
+  align-items: flex-start;
+}
+
+.cc-card-banner-label {
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.8px;
+  margin-bottom: 3px;
+  text-transform: uppercase;
+}
+
+.cc-card-banner-value {
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+}
+
+/* 3. Bottom Content Area */
+.cc-card-bottom-content {
+  padding: 20px 34px 24px 34px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.cc-card-suited-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.cc-card-suited-label {
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.cc-card-suited-pills {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cc-card-suited-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 16px;
+  border-radius: 999px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.2px;
+}
+
+/* Thin Divider Line */
+.cc-card-divider-line {
+  width: 100%;
+  height: 1px;
+  margin: 18px 0 14px 0;
+}
+
+/* Footer Row: Avatars + Apply Button */
+.cc-card-footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cc-card-users-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cc-card-avatar-stack {
+  display: flex;
+  align-items: center;
+}
+
+.cc-card-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: -12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.cc-card-avatar:first-child {
+  margin-left: 0;
+}
+
+.cc-card-user-count {
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.cc-card-apply-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 28px;
+  border-radius: 999px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  user-select: none;
+}
+
+.cc-card-apply-btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.92;
+}
+
+.cc-card-apply-arrow {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: -1px;
+}
+

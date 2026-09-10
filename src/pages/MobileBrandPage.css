@@ -1,0 +1,386 @@
+/* ==========================================================================
+   Mobile Brand Page Styles (Amazon & Top Brands)
+   Reference standard: 440px mobile canvas
+   ========================================================================== */
+
+.mobile-brand-page {
+  width: 100%;
+  max-width: 440px;
+  min-height: 100vh;
+  margin: 0 auto;
+  background-color: #FFFFFF;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-brand-content {
+  flex: 1;
+  padding: 16px 18px 8px 18px;
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   1. Breadcrumb Navigation
+   ========================================================================== */
+
+.mobile-brand__breadcrumb-wrap {
+  margin-bottom: 16px;
+}
+
+.mobile-brand__breadcrumb {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #2F368C;
+  text-decoration: underline;
+  display: inline-flex;
+  align-items: center;
+  transition: opacity 0.15s ease;
+}
+
+.mobile-brand__breadcrumb:hover {
+  opacity: 0.85;
+}
+
+/* ==========================================================================
+   2. 2-Row Filter Grid
+   ========================================================================== */
+
+.mobile-brand__filter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.mobile-brand__filter-btn {
+  height: 38px;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1E293B;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+  box-sizing: border-box;
+  box-shadow:
+    inset 0 3px 5px -1px rgba(0, 0, 0, 0.14),
+    0 4px 10px -1px rgba(0, 0, 0, 0.12),
+    0 2px 4px rgba(0, 0, 0, 0.06);
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.mobile-brand__filter-btn:active {
+  transform: scale(0.97);
+}
+
+.mobile-brand__filter-btn--active {
+  background-color: #2F368C;
+  color: #FFFFFF;
+  border-color: #2F368C;
+  box-shadow:
+    inset 0 2px 4px -1px rgba(0, 0, 0, 0.25),
+    0 4px 8px rgba(47, 54, 140, 0.28);
+}
+
+/* ==========================================================================
+   3. Brand Intro & Reward Headline
+   ========================================================================== */
+
+.mobile-brand__intro-section {
+  margin-bottom: 24px;
+}
+
+.mobile-brand__logo-wrap {
+  margin-bottom: 12px;
+}
+
+.mobile-brand__main-logo {
+  max-width: 140px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  margin-left: -16px; /* Offsets transparent PNG padding to align letter 'a' with text below */
+}
+
+.mobile-brand__headline {
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: #E31E25;
+  line-height: 1.25;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.3px;
+}
+
+.mobile-brand__subtitle {
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #282D78;
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* ==========================================================================
+   4. Section Headers (Available Coupons & Available Deals)
+   ========================================================================== */
+
+.mobile-brand__section-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* Semi-circle accent pinned to the absolute left screen edge */
+.mobile-brand__heading-accent {
+  width: 10px;
+  height: 22px;
+  background-color: #E31E25;
+  border-radius: 0 22px 22px 0;
+  margin-left: -18px; /* sits flush with the screen edge */
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.mobile-brand__section-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #000000;
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+/* ==========================================================================
+   5. Mobile Red Perforated Coupon Ticket
+   ========================================================================== */
+
+.mobile-brand__coupons-section {
+  margin-bottom: 30px;
+}
+
+.mobile-coupon-ticket {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 390 / 190;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  filter: drop-shadow(0 8px 18px rgba(227, 30, 37, 0.35)) drop-shadow(0 3px 6px rgba(0, 0, 0, 0.12));
+}
+
+.mobile-coupon-ticket__svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Left Partition (approx 61.5% width) */
+.mobile-coupon-left {
+  position: relative;
+  z-index: 2;
+  width: 61.5%;
+  height: 100%;
+  padding: 12px 10px 12px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.mobile-coupon-logo-box {
+  width: 96px;
+  height: 32px;
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+  box-sizing: border-box;
+}
+
+.mobile-coupon-logo {
+  max-width: 90%;
+  max-height: 85%;
+  width: 76px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.mobile-coupon-discount-wrap {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+  margin: auto 0;
+  line-height: 1;
+  width: 100%;
+}
+
+.mobile-coupon-discount-val {
+  font-family: 'Poppins', sans-serif;
+  font-size: 38px;
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.mobile-coupon-discount-off {
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1;
+}
+
+.mobile-coupon-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mobile-coupon-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 10px;
+  font-weight: 400; /* gentle normal weight */
+  color: rgba(255, 255, 255, 0.95);
+  white-space: nowrap;
+}
+
+/* Right Partition (approx 38.5% width) */
+.mobile-coupon-right {
+  position: relative;
+  z-index: 2;
+  width: 38.5%;
+  height: 100%;
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+.mobile-coupon-use-code {
+  font-family: 'Poppins', sans-serif;
+  font-size: 10.5px;
+  font-weight: 500; /* gentle normal weight */
+  color: rgba(255, 255, 255, 0.95);
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.mobile-coupon-code-pill {
+  background-color: #0B0D13;
+  color: #FFFFFF;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  transition: transform 0.12s ease, background-color 0.12s ease;
+  white-space: nowrap;
+}
+
+.mobile-coupon-code-pill:active {
+  transform: scale(0.95);
+  background-color: #000000;
+}
+
+.mobile-coupon-copy-btn {
+  background: transparent;
+  border: none;
+  color: #FFFFFF;
+  font-family: 'Poppins', sans-serif;
+  font-size: 10.5px;
+  font-weight: 400; /* gentle normal weight */
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px;
+  text-decoration: underline;
+  transition: opacity 0.15s ease;
+}
+
+.mobile-coupon-copy-btn:hover {
+  opacity: 0.85;
+}
+
+.mobile-coupon-copy-text {
+  color: #FFFFFF;
+}
+
+/* ==========================================================================
+   6. Available Deals Section
+   ========================================================================== */
+
+.mobile-brand__deals-section {
+  margin-bottom: 8px; /* Compact bottom gap above footer dotted line */
+}
+
+.mobile-brand__top-deals-pill {
+  display: inline-block;
+  background-color: #282D78;
+  color: #FFFFFF;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 14px;
+  border-radius: 999px;
+  margin-bottom: 14px;
+  user-select: none;
+}
+
+.mobile-brand__deals-scroll {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px; /* Tightened scroll container padding */
+  margin-right: -18px; /* lets the carousel peek across the right edge */
+  padding-right: 18px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.mobile-brand__deals-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-brand__deal-card-wrap {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+}

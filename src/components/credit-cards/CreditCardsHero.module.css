@@ -1,0 +1,197 @@
+/* ==========================================================================
+   CreditCardsHero Styles (1920 x 640px Reference Canvas)
+   Diagonal Stripe Animation: Top-Right (1920, 0) → Bottom-Left (0, 640)
+   ========================================================================== */
+
+.heroSection {
+  width: 100%;
+  position: relative;
+  overflow: visible;
+  background-color: #FFFFFF;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+  z-index: 5;
+}
+
+.heroCanvas {
+  width: 1920px;
+  height: 640px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) scale(var(--deals-scale, 1));
+  transform-origin: top center;
+  pointer-events: auto;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* Background Artwork Stack (Clipped to Canvas Boundary) */
+.artClip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 640px;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.artCanvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 640px;
+  background-color: #FFFFFF;
+}
+
+/* Layer 1: Vector Animated Diagonal Navy & White Bars */
+.bgAnimatedSvg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 640px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Layer 2: Big Animated Watermark (x: 440px, y: 10px, z-index: 10) */
+.watermarkMainWrap {
+  position: absolute;
+  left: 440px;
+  top: 10px;
+  width: 430px;
+  height: 285px;
+  z-index: 10;
+  opacity: 0.95;
+  filter: brightness(1.25) contrast(1.15) drop-shadow(0px 4px 16px rgba(255, 255, 255, 0.45));
+  pointer-events: none;
+}
+
+/* Small Animated Watermark (right: 60px, bottom: 20px, z-index: 10) */
+.watermarkSecondaryWrap {
+  position: absolute;
+  right: 60px;
+  bottom: 20px;
+  width: 290px;
+  height: 190px;
+  z-index: 10;
+  opacity: 0.90;
+  filter: brightness(1.2) contrast(1.1) drop-shadow(0px 2px 10px rgba(255, 255, 255, 0.45));
+  pointer-events: none;
+}
+
+/* Left Copy Block - Vertically Centered around Middle of Hero */
+.copyBlock {
+  position: absolute;
+  left: 130px;
+  top: 48%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  z-index: 15;
+  user-select: none;
+  width: 920px;
+}
+
+/* White Pill Badge: CARD DEALS */
+.cardDealsPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #FFFFFF;
+  color: #E31E25;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  padding: 6px 20px;
+  border-radius: 999px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.12);
+  margin-bottom: 20px;
+  line-height: 1.2;
+  width: fit-content;
+}
+
+/* Main Headline in One Single Line */
+.headline {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 1.15;
+  white-space: nowrap;
+  margin: 0 0 16px 0;
+  letter-spacing: -0.5px;
+}
+
+/* Main headline solid white with shadow */
+.headlineSolid {
+  color: #FFFFFF;
+  text-shadow: 0px 4px 18px rgba(0, 0, 0, 0.35);
+}
+
+/* Subtitle - Two Lines, Normal weight (no bold) */
+.subtitle {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: #FFFFFF;
+  opacity: 0.95;
+  margin: 0 0 38px 0;
+  letter-spacing: 0.2px;
+  text-shadow: 0px 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Red CTA Pill Button (Exact 491px x 59px) */
+.ctaPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 491px;
+  height: 59px;
+  background-color: var(--color-red, #E31E25);
+  color: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 20px;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 999px;
+  box-shadow: 0px 6px 20px rgba(227, 30, 37, 0.45);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+  box-sizing: border-box;
+}
+
+.ctaPill:hover {
+  background-color: #C4141A;
+  transform: translateY(-2px);
+  box-shadow: 0px 8px 24px rgba(227, 30, 37, 0.55);
+}
+
+/* Right Illustration Zone (50% Width) */
+.illustrationContainer {
+  position: absolute;
+  left: 960px;
+  bottom: 10px;
+  width: 900px;
+  height: 620px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 20;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.illustrationImg {
+  max-width: 90%;
+  max-height: 95%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0px 20px 36px rgba(0, 0, 0, 0.18));
+}

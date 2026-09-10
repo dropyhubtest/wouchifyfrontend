@@ -1,0 +1,298 @@
+/* ==========================================================================
+   Contact Us Page Styles - Desktop View
+   Matching Figma Reference media_1789041394627.png
+   ========================================================================== */
+
+.contact-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #FFFFFF;
+  color: #222222;
+  font-family: 'Poppins', sans-serif;
+  overflow-x: hidden;
+}
+
+/* ── Content Container ── */
+.contact-page__container {
+  width: 100%;
+  max-width: 1540px;
+  margin: 0 auto;
+  padding: 48px 60px 110px 60px;
+  position: relative;
+  box-sizing: border-box;
+  flex: 1 0 auto;
+}
+
+/* ── Top-Right Watermark ── */
+.contact-page__watermark-wrap {
+  position: absolute;
+  top: 10px;
+  right: 60px;
+  width: 320px;
+  height: 200px;
+  pointer-events: none;
+  opacity: 0.95;
+  z-index: 0;
+}
+
+.contact-page__watermark-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ── Page Header ── */
+.contact-page__header {
+  position: relative;
+  z-index: 1;
+  max-width: 1240px;
+  margin-bottom: 44px;
+}
+
+.contact-page__title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #E31E25;
+  margin: 0 0 28px 0;
+  letter-spacing: -0.4px;
+}
+
+.contact-page__salutation {
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #111111;
+  margin: 0 0 18px 0;
+  line-height: 1.4;
+}
+
+.contact-page__desc {
+  font-family: 'Poppins', sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.65;
+  color: #222222;
+  margin: 0 0 16px 0;
+}
+
+.contact-page__desc strong {
+  font-weight: 700;
+  color: #000000;
+}
+
+/* ── Form Section ── */
+.contact-page__form {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  width: 100%;
+}
+
+/* 2-Column Row for Name and Email */
+.contact-page__grid-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  width: 100%;
+}
+
+.contact-page__field-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.contact-page__label {
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1E2378;
+  margin-bottom: 14px;
+  line-height: 1.2;
+}
+
+.contact-page__input {
+  width: 100%;
+  height: 64px;
+  background-color: #FFFFFF;
+  border: 1.5px solid #8E8E93;
+  border-radius: 14px;
+  padding: 0 24px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  color: #222222;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.contact-page__input::placeholder {
+  color: #C7C7CC;
+  font-weight: 400;
+}
+
+.contact-page__input:focus {
+  border-color: #1E2378;
+  box-shadow: 0 0 0 3px rgba(30, 35, 120, 0.15);
+}
+
+.contact-page__textarea {
+  width: 100%;
+  min-height: 290px;
+  background-color: #FFFFFF;
+  border: 1.5px solid #8E8E93;
+  border-radius: 16px;
+  padding: 22px 24px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  color: #222222;
+  outline: none;
+  box-sizing: border-box;
+  resize: vertical;
+  line-height: 1.55;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.contact-page__textarea::placeholder {
+  color: #C7C7CC;
+  font-weight: 400;
+}
+
+.contact-page__textarea:focus {
+  border-color: #1E2378;
+  box-shadow: 0 0 0 3px rgba(30, 35, 120, 0.15);
+}
+
+/* ── Actions Row (Choose File & Submit Button) ── */
+.contact-page__actions-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.contact-page__file-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.contact-page__file-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background-color: #FFFFFF;
+  border: 1.5px solid #8E8E93;
+  border-radius: 14px;
+  padding: 12px 30px;
+  color: #E31E25;
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  user-select: none;
+}
+
+.contact-page__file-btn:hover {
+  background-color: #FFF5F5;
+  transform: translateY(-1px);
+}
+
+.contact-page__file-input {
+  display: none;
+}
+
+.contact-page__file-subtext {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13.5px;
+  color: #444444;
+  margin-top: 10px;
+  line-height: 1.45;
+}
+
+.contact-page__file-subtext strong {
+  font-weight: 700;
+  color: #111111;
+}
+
+.contact-page__file-selected {
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  color: #1E2378;
+  font-weight: 600;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.contact-page__file-clear {
+  background: none;
+  border: none;
+  color: #E31E25;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+/* Submit Button */
+.contact-page__submit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background-color: #E31E25;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 14px;
+  padding: 16px 54px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(227, 30, 37, 0.38);
+  transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.contact-page__submit-btn:hover {
+  background-color: #C4161C;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(227, 30, 37, 0.48);
+}
+
+.contact-page__submit-btn:active {
+  transform: translateY(0);
+}
+
+/* Success Message */
+.contact-page__success-banner {
+  background-color: #F0FDF4;
+  border: 1.5px solid #86EFAC;
+  border-radius: 14px;
+  padding: 24px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.contact-page__success-title {
+  color: #166534;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+}
+
+.contact-page__success-text {
+  color: #15803D;
+  font-size: 15px;
+  margin: 0;
+}

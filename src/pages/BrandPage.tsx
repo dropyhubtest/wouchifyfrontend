@@ -4,6 +4,8 @@ import { FooterSection } from '../components/footer'
 import { WatermarkAnimation } from '../components/hero/WatermarkAnimation'
 import { DealCard } from '../components/deals/DealCard'
 import { useDesktopScale } from '../hooks/useDesktopScale'
+import { useMediaQuery } from '../hooks/useMediaQuery'
+import { MobileBrandPage } from './MobileBrandPage'
 import { getBrandData } from '../data/brandDeals'
 import { DEALS_CARD_ITEMS, type DealCardItem } from '../data/dealsPage'
 
@@ -12,6 +14,7 @@ import watermarkMainState2 from '../assets/hero/hero-watermark-main-state-2.png'
 import watermarkSecondary from '../assets/hero/hero-watermark-secondary.png'
 import watermarkSecondaryState2 from '../assets/hero/hero-watermark-secondary-state-2.png'
 import amazonLogo from '../assets/brand-logos/amazon-logo.png'
+import amazonCouponLogo from '../assets/coupons/amazon.png'
 import amazonHeroArtwork from '../assets/brands-inner/amazon-hero.png'
 
 import './BrandPage.css'
@@ -39,6 +42,12 @@ const FILTER_PILLS = ['All', 'Deals', 'Loot', 'Coupons', 'Expired', '25%+'] as c
 type FilterPill = typeof FILTER_PILLS[number]
 
 export const BrandPage: React.FC<BrandPageProps> = ({ brandSlug }) => {
+  const isMobile = useMediaQuery('(max-width: 768px)')
+
+  if (isMobile) {
+    return <MobileBrandPage brandSlug={brandSlug} />
+  }
+
   const scale = useDesktopScale()
   const brand = getBrandData(brandSlug) || getBrandData('amazon')
   const brandName = brand?.name || 'Amazon'
@@ -201,30 +210,60 @@ export const BrandPage: React.FC<BrandPageProps> = ({ brandSlug }) => {
     })
   }, [amazonDeals, searchQuery, activeFilter])
 
-  // Coupon Ticket SVG Path (1560 x 480) with side cutouts and rounded corners
+  // Compact Coupon Ticket SVG Path (960 x 300) matching Figma Image 3
   const ticketPath = `
-    M 40 0
-    H 990
-    A 30 30 0 0 0 1050 0
-    H 1520
-    A 40 40 0 0 1 1560 40
-    V 210
-    A 30 30 0 0 0 1560 270
-    V 440
-    A 40 40 0 0 1 1520 480
-    H 1050
-    A 30 30 0 0 0 990 480
-    H 40
-    A 40 40 0 0 1 0 440
-    V 270
-    A 30 30 0 0 0 0 210
-    V 40
-    A 40 40 0 0 1 40 0
+    M 24 0
+    H 606
+    A 24 24 0 0 0 654 0
+    H 936
+    A 24 24 0 0 1 960 24
+    V 126
+    A 24 24 0 0 0 960 174
+    V 276
+    A 24 24 0 0 1 936 300
+    H 654
+    A 24 24 0 0 0 606 300
+    H 24
+    A 24 24 0 0 1 0 276
+    V 174
+    A 24 24 0 0 0 0 126
+    V 24
+    A 24 24 0 0 1 24 0
     Z
   `
 
   const showCouponsSection = activeFilter === 'All' || activeFilter === 'Coupons'
   const showDealsSection = activeFilter === 'All' || activeFilter === 'Deals' || activeFilter === 'Loot' || activeFilter === '25%+'
+
+  const [canvasHeight, setCanvasHeight] = useState<number>(0)
+  const canvasRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    const updateHeight = () => {
+      if (canvasRef.current) {
+        const measured = Math.max(
+          canvasRef.current.scrollHeight,
+          canvasRef.current.offsetHeight,
+          canvasRef.current.getBoundingClientRect().height / (scale || 1)
+        )
+        setCanvasHeight(Math.ceil(measured))
+      }
+    }
+    updateHeight()
+    const timer = setTimeout(updateHeight, 50)
+
+    const observer = new ResizeObserver(updateHeight)
+    if (canvasRef.current) {
+      observer.observe(canvasRef.current)
+    }
+    window.addEventListener('resize', updateHeight)
+
+    return () => {
+      clearTimeout(timer)
+      observer.disconnect()
+      window.removeEventListener('resize', updateHeight)
+    }
+  }, [scale, searchQuery, activeFilter, filteredDeals])
 
   return (
     <div className="amazon-brand-page">
@@ -413,15 +452,27 @@ export const BrandPage: React.FC<BrandPageProps> = ({ brandSlug }) => {
         </div>
       </section>
 
-      {/* 3. Scale-Aware 1920px Canvas Wrapper for Controls & Cards */}
+      {/* 3. Scale-Aware 1920px Canvas Outer Container */}
       <div
-        className="amazon-brand-canvas"
+        className="amazon-brand-canvas-outer"
         style={{
-          '--brand-scale': scale,
-          transform: `scale(${scale})`,
-          transformOrigin: 'top center',
-        } as React.CSSProperties}
+          height: canvasHeight ? `${canvasHeight * scale}px` : 'auto',
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+          position: 'relative',
+          overflow: 'visible',
+        }}
       >
+        <div
+          ref={canvasRef}
+          className="amazon-brand-canvas"
+          style={{
+            '--brand-scale': scale,
+            transform: `scale(${scale})`,
+            transformOrigin: 'top center',
+          } as React.CSSProperties}
+        >
 
         {/* ── SEARCH & FILTER PILLS BAR ── */}
         <section className="amazon-controls-bar" aria-label="Search and Filter Deals">
@@ -491,68 +542,112 @@ export const BrandPage: React.FC<BrandPageProps> = ({ brandSlug }) => {
               <h2 className="amazon-section-title">Available Coupons</h2>
             </div>
 
-            {/* Perforated Coupon Ticket (1560 x 480) */}
+            {/* Perforated Coupon Ticket (960 x 300) matching Figma Image 3 */}
             <div className="amazon-coupon-ticket">
               <svg
                 className="amazon-ticket-svg"
-                width="1560"
-                height="480"
-                viewBox="0 0 1560 480"
+                width="960"
+                height="300"
+                viewBox="0 0 960 300"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
                 aria-hidden="true"
               >
                 <defs>
-                  <filter id="amzTicketDropShadow" x="-15%" y="-15%" width="130%" height="130%">
-                    <feDropShadow dx="0" dy="14" stdDeviation="16" floodColor="#000000" floodOpacity="0.12" />
-                  </filter>
+                  <clipPath id="couponClip">
+                    <path d={ticketPath} />
+                  </clipPath>
+                  {/* Linear gradient for subtle top inner shadow */}
+                  <linearGradient id="topInnerShadowGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#000000" stopOpacity="0.06" />
+                    <stop offset="50%" stopColor="#000000" stopOpacity="0.015" />
+                    <stop offset="100%" stopColor="#000000" stopOpacity="0" />
+                  </linearGradient>
+                  {/* Subtle side inner shadow gradients */}
+                  <linearGradient id="leftInnerShadowGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#000000" stopOpacity="0.03" />
+                    <stop offset="100%" stopColor="#000000" stopOpacity="0" />
+                  </linearGradient>
+                  <linearGradient id="rightInnerShadowGrad" x1="1" y1="0" x2="0" y2="0">
+                    <stop offset="0%" stopColor="#000000" stopOpacity="0.03" />
+                    <stop offset="100%" stopColor="#000000" stopOpacity="0" />
+                  </linearGradient>
                 </defs>
 
                 {/* Lavender Ticket Body */}
                 <path
                   d={ticketPath}
                   fill="#E5E7FF"
-                  filter="url(#amzTicketDropShadow)"
+                />
+
+                {/* Top Inner Shadow (soft 12px height) */}
+                <rect
+                  x="0"
+                  y="0"
+                  width="960"
+                  height="12"
+                  fill="url(#topInnerShadowGrad)"
+                  clipPath="url(#couponClip)"
+                />
+
+                {/* Left Inner Shadow */}
+                <rect
+                  x="0"
+                  y="0"
+                  width="12"
+                  height="300"
+                  fill="url(#leftInnerShadowGrad)"
+                  clipPath="url(#couponClip)"
+                />
+
+                {/* Right Inner Shadow */}
+                <rect
+                  x="948"
+                  y="0"
+                  width="12"
+                  height="300"
+                  fill="url(#rightInnerShadowGrad)"
+                  clipPath="url(#couponClip)"
                 />
 
                 {/* White Dotted Perforation Line */}
                 <line
-                  x1="1020"
-                  y1="30"
-                  x2="1020"
-                  y2="450"
+                  x1="630"
+                  y1="24"
+                  x2="630"
+                  y2="276"
                   stroke="#FFFFFF"
                   strokeWidth="2.5"
-                  strokeDasharray="8 8"
+                  strokeDasharray="6 6"
                   strokeLinecap="round"
                 />
               </svg>
 
-              {/* Left Partition: Logo, 10% Off, Expiry & Min Order */}
+              {/* Left Partition: Logo, 10% Off (Centered), Expiry (Left) & Min Order (Right) */}
               <div className="amazon-coupon-left">
                 {/* White Logo Container */}
                 <div className="amazon-coupon-logo-box">
                   <img
-                    src={amazonLogo}
+                    src={amazonCouponLogo}
                     alt="Amazon"
                     className="amazon-coupon-logo"
-                    width="230"
-                    height="58"
+                    width="220"
+                    height="60"
                   />
                 </div>
 
-                {/* Discount Value */}
+                {/* Discount Value (Centered in Left Partition) */}
                 <div className="amazon-coupon-discount-row">
                   <span className="amazon-coupon-discount-value">10%</span>
                   <span className="amazon-coupon-discount-off">off</span>
                 </div>
 
-                {/* Meta details */}
+                {/* Meta details (Expires in 3 days on left, Min Order on right) */}
                 <div className="amazon-coupon-meta-row">
                   <div className="amazon-coupon-meta-item">
                     <svg
-                      width="26"
-                      height="26"
+                      width="20"
+                      height="20"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="#282D78"
@@ -567,10 +662,10 @@ export const BrandPage: React.FC<BrandPageProps> = ({ brandSlug }) => {
                     <span>Expires in 3 days</span>
                   </div>
 
-                  <div className="amazon-coupon-meta-item">
+                  <div className="amazon-coupon-meta-item amazon-coupon-meta-item--right">
                     <svg
-                      width="26"
-                      height="26"
+                      width="20"
+                      height="20"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="#282D78"
@@ -611,8 +706,8 @@ export const BrandPage: React.FC<BrandPageProps> = ({ brandSlug }) => {
                     {copied ? 'Copied! ✓' : 'Copy Code'}
                   </span>
                   <svg
-                    width="20"
-                    height="20"
+                    width="16"
+                    height="16"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="#000000"
@@ -650,15 +745,8 @@ export const BrandPage: React.FC<BrandPageProps> = ({ brandSlug }) => {
             </div>
           </section>
         )}
+        </div>
       </div>
-
-      {/* 3. Scaled Page Bottom Spacer (matches 1920 scale height adjustment) */}
-      <div
-        style={{
-          height: `calc((2300px * ${scale}) - 2300px + 60px)`,
-          pointerEvents: 'none',
-        }}
-      />
 
       {/* 4. Desktop Footer with Red Dotted Divider */}
       <FooterSection />

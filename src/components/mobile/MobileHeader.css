@@ -8,71 +8,94 @@
   background: #EEEFFF;
   overflow: visible;
   box-sizing: border-box;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.mobile-header__inner {
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.mobile-header__left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .mobile-header__menu {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 32px;
-  height: 29px;
+  width: 36px;
+  height: 36px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 3px;
+  align-items: center;
+  gap: 4px;
   margin: 0;
-  padding: 0 6px;
+  padding: 0;
   border: 0;
   background: transparent;
   cursor: pointer;
-  z-index: 2;
+  border-radius: 8px;
+  transition: background 0.15s ease;
   box-sizing: border-box;
+}
+
+.mobile-header__menu:hover {
+  background: rgba(42, 49, 137, 0.08);
 }
 
 .mobile-header__menu span {
   display: block;
-  width: 16px;
+  width: 18px;
   height: 2px;
   background: #2B2B2B;
   border-radius: 1px;
 }
 
+.mobile-header__logo-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
 .mobile-header__logo {
-  position: absolute;
-  left: 48px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 130px;
-  height: auto;
-  max-width: none;
+  height: 34px;
+  width: auto;
+  max-width: 130px;
   display: block;
   object-fit: contain;
   margin: 0;
   padding: 0;
-  z-index: 1;
 }
 
 /* Mobile Right Action Icons Group */
 .mobile-header__actions {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
   display: flex;
   align-items: center;
   gap: 4px;
-  z-index: 2;
+  flex-shrink: 0;
 }
 
 .mobile-header__action-btn {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   text-decoration: none;
   border-radius: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
   transition: background 0.15s ease;
 }
 
@@ -80,7 +103,8 @@
   background: rgba(42, 49, 137, 0.08);
 }
 
-.mobile-header__action-btn img {
+.mobile-header__action-btn img,
+.mobile-header__action-btn svg {
   width: 22px;
   height: 22px;
   display: block;
@@ -88,8 +112,8 @@
 }
 
 .mobile-header__avatar-initial {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: #2A3189;
   color: #fff;
@@ -99,6 +123,45 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+@media (max-width: 360px) {
+  .mobile-header__inner {
+    padding: 0 8px;
+  }
+
+  .mobile-header__left {
+    gap: 4px;
+  }
+
+  .mobile-header__menu {
+    width: 32px;
+    height: 32px;
+  }
+
+  .mobile-header__menu span {
+    width: 16px;
+  }
+
+  .mobile-header__logo {
+    height: 28px;
+    max-width: 105px;
+  }
+
+  .mobile-header__actions {
+    gap: 2px;
+  }
+
+  .mobile-header__action-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .mobile-header__action-btn img,
+  .mobile-header__action-btn svg {
+    width: 20px;
+    height: 20px;
+  }
 }
 
 /* Mobile Navigation Drawer Overlay */

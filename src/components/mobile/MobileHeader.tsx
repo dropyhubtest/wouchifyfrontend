@@ -61,59 +61,51 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ activeNav, variant =
     <>
       <div aria-hidden="true" style={{ height: '64px', width: '100%', flexShrink: 0 }} />
       <header className="mobile-header">
-        <button
-          type="button"
-          className="mobile-header__menu"
-          aria-label="Open navigation menu"
-          aria-expanded={isMenuOpen}
-          aria-controls="mobile-nav-drawer"
-          onClick={() => setIsMenuOpen((prev) => !prev)}
-        >
-          <span />
-          <span />
-          <span />
-        </button>
-
-        <a href="/" aria-label="Wouchify Home">
-          <img
-            className="mobile-header__logo"
-            src={mobileWouchifyLogo}
-            alt="Wouchify"
-            width="130"
-            height="38"
-          />
-        </a>
-
-        {/* Right-side action icons */}
-        <div className="mobile-header__actions">
-          {/* Search icon */}
-          {variant !== 'minimal' && (
+        <div className="mobile-header__inner">
+          <div className="mobile-header__left">
             <button
               type="button"
-              className="mobile-header__action-btn"
-              aria-label="Search"
-              onClick={() => setIsSearchOpen(true)}
+              className="mobile-header__menu"
+              aria-label="Open navigation menu"
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-nav-drawer"
+              onClick={() => setIsMenuOpen((prev) => !prev)}
             >
-              <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#2A3189" strokeWidth="2" aria-hidden="true">
-                <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-              </svg>
+              <span />
+              <span />
+              <span />
             </button>
-          )}
 
-          <a className="mobile-header__action-btn" href="/favorites" aria-label="View favourites">
-            <img src={favoriteIcon} alt="" aria-hidden="true" />
-          </a>
-
-          {variant !== 'minimal' && (
-            <a className="mobile-header__action-btn mobile-header__wallet" href="/wallet" aria-label="My Wallet">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <rect x="2" y="6" width="20" height="14" rx="2" stroke="#2A3189" strokeWidth="1.8" fill="none"/>
-                <path d="M2 10h20" stroke="#2A3189" strokeWidth="1.8"/>
-                <path d="M16 10V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v4" stroke="#2A3189" strokeWidth="1.8"/>
-                <circle cx="17" cy="16" r="1.5" fill="#2A3189"/>
-              </svg>
+            <a href="/" className="mobile-header__logo-link" aria-label="Wouchify Home">
+              <img
+                className="mobile-header__logo"
+                src={mobileWouchifyLogo}
+                alt="Wouchify"
+                width="130"
+                height="38"
+              />
             </a>
-          )}
+          </div>
+
+          {/* Right-side action icons */}
+          <div className="mobile-header__actions">
+            {/* Search icon */}
+            {variant !== 'minimal' && (
+              <button
+                type="button"
+                className="mobile-header__action-btn"
+                aria-label="Search"
+                onClick={() => setIsSearchOpen(true)}
+              >
+                <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#2A3189" strokeWidth="2" aria-hidden="true">
+                  <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                </svg>
+              </button>
+            )}
+
+            <a className="mobile-header__action-btn" href="/favorites" aria-label="View favourites">
+              <img src={favoriteIcon} alt="" aria-hidden="true" />
+            </a>
 
           {variant !== 'minimal' && (
             userInfo ? (
@@ -164,6 +156,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ activeNav, variant =
             )
           )}
         </div>
+      </div>
 
         {isMenuOpen && (
           <>

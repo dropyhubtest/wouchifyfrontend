@@ -19,6 +19,9 @@ import {
   MobileTravellingDirectoryPage,
   MobileBanksDirectoryPage,
   MobileCitiesDealsDirectoryPage,
+  MobileBrandPage,
+  MobileCreditCardsPage,
+  MobileContactUsPage,
 } from './components/mobile'
 import { StoresPage } from './pages/StoresPage'
 import { CategoriesPage } from './pages/CategoriesPage'
@@ -54,6 +57,7 @@ import { ReferPage } from './pages/ReferPage'
 import { AdminLoginPage } from './pages/admin/AdminLoginPage'
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage'
 import { BrandPage } from './pages/BrandPage'
+import { CreditCardsPage } from './pages/CreditCardsPage'
 import { StaffLoginPage } from './pages/admin/StaffLoginPage'
 import { ExecutiveDashboardPage } from './pages/admin/executive/ExecutiveDashboardPage'
 import { ExecutiveDealsPage } from './pages/admin/executive/ExecutiveDealsPage'
@@ -225,6 +229,15 @@ function resolveCurrentPath(): string {
     return '/coupons'
   }
 
+  // Credit Cards page (/credit-cards)
+  if (
+    pathname === '/credit-cards' ||
+    pathname.startsWith('/credit-cards/') ||
+    page === 'credit-cards'
+  ) {
+    return '/credit-cards'
+  }
+
   // Brand pages (/brands/:slug or /amazon or /stores/amazon)
   if (pathname === '/amazon' || page === 'amazon') {
     return '/brands/amazon'
@@ -367,6 +380,7 @@ export default function App() {
   const isFaqRoute = currentPath === '/faq'
   const isContactRoute = currentPath === '/contact'
   const isCouponsRoute = currentPath === '/coupons' || currentPath.startsWith('/coupons/')
+  const isCreditCardsRoute = currentPath === '/credit-cards' || currentPath.startsWith('/credit-cards/')
   const isLootDealsRoute = currentPath === '/loot-deals' || currentPath.startsWith('/loot-deals/')
   const isStoresRoute = currentPath === '/stores' || currentPath.startsWith('/stores/')
   const isDealsRoute = currentPath === '/deals' || currentPath.startsWith('/deals/')
@@ -416,6 +430,9 @@ export default function App() {
       if (isLootDealsRoute) {
         return <MobileLootDealsPage />
       }
+      if (isCreditCardsRoute) {
+        return <MobileCreditCardsPage />
+      }
       if (isCouponsRoute) {
         return <MobileCouponsPage />
       }
@@ -436,6 +453,9 @@ export default function App() {
       }
       if (isFaqRoute) {
         return <MobileFAQPage />
+      }
+      if (isContactRoute) {
+        return <MobileContactUsPage />
       }
       if (isStoresRoute) {
         return <MobileStoresPage />
@@ -460,7 +480,7 @@ export default function App() {
         return <AdminDashboardPage />
       }
       if (isBrandRoute) {
-        return <BrandPage brandSlug={brandSlug} />
+        return <MobileBrandPage brandSlug={brandSlug} />
       }
       if (isNotFoundRoute) {
         return <NotFoundPage />
@@ -521,6 +541,10 @@ export default function App() {
 
     if (isCouponsRoute) {
       return <CouponsPage />
+    }
+
+    if (isCreditCardsRoute) {
+      return <CreditCardsPage />
     }
 
     if (isLootDealsRoute) {

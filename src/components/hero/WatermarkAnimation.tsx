@@ -16,21 +16,24 @@ export const WatermarkAnimation: React.FC<WatermarkAnimationProps> = ({
   width = 403,
   height = 266,
 }) => {
+  const styleWidth = typeof width === 'number' ? `${width}px` : width
+  const styleHeight = typeof height === 'number' ? `${height}px` : height
+
   return (
-    <div className={`watermark-animation-wrapper ${className}`} aria-hidden="true">
+    <div
+      className={`watermark-animation-wrapper ${className}`}
+      style={{ width: styleWidth, height: styleHeight }}
+      aria-hidden="true"
+    >
       <img
         src={state1Src}
         alt=""
         className="watermark-img watermark-img-state-1"
-        width={width}
-        height={height}
       />
       <img
         src={state2Src}
         alt=""
         className="watermark-img watermark-img-state-2"
-        width={width}
-        height={height}
       />
     </div>
   )
