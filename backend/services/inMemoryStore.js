@@ -50,8 +50,6 @@ function loadFromDisk() {
   }
 }
 
-loadFromDisk();
-
 let coupons = [
   { _id: '1', id: 1, code: 'WOUCH50', store: 'Swiggy', discount: '50% OFF', category: 'Food', usageCount: 1420, usageLimit: 2000, status: 'active', expiry: 'Sep 30, 2026' },
   { _id: '2', id: 2, code: 'MYNTRA20', store: 'Myntra', discount: '20% OFF', category: 'Fashion', usageCount: 890, usageLimit: 1500, status: 'active', expiry: 'Sep 28, 2026' },
@@ -106,6 +104,9 @@ let transactions = [
   { _id: 'TXN-9016', id: 'TXN-9016', transactionId: 'TXN-9016', user: 'Ananya Roy', email: 'ananya.roy@gmail.com', type: 'Cashback', amount: '₹340', status: 'Completed', time: '6 hrs ago' },
   { _id: 'TXN-9015', id: 'TXN-9015', transactionId: 'TXN-9015', user: 'Rohan Deshmukh', email: 'rohan.d@gmail.com', type: 'Redemption', amount: '₹750', status: 'Pending', time: '8 hrs ago' }
 ];
+
+// Load persisted data after all collections are declared
+loadFromDisk();
 
 module.exports = {
   // Deals

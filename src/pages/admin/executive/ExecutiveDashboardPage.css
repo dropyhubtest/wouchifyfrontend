@@ -647,6 +647,7 @@
   gap: 5px;
   font-size: 0.8rem;
   color: #64748b;
+  white-space: nowrap;
 }
 
 .time-badge.is-today {
