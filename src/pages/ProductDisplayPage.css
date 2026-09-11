@@ -1,0 +1,498 @@
+/* ==========================================================================
+   Product Display Internal Page (Desktop) - 605x226 Matte Vector Coupon Card
+   ========================================================================== */
+
+.product-display-page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #FFFFFF;
+  color: #111827;
+  font-family: 'Poppins', sans-serif;
+  overflow-x: hidden;
+}
+
+/* ── MAIN PRODUCT CONTAINER (FULL VIEWPORT WIDTH 2-COLUMN GRID) ── */
+.product-display-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 32px 0 0 0;
+  padding: 0 54px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: start;
+  box-sizing: border-box;
+}
+
+/* ── LEFT SHOWCASE COLUMN ── */
+.product-display-showcase {
+  width: 100%;
+  min-width: 0;
+}
+
+.product-showcase-card {
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 24px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12), inset 0 2px 6px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+}
+
+.product-showcase-image-wrapper {
+  width: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  background-color: #0F172A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.product-showcase-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  border-radius: 18px;
+}
+
+.product-showcase-meta-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.product-showcase-store-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.product-showcase-store-logo {
+  height: 54px;
+  width: auto;
+  max-width: 220px;
+  object-fit: contain;
+}
+
+.product-showcase-verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: #4B5563;
+}
+
+.product-showcase-verified-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #E31E25;
+}
+
+.product-showcase-deal-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: #1F2937;
+  background: #F1F5F9;
+  padding: 5px 18px;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.product-showcase-deal-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #E31E25;
+}
+
+.product-showcase-title {
+  display: flex;
+  flex-direction: column;
+  font-size: 22px;
+  font-weight: 500;
+  color: #111827;
+  line-height: 1.45;
+  margin: 4px 0 0 0;
+}
+
+.product-showcase-title span {
+  display: block;
+}
+
+.product-showcase-badges-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.product-badge-pill {
+  flex: 1;
+  text-align: center;
+  padding: 14px 20px;
+  background: #EBF0FE;
+  border: 1.5px solid #98B2FB;
+  border-radius: 14px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #232B85;
+  box-shadow: 0 6px 16px rgba(35, 43, 133, 0.15), inset 0 2px 4px rgba(255, 255, 255, 0.8), inset 0 -2px 4px rgba(35, 43, 133, 0.1);
+  transition: transform 0.2s ease;
+}
+
+/* ── RIGHT DETAILS COLUMN ── */
+.product-display-details {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-details-store-logo-wrapper {
+  margin-bottom: 12px;
+}
+
+.product-details-store-logo {
+  height: 68px;
+  width: auto;
+  max-width: 260px;
+  object-fit: contain;
+}
+
+.product-details-title {
+  font-size: 30px;
+  font-weight: 500;
+  color: #111827;
+  line-height: 1.35;
+  margin: 0 0 12px 0;
+}
+
+.product-details-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16.5px;
+  font-weight: 400;
+  color: #4B5563;
+  margin-bottom: 14px;
+}
+
+.product-details-rating-divider {
+  color: #9CA3AF;
+}
+
+.product-details-header-divider {
+  width: 100%;
+  height: 2px;
+  background-color: #E2E8F0;
+  margin-bottom: 22px;
+}
+
+.product-details-price-block {
+  margin-bottom: 22px;
+}
+
+.product-details-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+}
+
+.product-details-current-price {
+  font-size: 48px;
+  font-weight: 700;
+  color: #232B85;
+  line-height: 1;
+}
+
+.product-details-original-price {
+  font-size: 26px;
+  font-weight: 500;
+  color: #5B67CA;
+  text-decoration: line-through;
+  text-decoration-color: #232B85;
+}
+
+.product-details-mrp-subtext {
+  display: block;
+  font-size: 15px;
+  color: #6B7280;
+  margin-top: 6px;
+  font-weight: 400;
+}
+
+/* ── VECTOR SVG COUPON TICKET (605x226, TOP INNER SHADOW + BOTTOM DROP SHADOW) ── */
+.product-coupon-ticket-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 605px;
+  height: 226px;
+  min-height: 226px;
+  margin-bottom: 30px;
+  filter: drop-shadow(0px 14px 20px rgba(0, 0, 0, 0.35)); /* Drop shadow at bottom border */
+  box-sizing: border-box;
+}
+
+.product-coupon-ticket-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 1;
+}
+
+.product-coupon-ticket-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: stretch;
+  z-index: 2;
+  box-sizing: border-box;
+}
+
+/* Left Section (~64.5%) */
+.coupon-ticket-left {
+  flex: 0 0 64.5%;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+.coupon-ticket-offer-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #232B85;
+  margin: 0;
+}
+
+.coupon-ticket-offer-sub {
+  font-size: 15px;
+  color: #1F2937;
+  font-weight: 400;
+  margin: 0;
+}
+
+.coupon-ticket-apply-btn {
+  margin-top: 6px;
+  background: #232B85;
+  color: #FFFFFF;
+  border: 2px dashed #98B2FB;
+  border-radius: 999px;
+  padding: 8px 32px;
+  font-size: 15.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.coupon-ticket-apply-btn:hover {
+  opacity: 0.92;
+  transform: scale(1.02);
+}
+
+/* Right Section (~35.5%) */
+.coupon-ticket-right {
+  flex: 0 0 35.5%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px 24px 10px;
+  box-sizing: border-box;
+}
+
+.coupon-ticket-code-btn {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: opacity 0.2s;
+}
+
+.coupon-ticket-code-btn:hover {
+  opacity: 0.8;
+}
+
+.coupon-ticket-copy-icon {
+  stroke: #111827;
+  width: 20px;
+  height: 20px;
+}
+
+/* ── RED CTA BUTTON ── */
+.product-details-grab-btn {
+  display: block;
+  width: 100%;
+  max-width: 605px;
+  text-align: center;
+  background: #E31E25;
+  color: #FFFFFF;
+  font-size: 19px;
+  font-weight: 600;
+  padding: 16px 26px;
+  border-radius: 12px;
+  text-decoration: none;
+  box-shadow: 0 6px 18px rgba(227, 30, 37, 0.3);
+  transition: background-color 0.2s, transform 0.2s;
+  margin-bottom: 30px;
+  box-sizing: border-box;
+}
+
+.product-details-grab-btn:hover {
+  background: #C4161C;
+  transform: translateY(-1px);
+}
+
+/* ── ABOUT THE PRODUCT ── */
+.product-about-section {
+  margin-top: 10px;
+}
+
+.product-about-heading {
+  font-size: 18px;
+  font-weight: 600;
+  color: #232B85;
+  margin: 0 0 12px 0;
+}
+
+.product-about-paragraph {
+  font-size: 15.5px;
+  font-weight: 400;
+  color: #374151;
+  line-height: 1.7;
+  margin: 0 0 16px 0;
+}
+
+.product-about-specs-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.product-about-spec-item {
+  position: relative;
+  padding-left: 18px;
+  font-size: 15.5px;
+  font-weight: 400;
+  color: #374151;
+  line-height: 1.55;
+}
+
+.product-about-spec-item::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #111827;
+  font-weight: bold;
+}
+
+/* ── HOW TO REDEEM ── */
+.product-redeem-section {
+  margin-top: 30px;
+}
+
+.product-redeem-heading {
+  font-size: 18px;
+  font-weight: 600;
+  color: #E31E25;
+  margin: 0 0 12px 0;
+}
+
+.product-redeem-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.product-redeem-item {
+  font-size: 15.5px;
+  font-weight: 400;
+  color: #374151;
+  line-height: 1.55;
+}
+
+/* ── SIMILAR PRODUCTS SECTION ── */
+.product-similar-section {
+  width: 100%;
+  max-width: 100%;
+  margin: 60px 0 0 0;
+  padding: 0 54px 64px 54px;
+  box-sizing: border-box;
+}
+
+.product-similar-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 26px;
+  margin-left: -54px;
+}
+
+.product-similar-accent {
+  width: 18px;
+  height: 40px;
+  background-color: #E31E25;
+  border-radius: 0 40px 40px 0;
+}
+
+.product-similar-title {
+  font-size: 26px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.product-similar-grid {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+/* Responsive breakpoint */
+@media (max-width: 1080px) {
+  .product-display-container {
+    grid-template-columns: 1fr;
+    padding: 0 24px;
+  }
+
+  .product-similar-section {
+    padding: 0 24px 40px 24px;
+  }
+
+  .product-similar-header {
+    margin-left: -24px;
+  }
+}

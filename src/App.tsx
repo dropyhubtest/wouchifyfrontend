@@ -22,6 +22,8 @@ import {
   MobileBrandPage,
   MobileCreditCardsPage,
   MobileContactUsPage,
+  MobileWishlistPage,
+  MobileProductPage,
 } from './components/mobile'
 import { StoresPage } from './pages/StoresPage'
 import { CategoriesPage } from './pages/CategoriesPage'
@@ -41,11 +43,13 @@ import { LoginPage } from './pages/LoginPage'
 import { TermsPage } from './pages/TermsPage'
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage'
 import { MobilePrivacyPolicyPage } from './pages/MobilePrivacyPolicyPage'
+import { CookiePolicyPage } from './pages/CookiePolicyPage'
 import { AdvertisePage } from './pages/AdvertisePage'
 import { MobileAdvertisePage } from './pages/MobileAdvertisePage'
 import { AboutUsPage } from './pages/AboutUsPage'
 import { FAQPage } from './pages/FAQPage'
 import { MobileFAQPage } from './pages/MobileFAQPage'
+import { HelpPage } from './pages/HelpPage'
 import { ContactUsPage } from './pages/ContactUsPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { WalletPage } from './pages/WalletPage'
@@ -58,6 +62,7 @@ import { AdminLoginPage } from './pages/admin/AdminLoginPage'
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage'
 import { BrandPage } from './pages/BrandPage'
 import { CreditCardsPage } from './pages/CreditCardsPage'
+import { ProductDisplayPage } from './pages/ProductDisplayPage'
 import { StaffLoginPage } from './pages/admin/StaffLoginPage'
 import { ExecutiveDashboardPage } from './pages/admin/executive/ExecutiveDashboardPage'
 import { ExecutiveDealsPage } from './pages/admin/executive/ExecutiveDealsPage'
@@ -203,8 +208,18 @@ function resolveCurrentPath(): string {
     return '/terms'
   }
 
-  // Static Pages (/privacy, /about, /faq, /contact, /advertise)
+  // Static Pages (/privacy, /cookies, /about, /faq, /contact, /advertise)
   if (pathname === '/privacy' || page === 'privacy' || page === 'privacy-policy') return '/privacy'
+  if (
+    pathname === '/cookies' ||
+    pathname === '/cookie-policy' ||
+    pathname === '/cookie' ||
+    page === 'cookies' ||
+    page === 'cookie-policy' ||
+    page === 'cookie'
+  ) {
+    return '/cookie-policy'
+  }
   if (
     pathname === '/advertise' ||
     pathname === '/advertise-with-us' ||
@@ -215,12 +230,17 @@ function resolveCurrentPath(): string {
   }
   if (pathname === '/about' || page === 'about' || page === 'about-us') return '/about'
   if (
-    pathname === '/faq' ||
     pathname === '/help' ||
     pathname === '/help-faq' ||
+    page === 'help' ||
+    page === 'help-faq'
+  ) {
+    return '/help'
+  }
+  if (
+    pathname === '/faq' ||
     pathname === '/questions' ||
     page === 'faq' ||
-    page === 'help' ||
     page === 'questions'
   ) {
     return '/faq'
@@ -284,6 +304,20 @@ function resolveCurrentPath(): string {
   // Admin dashboard
   if (pathname === '/admin/dashboard' || page === 'admin-dashboard') {
     return '/admin/dashboard'
+  }
+
+  // Product display internal page (/product, /products, /deal/:id, /product-display)
+  if (
+    pathname === '/product' ||
+    pathname.startsWith('/product/') ||
+    pathname === '/products' ||
+    pathname.startsWith('/products/') ||
+    pathname.startsWith('/deal/') ||
+    page === 'product' ||
+    page === 'product-display' ||
+    searchParams.has('product')
+  ) {
+    return '/product'
   }
 
   // Deals hero/landing page (/deals)
@@ -382,8 +416,10 @@ export default function App() {
     currentPath === '/terms-of-use' ||
     currentPath === '/terms-of-service'
   const isPrivacyRoute = currentPath === '/privacy'
+  const isCookieRoute = currentPath === '/cookies' || currentPath === '/cookie-policy'
   const isAdvertiseRoute = currentPath === '/advertise'
   const isAboutRoute = currentPath === '/about'
+  const isHelpRoute = currentPath === '/help' || currentPath === '/help-faq'
   const isFaqRoute = currentPath === '/faq'
   const isContactRoute = currentPath === '/contact'
   const isCouponsRoute = currentPath === '/coupons' || currentPath.startsWith('/coupons/')
@@ -392,11 +428,12 @@ export default function App() {
   const isStoresRoute = currentPath === '/stores' || currentPath.startsWith('/stores/')
   const isDealsRoute = currentPath === '/deals' || currentPath.startsWith('/deals/')
   const isCategoriesRoute = currentPath === '/categories' || currentPath.startsWith('/categories/')
+  const isProductRoute = currentPath === '/product' || currentPath.startsWith('/product') || currentPath.startsWith('/deal/')
   const isWalletRoute = currentPath === '/wallet'
   const isProfileRoute = currentPath === '/profile'
   const isOrdersRoute = currentPath === '/orders'
   const isCartRoute = currentPath === '/cart'
-  const isFavoritesRoute = currentPath === '/favorites'
+  const isFavoritesRoute = currentPath === '/favorites' || currentPath === '/wishlist'
   const isNotificationsRoute = currentPath === '/notifications'
   const isReferRoute = currentPath === '/refer'
   const isAdminLoginRoute = currentPath === '/admin/login'
@@ -456,14 +493,26 @@ export default function App() {
       if (isPrivacyRoute) {
         return <MobilePrivacyPolicyPage />
       }
+      if (isCookieRoute) {
+        return <CookiePolicyPage />
+      }
       if (isAdvertiseRoute) {
         return <MobileAdvertisePage />
+      }
+      if (isAboutRoute) {
+        return <AboutUsPage />
+      }
+      if (isHelpRoute) {
+        return <HelpPage />
       }
       if (isFaqRoute) {
         return <MobileFAQPage />
       }
       if (isContactRoute) {
         return <MobileContactUsPage />
+      }
+      if (isProductRoute) {
+        return <MobileProductPage />
       }
       if (isStoresRoute) {
         return <MobileStoresPage />
@@ -477,8 +526,8 @@ export default function App() {
       if (isWalletRoute) return <WalletPage />
       if (isProfileRoute) return <ProfilePage />
       if (isOrdersRoute) return <OrdersPage />
-      if (isCartRoute) return <FavoritesPage />
-      if (isFavoritesRoute) return <FavoritesPage />
+      if (isCartRoute) return <MobileWishlistPage />
+      if (isFavoritesRoute) return <MobileWishlistPage />
       if (isNotificationsRoute) return <NotificationsPage />
       if (isReferRoute) return <ReferPage />
       if (isAdminLoginRoute) {
@@ -555,11 +604,17 @@ export default function App() {
     if (isPrivacyRoute) {
       return <PrivacyPolicyPage />
     }
+    if (isCookieRoute) {
+      return <CookiePolicyPage />
+    }
     if (isAdvertiseRoute) {
       return <AdvertisePage />
     }
     if (isAboutRoute) {
       return <AboutUsPage />
+    }
+    if (isHelpRoute) {
+      return <HelpPage />
     }
     if (isFaqRoute) {
       return <FAQPage />
@@ -578,6 +633,10 @@ export default function App() {
 
     if (isLootDealsRoute) {
       return <LootDealsPage />
+    }
+
+    if (isProductRoute) {
+      return <ProductDisplayPage />
     }
 
     if (isStoresRoute) {

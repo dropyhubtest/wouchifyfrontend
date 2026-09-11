@@ -1,0 +1,165 @@
+/* ==========================================================================
+   Cookie Policy Page Styles (Matching Reference Design media_1789112594459.png)
+   Typography: Poppins, Mixed case, 25 tracking (0.025em letter-spacing)
+   ========================================================================== */
+
+.cookie-page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+  text-transform: none;
+  letter-spacing: 0.025em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Main Container (Full Viewport Width) */
+.cookie-page__container {
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 56px 80px 40px 80px;
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: 0.025em;
+}
+
+/* Big Animated W Watermark on Top-Left */
+.cookie-page__watermark-wrap {
+  position: absolute;
+  top: 15px;
+  left: 30px;
+  width: 320px;
+  height: 210px;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+}
+
+/* Page Title (Centered, 34px bold, black, Poppins mixed case) */
+.cookie-page__title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 34px;
+  font-weight: 700;
+  color: #000000;
+  text-align: center;
+  margin: 10px 0 36px 0;
+  letter-spacing: 0.025em;
+  text-transform: none;
+  line-height: 1.25;
+  position: relative;
+  z-index: 2;
+}
+
+/* Document Content Container */
+.cookie-page__content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: 0.025em;
+}
+
+/* Section */
+.cookie-page__section {
+  margin-bottom: 24px;
+}
+
+/* Section Titles: 18.5px, bold Poppins, mixed case, 25 letter-spacing */
+.cookie-page__section-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 18.5px;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+  text-transform: none;
+  margin: 0 0 8px 0;
+  line-height: 1.35;
+}
+
+/* Alternating Red / Navy Starting with 1. Introduction (Red) */
+/* Odd sections: 1. Introduction, 3. How We Use..., 5. Third-Party..., 7. Updates... */
+.cookie-page__section:nth-of-type(odd) .cookie-page__section-title {
+  color: var(--color-red, #E31E25);
+}
+
+/* Even sections: 2. What Are Cookies?, 4. Types of Cookies..., 6. Managing Cookies, 8. Contact Us */
+.cookie-page__section:nth-of-type(even) .cookie-page__section-title {
+  color: #282D78;
+}
+
+/* Subheadings within section 4 */
+.cookie-page__subgroup {
+  margin-top: 10px;
+  margin-bottom: 8px;
+}
+
+.cookie-page__subheading {
+  font-family: 'Poppins', sans-serif;
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #222222;
+  margin: 0 0 4px 0;
+  line-height: 1.35;
+  letter-spacing: 0.025em;
+}
+
+/* Paragraph with uniform 1.65 line height, Poppins 500, mixed case, 25 letter-spacing */
+.cookie-page__paragraph {
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: #222222;
+  line-height: 1.65;
+  margin: 0 0 8px 0;
+  letter-spacing: 0.025em;
+  text-transform: none;
+}
+
+/* Bullet list */
+.cookie-page__list {
+  margin: 4px 0 12px 0;
+  padding-left: 24px;
+  list-style-type: disc;
+}
+
+.cookie-page__list li {
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: #222222;
+  line-height: 1.65;
+  margin-bottom: 4px;
+  letter-spacing: 0.025em;
+  text-transform: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .cookie-page__container {
+    padding: 40px 20px 24px 20px;
+  }
+  .cookie-page__title {
+    font-size: 30px;
+    margin-bottom: 28px;
+  }
+  .cookie-page__watermark-wrap {
+    width: 240px;
+    height: 160px;
+    top: 10px;
+    left: -20px;
+  }
+}

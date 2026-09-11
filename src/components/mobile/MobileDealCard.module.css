@@ -58,15 +58,16 @@
 /* Store Row */
 .storeRow {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 8px;
 }
 
 .storeLeft {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
 }
 
 .storeLogo {

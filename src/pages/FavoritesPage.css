@@ -1,46 +1,306 @@
-.favs-page { width: 100%; min-height: 100vh; background: #F8FAFC; font-family: 'Poppins', sans-serif; }
-.favs-page__header-bg { position: absolute; top: 0; left: 0; width: 100%; height: 131px; background: #EEEFFF; z-index: 10; pointer-events: none; }
-@media (max-width: 768px) { .favs-page__header-bg { height: 64px; } }
-.favs-page__navbar-wrapper { position: relative; z-index: 100; }
+/* ==========================================================================
+   Wishlist / Favorites Desktop Page Styles (Matching Figma media_1789109355485.png)
+   ========================================================================== */
 
-.favs-container { max-width: 1100px; margin: 0 auto; padding: 40px 24px 60px; }
-.favs-page-header { margin-bottom: 32px; }
-.favs-page-header h1 { font-size: 28px; font-weight: 700; color: #2A3189; margin: 0 0 6px; }
-.favs-page-header p { color: #6b7280; font-size: 14px; margin: 0; }
-
-.favs-empty { text-align: center; padding: 80px 20px; }
-.favs-empty__icon { font-size: 72px; margin-bottom: 16px; }
-.favs-empty h2 { font-size: 22px; font-weight: 700; color: #1f2937; margin: 0 0 8px; }
-.favs-empty p { color: #6b7280; font-size: 14px; margin: 0 0 24px; }
-.favs-empty__cta { background: #2A3189; color: #fff; border-radius: 10px; padding: 12px 28px; font-size: 14px; font-weight: 600; text-decoration: none; display: inline-block; }
-
-.favs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
-
-.fav-card {
-  background: #fff; border-radius: 16px; padding: 20px;
-  box-shadow: 0 2px 12px rgba(42,49,137,0.08);
-  display: flex; flex-direction: column; gap: 10px;
-  transition: transform 0.2s, box-shadow 0.2s;
+.wishlist-page {
+  width: 100%;
+  min-height: 100vh;
+  background: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
-.fav-card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(42,49,137,0.14); }
 
-.fav-card__top { display: flex; justify-content: space-between; align-items: center; }
-.fav-card__badge { font-size: 11px; font-weight: 600; color: #7c3aed; background: #f5f3ff; padding: 4px 10px; border-radius: 20px; }
-.fav-card__remove { background: none; border: none; font-size: 20px; cursor: pointer; opacity: 0.7; transition: opacity 0.15s, transform 0.15s; }
-.fav-card__remove:hover { opacity: 1; transform: scale(1.2); }
+/* ==========================================================================
+   1. Wishlist Hero Banner Section (Vibrant Royal Blue Background)
+   ========================================================================== */
 
-.fav-card__store { margin: 0; font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; }
-.fav-card__deal { margin: 0; font-size: 15px; font-weight: 700; color: #1f2937; line-height: 1.3; }
-.fav-card__tags { display: flex; flex-wrap: wrap; gap: 8px; }
-.fav-card__discount { background: #fff7ed; color: #c2410c; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
-.fav-card__cashback { background: #ecfdf5; color: #065f46; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
-
-.fav-card__btn {
-  margin-top: auto; display: block; text-align: center;
-  background: #2A3189; color: #fff; border-radius: 10px;
-  padding: 10px; font-size: 13px; font-weight: 600;
-  text-decoration: none; transition: background 0.15s;
+.wishlist-hero {
+  position: relative;
+  width: 100%;
+  height: 520px;
+  min-height: 480px;
+  background-color: #232B7A;
+  background: radial-gradient(circle at 50% 45%, #3B4AB8 0%, #242D7D 55%, #151A52 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-sizing: border-box;
 }
-.fav-card__btn:hover { background: #1e2466; }
 
-@media (max-width: 600px) { .favs-container { padding: 20px 16px 40px; } }
+.wishlist-hero__bg-wrap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.wishlist-hero__bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  opacity: 0.42;
+  mix-blend-mode: luminosity;
+  filter: contrast(1.15) brightness(1.1);
+}
+
+.wishlist-hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 45%, rgba(55, 71, 180, 0.25) 0%, rgba(24, 30, 88, 0.65) 75%, rgba(16, 20, 60, 0.88) 100%);
+  pointer-events: none;
+}
+
+.wishlist-hero__content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: #FFFFFF;
+  padding: 0 24px;
+  max-width: 960px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.wishlist-hero__title {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: clamp(40px, 4.4vw, 56px);
+  font-weight: 700;
+  margin: 0 0 10px 0;
+  line-height: 1.15;
+  color: #FFFFFF;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
+}
+
+.wishlist-hero__subtitle {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: clamp(24px, 2.7vw, 36px);
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  line-height: 1.25;
+  color: #FFFFFF;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.wishlist-hero__desc {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: clamp(14px, 1.2vw, 17px);
+  font-weight: 400;
+  margin: 0 0 30px 0;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.92);
+  max-width: 620px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.wishlist-hero__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #E31E25;
+  color: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 17px;
+  font-weight: 700;
+  padding: 13px 38px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(227, 30, 37, 0.45);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.wishlist-hero__cta:hover {
+  background-color: #C4141A;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(227, 30, 37, 0.6);
+}
+
+.wishlist-hero__cta:active {
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   2. Main Content Section & Cards
+   ========================================================================== */
+
+.wishlist-main {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 48px 48px 60px 0;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.wishlist-main__container {
+  width: 100%;
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.wishlist-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-right: 20px;
+}
+
+/* Cards Grid */
+.wishlist-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.wishlist-card-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.wishlist-card-wrapper.is-removing {
+  opacity: 0;
+  transform: scale(0.92) translateY(8px);
+  pointer-events: none;
+}
+
+.wishlist-heart-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 10;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wishlist-heart-btn:hover {
+  transform: scale(1.12);
+  background-color: #FFF5F5;
+  box-shadow: 0 4px 14px rgba(227, 30, 37, 0.3);
+}
+
+.wishlist-heart-btn:active {
+  transform: scale(0.94);
+}
+
+.wishlist-heart-btn.is-unfavorited {
+  transform: scale(0.85);
+  background-color: #F3F4F6;
+}
+
+/* Empty State */
+.wishlist-empty {
+  text-align: center;
+  padding: 70px 20px;
+  background: #F8F9FD;
+  border-radius: 20px;
+  border: 1.5px dashed #D0D5DD;
+  max-width: 600px;
+  margin: 20px auto;
+}
+
+.wishlist-empty__icon {
+  font-size: 54px;
+  margin-bottom: 14px;
+}
+
+.wishlist-empty__title {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: #1F2937;
+  margin: 0 0 8px 0;
+}
+
+.wishlist-empty__desc {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 15px;
+  color: #6B7280;
+  margin: 0 0 24px 0;
+}
+
+.wishlist-empty__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #E31E25;
+  color: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 15px;
+  font-weight: 700;
+  padding: 12px 28px;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 10px rgba(227, 30, 37, 0.3);
+}
+
+.wishlist-empty__btn:hover {
+  background: #C4141A;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(227, 30, 37, 0.45);
+}
+
+/* ==========================================================================
+   3. Responsive Adjustments
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+  .wishlist-main__container {
+    gap: 28px;
+  }
+  .wishlist-grid {
+    gap: 24px;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .wishlist-hero {
+    height: 400px;
+    min-height: 360px;
+  }
+  .wishlist-main {
+    padding: 24px 16px 40px;
+  }
+  .wishlist-main__container {
+    flex-direction: column;
+    gap: 24px;
+  }
+  .wishlist-content {
+    padding-right: 0;
+    width: 100%;
+  }
+  .wishlist-grid {
+    justify-content: center;
+  }
+}

@@ -1,0 +1,356 @@
+/* ==========================================================================
+   Help Page Styles (Matching Figma Reference & Colorized Question Mark Design)
+   ========================================================================== */
+
+.help-page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==========================================================================
+   1. Help Hero Banner Section (500px Height, Softly Integrated Question Marks)
+   ========================================================================== */
+
+.help-hero {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  min-height: 460px;
+  background-color: #26338C;
+  background: radial-gradient(circle at 45% 45%, #3B4BB8 0%, #252F82 55%, #151A52 100%);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Question Marks 3D Embossed Background (Softened into rich blue) */
+.help-hero__bg-wrap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.help-hero__bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  opacity: 0.22;
+  mix-blend-mode: overlay;
+  filter: contrast(1.1) brightness(1.02);
+}
+
+/* Faint W Watermark */
+.help-hero__watermark-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.help-hero__watermark {
+  position: absolute;
+  opacity: 0.08;
+  pointer-events: none;
+  user-select: none;
+}
+
+.help-hero__watermark--1 {
+  width: 220px;
+  top: 25px;
+  left: 18%;
+}
+
+.help-hero__watermark--2 {
+  width: 270px;
+  top: 40px;
+  right: 22%;
+}
+
+.help-hero__container {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1300px;
+  padding: 0 80px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+}
+
+.help-hero__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 540px;
+}
+
+.help-hero__pill-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #FFFFFF;
+  color: #E31E25;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 15px;
+  font-weight: 700;
+  padding: 4px 22px;
+  border-radius: 999px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+}
+
+.help-hero__title {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: clamp(34px, 3.8vw, 54px);
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1.18;
+  margin: 0 0 18px 0;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+
+.help-hero__sub-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #FFFFFF;
+  color: #22296E;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 15px;
+  font-weight: 700;
+  padding: 8px 26px;
+  border-radius: 999px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+}
+
+/* Right Red Telephone Handset Illustration starting flush from right screen edge */
+.help-hero__image-wrap {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 58%;
+  max-width: 780px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.help-hero__image {
+  height: 92%;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: right center;
+  display: block;
+  filter: drop-shadow(0 16px 30px rgba(0, 0, 0, 0.45));
+}
+
+/* ==========================================================================
+   2. Action Cards Grid Section (1px Black Border, Drop Shadow & Inner Shadow)
+   ========================================================================== */
+
+.help-content {
+  width: 100%;
+  flex: 1;
+  padding: 60px 80px 80px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+}
+
+.help-content__container {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  flex-direction: column;
+  gap: 34px;
+  align-items: center;
+}
+
+.help-cards-grid {
+  display: flex;
+  gap: 34px;
+  width: 100%;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.help-cards-grid--row1 .help-card {
+  flex: 1;
+  max-width: 368px;
+  min-width: 280px;
+}
+
+.help-cards-grid--row2 .help-card {
+  flex: 1;
+  max-width: 368px;
+  min-width: 280px;
+}
+
+/* Card with 1px Black Border, Deep Drop Shadow AND Inner Shadow */
+.help-card {
+  height: 220px;
+  border-radius: 20px;
+  border: 1px solid #000000;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 24px 28px;
+  box-sizing: border-box;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow:
+    0px 10px 24px rgba(0, 0, 0, 0.14),
+    0px 4px 8px rgba(0, 0, 0, 0.08),
+    inset 0px 4px 10px rgba(0, 0, 0, 0.16),
+    inset 0px -3px 8px rgba(255, 255, 255, 0.75);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.help-card:hover {
+  transform: translateY(-5px);
+  box-shadow:
+    0px 18px 36px rgba(0, 0, 0, 0.20),
+    0px 6px 14px rgba(0, 0, 0, 0.10),
+    inset 0px 5px 12px rgba(0, 0, 0, 0.18),
+    inset 0px -3px 8px rgba(255, 255, 255, 0.85);
+}
+
+.help-card:active {
+  transform: translateY(-2px);
+}
+
+.help-card__img-wrap {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  width: 150px;
+  height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+.help-card__img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+  transition: transform 0.25s ease;
+}
+
+.help-card:hover .help-card__img {
+  transform: scale(1.06);
+}
+
+.help-card__title {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 25px;
+  font-weight: 700;
+  color: #000000;
+  line-height: 1.25;
+  margin: 0;
+  max-width: 210px;
+  letter-spacing: -0.3px;
+  position: relative;
+  z-index: 2;
+}
+
+/* ==========================================================================
+   3. Responsive Styles
+   ========================================================================== */
+
+@media (max-width: 1100px) {
+  .help-hero__container {
+    padding: 0 40px;
+  }
+  .help-content {
+    padding: 48px 40px 60px;
+  }
+  .help-cards-grid {
+    gap: 20px;
+  }
+  .help-card__title {
+    font-size: 22px;
+  }
+  .help-hero__image-wrap {
+    width: 52%;
+  }
+}
+
+@media (max-width: 768px) {
+  .help-hero {
+    height: auto;
+    min-height: auto;
+    padding: 30px 20px;
+  }
+  .help-hero__container {
+    padding: 0;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+  }
+  .help-hero__content {
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .help-hero__title {
+    font-size: 28px;
+  }
+  .help-hero__image-wrap {
+    position: relative;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    width: 260px;
+    height: 180px;
+    justify-content: center;
+  }
+  .help-hero__image {
+    object-position: center;
+  }
+  .help-content {
+    padding: 36px 20px 50px;
+  }
+  .help-cards-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+  .help-card {
+    width: 100%;
+    max-width: 100% !important;
+    min-width: 0;
+    height: 180px;
+  }
+  .help-card__title {
+    font-size: 20px;
+  }
+  .help-card__img-wrap {
+    width: 90px;
+    height: 85px;
+  }
+}

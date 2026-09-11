@@ -1,0 +1,204 @@
+/* ==========================================================================
+   MobileWishlistPage Styles (440px Max Mobile Architecture)
+   Matching Figma Reference media_1789111600294.png
+   ========================================================================== */
+
+.mobileWishlistPage {
+  width: 100%;
+  max-width: 440px;
+  min-height: 100vh;
+  margin: 0 auto;
+  background: #FFFFFF;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.headerWrapper {
+  position: relative;
+  z-index: 100;
+}
+
+/* Top Section with Breadcrumb and Watermark */
+.topSection {
+  position: relative;
+  width: 100%;
+  padding: 18px 18px 16px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+.breadcrumbWrap {
+  position: relative;
+  z-index: 2;
+}
+
+.breadcrumbLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 16px;
+  font-weight: 700;
+  color: #282D78;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.breadcrumbLink:hover {
+  color: #E31E25;
+}
+
+.chevron {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
+.pageTitle {
+  text-decoration: none;
+}
+
+.watermarkWrap {
+  position: absolute;
+  right: 6px;
+  top: -6px;
+  width: 120px;
+  height: 90px;
+  opacity: 0.18;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.watermarkImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Cards Section */
+.cardsSection {
+  width: 100%;
+  flex: 1;
+  padding: 0 0 24px;
+  box-sizing: border-box;
+}
+
+.cardsRail {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 0 18px 16px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  box-sizing: border-box;
+}
+
+.cardsRail::-webkit-scrollbar {
+  display: none;
+}
+
+.cardItem {
+  position: relative;
+  flex-shrink: 0;
+  width: 250px;
+  scroll-snap-align: start;
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.cardItem.isRemoving {
+  opacity: 0;
+  transform: scale(0.92) translateY(8px);
+  pointer-events: none;
+}
+
+/* Wishlist Heart Icon on the Card */
+.heartBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.heartBtn:hover,
+.heartBtn:active {
+  transform: scale(1.1);
+  background-color: #FFF5F5;
+  box-shadow: 0 3px 10px rgba(227, 30, 37, 0.35);
+}
+
+.heartBtn.isUnfavorited {
+  transform: scale(0.85);
+  background-color: #F3F4F6;
+}
+
+/* Empty State */
+.emptyState {
+  margin: 40px 18px;
+  padding: 40px 20px;
+  background: #F8F9FD;
+  border: 1.5px dashed #D0D5DD;
+  border-radius: 16px;
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 44px;
+  margin-bottom: 12px;
+}
+
+.emptyTitle {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: #1F2937;
+  margin: 0 0 6px;
+}
+
+.emptyDesc {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 13px;
+  color: #6B7280;
+  margin: 0 0 20px;
+  line-height: 1.4;
+}
+
+.emptyCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #E31E25;
+  color: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 24px;
+  border-radius: 999px;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(227, 30, 37, 0.3);
+}
+
+/* Red Dashed Divider */
+.dashedDivider {
+  width: 100%;
+  border-top: 1.5px dashed #E31E25;
+  margin: 10px 0 0;
+  opacity: 0.85;
+}

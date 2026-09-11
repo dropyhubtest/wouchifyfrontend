@@ -43,7 +43,7 @@ export const COMPANY_LINKS: FooterLink[] = [
 export const LEGAL_LINKS: FooterLink[] = [
   { label: 'Privacy Policy', href: '/privacy' },
   { label: 'Terms of Use', href: '/terms' },
-  { label: 'Cookie Policy', href: '/cookies' },
+  { label: 'Cookie Policy', href: '/cookie-policy' },
 ]
 
 export const SOCIAL_LINKS: SocialLink[] = [
@@ -86,6 +86,6 @@ export const CONTACT_DETAILS: ContactDetail[] = [
 export const BOTTOM_LEGAL_LINKS: FooterLink[] = [
   { label: 'Privacy Policy', href: '/privacy' },
   { label: 'Terms of Use', href: '/terms' },
-  { label: 'Cookie Policy', href: '/cookies' },
+  { label: 'Cookie Policy', href: '/cookie-policy' },
   { label: 'Contact', href: '/contact' },
 ]

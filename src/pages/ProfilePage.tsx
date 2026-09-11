@@ -3,6 +3,11 @@ import { Navbar } from '../components/layout/Navbar'
 import { MobileHeader } from '../components/mobile/MobileHeader'
 import { FooterSection } from '../components/footer/FooterSection'
 import { useMediaQuery } from '../hooks/useMediaQuery'
+import { ProfileHero } from '../components/profile/ProfileHero'
+
+import { ProfileSidebar } from '../components/profile/ProfileSidebar'
+import editIcon from '../assets/profile/edit.png'
+
 import './ProfilePage.css'
 
 interface UserInfo {
@@ -15,9 +20,15 @@ interface UserInfo {
 
 export const ProfilePage: React.FC = () => {
   const isMobile = useMediaQuery('(max-width: 768px)')
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
+  const [userInfo, setUserInfo] = useState<UserInfo>({
+    name: 'Arushi Shetty',
+    fullName: 'Arushi Shetty',
+    email: 'arushi123@gmail.com',
+    mobile: '—',
+  })
   const [isEditing, setIsEditing] = useState(false)
-  const [editName, setEditName] = useState('')
+  const [editName, setEditName] = useState('Arushi Shetty')
+  const [editEmail, setEditEmail] = useState('arushi123@gmail.com')
   const [editPhone, setEditPhone] = useState('')
   const [saved, setSaved] = useState(false)
 
@@ -27,24 +38,36 @@ export const ProfilePage: React.FC = () => {
       try {
         const parsed = JSON.parse(raw)
         const data = parsed?.user || parsed
-        setUserInfo(data)
-        setEditName(data.name || data.fullName || '')
-        setEditPhone(data.mobile || '')
+        const finalName = data.name || data.fullName || 'Arushi Shetty'
+        const finalEmail = data.email || 'arushi123@gmail.com'
+        const finalPhone = data.mobile || '—'
+        setUserInfo({
+          ...data,
+          name: finalName,
+          fullName: finalName,
+          email: finalEmail,
+          mobile: finalPhone,
+        })
+        setEditName(finalName)
+        setEditEmail(finalEmail)
+        setEditPhone(finalPhone === '—' ? '' : finalPhone)
       } catch {}
     }
   }, [])
 
-  const displayName = userInfo?.name || userInfo?.fullName || userInfo?.email?.split('@')[0] || 'User'
-
-  const getInitial = () => {
-    if (userInfo?.name) return userInfo.name.charAt(0).toUpperCase()
-    if (userInfo?.fullName) return userInfo.fullName.charAt(0).toUpperCase()
-    if (userInfo?.email) return userInfo.email.charAt(0).toUpperCase()
-    return '?'
-  }
+  const displayName = userInfo.fullName || userInfo.name || 'Arushi Shetty'
+  const firstName = displayName.split(' ')[0] || 'Arushi'
+  const displayEmail = userInfo.email || 'arushi123@gmail.com'
+  const displayPhone = userInfo.mobile || '—'
 
   const handleSave = () => {
-    const updated = { ...userInfo, name: editName, mobile: editPhone }
+    const updated = {
+      ...userInfo,
+      name: editName.trim() || 'Arushi Shetty',
+      fullName: editName.trim() || 'Arushi Shetty',
+      email: editEmail.trim() || 'arushi123@gmail.com',
+      mobile: editPhone.trim() || '—',
+    }
     localStorage.setItem('userInfo', JSON.stringify(updated))
     setUserInfo(updated)
     setIsEditing(false)
@@ -52,122 +75,149 @@ export const ProfilePage: React.FC = () => {
     setTimeout(() => setSaved(false), 2500)
   }
 
-  const menuItems = [
-    { icon: '👤', label: 'Profile', href: '/profile', active: true },
-    { icon: '🛍️', label: 'My Orders', href: '/orders' },
-    { icon: '💛', label: 'Favorites', href: '/favorites' },
-    { icon: '👜', label: 'My Wallet', href: '/wallet' },
-    { icon: '🔔', label: 'Notifications', href: '/notifications' },
-    { icon: '🎁', label: 'Refer & Earn', href: '/refer' },
-  ]
+  const handleCancel = () => {
+    setEditName(displayName)
+    setEditEmail(displayEmail)
+    setEditPhone(displayPhone === '—' ? '' : displayPhone)
+    setIsEditing(false)
+  }
 
   return (
-    <main className="profile-page">
-      <div className="profile-page__header-bg" />
-      <div className="profile-page__navbar-wrapper">
-        {isMobile ? <MobileHeader /> : <Navbar />}
-      </div>
+    <div className="profile-page">
+      {/* 1. Top Navbar */}
+      {isMobile ? <MobileHeader /> : <Navbar activeNav="profile" />}
 
-      <div className="profile-container">
-        <div className="profile-sidebar">
-          <div className="profile-sidebar__avatar-wrap">
-            <div className="profile-sidebar__avatar">{getInitial()}</div>
-            <p className="profile-sidebar__name">{displayName}</p>
-            <p className="profile-sidebar__email">{userInfo?.email}</p>
-          </div>
-          <nav className="profile-sidebar__nav">
-            {menuItems.map(item => (
-              <a
-                key={item.href}
-                href={item.href}
-                className={`profile-sidebar__nav-item ${item.active ? 'active' : ''}`}
-              >
-                <span className="profile-sidebar__nav-icon">{item.icon}</span>
-                {item.label}
-              </a>
-            ))}
-          </nav>
-        </div>
+      {/* 2. Animated Profile Hero Section with Top-to-Bottom Sweep */}
+      <ProfileHero
+        name={firstName}
+        email={displayEmail}
+        onEditClick={() => setIsEditing(true)}
+      />
 
-        <div className="profile-content">
-          <div className="profile-card">
-            <div className="profile-card__header">
-              <h1 className="profile-card__title">My Profile</h1>
-              {!isEditing && (
-                <button className="profile-edit-btn" onClick={() => setIsEditing(true)}>
-                  ✏️ Edit Profile
-                </button>
+      {/* 3. Main Body Container */}
+      <main className="profile-main">
+        <div className="profile-main__container">
+          {/* Left Column: Stack of Pill Navigation Buttons + Quick Access */}
+          <ProfileSidebar activeTab="profile" showQuickAccess={true} />
+
+          {/* Right Column: User Information Form Cards */}
+          <section className="profile-content" aria-label="User Profile Details">
+            {saved && (
+              <div className="profile-saved-banner" role="alert">
+                Profile updated successfully!
+              </div>
+            )}
+
+            <div className="profile-form-grid">
+              {/* Field 1: Full Name */}
+              <div className="profile-field-group">
+                <label className="profile-field-label">Full Name:</label>
+                <div className="profile-field-card" onClick={() => !isEditing && setIsEditing(true)}>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      className="profile-field-input"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      placeholder="Enter Full Name"
+                      autoFocus
+                    />
+                  ) : (
+                    <span className="profile-field-value">{displayName}</span>
+                  )}
+                  <button
+                    type="button"
+                    className="profile-field-edit-icon"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setIsEditing(true)
+                    }}
+                    aria-label="Edit Full Name"
+                  >
+                    <img src={editIcon} alt="Edit" className="profile-field-edit-img" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Field 2: Email Id */}
+              <div className="profile-field-group">
+                <label className="profile-field-label">Email Id:</label>
+                <div className="profile-field-card" onClick={() => !isEditing && setIsEditing(true)}>
+                  {isEditing ? (
+                    <input
+                      type="email"
+                      className="profile-field-input"
+                      value={editEmail}
+                      onChange={(e) => setEditEmail(e.target.value)}
+                      placeholder="Enter Email Address"
+                    />
+                  ) : (
+                    <span className="profile-field-value">{displayEmail}</span>
+                  )}
+                  <button
+                    type="button"
+                    className="profile-field-edit-icon"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setIsEditing(true)
+                    }}
+                    aria-label="Edit Email Id"
+                  >
+                    <img src={editIcon} alt="Edit" className="profile-field-edit-img" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Field 3: Phone Number */}
+              <div className="profile-field-group">
+                <label className="profile-field-label">Phone Number:</label>
+                <div className="profile-field-card" onClick={() => !isEditing && setIsEditing(true)}>
+                  {isEditing ? (
+                    <input
+                      type="tel"
+                      className="profile-field-input"
+                      value={editPhone}
+                      onChange={(e) => setEditPhone(e.target.value)}
+                      placeholder="+91 XXXXXXXXXX"
+                    />
+                  ) : (
+                    <span className="profile-field-value">{displayPhone}</span>
+                  )}
+                  <button
+                    type="button"
+                    className="profile-field-edit-icon"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setIsEditing(true)
+                    }}
+                    aria-label="Edit Phone Number"
+                  >
+                    <img src={editIcon} alt="Edit" className="profile-field-edit-img" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Editing Action Buttons */}
+              {isEditing && (
+                <div className="profile-form-actions">
+                  <button type="button" className="profile-save-btn" onClick={handleSave}>
+                    Save Changes
+                  </button>
+                  <button type="button" className="profile-cancel-btn" onClick={handleCancel}>
+                    Cancel
+                  </button>
+                </div>
               )}
             </div>
-
-            {saved && (
-              <div className="profile-success-banner">✅ Profile updated successfully!</div>
-            )}
-
-            <div className="profile-fields">
-              <div className="profile-field">
-                <label className="profile-field__label">Full Name</label>
-                {isEditing ? (
-                  <input
-                    className="profile-field__input"
-                    value={editName}
-                    onChange={e => setEditName(e.target.value)}
-                    placeholder="Enter your full name"
-                  />
-                ) : (
-                  <p className="profile-field__value">{displayName}</p>
-                )}
-              </div>
-
-              <div className="profile-field">
-                <label className="profile-field__label">Email Address</label>
-                <p className="profile-field__value profile-field__value--muted">
-                  {userInfo?.email || '—'}
-                </p>
-              </div>
-
-              <div className="profile-field">
-                <label className="profile-field__label">Phone Number</label>
-                {isEditing ? (
-                  <input
-                    className="profile-field__input"
-                    value={editPhone}
-                    onChange={e => setEditPhone(e.target.value)}
-                    placeholder="+91 XXXXXXXXXX"
-                    type="tel"
-                  />
-                ) : (
-                  <p className="profile-field__value">{userInfo?.mobile || '—'}</p>
-                )}
-              </div>
-            </div>
-
-            {isEditing && (
-              <div className="profile-card__actions">
-                <button className="profile-save-btn" onClick={handleSave}>Save Changes</button>
-                <button className="profile-cancel-btn" onClick={() => setIsEditing(false)}>Cancel</button>
-              </div>
-            )}
-          </div>
-
-          {/* Quick Links */}
-          <div className="profile-quick-links">
-            <h2 className="profile-quick-links__title">Quick Access</h2>
-            <div className="profile-quick-links__grid">
-              {menuItems.filter(m => !m.active).map(item => (
-                <a key={item.href} href={item.href} className="profile-quick-link-card">
-                  <span className="profile-quick-link-card__icon">{item.icon}</span>
-                  <span className="profile-quick-link-card__label">{item.label}</span>
-                </a>
-              ))}
-            </div>
-          </div>
+          </section>
         </div>
-      </div>
+      </main>
 
+      {/* 4. Global Desktop Footer */}
       <FooterSection />
-    </main>
+    </div>
   )
 }
 
 export default ProfilePage
+

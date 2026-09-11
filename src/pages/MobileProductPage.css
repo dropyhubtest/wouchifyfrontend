@@ -1,0 +1,356 @@
+/* ==========================================================================
+   Mobile Product Page (440px Reference Width, Exact Figma Design)
+   ========================================================================== */
+
+.mobile-product-page {
+  width: 100%;
+  max-width: 440px;
+  min-height: 100vh;
+  margin: 0 auto;
+  background-color: #FFFFFF;
+  color: #111827;
+  font-family: 'Poppins', sans-serif;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* ── BREADCRUMB / BACK ROW ── */
+.mobile-product-back-row {
+  padding: 14px 18px 6px;
+}
+
+.mobile-product-back-link {
+  font-size: 14px;
+  font-weight: 500;
+  color: #2F368C;
+  text-decoration: none;
+  display: inline-block;
+  transition: opacity 0.2s;
+}
+
+.mobile-product-back-link:hover {
+  opacity: 0.85;
+}
+
+/* ── STORE INFO ROW ── */
+.mobile-product-store-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 6px 18px 10px;
+}
+
+.mobile-product-store-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.mobile-product-store-logo {
+  height: 26px;
+  width: auto;
+  max-width: 120px;
+  object-fit: contain;
+}
+
+.mobile-product-verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #4B5563;
+}
+
+.mobile-product-verified-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #E31E25;
+}
+
+.mobile-product-deal-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #1F2937;
+  background: #F1F5F9;
+  padding: 3px 12px;
+  border-radius: 999px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.mobile-product-deal-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #E31E25;
+}
+
+/* ── PRODUCT IMAGE CARD (ENHANCED DEEP BOTTOM SHADOW + TOP INNER SHADOW) ── */
+.mobile-product-image-card {
+  margin: 0 18px;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 20px;
+  padding: 10px;
+  background: #FFFFFF;
+  box-shadow: 0 20px 42px rgba(0, 0, 0, 0.24), inset 0 4px 8px rgba(0, 0, 0, 0.12);
+  box-sizing: border-box;
+}
+
+.mobile-product-image {
+  width: 100%;
+  height: auto;
+  border-radius: 14px;
+  display: block;
+  object-fit: cover;
+  aspect-ratio: 16/10;
+}
+
+/* ── PAGINATION DOTS ── */
+.mobile-product-dots-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin: 12px 0 16px;
+}
+
+.mobile-product-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #CBD5E1;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mobile-product-dot--active {
+  background-color: #2F368C;
+  width: 7px;
+  height: 7px;
+}
+
+/* ── PRODUCT TITLE ── */
+.mobile-product-title {
+  margin: 0 18px 16px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.35;
+}
+
+/* ── PERFORATED COUPON TICKET (MOBILE SCALED SVG) ── */
+.mobile-product-coupon-wrapper {
+  position: relative;
+  width: calc(100% - 36px);
+  margin: 0 18px 22px;
+  aspect-ratio: 605 / 226;
+  filter: drop-shadow(0px 8px 18px rgba(0, 0, 0, 0.25));
+  box-sizing: border-box;
+}
+
+.mobile-product-coupon-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 1;
+}
+
+.mobile-product-coupon-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: stretch;
+  z-index: 2;
+  box-sizing: border-box;
+}
+
+/* Coupon Left */
+.mobile-coupon-left {
+  flex: 0 0 65%;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
+  box-sizing: border-box;
+}
+
+.mobile-coupon-offer-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #232B85;
+  margin: 0;
+}
+
+.mobile-coupon-offer-sub {
+  font-size: 9.5px;
+  color: #1F2937;
+  margin: 0;
+}
+
+.mobile-coupon-apply-btn {
+  margin-top: 4px;
+  background: #232B85;
+  color: #FFFFFF;
+  border: 1.5px dashed #98B2FB;
+  border-radius: 999px;
+  padding: 3px 14px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Coupon Right */
+.mobile-coupon-right {
+  flex: 0 0 35%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 6px;
+  box-sizing: border-box;
+}
+
+.mobile-coupon-code-btn {
+  background: transparent;
+  border: none;
+  font-size: 11px;
+  font-weight: 600;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.mobile-coupon-copy-icon {
+  stroke: #111827;
+  width: 13px;
+  height: 13px;
+}
+
+/* ── ABOUT THE PRODUCT SECTION ── */
+.mobile-product-about-section {
+  padding: 0 18px 24px;
+  box-sizing: border-box;
+}
+
+.mobile-product-about-heading {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #232B85;
+  margin: 0 0 8px 0;
+}
+
+.mobile-product-about-paragraph {
+  font-size: 11.5px;
+  color: #374151;
+  line-height: 1.6;
+  margin: 0 0 12px 0;
+}
+
+.mobile-product-specs-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mobile-product-spec-item {
+  position: relative;
+  padding-left: 14px;
+  font-size: 11.5px;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.mobile-product-spec-item::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #111827;
+  font-weight: bold;
+}
+
+/* ── SIMILAR PRODUCTS SECTION & SCROLLER ── */
+.mobile-product-similar-section {
+  position: relative;
+  width: 100%;
+  background: #FFFFFF;
+  margin-top: 10px;
+  margin-bottom: 30px;
+  overflow: visible;
+  box-sizing: border-box;
+}
+
+.mobile-product-similar-heading {
+  position: relative;
+  width: 100%;
+  height: 24px;
+  margin-bottom: 14px;
+  overflow: visible;
+}
+
+.mobile-product-similar-heading h2 {
+  margin: 0;
+  margin-left: 18px;
+  white-space: nowrap;
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 24px;
+  color: #000000;
+}
+
+.mobile-product-similar-heading__accent {
+  position: absolute;
+  left: -7px;
+  top: 5px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #E31E25;
+}
+
+.mobile-product-scroller {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  padding-left: 18px;
+  padding-right: 18px;
+  padding-top: 4px;
+  padding-bottom: 16px;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.mobile-product-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-product-track {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  width: max-content;
+  box-sizing: border-box;
+}

@@ -372,7 +372,7 @@ export const DEALS_CARD_ITEMS: DealCardItem[] = [
     originalPrice: '62999',
     discountPercentage: '40% OFF',
     ctaText: 'GRAB DEAL',
-    ctaHref: '/stores#amazon',
+    ctaHref: '/product?id=deal-1',
   },
   {
     id: 'deal-2',
@@ -385,7 +385,7 @@ export const DEALS_CARD_ITEMS: DealCardItem[] = [
     originalPrice: '1499',
     discountPercentage: '60% OFF',
     ctaText: 'GRAB DEAL',
-    ctaHref: '/stores#amazon',
+    ctaHref: '/product?id=deal-2',
   },
 ]
 
@@ -401,7 +401,7 @@ export const BEST_SELLING_DEAL_ITEMS: DealCardItem[] = [
     originalPrice: '62999',
     discountPercentage: '40% OFF',
     ctaText: 'GRAB DEAL',
-    ctaHref: '/stores#amazon',
+    ctaHref: '/product?id=deal-1',
   },
   {
     id: 'best-2',
@@ -414,6 +414,6 @@ export const BEST_SELLING_DEAL_ITEMS: DealCardItem[] = [
     originalPrice: '1499',
     discountPercentage: '60% OFF',
     ctaText: 'GRAB DEAL',
-    ctaHref: '/stores#amazon',
+    ctaHref: '/product?id=deal-2',
   },
 ]
