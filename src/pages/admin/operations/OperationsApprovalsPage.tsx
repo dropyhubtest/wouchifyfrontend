@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import './OperationsShared.css'
 import { getStoreLogo } from '../../../data/dealsPage'
+import api from '../../../services/api'
 
 export interface ModerationItem {
   id: string
@@ -58,161 +59,7 @@ export interface ModerationItem {
   terms?: string
 }
 
-const initialApprovalQueue: ModerationItem[] = [
-  {
-    id: 'appr-201',
-    type: 'loot',
-    title: 'Sony WH-1000XM5 Wireless ANC Headphones (Price Glitch at ₹4,999)',
-    brand: 'Sony',
-    store: 'Amazon',
-    submittedBy: 'rahul.executive@wouchify.com',
-    submittedAt: '12 mins ago',
-    price: '₹4,999',
-    originalPrice: '₹29,990',
-    discount: '83% OFF',
-    code: 'GLITCHSONY',
-    priority: 'Critical',
-    link: 'https://amazon.in/dp/B09XS7JWHH',
-    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop',
-    notes: 'Price drop verified on Amazon seller app. Very high urgency.',
-    category: 'Electronics',
-    subCategory: 'Headphones',
-    asinOrSku: 'B09XS7JWHH',
-    bankOffer: '10% Instant Discount via SBI Credit Card',
-    cashback: '₹200 Amazon Pay Balance',
-    stockStatus: 'Lightning Deal (85% Claimed)',
-    rating: '4.5/5 (2,300 reviews)',
-    deliveryInfo: 'Free One-Day Delivery for Prime',
-    description: 'The best ANC headphones in the market, now at an unbelievable glitch price.',
-    highlights: ['Industry Leading ANC', '30hr Battery Life', 'Multipoint connection'],
-    status: 'Pending Approval'
-  },
-  {
-    id: 'appr-202',
-    type: 'loot',
-    title: 'Puma Speedcat OG Leather Sneakers (Under ₹999 Steal Deal)',
-    brand: 'Puma',
-    store: 'Myntra',
-    submittedBy: 'rahul.executive@wouchify.com',
-    submittedAt: '25 mins ago',
-    price: '₹949',
-    originalPrice: '₹7,999',
-    discount: '88% OFF',
-    code: 'PUMASTEAL',
-    priority: 'Critical',
-    link: 'https://myntra.com/puma-speedcat',
-    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&auto=format&fit=crop',
-    notes: 'Myntra End of Reason flash glitch.',
-    category: 'Footwear',
-    status: 'Pending Approval'
-  },
-  {
-    id: 'appr-203',
-    type: 'deal',
-    title: 'Samsung Galaxy S24 Ultra 5G (12GB RAM, 512GB Titanium Black)',
-    brand: 'Samsung',
-    store: 'Flipkart',
-    submittedBy: 'sneha.deals@wouchify.com',
-    submittedAt: '35 mins ago',
-    price: '₹1,09,999',
-    originalPrice: '₹1,34,999',
-    discount: '19% OFF',
-    priority: 'High',
-    link: 'https://flipkart.com/samsung-s24-ultra',
-    image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500&auto=format&fit=crop',
-    notes: 'Includes ₹5,000 instant HDFC Bank discount.',
-    category: 'Electronics',
-    status: 'Pending Approval'
-  },
-  {
-    id: 'appr-204',
-    type: 'deal',
-    title: 'Apple MacBook Air M3 (13.6-inch Liquid Retina, 8GB/256GB SSD)',
-    brand: 'Apple',
-    store: 'Amazon',
-    submittedBy: 'sneha.deals@wouchify.com',
-    submittedAt: '45 mins ago',
-    price: '₹94,990',
-    originalPrice: '₹1,14,900',
-    discount: '17% OFF',
-    priority: 'High',
-    link: 'https://amazon.in/dp/B0CX2319',
-    image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&auto=format&fit=crop',
-    notes: 'Amazon Prime Day special pricing.',
-    category: 'Computers',
-    status: 'Pending Approval'
-  },
-  {
-    id: 'appr-205',
-    type: 'coupon',
-    title: 'Myntra Flat ₹500 OFF on Orders Above ₹1,999',
-    brand: 'Myntra',
-    store: 'Myntra',
-    submittedBy: 'arjun.coupons@wouchify.com',
-    submittedAt: '1 hour ago',
-    price: 'Flat ₹500 OFF',
-    code: 'MYNTRAPRO',
-    discount: '₹500 OFF',
-    priority: 'Normal',
-    link: 'https://myntra.com',
-    image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=500&auto=format&fit=crop',
-    notes: 'Verified working coupon on Fashion catalog.',
-    category: 'Fashion',
-    status: 'Pending Approval'
-  },
-  {
-    id: 'appr-206',
-    type: 'coupon',
-    title: 'Dominos Pizza: Flat 50% OFF up to ₹120 on Pizza Mania & Combos',
-    brand: "Domino's",
-    store: 'Dominos',
-    submittedBy: 'arjun.coupons@wouchify.com',
-    submittedAt: '2 hours ago',
-    price: '50% OFF',
-    code: 'DOM50FEST',
-    discount: '50% OFF',
-    priority: 'Normal',
-    link: 'https://dominos.co.in',
-    image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500&auto=format&fit=crop',
-    notes: 'Applicable on min order ₹249.',
-    category: 'Food',
-    status: 'Pending Approval'
-  },
-  {
-    id: 'appr-207',
-    type: 'banner',
-    title: 'Home Page Hero: Diwali Mega Cashback Bonanza (Up to 15% Extra)',
-    brand: 'Wouchify',
-    store: 'Wouchify',
-    submittedBy: 'priya.media@wouchify.com',
-    submittedAt: '3 hours ago',
-    price: 'Heroic Banner',
-    discount: 'Up to 15% Cashback',
-    priority: 'High',
-    link: '/stores',
-    image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200&auto=format&fit=crop',
-    notes: 'Scheduled to go live for upcoming festive season.',
-    category: 'Campaign',
-    status: 'Pending Approval'
-  },
-  {
-    id: 'appr-208',
-    type: 'ad',
-    title: 'Header Sticky Sponsor Banner: HDFC Regalia Gold Credit Card',
-    brand: 'HDFC Bank',
-    store: 'HDFC Bank',
-    submittedBy: 'priya.media@wouchify.com',
-    submittedAt: '4 hours ago',
-    price: '₹45,000 / Week',
-    discount: 'Sponsor Ad',
-    priority: 'Normal',
-    link: 'https://hdfcbank.com/credit-cards',
-    image: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=800&auto=format&fit=crop',
-    notes: 'Targeting Deals & Coupons page header slot.',
-    category: 'Banking',
-    status: 'Pending Approval'
-  }
-]
+const initialApprovalQueue: ModerationItem[] = []
 
 export const OperationsApprovalsPage: React.FC = () => {
   const [items, setItems] = useState<ModerationItem[]>(initialApprovalQueue)
@@ -228,6 +75,52 @@ export const OperationsApprovalsPage: React.FC = () => {
 
   // Preview Modal
   const [previewItem, setPreviewItem] = useState<ModerationItem | null>(null)
+
+  React.useEffect(() => {
+    fetchPendingItems()
+  }, [])
+
+  const fetchPendingItems = async () => {
+    try {
+      const storesRes = await api.get('/stores/pending')
+      const couponsRes = await api.get('/coupons/pending')
+      
+      const mappedStores = storesRes.data.map((s: any) => ({
+        id: s._id || s.id,
+        type: 'store',
+        title: s.name,
+        store: s.name,
+        submittedBy: s.submittedBy || 'executive@wouchify.com',
+        submittedAt: s.createdAt ? new Date(s.createdAt).toISOString().split('T')[0] : 'Just now',
+        price: '-',
+        priority: 'Normal',
+        link: s.affiliateLink || '',
+        image: s.logo || '',
+        category: s.categories?.[0] || 'Store',
+        status: 'Pending Approval'
+      }))
+
+      const mappedCoupons = couponsRes.data.map((c: any) => ({
+        id: c._id || c.id,
+        type: 'coupon',
+        title: c.title,
+        store: c.store,
+        submittedBy: c.submittedBy || 'executive@wouchify.com',
+        submittedAt: c.createdAt ? new Date(c.createdAt).toISOString().split('T')[0] : 'Just now',
+        price: c.discount || '',
+        code: c.code || '',
+        priority: 'Normal',
+        link: c.affiliateLink || '',
+        image: '',
+        category: c.category || 'Coupon',
+        status: 'Pending Approval'
+      }))
+
+      setItems([...mappedStores, ...mappedCoupons])
+    } catch (err) {
+      console.error('Failed to fetch pending items', err)
+    }
+  }
 
   const showToast = (msg: string) => {
     setToastMessage(msg)
@@ -267,10 +160,20 @@ export const OperationsApprovalsPage: React.FC = () => {
     })
   }, [items, filterType, filterExecutive, searchTerm])
 
-  const handleApproveOne = (id: string, title: string) => {
-    setItems(prev => prev.map(item => item.id === id ? { ...item, status: 'Approved' } : item))
-    setSelectedIds(prev => prev.filter(selId => selId !== id))
-    showToast(`Approved & published to storefront: "${title}"`)
+  const handleApproveOne = async (id: string, title: string) => {
+    const item = items.find(i => i.id === id)
+    if (!item) return
+    try {
+      const endpoint = item.type === 'store' ? `/stores/${id}/approve/opsManager` : `/coupons/${id}/approve/opsManager`
+      await api.patch(endpoint)
+      
+      setItems(prev => prev.filter(i => i.id !== id))
+      setSelectedIds(prev => prev.filter(selId => selId !== id))
+      showToast(`Approved & passed to Manager: "${title}"`)
+    } catch (err) {
+      console.error('Approval failed', err)
+      alert('Approval failed')
+    }
   }
 
   const handleOpenRejectModal = (item: ModerationItem) => {
@@ -278,36 +181,69 @@ export const OperationsApprovalsPage: React.FC = () => {
     setRejectionReason('')
   }
 
-  const handleConfirmReject = () => {
+  const handleConfirmReject = async () => {
     if (!rejectingItem) return
     if (!rejectionReason.trim()) {
       alert('Please enter a rejection reason note for the executive team.')
       return
     }
 
-    setItems(prev => prev.map(item => 
-      item.id === rejectingItem.id ? { ...item, status: 'Rejected', rejectionReason } : item
-    ))
-    setSelectedIds(prev => prev.filter(id => id !== rejectingItem.id))
-    showToast(`Rejected submission with feedback note`)
-    setRejectingItem(null)
-    setRejectionReason('')
+    try {
+      const endpoint = rejectingItem.type === 'store' 
+        ? `/stores/${rejectingItem.id}/reject/opsManager` 
+        : `/coupons/${rejectingItem.id}/reject/opsManager`
+      
+      await api.patch(endpoint, { reason: rejectionReason })
+      
+      setItems(prev => prev.filter(item => item.id !== rejectingItem.id))
+      setSelectedIds(prev => prev.filter(id => id !== rejectingItem.id))
+      showToast(`Rejected submission with feedback note`)
+      setRejectingItem(null)
+      setRejectionReason('')
+    } catch (err) {
+      console.error('Rejection failed', err)
+      alert('Rejection failed')
+    }
   }
 
-  const handleBulkApprove = () => {
+  const handleBulkApprove = async () => {
     if (selectedIds.length === 0) return
-    setItems(prev => prev.map(item => selectedIds.includes(item.id) ? { ...item, status: 'Approved' } : item))
-    showToast(`Bulk approved ${selectedIds.length} submissions`)
-    setSelectedIds([])
+    try {
+      for (const id of selectedIds) {
+        const item = items.find(i => i.id === id)
+        if (item) {
+          const endpoint = item.type === 'store' ? `/stores/${id}/approve/opsManager` : `/coupons/${id}/approve/opsManager`
+          await api.patch(endpoint)
+        }
+      }
+      showToast(`Bulk approved ${selectedIds.length} submissions`)
+      fetchPendingItems()
+      setSelectedIds([])
+    } catch (err) {
+      console.error(err)
+      alert('Some approvals failed')
+    }
   }
 
-  const handleBulkReject = () => {
+  const handleBulkReject = async () => {
     if (selectedIds.length === 0) return
     const reason = prompt(`Enter rejection reason for ${selectedIds.length} selected items:`, 'Details incomplete or inaccurate')
     if (reason) {
-      setItems(prev => prev.map(item => selectedIds.includes(item.id) ? { ...item, status: 'Rejected', rejectionReason: reason } : item))
-      showToast(`Rejected ${selectedIds.length} submissions`)
-      setSelectedIds([])
+      try {
+        for (const id of selectedIds) {
+          const item = items.find(i => i.id === id)
+          if (item) {
+            const endpoint = item.type === 'store' ? `/stores/${id}/reject/opsManager` : `/coupons/${id}/reject/opsManager`
+            await api.patch(endpoint, { reason })
+          }
+        }
+        showToast(`Rejected ${selectedIds.length} submissions`)
+        fetchPendingItems()
+        setSelectedIds([])
+      } catch (err) {
+        console.error(err)
+        alert('Some rejections failed')
+      }
     }
   }
 

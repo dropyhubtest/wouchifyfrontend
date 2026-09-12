@@ -25,15 +25,16 @@ import {
   TrendingUp,
   Image as ImageIcon,
 } from 'lucide-react'
-import './ExecutiveShared.css'
-import { FAVOURITE_STORES, STORE_CATEGORIES } from '../../../data/storesHero'
+import { STORE_CATEGORIES, FAVOURITE_STORES } from '../../../data/storesHero'
+import { getStoreLogo } from '../../../data/storesDirectoryData'
 import { ImageUploadField } from './ImageUploadField'
+import api from '../../../services/api'
 
 /* ============================================================
    Types
    ============================================================ */
 
-type StoreStatus = 'active' | 'inactive' | 'featured'
+type StoreStatus = 'active' | 'inactive' | 'featured' | 'pending' | 'rejected'
 type StoreCategory = typeof STORE_CATEGORIES[number]
 
 interface ManagedStore {
@@ -51,7 +52,9 @@ interface ManagedStore {
   isFeatured: boolean
   clicks: number
   totalDeals: number
-  addedOn: string
+  addedOn?: string
+  createdAt?: string
+  _id?: string
 }
 
 /* ============================================================
@@ -60,27 +63,7 @@ interface ManagedStore {
 
 const CATEGORY_LIST: StoreCategory[] = [...STORE_CATEGORIES]
 
-function buildMockStores(): ManagedStore[] {
-  return FAVOURITE_STORES.map((s, i) => ({
-    id: s.id,
-    name: s.name,
-    slug: s.slug,
-    logoUrl: s.logo as unknown as string,
-    category: s.category as StoreCategory,
-    reward: s.reward,
-    description: s.description,
-    affiliateLink: `https://${s.slug}.com/?affid=wouchify`,
-    cardBg: s.cardBg,
-    badgeBg: s.badgeBg,
-    status: i % 5 === 2 ? 'inactive' : i % 7 === 0 ? 'featured' : 'active',
-    isFeatured: i % 7 === 0,
-    clicks: Math.floor(Math.random() * 9000) + 500,
-    totalDeals: Math.floor(Math.random() * 120) + 5,
-    addedOn: new Date(Date.now() - i * 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-  }))
-}
-
-const INITIAL_STORES = buildMockStores()
+const INITIAL_STORES: ManagedStore[] = []
 
 const EMPTY_FORM: Partial<ManagedStore> = {
   name: '',
@@ -103,11 +86,15 @@ const EMPTY_FORM: Partial<ManagedStore> = {
 function statusLabel(s: StoreStatus) {
   if (s === 'featured') return 'Featured'
   if (s === 'inactive') return 'Inactive'
+  if (s === 'pending') return 'Pending'
+  if (s === 'rejected') return 'Rejected'
   return 'Active'
 }
 function statusClass(s: StoreStatus) {
   if (s === 'featured') return 'loot-badge-glitch'
   if (s === 'inactive') return 'status-badge inactive'
+  if (s === 'pending') return 'status-badge pending'
+  if (s === 'rejected') return 'status-badge inactive'
   return 'status-badge active'
 }
 
@@ -629,6 +616,35 @@ export const ExecutiveStoresPage: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editing, setEditing] = useState<ManagedStore | null>(null)
   const [previewing, setPreviewing] = useState<ManagedStore | null>(null)
+  React.useEffect(() => {
+    fetchStores()
+  }, [])
+
+  const fetchStores = async () => {
+    try {
+      const res = await api.get('/stores')
+      // Map backend id to frontend format and inject local logos if missing
+      const mapped = res.data.map((s: any) => {
+        const fallbackStore = FAVOURITE_STORES.find(fs => fs.name.toLowerCase() === s.name.toLowerCase())
+        return {
+          ...s,
+          id: s._id || s.id,
+          logoUrl: s.logo || s.logoUrl || fallbackStore?.logo || getStoreLogo(`${s.name.toLowerCase().replace(/\s+/g, '')}.png`) || '',
+          category: s.category || fallbackStore?.category || 'Fashion',
+          reward: s.reward || fallbackStore?.reward || 'Upto 5% rewards',
+          description: s.reward || fallbackStore?.description || 'Shop and Earn',
+          cardBg: s.cardBg || fallbackStore?.cardBg || '#E8F5FF',
+          badgeBg: s.badgeBg || fallbackStore?.badgeBg || '#B3DCFA',
+          clicks: s.clicks || 0,
+          totalDeals: s.totalDeals || 0,
+          addedOn: s.createdAt ? new Date(s.createdAt).toISOString().split('T')[0] : 'Just now'
+        }
+      })
+      setStores(mapped)
+    } catch (err) {
+      console.error('Failed to fetch stores:', err)
+    }
+  }
 
   /* KPI stats */
   const kpi = useMemo(() => ({
@@ -667,16 +683,38 @@ export const ExecutiveStoresPage: React.FC = () => {
   const openAdd = () => { setEditing(null); setIsFormOpen(true) }
   const openEdit = (s: ManagedStore) => { setEditing(s); setIsFormOpen(true) }
 
-  const handleSave = (data: ManagedStore) => {
-    setStores(prev =>
-      editing ? prev.map(s => s.id === data.id ? data : s) : [data, ...prev]
-    )
-    setIsFormOpen(false)
+  const handleSave = async (data: ManagedStore) => {
+    try {
+      const payload = { ...data, logo: data.logoUrl }
+      if (editing && (editing._id || editing.id)) {
+        await api.put(`/stores/${editing._id || editing.id}`, payload)
+      } else {
+        await api.post('/stores', payload)
+      }
+      fetchStores()
+      setIsFormOpen(false)
+    } catch (err: any) {
+      console.error('Failed to save store', err)
+      const errorMsg = err.response?.data?.message || 'Failed to save store'
+      alert(errorMsg)
+    }
   }
 
-  const handleDelete = (id: string) => {
-    if (window.confirm('Delete this store? This cannot be undone.')) {
-      setStores(prev => prev.filter(s => s.id !== id))
+  const [storeToDelete, setStoreToDelete] = useState<string | null>(null)
+
+  const handleDeleteClick = (id: string) => {
+    setStoreToDelete(id)
+  }
+
+  const confirmDelete = async () => {
+    if (!storeToDelete) return
+    try {
+      await api.delete(`/stores/${storeToDelete}`)
+      fetchStores()
+    } catch (err) {
+      console.error('Failed to delete store', err)
+    } finally {
+      setStoreToDelete(null)
     }
   }
 
@@ -743,8 +781,10 @@ export const ExecutiveStoresPage: React.FC = () => {
             <select value={filterStatus} onChange={e => setFilterStatus(e.target.value as 'all' | StoreStatus)}>
               <option value="all">All Status</option>
               <option value="active">Active</option>
+              <option value="pending">Pending</option>
               <option value="featured">Featured</option>
               <option value="inactive">Inactive</option>
+              <option value="rejected">Rejected</option>
             </select>
           </div>
 
@@ -809,7 +849,7 @@ export const ExecutiveStoresPage: React.FC = () => {
                     key={store.id}
                     store={store}
                     onEdit={() => openEdit(store)}
-                    onDelete={() => handleDelete(store.id)}
+                    onDelete={() => handleDeleteClick(store._id || store.id)}
                     onPreview={() => setPreviewing(store)}
                   />
                 ))}
@@ -896,8 +936,8 @@ export const ExecutiveStoresPage: React.FC = () => {
                         <button className="action-btn" onClick={() => openEdit(store)} title="Edit">
                           <Edit2 size={15} />
                         </button>
-                        <button className="action-btn delete" onClick={() => handleDelete(store.id)} title="Delete">
-                          <Trash2 size={15} />
+                        <button className="crud-action-btn delete" onClick={() => handleDeleteClick(store._id || store.id)} title="Delete Store">
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </td>
@@ -923,6 +963,37 @@ export const ExecutiveStoresPage: React.FC = () => {
           store={previewing}
           onClose={() => setPreviewing(null)}
         />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {storeToDelete && (
+        <div className="crud-modal-overlay" style={{ zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="crud-modal" style={{ maxWidth: '400px', width: '90%', padding: '24px', textAlign: 'center', borderRadius: '12px' }}>
+            <div style={{ marginBottom: '16px', color: '#EF4444' }}>
+              <Trash2 size={48} style={{ margin: '0 auto' }} />
+            </div>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: '#1E293B', marginBottom: '8px' }}>
+              Delete Store
+            </h3>
+            <p style={{ color: '#64748B', marginBottom: '24px', fontSize: '0.95rem' }}>
+              Are you sure you want to delete this store? This action cannot be undone and will remove it from all portals.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button 
+                onClick={() => setStoreToDelete(null)}
+                style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid #CBD5E1', background: '#FFF', color: '#475569', fontWeight: 500, cursor: 'pointer' }}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmDelete}
+                style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#EF4444', color: '#FFF', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <Trash2 size={16} /> Delete
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </ExecutiveLayout>
   )

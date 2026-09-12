@@ -7,7 +7,22 @@ import { EXCLUSIVE_LOOT_DEALS, type ExclusiveLootDealItem } from '../../data/exc
 import { adminApi } from '../../services/adminApi'
 import { CustomDropdown } from '../../components/common/CustomDropdown'
 import { DEAL_PRODUCT_PRESETS, convertGoogleDriveUrl } from '../../data/dealsPage'
+import { Line, Bar, Doughnut } from 'react-chartjs-2'
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js'
 import './AdminDashboardPage.css'
+import { AdminApprovalsView } from './AdminApprovalsView'
 
 // ── Icons (Clean SVG primitives matching Wouchify styling) ───────────────────
 const IconUpload = () => (
@@ -309,17 +324,20 @@ export const AdminDashboardPage: React.FC = () => {
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [isBackendConnected, setIsBackendConnected] = useState<boolean>(true)
+  const [pendingApprovalsCount, setPendingApprovalsCount] = useState<number>(0)
 
   // Load live data from Backend API on mount
   useEffect(() => {
     let isMounted = true
     const fetchLiveData = async () => {
       try {
-        const [dealsRes, couponsRes, lootRes, txnsRes] = await Promise.allSettled([
+        const [dealsRes, couponsRes, lootRes, txnsRes, pendingStoresRes, pendingCouponsRes] = await Promise.allSettled([
           adminApi.getDeals(),
           adminApi.getCoupons(),
           adminApi.getLootDeals(),
-          adminApi.getTransactions()
+          adminApi.getTransactions(),
+          adminApi.getManagerPendingStores(),
+          adminApi.getManagerPendingCoupons()
         ])
         if (!isMounted) return
 
@@ -357,6 +375,16 @@ export const AdminDashboardPage: React.FC = () => {
         if (txnsRes.status === 'fulfilled' && Array.isArray(txnsRes.value) && txnsRes.value.length > 0) {
           setTransactions(txnsRes.value)
         }
+        
+        let managerCount = 0
+        if (pendingStoresRes.status === 'fulfilled' && Array.isArray(pendingStoresRes.value)) {
+          managerCount += pendingStoresRes.value.length
+        }
+        if (pendingCouponsRes.status === 'fulfilled' && Array.isArray(pendingCouponsRes.value)) {
+          managerCount += pendingCouponsRes.value.length
+        }
+        setPendingApprovalsCount(managerCount)
+
         setIsBackendConnected(true)
       } catch (err) {
         if (isMounted) setIsBackendConnected(false)
@@ -819,6 +847,7 @@ export const AdminDashboardPage: React.FC = () => {
   // Navigation Items
   const navItems = [
     { key: 'dashboard', label: 'Dashboard', icon: <IconDashboard />, badge: null },
+    { key: 'approvals', label: 'Manager Approvals', icon: <IconCheck />, badge: pendingApprovalsCount },
     { key: 'deals', label: 'Deals Management', icon: <IconDeals />, badge: deals.length },
     { key: 'loot-deals', label: 'Loot Deals', icon: <IconFlame />, badge: lootDeals.length },
     { key: 'coupons', label: 'Verified Coupons', icon: <IconCoupons />, badge: coupons.length },
@@ -1059,6 +1088,7 @@ export const AdminDashboardPage: React.FC = () => {
               <div>
                 <h1>
                   {activeNav === 'dashboard' && 'Dashboard Overview'}
+                  {activeNav === 'approvals' && 'Manager Approvals Queue'}
                   {activeNav === 'deals' && 'Deals Management Studio'}
                   {activeNav === 'loot-deals' && 'Loot & Flash Deals Studio'}
                   {activeNav === 'coupons' && 'Verified Coupons Hub'}
@@ -1069,6 +1099,7 @@ export const AdminDashboardPage: React.FC = () => {
                 </h1>
                 <p>
                   {activeNav === 'dashboard' && 'Real-time performance metrics, live deal statuses, and user reward redemptions.'}
+                  {activeNav === 'approvals' && 'Review operations-approved items and publish them to live.'}
                   {activeNav === 'deals' && 'Create, edit, and control discount promotions rendered on user-facing storefronts.'}
                   {activeNav === 'loot-deals' && 'Curate high-urgency Flash Loot and Exclusive Loot promotions with steep discounts (>80% off).'}
                   {activeNav === 'coupons' && 'Manage coupon codes, usage limits, and store discount vouchers.'}
@@ -1115,6 +1146,13 @@ export const AdminDashboardPage: React.FC = () => {
               )}
             </div>
           </div>
+
+          {/* ══════════════════════════════════════════════════════════════════
+              VIEW 0: MANAGER APPROVALS
+              ══════════════════════════════════════════════════════════════════ */}
+          {activeNav === 'approvals' && (
+            <AdminApprovalsView />
+          )}
 
           {/* ══════════════════════════════════════════════════════════════════
               VIEW 1: DASHBOARD

@@ -67,6 +67,7 @@ export const BestSellingDeals: React.FC<BestSellingDealsProps> = ({
     }
 
     fetchBestSellingDeals()
+    const intervalId = setInterval(fetchBestSellingDeals, 10000)
 
     const handleUpdate = () => {
       fetchBestSellingDeals()
@@ -76,6 +77,7 @@ export const BestSellingDeals: React.FC<BestSellingDealsProps> = ({
     window.addEventListener('storage', handleUpdate)
     return () => {
       isMounted = false
+      clearInterval(intervalId)
       window.removeEventListener('wouchify_deals_updated', handleUpdate)
       window.removeEventListener('storage', handleUpdate)
     }

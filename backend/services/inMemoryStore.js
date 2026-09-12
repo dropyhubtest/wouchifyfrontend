@@ -159,7 +159,16 @@ module.exports = {
   getCoupons: () => [...coupons],
   addCoupon: (item) => {
     const id = Date.now().toString();
-    const created = { _id: id, id: Date.now(), usageCount: 0, usageLimit: 1000, status: 'active', ...item };
+    const created = { 
+      _id: id, 
+      id: Date.now(), 
+      usageCount: 0, 
+      usageLimit: 1000, 
+      status: 'pending', 
+      opsManagerApproval: 'Pending',
+      managerApproval: 'Pending',
+      ...item 
+    };
     coupons.unshift(created);
     saveToDisk();
     return created;
@@ -177,6 +186,26 @@ module.exports = {
     coupons.splice(idx, 1);
     saveToDisk();
     return true;
+  },
+  approveCoupon: (id, role) => {
+    const coupon = coupons.find(c => c._id === id || String(c.id) === String(id));
+    if (!coupon) return null;
+    if (role === 'opsManager') coupon.opsManagerApproval = 'Approved';
+    if (role === 'manager') coupon.managerApproval = 'Approved';
+    if (coupon.opsManagerApproval === 'Approved' && coupon.managerApproval === 'Approved') {
+      coupon.status = 'active';
+    }
+    saveToDisk();
+    return coupon;
+  },
+  rejectCoupon: (id, role) => {
+    const coupon = coupons.find(c => c._id === id || String(c.id) === String(id));
+    if (!coupon) return null;
+    if (role === 'opsManager') coupon.opsManagerApproval = 'Rejected';
+    if (role === 'manager') coupon.managerApproval = 'Rejected';
+    coupon.status = 'rejected';
+    saveToDisk();
+    return coupon;
   },
 
   // Loot Deals
@@ -220,7 +249,13 @@ module.exports = {
   getStores: () => [...stores],
   addStore: (item) => {
     const id = Date.now().toString();
-    const created = { _id: id, status: 'active', ...item };
+    const created = { 
+      _id: id, 
+      status: 'pending', 
+      opsManagerApproval: 'Pending',
+      managerApproval: 'Pending',
+      ...item 
+    };
     stores.unshift(created);
     saveToDisk();
     return created;
@@ -238,6 +273,26 @@ module.exports = {
     stores.splice(idx, 1);
     saveToDisk();
     return true;
+  },
+  approveStore: (id, role) => {
+    const storeDoc = stores.find(s => s._id === id);
+    if (!storeDoc) return null;
+    if (role === 'opsManager') storeDoc.opsManagerApproval = 'Approved';
+    if (role === 'manager') storeDoc.managerApproval = 'Approved';
+    if (storeDoc.opsManagerApproval === 'Approved' && storeDoc.managerApproval === 'Approved') {
+      storeDoc.status = 'active';
+    }
+    saveToDisk();
+    return storeDoc;
+  },
+  rejectStore: (id, role) => {
+    const storeDoc = stores.find(s => s._id === id);
+    if (!storeDoc) return null;
+    if (role === 'opsManager') storeDoc.opsManagerApproval = 'Rejected';
+    if (role === 'manager') storeDoc.managerApproval = 'Rejected';
+    storeDoc.status = 'rejected';
+    saveToDisk();
+    return storeDoc;
   },
 
   // Categories

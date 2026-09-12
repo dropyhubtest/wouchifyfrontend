@@ -3,8 +3,10 @@ import { StoreCard } from './StoreCard'
 import { StoreSearch } from './StoreSearch'
 import { StoreCategoryFilter } from './StoreCategoryFilter'
 import { StoreAlphabetFilter } from './StoreAlphabetFilter'
-import { FAVOURITE_STORES, STORE_CATEGORIES } from '../../data/storesHero'
+import { FAVOURITE_STORES, STORE_CATEGORIES, type StoreItem } from '../../data/storesHero'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
+import { getPublicStores } from '../../services/api'
+import { getStoreLogo } from '../../data/storesDirectoryData'
 import './FavouriteStores.css'
 
 export const FavouriteStores: React.FC = () => {
@@ -12,14 +14,54 @@ export const FavouriteStores: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [activeLetter, setActiveLetter] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState('All Stores')
+  const [dbStores, setDbStores] = useState<StoreItem[]>([])
   const gridRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
   const [canvasHeight, setCanvasHeight] = useState<number>(1800)
   const [revealed, setRevealed] = useState(false)
 
+  // Fetch from DB
+  useEffect(() => {
+    const fetchStoresData = () => {
+      getPublicStores().then(fetched => {
+        // Map backend Store to StoreItem format to integrate with existing UI
+        const mapped: StoreItem[] = fetched.map((s: any) => {
+          const fallbackStore = FAVOURITE_STORES.find(fs => fs.name.toLowerCase() === s.name.toLowerCase())
+          return {
+            id: s._id || s.name.toLowerCase().replace(/\s+/g, '-'),
+            name: s.name,
+            slug: s.name.toLowerCase().replace(/\s+/g, '-'),
+            logo: s.logo || fallbackStore?.logo || getStoreLogo(`${s.name.toLowerCase().replace(/\s+/g, '')}.png`) || '',
+            category: s.category || fallbackStore?.category || 'Other',
+            reward: s.reward || fallbackStore?.reward || 'Earn Cashback',
+            description: s.reward || fallbackStore?.description || 'Shop and Earn',
+            cardBg: s.cardBg || fallbackStore?.cardBg || '#ECF4FF',
+            badgeBg: s.badgeBg || fallbackStore?.badgeBg || '#D3E0F2',
+            mobileCategory: (s.category || fallbackStore?.mobileCategory || 'OTHER').toUpperCase(),
+            mobileReward: s.reward || fallbackStore?.mobileReward || 'Earn Cashback',
+            mobileDescription: s.reward || fallbackStore?.mobileDescription || 'Shop and Earn'
+          }
+        })
+        setDbStores(mapped)
+      }).catch(err => console.error("Failed to auto-refresh stores:", err))
+    }
+
+    // Fetch immediately on mount
+    fetchStoresData()
+
+    // Set up auto-refresh polling every 10 seconds
+    const intervalId = setInterval(fetchStoresData, 10000)
+
+    // Clean up interval on unmount
+    return () => clearInterval(intervalId)
+  }, [])
+
   // Single derived filtered list combining all three filters
   const filteredStores = useMemo(() => {
-    return FAVOURITE_STORES.filter((store) => {
+    // Merge DB stores only, rely entirely on the backend
+    const combined = dbStores;
+
+    return combined.filter((store) => {
       const matchesSearch =
         searchQuery.trim() === '' ||
         store.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -34,7 +76,7 @@ export const FavouriteStores: React.FC = () => {
 
       return matchesSearch && matchesLetter && matchesCategory
     })
-  }, [searchQuery, activeLetter, selectedCategory])
+  }, [searchQuery, activeLetter, selectedCategory, dbStores])
 
   // Update canvas height dynamically based on filtered stores
   useEffect(() => {

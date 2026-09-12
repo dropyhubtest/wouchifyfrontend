@@ -25,12 +25,13 @@ import {
 import './ExecutiveShared.css'
 import { FAVOURITE_STORES } from '../../../data/storesHero'
 import { CATEGORIES_DATA } from '../../../data/categories'
+import api from '../../../services/api'
 
 /* ============================================================
    Types
    ============================================================ */
 
-type CouponStatus = 'active' | 'inactive' | 'expired' | 'scheduled'
+type CouponStatus = 'active' | 'inactive' | 'expired' | 'scheduled' | 'pending' | 'rejected'
 type CouponType = 'percent' | 'flat' | 'bogo' | 'freebie' | 'cashback' | 'bank'
 
 interface Coupon {
@@ -55,7 +56,9 @@ interface Coupon {
   expiryDate: string
   usageCount: number
   totalUses: number         // cap (0 = unlimited)
-  addedOn: string
+  addedOn?: string
+  createdAt?: string
+  _id?: string
 }
 
 /* ============================================================
@@ -94,72 +97,7 @@ function expiryPill(days: number) {
   return { label: `${days}d left`, bg: '#dcfce7', color: '#16a34a' }
 }
 
-const MOCK_COUPONS: Coupon[] = [
-  {
-    id: 'c1', title: 'Flat 50% Off on First Order', description: 'Valid for new users only. No minimum order required.',
-    store: 'Swiggy', category: 'Food', code: 'WELCOME50', couponType: 'percent',
-    discount: '50% OFF', discountValue: 50, minOrder: 'No minimum', maxDiscount: 'Max ₹100',
-    affiliateLink: 'https://swiggy.com/?affid=wouchify', status: 'active',
-    isExclusive: true, isFeatured: true, isVerified: true, telegramAlert: true,
-    startDate: '2026-09-01', expiryDate: '2026-12-31', usageCount: 1240, totalUses: 0, addedOn: '2026-09-01',
-  },
-  {
-    id: 'c2', title: '₹500 Off on Electronics', description: 'Valid on electronics above ₹2999.',
-    store: 'Amazon', category: 'Electronics', code: 'ELEC500', couponType: 'flat',
-    discount: '₹500 OFF', discountValue: 500, minOrder: 'Min ₹2999', maxDiscount: '',
-    affiliateLink: 'https://amazon.in/?tag=wouchify', status: 'active',
-    isExclusive: false, isFeatured: true, isVerified: true, telegramAlert: false,
-    startDate: '2026-09-05', expiryDate: '2026-10-15', usageCount: 892, totalUses: 1000, addedOn: '2026-09-05',
-  },
-  {
-    id: 'c3', title: 'Buy 1 Get 1 Free on Fashion', description: 'T&C apply. Select styles only.',
-    store: 'Myntra', category: 'Fashion', code: 'BOGO', couponType: 'bogo',
-    discount: 'Buy 1 Get 1', discountValue: 0, minOrder: 'Min ₹599', maxDiscount: '',
-    affiliateLink: 'https://myntra.com/?affid=wouchify', status: 'inactive',
-    isExclusive: false, isFeatured: false, isVerified: false, telegramAlert: false,
-    startDate: '2026-08-01', expiryDate: '2026-09-30', usageCount: 301, totalUses: 500, addedOn: '2026-08-01',
-  },
-  {
-    id: 'c4', title: '₹200 Grocery Cashback', description: 'Cashback via Paytm wallet.',
-    store: 'Big Basket', category: 'Grocery', code: 'FRESH200', couponType: 'cashback',
-    discount: '₹200 Cashback', discountValue: 200, minOrder: 'Min ₹1000', maxDiscount: '',
-    affiliateLink: 'https://bigbasket.com/?affid=wouchify', status: 'active',
-    isExclusive: true, isFeatured: false, isVerified: true, telegramAlert: true,
-    startDate: '2026-09-08', expiryDate: '2026-09-11', usageCount: 88, totalUses: 200, addedOn: '2026-09-08',
-  },
-  {
-    id: 'c5', title: 'HDFC 10% Off on Flipkart', description: 'HDFC credit/debit card offer.',
-    store: 'Flipkart', category: 'Electronics', code: 'HDFC10', couponType: 'bank',
-    discount: '10% OFF', discountValue: 10, minOrder: 'Min ₹3000', maxDiscount: 'Max ₹1500',
-    affiliateLink: 'https://flipkart.com/?affid=wouchify', status: 'scheduled',
-    isExclusive: false, isFeatured: false, isVerified: true, telegramAlert: false,
-    startDate: '2026-09-15', expiryDate: '2026-09-20', usageCount: 0, totalUses: 0, addedOn: '2026-09-09',
-  },
-  {
-    id: 'c6', title: 'Free Delivery on Zepto', description: 'No delivery charge on first 5 orders.',
-    store: 'Zepto', category: 'Food', code: 'ZEPTO0DEL', couponType: 'freebie',
-    discount: 'Free Delivery', discountValue: 0, minOrder: 'No minimum', maxDiscount: '',
-    affiliateLink: 'https://zeptonow.com/?affid=wouchify', status: 'active',
-    isExclusive: true, isFeatured: true, isVerified: true, telegramAlert: true,
-    startDate: '2026-09-01', expiryDate: '2026-10-01', usageCount: 654, totalUses: 1000, addedOn: '2026-09-01',
-  },
-  {
-    id: 'c7', title: '30% Off on Nykaa Beauty', description: 'Valid on skin care range.',
-    store: 'Nykaa', category: 'Beauty', code: 'GLOW30', couponType: 'percent',
-    discount: '30% OFF', discountValue: 30, minOrder: 'Min ₹499', maxDiscount: 'Max ₹250',
-    affiliateLink: 'https://nykaa.com/?affid=wouchify', status: 'expired',
-    isExclusive: false, isFeatured: false, isVerified: false, telegramAlert: false,
-    startDate: '2026-08-15', expiryDate: '2026-09-05', usageCount: 1100, totalUses: 0, addedOn: '2026-08-15',
-  },
-  {
-    id: 'c8', title: '₹300 Off on Pepperfry Furniture', description: 'Home & furniture category.',
-    store: 'Pepperfry', category: 'Home', code: 'HOME300', couponType: 'flat',
-    discount: '₹300 OFF', discountValue: 300, minOrder: 'Min ₹2000', maxDiscount: '',
-    affiliateLink: 'https://pepperfry.com/?affid=wouchify', status: 'active',
-    isExclusive: false, isFeatured: false, isVerified: true, telegramAlert: false,
-    startDate: '2026-09-06', expiryDate: '2026-11-06', usageCount: 210, totalUses: 0, addedOn: '2026-09-06',
-  },
-]
+const MOCK_COUPONS: Coupon[] = []
 
 const CATEGORY_OPTIONS = ['All', ...Array.from(new Set(MOCK_COUPONS.map(c => c.category)))]
 
@@ -183,6 +121,8 @@ function statusConfig(s: CouponStatus) {
     inactive:  { label: 'Inactive',   bg: '#f1f5f9', color: '#64748b' },
     expired:   { label: 'Expired',    bg: '#fee2e2', color: '#ef4444' },
     scheduled: { label: 'Scheduled',  bg: '#e0f2fe', color: '#0284c7' },
+    pending:   { label: 'Pending',    bg: '#fef3c7', color: '#d97706' },
+    rejected:  { label: 'Rejected',   bg: '#fee2e2', color: '#ef4444' },
   }
   return map[s]
 }
@@ -544,6 +484,8 @@ const CouponFormModal: React.FC<CouponFormProps> = ({ editing, onClose, onSave }
                     <option value="scheduled">Scheduled</option>
                     <option value="inactive">Inactive</option>
                     <option value="expired">Expired</option>
+                    <option value="pending">Pending</option>
+                    <option value="rejected">Rejected</option>
                   </select>
                 </div>
                 <div className="form-group">
@@ -630,6 +572,24 @@ export const ExecutiveCouponsPage: React.FC = () => {
   const [editing, setEditing] = useState<Coupon | null>(null)
   const [previewing, setPreviewing] = useState<Coupon | null>(null)
 
+  React.useEffect(() => {
+    fetchCoupons()
+  }, [])
+
+  const fetchCoupons = async () => {
+    try {
+      const res = await api.get('/coupons')
+      const mapped = res.data.map((c: any) => ({
+        ...c,
+        id: c._id || c.id,
+        addedOn: c.createdAt ? new Date(c.createdAt).toISOString().split('T')[0] : 'Just now'
+      }))
+      setCoupons(mapped)
+    } catch (err) {
+      console.error('Failed to fetch coupons', err)
+    }
+  }
+
   /* KPI stats */
   const kpi = useMemo(() => ({
     total: coupons.length,
@@ -668,16 +628,29 @@ export const ExecutiveCouponsPage: React.FC = () => {
   const openAdd = () => { setEditing(null); setIsFormOpen(true) }
   const openEdit = (c: Coupon) => { setEditing(c); setIsFormOpen(true) }
 
-  const handleSave = (data: Coupon) => {
-    setCoupons(prev =>
-      editing ? prev.map(c => c.id === data.id ? data : c) : [data, ...prev]
-    )
-    setIsFormOpen(false)
+  const handleSave = async (data: Coupon) => {
+    try {
+      if (editing && (editing._id || editing.id)) {
+        await api.put(`/coupons/${editing._id || editing.id}`, data)
+      } else {
+        await api.post('/coupons', data)
+      }
+      fetchCoupons()
+      setIsFormOpen(false)
+    } catch (err) {
+      console.error('Failed to save coupon', err)
+      alert('Failed to save coupon')
+    }
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Delete this coupon permanently?')) {
-      setCoupons(prev => prev.filter(c => c.id !== id))
+      try {
+        await api.delete(`/coupons/${id}`)
+        fetchCoupons()
+      } catch (err) {
+        console.error('Failed to delete coupon', err)
+      }
     }
   }
 
@@ -776,6 +749,8 @@ export const ExecutiveCouponsPage: React.FC = () => {
               <option value="scheduled">Scheduled</option>
               <option value="inactive">Inactive</option>
               <option value="expired">Expired</option>
+              <option value="pending">Pending</option>
+              <option value="rejected">Rejected</option>
             </select>
           </div>
 

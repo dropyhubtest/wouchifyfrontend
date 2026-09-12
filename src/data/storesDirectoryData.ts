@@ -38,7 +38,7 @@ const brandLogoImages = import.meta.glob<{ default: string }>(
   { eager: true }
 )
 
-function getStoreLogo(filename: string): string {
+export function getStoreLogo(filename: string): string {
   // Check directory
   const dirPath = `../assets/categories/directory/${filename}`
   if (directoryImages[dirPath]) {
