@@ -1,77 +1,138 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { Navbar } from '../components/layout/Navbar'
 import { MobileHeader } from '../components/mobile/MobileHeader'
 import { FooterSection } from '../components/footer/FooterSection'
+import { ProfileSidebar } from '../components/profile/ProfileSidebar'
+import { NotificationsHero } from '../components/notifications/NotificationsHero'
 import { useMediaQuery } from '../hooks/useMediaQuery'
+import amazonLogo from '../assets/notifications/amazon.png'
+import flipkartLogo from '../assets/notifications/flipkart.png'
+import ajioLogo from '../assets/notifications/ajio.png'
+import myntraLogo from '../assets/notifications/myntra.png'
 import './NotificationsPage.css'
 
-interface Notification {
-  id: number; type: 'deal' | 'cashback' | 'alert'; title: string; body: string; time: string; read: boolean
+interface NotificationItem {
+  id: number
+  title: string
+  description: string
+  time: string
+  logo: string
+  logoAlt: string
 }
 
-const initNotifs: Notification[] = [
-  { id: 1, type: 'cashback', title: '💰 Cashback Confirmed!', body: 'Your ₹800 cashback from Amazon has been confirmed.', time: '2 hrs ago', read: false },
-  { id: 2, type: 'deal', title: '🔥 New Deal Alert', body: 'Myntra End of Season Sale is LIVE — up to 70% off!', time: '5 hrs ago', read: false },
-  { id: 3, type: 'alert', title: '⚠️ Pending Cashback', body: 'Your ₹350 cashback from Flipkart is pending confirmation.', time: 'Yesterday', read: true },
-  { id: 4, type: 'deal', title: '⚡ Flash Sale Starts Now', body: 'Wouchify Flash Loot deals are live for the next 4 hours only!', time: 'Yesterday', read: true },
-  { id: 5, type: 'cashback', title: '🎉 Referral Bonus!', body: 'Your friend Priya joined Wouchify. You earned ₹100 bonus!', time: '3 days ago', read: true },
+const NOTIFICATION_ITEMS: NotificationItem[] = [
+  {
+    id: 1,
+    logo: amazonLogo,
+    logoAlt: 'Amazon',
+    title: 'Cashback Confirmed!',
+    description: 'Your ₹800 cashback from Amazon has been confirmed.',
+    time: '2hrs ago',
+  },
+  {
+    id: 2,
+    logo: flipkartLogo,
+    logoAlt: 'Flipkart',
+    title: 'New Deal Alert!',
+    description: 'Myntra End of Season Sale is LIVE — up to 70% off!',
+    time: '5hrs ago',
+  },
+  {
+    id: 3,
+    logo: ajioLogo,
+    logoAlt: 'Ajio',
+    title: 'Pending Cashback',
+    description: 'Your ₹350 cashback from Flipkart is pending confirmation.',
+    time: 'Yesterday',
+  },
+  {
+    id: 4,
+    logo: myntraLogo,
+    logoAlt: 'Myntra',
+    title: 'Flash Sale Starts Now',
+    description: 'Wouchify Flash Loot deals are live for the next 4 hours only!',
+    time: 'Yesterday',
+  },
 ]
 
 export const NotificationsPage: React.FC = () => {
   const isMobile = useMediaQuery('(max-width: 768px)')
-  const [notifs, setNotifs] = useState<Notification[]>(initNotifs)
+  const [selectedId, setSelectedId] = useState<number | null>(null) // No default blue background, only on hover/click
+  const contentSectionRef = useRef<HTMLDivElement | null>(null)
 
-  const markAllRead = () => setNotifs(prev => prev.map(n => ({ ...n, read: true })))
-  const clearAll = () => setNotifs([])
-  const markRead = (id: number) => setNotifs(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
-  const unreadCount = notifs.filter(n => !n.read).length
+  const handleScrollToContent = () => {
+    if (contentSectionRef.current) {
+      contentSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
 
   return (
-    <main className="notifs-page">
-      <div className="notifs-page__header-bg" />
-      <div className="notifs-page__navbar-wrapper">
+    <main className="notifications-page">
+      {/* Top Navbar */}
+      <div className="notifications-page__navbar">
         {isMobile ? <MobileHeader /> : <Navbar />}
       </div>
 
-      <div className="notifs-container">
-        <div className="notifs-page-header">
-          <div>
-            <h1>🔔 Notifications</h1>
-            <p>{unreadCount > 0 ? `${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}` : 'All caught up!'}</p>
-          </div>
-          <div className="notifs-actions">
-            {unreadCount > 0 && <button className="notifs-btn" onClick={markAllRead}>Mark all read</button>}
-            {notifs.length > 0 && <button className="notifs-btn notifs-btn--danger" onClick={clearAll}>Clear all</button>}
+      {/* Hero Section */}
+      <NotificationsHero onCheckNowClick={handleScrollToContent} />
+
+      {/* Main Content Area: Sidebar + Notification Cards */}
+      <section
+        ref={contentSectionRef}
+        className="notifications-main"
+        aria-label="User Notifications"
+      >
+        <div className="notifications-layout">
+          {/* Account Profile Sidebar (Active tab: notifications) */}
+          <ProfileSidebar activeTab="notifications" />
+
+          {/* Notification Cards Column */}
+          <div className="notifications-content">
+            <div className="notifications-list">
+              {NOTIFICATION_ITEMS.map((item) => {
+                const isSelected = selectedId === item.id
+                return (
+                  <article
+                    key={item.id}
+                    className={`notification-card ${isSelected ? 'notification-card--active' : ''}`}
+                    onClick={() => setSelectedId(item.id)}
+                    tabIndex={0}
+                    role="button"
+                    aria-pressed={isSelected}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        setSelectedId(item.id)
+                      }
+                    }}
+                  >
+                    {/* Store Logo Container */}
+                    <div className="notification-card__logo-wrap">
+                      <img
+                        src={item.logo}
+                        alt={item.logoAlt}
+                        className="notification-card__logo-img"
+                      />
+                    </div>
+
+                    {/* Middle Copy Block */}
+                    <div className="notification-card__body">
+                      <h2 className="notification-card__title">{item.title}</h2>
+                      <p className="notification-card__desc">{item.description}</p>
+                    </div>
+
+                    {/* Right Timestamp */}
+                    <div className="notification-card__meta">
+                      <span className="notification-card__time">{item.time}</span>
+                    </div>
+                  </article>
+                )
+              })}
+            </div>
           </div>
         </div>
+      </section>
 
-        {notifs.length === 0 ? (
-          <div className="notifs-empty">
-            <div className="notifs-empty__icon">🔔</div>
-            <h2>No notifications</h2>
-            <p>We'll notify you about deals, cashback updates and more!</p>
-          </div>
-        ) : (
-          <div className="notifs-list">
-            {notifs.map(n => (
-              <div
-                key={n.id}
-                className={`notif-item ${!n.read ? 'unread' : ''}`}
-                onClick={() => markRead(n.id)}
-              >
-                <div className={`notif-item__dot ${n.type}`} />
-                <div className="notif-item__content">
-                  <p className="notif-item__title">{n.title}</p>
-                  <p className="notif-item__body">{n.body}</p>
-                  <p className="notif-item__time">{n.time}</p>
-                </div>
-                {!n.read && <div className="notif-item__unread-badge" />}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
+      {/* Global Footer */}
       <FooterSection />
     </main>
   )

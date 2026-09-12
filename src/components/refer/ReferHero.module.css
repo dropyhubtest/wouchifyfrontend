@@ -1,0 +1,359 @@
+/* ==========================================================================
+   ReferHero Styles (Desktop Full Viewport Width, 3D Fill Animation)
+   ========================================================================== */
+
+.heroSection {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: #FFFFFF;
+  box-sizing: border-box;
+  perspective: 1200px;
+}
+
+.heroCanvas {
+  position: relative;
+  width: 100%;
+  min-height: 560px;
+  height: 560px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #FFFFFF;
+}
+
+/* Big 'W' Watermark behind Left Title */
+.watermarkMain {
+  position: absolute;
+  top: 25px;
+  left: 130px;
+  opacity: 0.25;
+  pointer-events: none;
+  z-index: 4;
+  filter: brightness(1.15) contrast(1.1);
+  transition: opacity 1.5s ease;
+}
+
+.watermarkMainActive {
+  opacity: 0.45;
+}
+
+/* Single Blue Organic Reference Shape (Starts in center, expands seamlessly outward across the entire hero) */
+.blobContainer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  pointer-events: none;
+  transform: translate(-38px, 0) scale(0.96, 1.04);
+  transform-origin: 46% 50%;
+  transition: transform 3.3s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+/* Expanded State: Zoom in significantly to fully cover all notches and the bottom-left corner */
+.blobExpanded {
+  transform: translate(-12%, 8%) scale(22);
+}
+
+.blobImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* Full Viewport Width Content Container - Zero Right Padding so Image Touches Right Screen Edge */
+.contentContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0 0 0 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 5;
+  box-sizing: border-box;
+}
+
+.heroLeftGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 680px;
+  z-index: 10;
+}
+
+.referPillBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #E31E25;
+  color: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 6px 18px;
+  border-radius: 999px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(227, 30, 37, 0.30);
+}
+
+.blueDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #2F368C;
+  display: inline-block;
+}
+
+/* Headline in One Single Line: White text over white canvas reveals letters on dark navy blob */
+.heroTitle {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 52px;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin: 0;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.heroTitleActive {
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+}
+
+.heroSubtitle {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 18px;
+  font-weight: 500;
+  color: #FFFFFF;
+  line-height: 1.5;
+  margin: 16px 0 0 0;
+  opacity: 0.95;
+  user-select: none;
+}
+
+.heroSubtitleActive {
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.16);
+}
+
+.actionsRow {
+  margin-top: 24px;
+}
+
+.codeBtn {
+  background: #E31E25;
+  color: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 18px;
+  font-weight: 700;
+  padding: 13px 28px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 6px 20px rgba(227, 30, 37, 0.45);
+  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.codeBtn:hover {
+  background: #C4141A;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(227, 30, 37, 0.55);
+}
+
+.codeBtn:active {
+  transform: translateY(0);
+}
+
+.codeText {
+  letter-spacing: 0.5px;
+}
+
+.copyIcon {
+  display: block;
+}
+
+/* Secondary Share Action Buttons Row (Revealed immediately with animation) */
+.secondaryShareRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  will-change: opacity, transform;
+}
+
+.secondaryShareRowActive {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.secondaryShareBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(36, 44, 126, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
+  color: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 16px;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.secondaryShareBtn:hover {
+  background: rgba(36, 44, 126, 0.92);
+  border-color: rgba(255, 255, 255, 0.8);
+  transform: translateY(-1px);
+}
+
+.secondaryShareBtn:active {
+  transform: translateY(0);
+}
+
+/* Right Illustration Container Touching Right Edge */
+.illustrationContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  margin-right: 0;
+  padding-right: 0;
+  z-index: 4;
+}
+
+.illustrationImg {
+  width: 760px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  object-position: right center;
+  display: block;
+}
+
+/* ==========================================================================
+   Responsive Breakpoints
+   ========================================================================== */
+
+@media (max-width: 1550px) {
+  .heroTitle {
+    font-size: 46px;
+  }
+  .illustrationImg {
+    width: 640px;
+  }
+}
+
+@media (max-width: 1350px) {
+  .heroCanvas {
+    height: 500px;
+    min-height: 500px;
+  }
+  .heroTitle {
+    font-size: 38px;
+  }
+  .heroSubtitle {
+    font-size: 15px;
+  }
+  .blobContainer {
+    width: 380px;
+    height: 460px;
+  }
+  .illustrationImg {
+    width: 520px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .heroCanvas {
+    height: 440px;
+    min-height: 440px;
+  }
+  .blobContainer {
+    width: 300px;
+    height: 380px;
+    left: 45%;
+  }
+  .heroTitle {
+    font-size: 32px;
+  }
+  .heroSubtitle {
+    font-size: 14.5px;
+  }
+  .illustrationImg {
+    width: 420px;
+  }
+}
+
+@media (max-width: 768px) {
+  .heroCanvas {
+    height: auto;
+    min-height: auto;
+    padding: 36px 0;
+  }
+  .blobContainer {
+    display: none;
+  }
+  .blueFillLayer {
+    opacity: 1;
+    clip-path: none;
+  }
+  .contentContainer {
+    flex-direction: column;
+    text-align: center;
+    gap: 24px;
+    padding: 0 20px;
+  }
+  .heroLeftGroup {
+    align-items: center;
+    max-width: 100%;
+  }
+  .heroTitle {
+    font-size: 28px;
+    white-space: normal;
+    color: #FFFFFF;
+    text-shadow: none;
+  }
+  .heroSubtitle {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.92);
+    text-shadow: none;
+  }
+  .illustrationImg {
+    width: 300px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .illustrationImg,
+  .blobContainer,
+  .blueFillLayer {
+    animation: none !important;
+    transition: none !important;
+  }
+  .blueFillLayer {
+    opacity: 1 !important;
+    clip-path: none !important;
+  }
+}

@@ -1,112 +1,149 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Navbar } from '../components/layout/Navbar'
 import { MobileHeader } from '../components/mobile/MobileHeader'
 import { FooterSection } from '../components/footer/FooterSection'
+import { ProfileSidebar } from '../components/profile/ProfileSidebar'
+import { ReferHero } from '../components/refer/ReferHero'
 import { useMediaQuery } from '../hooks/useMediaQuery'
+import stepsIllustration from '../assets/refer/main.png'
 import './ReferPage.css'
 
-const REFERRAL_CODE = 'WOUCHIFY-RAHUL25'
-const referralHistory = [
-  { id: 1, friend: 'Priya S.', date: '2023-10-10', status: 'Joined', bonus: 100 },
-  { id: 2, friend: 'Rahul K.', date: '2023-09-28', status: 'Joined', bonus: 100 },
-  { id: 3, friend: 'Anjali M.', date: '2023-09-15', status: 'Pending', bonus: 0 },
+interface ReferralHistoryItem {
+  id: number
+  friend: string
+  date: string
+  status: 'Joined' | 'Pending'
+  bonus: string
+  variant: 'blue' | 'peach'
+}
+
+const REFERRAL_HISTORY: ReferralHistoryItem[] = [
+  {
+    id: 1,
+    friend: 'Priya S.',
+    date: '10 Oct 2023',
+    status: 'Joined',
+    bonus: '+₹100',
+    variant: 'blue',
+  },
+  {
+    id: 2,
+    friend: 'Rahul K.',
+    date: '28 Sept 2023',
+    status: 'Joined',
+    bonus: '+₹100',
+    variant: 'peach',
+  },
+  {
+    id: 3,
+    friend: 'Anjali M.',
+    date: '15 Sept 2023',
+    status: 'Pending',
+    bonus: '—',
+    variant: 'blue',
+  },
 ]
 
-const steps = [
-  { icon: '📤', title: 'Share Your Code', desc: 'Share your unique referral code with friends and family.' },
-  { icon: '🛍️', title: 'Friend Signs Up', desc: 'Your friend registers on Wouchify using your referral code.' },
-  { icon: '💰', title: 'Both Earn Rewards', desc: 'You get ₹100 bonus and your friend gets ₹50 on their first deal!' },
+const STEPS_DATA = [
+  {
+    id: 1,
+    title: 'Share Your Code',
+    description: 'Share your unique referral code with friends and family.',
+  },
+  {
+    id: 2,
+    title: 'Friend Signs Up',
+    description: 'Your friend registers on Wouchify using your referral code.',
+  },
+  {
+    id: 3,
+    title: 'Both Earn Rewards',
+    description: 'You get ₹100 bonus and your friend gets ₹50 on their first deal!',
+  },
 ]
 
 export const ReferPage: React.FC = () => {
   const isMobile = useMediaQuery('(max-width: 768px)')
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(REFERRAL_CODE)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({ title: 'Join Wouchify!', text: `Use my referral code ${REFERRAL_CODE} on Wouchify and get ₹50 bonus cashback!`, url: 'https://wouchify.com' })
-    }
-  }
 
   return (
     <main className="refer-page">
-      <div className="refer-page__header-bg" />
-      <div className="refer-page__navbar-wrapper">
+      {/* Top Navbar */}
+      <div className="refer-page__navbar">
         {isMobile ? <MobileHeader /> : <Navbar />}
       </div>
 
-      <div className="refer-container">
-        {/* Hero Banner */}
-        <div className="refer-hero">
-          <div className="refer-hero__content">
-            <p className="refer-hero__eyebrow">🎁 Refer & Earn</p>
-            <h1 className="refer-hero__title">Invite Friends,<br />Earn Together!</h1>
-            <p className="refer-hero__subtitle">
-              Get <strong>₹100</strong> for every friend who joins using your code.<br />
-              Your friend gets <strong>₹50</strong> bonus on their first deal!
-            </p>
+      {/* Hero Section */}
+      <ReferHero referralCode="WOUCHIFY-RAHUL25" />
 
-            <div className="refer-code-box">
-              <span className="refer-code-box__code">{REFERRAL_CODE}</span>
-              <button className="refer-code-box__copy" onClick={handleCopy}>
-                {copied ? '✅ Copied!' : '📋 Copy'}
-              </button>
+      {/* Main Body: Sidebar + 3-Step Process */}
+      <section className="refer-main" aria-label="Refer and Earn Program">
+        <div className="refer-top-section">
+          {/* Profile Sidebar (Active: Refer & Earn) */}
+          <ProfileSidebar activeTab="refer" />
+
+          {/* 3-Step Referral Process Illustration & Cards */}
+          <div className="refer-steps-container">
+            {/* Steps Illustration Banner */}
+            <div className="refer-steps-banner-wrap">
+              <img
+                src={stepsIllustration}
+                alt="3 Steps: Share Your Code, Friend Signs Up, Both Earn Rewards"
+                className="refer-steps-banner-img"
+              />
             </div>
 
-            <div className="refer-hero__btns">
-              <button className="refer-share-btn" onClick={handleShare}>📤 Share with Friends</button>
-              <a className="refer-whatsapp-btn" href={`https://wa.me/?text=Join%20Wouchify%20and%20earn%20cashback%20on%20every%20purchase!%20Use%20my%20code%20${REFERRAL_CODE}%20for%20a%20₹50%20bonus.`} target="_blank" rel="noopener noreferrer">
-                💬 Share on WhatsApp
-              </a>
-            </div>
-          </div>
-          <div className="refer-hero__illustration">🎉</div>
-        </div>
-
-        {/* How it works */}
-        <div className="refer-steps">
-          <h2 className="refer-steps__title">How It Works</h2>
-          <div className="refer-steps__grid">
-            {steps.map((s, i) => (
-              <div key={i} className="refer-step">
-                <div className="refer-step__num">{i + 1}</div>
-                <div className="refer-step__icon">{s.icon}</div>
-                <p className="refer-step__title">{s.title}</p>
-                <p className="refer-step__desc">{s.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Referral history */}
-        <div className="refer-history">
-          <h2 className="refer-history__title">Your Referrals</h2>
-          {referralHistory.length === 0 ? (
-            <p className="refer-history__empty">No referrals yet. Share your code to get started!</p>
-          ) : (
-            <div className="refer-history__table">
-              <div className="refer-history__thead">
-                <span>Friend</span><span>Date</span><span>Status</span><span>Bonus</span>
-              </div>
-              {referralHistory.map(r => (
-                <div key={r.id} className="refer-history__row">
-                  <span className="refer-history__friend">{r.friend}</span>
-                  <span>{new Date(r.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                  <span className={`refer-history__status refer-history__status--${r.status.toLowerCase()}`}>{r.status}</span>
-                  <span className="refer-history__bonus">{r.bonus > 0 ? `+₹${r.bonus}` : '—'}</span>
-                </div>
+            {/* 3 Step Cards Grid */}
+            <div className="refer-steps-cards-grid">
+              {STEPS_DATA.map((step) => (
+                <article key={step.id} className="refer-step-card">
+                  <h2 className="refer-step-card__title">{step.title}</h2>
+                  <p className="refer-step-card__desc">{step.description}</p>
+                </article>
               ))}
             </div>
-          )}
+          </div>
         </div>
-      </div>
 
+        {/* Your Referrals Section - Full Viewport Width */}
+        <div className="refer-history-section">
+          {/* Section Heading with Decorative Half-Pill */}
+          <div className="refer-history-header">
+            <div className="refer-history-indicator" aria-hidden="true" />
+            <h2 className="refer-history-title">Your Referrals</h2>
+          </div>
+
+          {/* Referrals Table / Cards Stack */}
+          <div className="refer-table-container">
+            {/* Table Column Headers */}
+            <div className="refer-table-header-row">
+              <span className="refer-th">FRIEND</span>
+              <span className="refer-th">DATE</span>
+              <span className="refer-th">STATUS</span>
+              <span className="refer-th">BONUS</span>
+            </div>
+
+            {/* Table Rows */}
+            <div className="refer-table-rows">
+              {REFERRAL_HISTORY.map((item) => {
+                const isPeach = item.variant === 'peach'
+                return (
+                  <div
+                    key={item.id}
+                    className={`refer-table-card ${isPeach ? 'refer-table-card--peach' : 'refer-table-card--blue'}`}
+                  >
+                    <span className="refer-td refer-td--friend">{item.friend}</span>
+                    <span className="refer-td refer-td--date">{item.date}</span>
+                    <span className="refer-td refer-td--status">{item.status}</span>
+                    <span className="refer-td refer-td--bonus">{item.bonus}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Global Footer */}
       <FooterSection />
     </main>
   )

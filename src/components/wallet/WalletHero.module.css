@@ -1,0 +1,198 @@
+/* ==========================================================================
+   WalletHero Styles (Desktop Full Viewport Width Reference)
+   ========================================================================== */
+
+.heroSection {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: linear-gradient(180deg, #303B97 0%, #232B85 100%);
+  box-sizing: border-box;
+}
+
+.heroCanvas {
+  position: relative;
+  width: 100%;
+  height: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.bgOverlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.32;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.watermarkMain {
+  position: absolute;
+  top: 25px;
+  left: 32%;
+  opacity: 0.42;
+  pointer-events: none;
+  z-index: 2;
+  filter: brightness(1.3) contrast(1.15) drop-shadow(0 4px 16px rgba(255, 255, 255, 0.2));
+}
+
+.watermarkBottomRight {
+  position: absolute;
+  bottom: 20px;
+  right: 50px;
+  opacity: 0.38;
+  pointer-events: none;
+  z-index: 2;
+  filter: brightness(1.3) contrast(1.15) drop-shadow(0 4px 16px rgba(255, 255, 255, 0.2));
+}
+
+.contentContainer {
+  position: relative;
+  width: 100%;
+  max-width: 1600px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 5;
+  box-sizing: border-box;
+}
+
+.heroLeftGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 620px;
+}
+
+.heroTitle {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 56px;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+}
+
+.heroSubtitle {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 17.5px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.55;
+  margin: 16px 0 0 0;
+}
+
+.checkBalanceBtn {
+  margin-top: 28px;
+  background: #E31E25;
+  color: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 15px;
+  font-weight: 700;
+  padding: 12px 28px;
+  border-radius: 12px; /* Decreased border radius */
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(227, 30, 37, 0.40);
+  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.checkBalanceBtn:hover {
+  background: #C4141A;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(227, 30, 37, 0.50);
+}
+
+.checkBalanceBtn:active {
+  transform: translateY(0);
+}
+
+.illustrationContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.illustrationImg {
+  width: 540px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 18px 38px rgba(0, 0, 0, 0.35));
+}
+
+/* ==========================================================================
+   Responsive Breakpoints
+   ========================================================================== */
+
+@media (max-width: 1200px) {
+  .heroCanvas {
+    height: 400px;
+  }
+  .watermarkMain {
+    width: 320px !important;
+    height: 210px !important;
+    left: 26%;
+    top: 20px;
+    opacity: 0.35;
+  }
+  .watermarkBottomRight {
+    width: 220px !important;
+    height: 145px !important;
+    right: 20px;
+    bottom: 15px;
+    opacity: 0.32;
+  }
+  .heroTitle {
+    font-size: 44px;
+  }
+  .heroSubtitle {
+    font-size: 15px;
+  }
+  .illustrationImg {
+    width: 420px;
+  }
+}
+
+@media (max-width: 768px) {
+  .heroCanvas {
+    height: auto;
+    padding: 36px 0;
+  }
+  .watermarkMain,
+  .watermarkBottomRight {
+    opacity: 0.20;
+  }
+  .contentContainer {
+    flex-direction: column;
+    text-align: center;
+    gap: 24px;
+    padding: 0 20px;
+  }
+  .heroLeftGroup {
+    align-items: center;
+    max-width: 100%;
+  }
+  .heroTitle {
+    font-size: 32px;
+  }
+  .heroSubtitle {
+    font-size: 14px;
+  }
+  .illustrationImg {
+    width: 280px;
+  }
+}

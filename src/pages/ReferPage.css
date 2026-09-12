@@ -1,91 +1,336 @@
-.refer-page { width: 100%; min-height: 100vh; background: #F8FAFC; font-family: 'Poppins', sans-serif; }
-.refer-page__header-bg { position: absolute; top: 0; left: 0; width: 100%; height: 131px; background: #EEEFFF; z-index: 10; pointer-events: none; }
-@media (max-width: 768px) { .refer-page__header-bg { height: 64px; } }
-.refer-page__navbar-wrapper { position: relative; z-index: 100; }
+/* ==========================================================================
+   Desktop Refer & Earn Page Styles (Full Viewport Width & Shadows)
+   ========================================================================== */
 
-.refer-container { max-width: 1000px; margin: 0 auto; padding: 40px 24px 60px; display: flex; flex-direction: column; gap: 40px; }
-
-/* Hero */
-.refer-hero {
-  background: linear-gradient(135deg, #2A3189 0%, #4f5de0 100%);
-  border-radius: 24px; padding: 48px;
-  display: flex; align-items: center; justify-content: space-between; gap: 32px;
-  color: #fff;
-}
-.refer-hero__content { flex: 1; }
-.refer-hero__eyebrow { margin: 0 0 10px; font-size: 14px; font-weight: 600; opacity: 0.8; }
-.refer-hero__title { margin: 0 0 12px; font-size: 36px; font-weight: 800; line-height: 1.2; }
-.refer-hero__subtitle { margin: 0 0 28px; font-size: 15px; opacity: 0.85; line-height: 1.6; }
-
-.refer-code-box {
-  background: rgba(255,255,255,0.15);
-  border: 2px dashed rgba(255,255,255,0.5);
-  border-radius: 12px; padding: 16px 20px;
-  display: inline-flex; align-items: center; gap: 16px; margin-bottom: 24px;
-}
-.refer-code-box__code { font-size: 20px; font-weight: 800; letter-spacing: 0.05em; }
-.refer-code-box__copy {
-  background: rgba(255,255,255,0.25); color: #fff; border: none; border-radius: 8px;
-  padding: 8px 14px; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600;
-  cursor: pointer; transition: background 0.15s;
-}
-.refer-code-box__copy:hover { background: rgba(255,255,255,0.35); }
-
-.refer-hero__btns { display: flex; flex-wrap: wrap; gap: 12px; }
-.refer-share-btn {
-  background: #fff; color: #2A3189; border: none; border-radius: 10px;
-  padding: 12px 20px; font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 700;
-  cursor: pointer; transition: transform 0.15s;
-}
-.refer-share-btn:hover { transform: scale(1.03); }
-.refer-whatsapp-btn {
-  background: #25d366; color: #fff; border-radius: 10px;
-  padding: 12px 20px; font-size: 14px; font-weight: 700;
-  text-decoration: none; transition: background 0.15s;
-}
-.refer-whatsapp-btn:hover { background: #1ebe5a; }
-
-.refer-hero__illustration { font-size: 100px; flex-shrink: 0; }
-
-/* Steps */
-.refer-steps__title { font-size: 22px; font-weight: 700; color: #1f2937; margin: 0 0 20px; }
-.refer-steps__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-
-.refer-step {
-  background: #fff; border-radius: 16px; padding: 28px 20px;
-  text-align: center; box-shadow: 0 2px 12px rgba(42,49,137,0.08);
+.refer-page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  display: flex;
+  flex-direction: column;
   position: relative;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
-.refer-step__num {
-  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
-  width: 24px; height: 24px; border-radius: 50%;
-  background: #2A3189; color: #fff; font-size: 12px; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
+
+.refer-page__navbar {
+  width: 100%;
+  position: relative;
+  z-index: 100;
 }
-.refer-step__icon { font-size: 36px; margin-bottom: 12px; }
-.refer-step__title { margin: 0 0 6px; font-size: 15px; font-weight: 700; color: #1f2937; }
-.refer-step__desc { margin: 0; font-size: 13px; color: #6b7280; line-height: 1.5; }
 
-/* History table */
-.refer-history { background: #fff; border-radius: 16px; padding: 28px; box-shadow: 0 2px 12px rgba(42,49,137,0.08); }
-.refer-history__title { font-size: 18px; font-weight: 700; color: #1f2937; margin: 0 0 20px; }
-.refer-history__empty { color: #6b7280; font-size: 14px; margin: 0; }
+/* ==========================================================================
+   Main Body Container - Full Viewport Width
+   ========================================================================== */
 
-.refer-history__thead, .refer-history__row { display: grid; grid-template-columns: 2fr 2fr 1.5fr 1fr; gap: 16px; padding: 12px 0; }
-.refer-history__thead { font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #f3f4f6; }
-.refer-history__row { font-size: 13px; color: #4b5563; border-bottom: 1px solid #f9fafb; }
-.refer-history__friend { font-weight: 600; color: #1f2937; }
-.refer-history__status { font-weight: 600; }
-.refer-history__status--joined { color: #10b981; }
-.refer-history__status--pending { color: #f59e0b; }
-.refer-history__bonus { font-weight: 700; color: #10b981; }
+.refer-main {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 16px 0 60px 0;
+  box-sizing: border-box;
+}
 
-@media (max-width: 768px) {
-  .refer-container { padding: 20px 16px 40px; }
-  .refer-hero { flex-direction: column; padding: 28px 20px; }
-  .refer-hero__title { font-size: 26px; }
-  .refer-hero__illustration { display: none; }
-  .refer-steps__grid { grid-template-columns: 1fr; }
-  .refer-history { padding: 20px 16px; }
-  .refer-history__thead, .refer-history__row { grid-template-columns: 1fr 1fr 1fr 1fr; font-size: 12px; gap: 8px; }
+/* ==========================================================================
+   Top Section: Sidebar + 3-Step Referral Process
+   ========================================================================== */
+
+.refer-top-section {
+  width: 100%;
+  display: flex;
+  gap: 36px;
+  align-items: flex-start;
+  padding-right: 48px;
+  margin-bottom: 48px;
+  box-sizing: border-box;
+}
+
+.refer-steps-container {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: -18px;
+}
+
+.refer-steps-banner-wrap {
+  width: 100%;
+  max-width: 1260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.refer-steps-banner-img {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* 3 Step Cards Grid overlapping directly on the bottom portion of the illustration */
+.refer-steps-cards-grid {
+  width: 100%;
+  max-width: 1260px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: -85px;
+  padding: 0 8px;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 5;
+}
+
+.refer-step-card {
+  background: #FFFFFF;
+  border: 1.5px solid #CBD2EB;
+  border-radius: 16px;
+  padding: 16px 20px;
+  text-align: center;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    inset 0 3px 5px -1px rgba(0, 0, 0, 0.08),     /* Top Inner Shadow */
+    0 6px 14px -2px rgba(0, 0, 0, 0.06);          /* Bottom Drop Shadow */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  z-index: 5;
+}
+
+.refer-step-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 3px 5px -1px rgba(0, 0, 0, 0.06),
+    0 10px 20px -3px rgba(47, 54, 140, 0.10);
+}
+
+.refer-step-card__title {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.refer-step-card__desc {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 12px;
+  font-weight: 400;
+  color: #333333;
+  margin: 6px 0 0 0;
+  line-height: 1.35;
+}
+
+/* ==========================================================================
+   Bottom Section: "Your Referrals" Table (Full Viewport Width)
+   ========================================================================== */
+
+.refer-history-section {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  margin-top: 24px;
+}
+
+/* Header with Blue Half-Pill */
+.refer-history-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 28px;
+  padding-left: 0;
+}
+
+.refer-history-indicator {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 48px;
+  background-color: #2F368C;
+  border-top-right-radius: 999px;
+  border-bottom-right-radius: 999px;
+}
+
+.refer-history-title {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 32px;
+  font-weight: 700;
+  color: #1F267A;
+  margin: 0;
+  padding-left: 48px;
+  line-height: 1.2;
+}
+
+/* Referrals Table Container */
+.refer-table-container {
+  width: 100%;
+  padding: 0 48px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Table Column Headers */
+.refer-table-header-row {
+  display: grid;
+  grid-template-columns: 2fr 2fr 2fr 1.5fr;
+  padding: 0 32px 14px 32px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.refer-th {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: #E31E25;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.refer-th:nth-child(2),
+.refer-th:nth-child(3),
+.refer-th:nth-child(4) {
+  text-align: center;
+}
+
+/* Table Card Rows */
+.refer-table-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.refer-table-card {
+  width: 100%;
+  min-height: 72px;
+  border-radius: 16px;
+  box-sizing: border-box;
+  padding: 16px 32px;
+  display: grid;
+  grid-template-columns: 2fr 2fr 2fr 1.5fr;
+  align-items: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.refer-table-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Lavender / Blue Card Row */
+.refer-table-card--blue {
+  background: #EEF2FF;
+  border: 1.5px solid #CBD2EB;
+  box-shadow:
+    inset 0 3px 5px -1px rgba(0, 0, 0, 0.10),     /* Top Inner Shadow */
+    0 6px 14px -2px rgba(47, 54, 140, 0.08);      /* Bottom Drop Shadow */
+}
+
+.refer-table-card--blue:hover {
+  box-shadow:
+    inset 0 3px 5px -1px rgba(0, 0, 0, 0.08),
+    0 10px 20px -3px rgba(47, 54, 140, 0.14);
+}
+
+/* Peach / Tan Card Row */
+.refer-table-card--peach {
+  background: #FCE8D8;
+  border: 1.5px solid #E5C3A5;
+  box-shadow:
+    inset 0 3px 5px -1px rgba(0, 0, 0, 0.10),     /* Top Inner Shadow */
+    0 6px 14px -2px rgba(180, 100, 50, 0.08);     /* Bottom Drop Shadow */
+}
+
+.refer-table-card--peach:hover {
+  box-shadow:
+    inset 0 3px 5px -1px rgba(0, 0, 0, 0.08),
+    0 10px 20px -3px rgba(180, 100, 50, 0.14);
+}
+
+/* Table Cells */
+.refer-td {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 20px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.refer-td--friend {
+  text-align: left;
+}
+
+.refer-td--date {
+  text-align: center;
+  font-weight: 600;
+}
+
+.refer-td--status {
+  text-align: center;
+  font-weight: 700;
+}
+
+.refer-td--bonus {
+  text-align: center;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   Responsive Breakpoints
+   ========================================================================== */
+
+@media (max-width: 1200px) {
+  .refer-top-section {
+    gap: 24px;
+    padding-right: 28px;
+  }
+  .refer-steps-cards-grid {
+    gap: 16px;
+  }
+  .refer-step-card__title {
+    font-size: 14px;
+  }
+  .refer-step-card__desc {
+    font-size: 11px;
+  }
+  .refer-table-container {
+    padding: 0 28px;
+  }
+  .refer-td {
+    font-size: 17px;
+  }
+}
+
+@media (max-width: 900px) {
+  .refer-top-section {
+    flex-direction: column;
+    padding: 0 20px;
+  }
+  .refer-steps-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .refer-table-container {
+    padding: 0 16px;
+    overflow-x: auto;
+  }
+  .refer-table-header-row,
+  .refer-table-card {
+    min-width: 600px;
+  }
 }
