@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { OperationsLayout } from './OperationsLayout'
+import { adminApi } from '../../../services/adminApi'
 import { 
   CheckCircle2, 
   LifeBuoy, 
@@ -159,6 +160,39 @@ export const OperationsSupportPage: React.FC = () => {
     setTimeout(() => setToastMessage(null), 3000)
   }
 
+  // Load from backend API
+  useEffect(() => {
+    adminApi.getSupportTickets()
+      .then((res: any[]) => {
+        if (Array.isArray(res) && res.length > 0) {
+          const mapped: SupportTicket[] = res.map((t: any, idx: number) => ({
+            id: t.ticketId || t._id || t.id || `TKT-${8900 + idx}`,
+            userName: t.userName || 'Customer',
+            userEmail: t.userEmail || 'customer@wouchify.com',
+            category: t.category || 'Missing Cashback',
+            subject: t.subject || 'Support Ticket',
+            priority: t.priority || 'Medium',
+            status: t.status || 'Open',
+            createdAt: t.createdAt ? new Date(t.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : 'Recently',
+            orderId: t.orderId,
+            disputeAmount: t.disputeAmount,
+            messages: Array.isArray(t.messages) && t.messages.length > 0 ? t.messages : [
+              {
+                sender: 'user',
+                senderName: t.userName || 'Customer',
+                time: 'Recently',
+                text: t.subject || 'Query details'
+              }
+            ]
+          }))
+          setTickets(mapped)
+        }
+      })
+      .catch(err => {
+        console.warn('API error, using mock tickets:', err)
+      })
+  }, [])
+
   // KPIs
   const openCount = tickets.filter(t => t.status === 'Open').length
   const urgentCount = tickets.filter(t => t.priority === 'Urgent' && t.status !== 'Resolved' && t.status !== 'Closed').length
@@ -207,6 +241,9 @@ export const OperationsSupportPage: React.FC = () => {
       messages: [...activeTicket.messages, newMsg]
     }
 
+    adminApi.replySupportTicket(activeTicket.id, newMsg).catch(console.warn)
+    adminApi.updateSupportTicketStatus(activeTicket.id, newStatus).catch(console.warn)
+
     setTickets(prev => prev.map(t => t.id === activeTicket.id ? updated : t))
     setActiveTicket(updated)
     setReplyText('')
@@ -227,6 +264,10 @@ export const OperationsSupportPage: React.FC = () => {
         status: 'Resolved',
         messages: [...activeTicket.messages, newMsg]
       }
+
+      adminApi.replySupportTicket(activeTicket.id, newMsg).catch(console.warn)
+      adminApi.updateSupportTicketStatus(activeTicket.id, 'Resolved').catch(console.warn)
+
       setTickets(prev => prev.map(t => t.id === activeTicket.id ? updated : t))
       setActiveTicket(updated)
       showToast(`Credited ₹${creditAmount} to ${activeTicket.userName}'s wallet`)

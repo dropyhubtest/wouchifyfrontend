@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { OperationsLayout } from './OperationsLayout'
+import { adminApi } from '../../../services/adminApi'
 import { 
   CheckCircle2, 
   Users, 
@@ -39,55 +40,42 @@ export interface AuditLogEvent {
 
 const mockStaffMembers: StaffMember[] = [
   {
-    id: 'stf-01',
-    name: 'Rahul Sharma',
-    email: 'rahul.executive@wouchify.com',
+    id: 'stf-balaji',
+    name: 'Balaji',
+    email: 'balaji@wouchify.com',
     role: 'Content Executive',
-    domain: 'Electronics & Loot Deals',
-    submissionsToday: 18,
-    totalSubmissions: 420,
-    approvalRate: 96.5,
-    rejectionsCount: 15,
+    domain: 'Deals & Loot Deals',
+    submissionsToday: 12,
+    totalSubmissions: 145,
+    approvalRate: 98.0,
+    rejectionsCount: 3,
+    avgTurnaround: '10 mins',
+    status: 'Online'
+  },
+  {
+    id: 'stf-jayanth',
+    name: 'Jayanth',
+    email: 'jayanth@wouchify.com',
+    role: 'Content Executive',
+    domain: 'Coupons & Credit Cards',
+    submissionsToday: 9,
+    totalSubmissions: 120,
+    approvalRate: 97.0,
+    rejectionsCount: 4,
     avgTurnaround: '12 mins',
     status: 'Online'
   },
   {
-    id: 'stf-02',
-    name: 'Sneha Patel',
-    email: 'sneha.deals@wouchify.com',
-    role: 'Deals Executive',
-    domain: 'Mobiles, Laptops & Appliances',
-    submissionsToday: 12,
-    totalSubmissions: 385,
-    approvalRate: 98.2,
+    id: 'stf-ops-manager',
+    name: 'Operational Manager',
+    email: 'ops.manager@wouchify.com',
+    role: 'Ops Manager',
+    domain: 'Approvals & Quality Assurance',
+    submissionsToday: 21,
+    totalSubmissions: 580,
+    approvalRate: 99.0,
     rejectionsCount: 7,
-    avgTurnaround: '18 mins',
-    status: 'Online'
-  },
-  {
-    id: 'stf-03',
-    name: 'Arjun Verma',
-    email: 'arjun.coupons@wouchify.com',
-    role: 'Coupons Executive',
-    domain: 'Fashion, Food & Travel',
-    submissionsToday: 8,
-    totalSubmissions: 290,
-    approvalRate: 91.4,
-    rejectionsCount: 25,
-    avgTurnaround: '24 mins',
-    status: 'Away'
-  },
-  {
-    id: 'stf-04',
-    name: 'Priya Sundaram',
-    email: 'priya.media@wouchify.com',
-    role: 'Creative Executive',
-    domain: 'Hero Banners & Ads',
-    submissionsToday: 4,
-    totalSubmissions: 140,
-    approvalRate: 97.8,
-    rejectionsCount: 3,
-    avgTurnaround: '35 mins',
+    avgTurnaround: '8 mins',
     status: 'Online'
   }
 ]
@@ -96,8 +84,8 @@ const mockAuditLogs: AuditLogEvent[] = [
   {
     id: 'log-101',
     timestamp: '12 mins ago',
-    staffEmail: 'rahul.executive@wouchify.com',
-    staffName: 'Rahul Sharma',
+    staffEmail: 'balaji@wouchify.com',
+    staffName: 'Balaji',
     action: 'Created',
     entityType: 'Loot Deal',
     entityTitle: 'Sony WH-1000XM5 Wireless Headphones at ₹4,999',
@@ -116,22 +104,22 @@ const mockAuditLogs: AuditLogEvent[] = [
   {
     id: 'log-103',
     timestamp: '45 mins ago',
-    staffEmail: 'sneha.deals@wouchify.com',
-    staffName: 'Sneha Patel',
-    action: 'Modified',
-    entityType: 'Deal',
-    entityTitle: 'Samsung Galaxy S24 Ultra 5G pricing math',
-    details: 'Updated bank offer to ₹5,000 instant HDFC discount.'
-  },
-  {
-    id: 'log-104',
-    timestamp: '1 hour ago',
-    staffEmail: 'arjun.coupons@wouchify.com',
-    staffName: 'Arjun Verma',
+    staffEmail: 'jayanth@wouchify.com',
+    staffName: 'Jayanth',
     action: 'Created',
     entityType: 'Coupon',
     entityTitle: 'Myntra Flat ₹500 OFF (Code: MYNTRAPRO)',
     details: 'Added coupon code with expiry date 30-Sep-2026.'
+  },
+  {
+    id: 'log-104',
+    timestamp: '1 hour ago',
+    staffEmail: 'balaji@wouchify.com',
+    staffName: 'Balaji',
+    action: 'Modified',
+    entityType: 'Deal',
+    entityTitle: 'Samsung Galaxy S24 Ultra 5G pricing math',
+    details: 'Updated bank offer to ₹5,000 instant HDFC discount.'
   },
   {
     id: 'log-105',
@@ -146,8 +134,8 @@ const mockAuditLogs: AuditLogEvent[] = [
   {
     id: 'log-106',
     timestamp: '3 hours ago',
-    staffEmail: 'priya.media@wouchify.com',
-    staffName: 'Priya Sundaram',
+    staffEmail: 'jayanth@wouchify.com',
+    staffName: 'Jayanth',
     action: 'Created',
     entityType: 'Banner',
     entityTitle: 'Diwali Mega Cashback Bonanza Hero Banner',
@@ -156,7 +144,7 @@ const mockAuditLogs: AuditLogEvent[] = [
 ]
 
 export const OperationsStaffActivityPage: React.FC = () => {
-  const [staff] = useState<StaffMember[]>(mockStaffMembers)
+  const [staff, setStaff] = useState<StaffMember[]>(mockStaffMembers)
   const [auditLogs] = useState<AuditLogEvent[]>(mockAuditLogs)
   const [searchTerm, setSearchTerm] = useState('')
   const [toastMessage, setToastMessage] = useState<string | null>(null)
@@ -165,6 +153,32 @@ export const OperationsStaffActivityPage: React.FC = () => {
     setToastMessage(msg)
     setTimeout(() => setToastMessage(null), 3000)
   }
+
+  // Load staff members from backend API
+  useEffect(() => {
+    adminApi.getStaffMembers()
+      .then((res: any[]) => {
+        if (Array.isArray(res) && res.length > 0) {
+          const mapped: StaffMember[] = res.map((s: any, idx: number) => ({
+            id: s._id || s.id || `stf-0${idx + 1}`,
+            name: s.name || 'Staff Member',
+            email: s.email || 'staff@wouchify.com',
+            role: s.role === 'executive' ? 'Content Executive' : (s.role === 'operational_manager' ? 'Ops Manager' : 'Staff'),
+            domain: s.domain || 'All Categories',
+            submissionsToday: typeof s.submissionsToday === 'number' ? s.submissionsToday : 10,
+            totalSubmissions: typeof s.totalSubmissions === 'number' ? s.totalSubmissions : 250,
+            approvalRate: typeof s.approvalRate === 'number' ? s.approvalRate : 95.5,
+            rejectionsCount: typeof s.rejectionsCount === 'number' ? s.rejectionsCount : 5,
+            avgTurnaround: s.avgTurnaround || '15 mins',
+            status: s.status || 'Online'
+          }))
+          setStaff(mapped)
+        }
+      })
+      .catch((err: unknown) => {
+        console.warn('API error, using mock staff members:', err)
+      })
+  }, [])
 
   // KPIs
   const totalSubmissionsToday = staff.reduce((acc, s) => acc + s.submissionsToday, 0)

@@ -9,7 +9,6 @@ import {
   ChevronLeft, 
   ChevronRight, 
   LogOut, 
-  ExternalLink,
   ShieldCheck,
   Bell
 } from 'lucide-react'
@@ -198,28 +197,25 @@ export const OperationsLayout: React.FC<OperationsLayoutProps> = ({
       <main className="operations-main-content">
         <div className="operations-top-bar">
           <div className="operations-top-title-wrap">
-            <span className="operations-live-dot" title="Operational Services Online"></span>
-            <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#334155' }}>
-              Wouchify Operations Hub • Live Sync Active
-            </span>
+            <span className="operations-top-title">Operations Manager Portal</span>
           </div>
 
           <div className="operations-top-actions">
             <button 
               type="button" 
-              className="operations-quick-link-btn"
-              onClick={() => navigate('/executive/dashboard')}
-              title="Open Content Executive Console"
+              className="operations-quick-link-btn queue-highlight"
+              onClick={() => navigate('/operational-manager/approvals')}
+              title="View Pending Moderation Queue"
             >
-              <ExternalLink size={13} /> Executive Portal
+              <Bell size={14} /> Moderation Queue ({mergedCounts.approvals})
             </button>
             <button 
               type="button" 
               className="operations-quick-link-btn"
-              onClick={() => navigate('/operational-manager/approvals')}
-              title="View Pending Moderation Queue"
+              onClick={() => navigate('/operational-manager/cashbacks')}
+              title="View Cashback Claims"
             >
-              <Bell size={13} style={{ color: '#ea580c' }} /> Moderation Queue ({mergedCounts.approvals})
+              <Wallet size={14} /> Payouts ({mergedCounts.cashbacks})
             </button>
           </div>
         </div>

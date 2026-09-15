@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { DealCard } from './DealCard'
 import { DealsEmptyState } from './DealsEmptyState'
-import { BEST_SELLING_DEAL_ITEMS, normalizeDealToCard, type DealCardItem } from '../../data/dealsPage'
+import { normalizeDealToCard, normalizeLootToCard, BEST_SELLING_DEAL_ITEMS, MASTER_EXECUTIVE_LOOT_DEALS, type DealCardItem } from '../../data/dealsPage'
 import { adminApi } from '../../services/adminApi'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
 import './BestSellingDeals.css'
@@ -12,6 +12,7 @@ export interface BestSellingDealsProps {
   showEmptyState?: boolean
   emptyStateTitle?: string
   emptyStateSubtitle?: string
+  dataSource?: 'deals' | 'loot'
 }
 
 export const BestSellingDeals: React.FC<BestSellingDealsProps> = ({
@@ -20,6 +21,7 @@ export const BestSellingDeals: React.FC<BestSellingDealsProps> = ({
   showEmptyState = false,
   emptyStateTitle = 'No loot deals found',
   emptyStateSubtitle = 'Try adjusting your filters',
+  dataSource = 'deals'
 }) => {
   const scale = useDesktopScale()
   const canvasRef = useRef<HTMLDivElement>(null)
@@ -28,18 +30,35 @@ export const BestSellingDeals: React.FC<BestSellingDealsProps> = ({
   // Live Best Selling Deals list initialized from cached storage or defaults
   const [bestDeals, setBestDeals] = useState<DealCardItem[]>(() => {
     try {
-      const cached = localStorage.getItem('wouchify_public_deals')
-      if (cached) {
-        const parsed = JSON.parse(cached)
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const featured = parsed
-            .map((d: any, idx: number) => normalizeDealToCard(d, idx))
-            .filter((d: DealCardItem) => d.status === 'active' && d.isBestSelling)
-          if (featured.length > 0) return featured
+      if (dataSource === 'loot') {
+        const cached = localStorage.getItem('wouchify_loot_deals')
+        if (cached) {
+          const parsed = JSON.parse(cached)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const featured = parsed
+              .map((l: any, idx: number) => normalizeLootToCard(l, idx))
+              .filter((d: DealCardItem) => (!d.status || d.status.toLowerCase() === 'active' || d.status.toLowerCase() === 'approved') && Boolean(d.isBestSelling))
+            if (featured.length > 0) return featured
+          }
         }
+        return MASTER_EXECUTIVE_LOOT_DEALS.map((l: any, idx: number) => normalizeLootToCard(l, idx)).filter(d => Boolean(d.isBestSelling))
+      } else {
+        const cached = localStorage.getItem('wouchify_public_deals')
+        if (cached) {
+          const parsed = JSON.parse(cached)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const featured = parsed
+              .map((d: any, idx: number) => normalizeDealToCard(d, idx))
+              .filter((d: DealCardItem) => (!d.status || d.status.toLowerCase() === 'active' || d.status.toLowerCase() === 'approved') && Boolean(d.isBestSelling))
+            if (featured.length > 0) return featured
+          }
+        }
+        return BEST_SELLING_DEAL_ITEMS
       }
     } catch {}
-    return BEST_SELLING_DEAL_ITEMS
+    return dataSource === 'loot' 
+      ? MASTER_EXECUTIVE_LOOT_DEALS.map((l: any, idx: number) => normalizeLootToCard(l, idx)).filter(d => Boolean(d.isBestSelling))
+      : BEST_SELLING_DEAL_ITEMS
   })
 
   // Fetch from adminApi & subscribe to live updates
@@ -48,17 +67,25 @@ export const BestSellingDeals: React.FC<BestSellingDealsProps> = ({
 
     const fetchBestSellingDeals = async () => {
       try {
-        const res = await adminApi.getPublicDeals()
-        if (!isMounted) return
-        if (Array.isArray(res) && res.length > 0) {
-          const normalized = res.map((d: any, idx: number) => normalizeDealToCard(d, idx))
-          const featured = normalized.filter(
-            (d: DealCardItem) => d.status === 'active' && d.isBestSelling
-          )
-          if (featured.length > 0) {
+        if (dataSource === 'loot') {
+          const res = await adminApi.getLootDeals()
+          if (!isMounted) return
+          if (Array.isArray(res) && res.length > 0) {
+            const normalized = res.map((l: any, idx: number) => normalizeLootToCard(l, idx))
+            const featured = normalized.filter(
+              (d: DealCardItem) => (!d.status || d.status.toLowerCase() === 'active' || d.status.toLowerCase() === 'approved') && Boolean(d.isBestSelling)
+            )
             setBestDeals(featured)
-          } else {
-            setBestDeals(BEST_SELLING_DEAL_ITEMS)
+          }
+        } else {
+          const res = await adminApi.getPublicDeals()
+          if (!isMounted) return
+          if (Array.isArray(res) && res.length > 0) {
+            const normalized = res.map((d: any, idx: number) => normalizeDealToCard(d, idx))
+            const featured = normalized.filter(
+              (d: DealCardItem) => (!d.status || d.status.toLowerCase() === 'active' || d.status.toLowerCase() === 'approved') && Boolean(d.isBestSelling)
+            )
+            setBestDeals(featured)
           }
         }
       } catch {
@@ -73,13 +100,17 @@ export const BestSellingDeals: React.FC<BestSellingDealsProps> = ({
     }
 
     window.addEventListener('wouchify_deals_updated', handleUpdate)
+    window.addEventListener('wouchify_loot_deals_updated', handleUpdate)
+    window.addEventListener('wouchify_deal_clicked', handleUpdate)
     window.addEventListener('storage', handleUpdate)
     return () => {
       isMounted = false
       window.removeEventListener('wouchify_deals_updated', handleUpdate)
+      window.removeEventListener('wouchify_loot_deals_updated', handleUpdate)
+      window.removeEventListener('wouchify_deal_clicked', handleUpdate)
       window.removeEventListener('storage', handleUpdate)
     }
-  }, [])
+  }, [dataSource])
 
   useEffect(() => {
     const updateHeight = () => {
@@ -129,15 +160,15 @@ export const BestSellingDeals: React.FC<BestSellingDealsProps> = ({
         </div>
 
         {/* Content: Cards or Empty State */}
-        {showEmptyState ? (
+        {showEmptyState || bestDeals.length === 0 ? (
           <DealsEmptyState
-            title={emptyStateTitle}
-            subtitle={emptyStateSubtitle}
+            title={showEmptyState ? emptyStateTitle : (dataSource === 'loot' ? "No best selling loot deals selected" : "No best selling deals selected")}
+            subtitle={showEmptyState ? emptyStateSubtitle : "Mark deals with ⭐ Best Seller in Executive Panel to feature them here"}
           />
         ) : (
           <div className="best-selling-deals__cards-container">
             {bestDeals.map((deal) => (
-              <DealCard key={deal.id} deal={deal} horizontal={true} />
+              <DealCard key={deal.id} deal={deal} horizontal={true} isLoot={dataSource === 'loot'} />
             ))}
           </div>
         )}

@@ -5,9 +5,7 @@ const LootDeal = require('../models/LootDeal');
 const auth = require('../middleware/authMiddleware');
 const store = require('../services/inMemoryStore');
 
-router.use(auth);
-
-// Get all loot deals
+// Public read access for storefront & catalog consumers
 router.get('/', async (req, res, next) => {
   try {
     if (mongoose.connection.readyState !== 1) {
@@ -20,6 +18,26 @@ router.get('/', async (req, res, next) => {
     res.json(lootDeals);
   } catch (err) { next(err); }
 });
+
+// Public click tracking for storefront engagements
+router.post('/:id/click', async (req, res, next) => {
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      const updated = store.incrementLootClicks(req.params.id);
+      return res.json({ success: true, clicks: updated?.clicks || 1 });
+    }
+    const loot = await LootDeal.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { clicks: 1 } },
+      { new: true }
+    );
+    if (!loot) return res.status(404).json({ message: 'Loot deal not found' });
+    res.json({ success: true, clicks: loot.clicks || 1 });
+  } catch (err) { next(err); }
+});
+
+// Protected administrative mutation routes
+router.use(auth);
 
 // Create loot deal
 router.post('/', async (req, res, next) => {

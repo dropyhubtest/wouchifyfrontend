@@ -20,6 +20,23 @@ router.get('/', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// Public click tracking for storefront engagements
+router.post('/:id/click', async (req, res, next) => {
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      const updated = store.incrementDealClicks(req.params.id);
+      return res.json({ success: true, clicks: updated?.clicks || 1 });
+    }
+    const deal = await Deal.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { clicks: 1 } },
+      { new: true }
+    );
+    if (!deal) return res.status(404).json({ message: 'Deal not found' });
+    res.json({ success: true, clicks: deal.clicks || 1 });
+  } catch (err) { next(err); }
+});
+
 // Protected administrative mutation routes
 router.use(auth);
 

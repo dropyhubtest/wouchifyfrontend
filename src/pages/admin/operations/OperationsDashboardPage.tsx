@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { OperationsLayout } from './OperationsLayout'
+import { adminApi } from '../../../services/adminApi'
 import {
   CheckCircle2,
   Clock,
@@ -23,7 +24,7 @@ import {
   Store
 } from 'lucide-react'
 import './OperationsShared.css'
-import { getStoreLogo } from '../../../data/dealsPage'
+import { getStoreLogo, PLACEHOLDER_DEAL_IMAGE, PLACEHOLDER_STORE_LOGO } from '../../../data/dealsPage'
 
 export interface UrgentModerationItem {
   id: string
@@ -62,74 +63,41 @@ export interface ExecutiveInfo {
 
 export const EXECUTIVES_LIST: ExecutiveInfo[] = [
   {
-    id: 'stf-01',
-    name: 'Rahul Sharma',
-    shortName: 'Rahul S.',
-    email: 'rahul.executive@wouchify.com',
+    id: 'stf-balaji',
+    name: 'Balaji',
+    shortName: 'Balaji',
+    email: 'balaji@wouchify.com',
     role: 'Content Executive',
-    domain: 'Electronics & Loot Deals',
-    dealsToday: 8,
-    lootToday: 5,
-    couponsToday: 3,
+    domain: 'Deals & Loot Deals',
+    dealsToday: 12,
+    lootToday: 6,
+    couponsToday: 0,
     bannersToday: 2,
     storesToday: 1,
-    submissionsToday: 19,
-    approvalRate: 96.5,
-    avgTurnaround: '12 mins',
+    submissionsToday: 21,
+    approvalRate: 98.5,
+    avgTurnaround: '10 mins',
     status: 'Online'
   },
   {
-    id: 'stf-02',
-    name: 'Sneha Patel',
-    shortName: 'Sneha P.',
-    email: 'sneha.deals@wouchify.com',
-    role: 'Deals Executive',
-    domain: 'Mobiles, Laptops & Appliances',
-    dealsToday: 9,
-    lootToday: 2,
-    couponsToday: 1,
-    bannersToday: 0,
-    storesToday: 3,
-    submissionsToday: 15,
-    approvalRate: 98.2,
-    avgTurnaround: '18 mins',
-    status: 'Online'
-  },
-  {
-    id: 'stf-03',
-    name: 'Arjun Verma',
-    shortName: 'Arjun V.',
-    email: 'arjun.coupons@wouchify.com',
-    role: 'Coupons Executive',
-    domain: 'Fashion, Food & Travel',
-    dealsToday: 2,
-    lootToday: 1,
-    couponsToday: 5,
-    bannersToday: 0,
-    storesToday: 0,
-    submissionsToday: 8,
-    approvalRate: 91.4,
-    avgTurnaround: '24 mins',
-    status: 'Away'
-  },
-  {
-    id: 'stf-04',
-    name: 'Priya Sundaram',
-    shortName: 'Priya S.',
-    email: 'priya.media@wouchify.com',
-    role: 'Creative Executive',
-    domain: 'Hero Banners & Ads',
+    id: 'stf-jayanth',
+    name: 'Jayanth',
+    shortName: 'Jayanth',
+    email: 'jayanth@wouchify.com',
+    role: 'Content Executive',
+    domain: 'Coupons & Credit Cards',
     dealsToday: 0,
     lootToday: 0,
-    couponsToday: 0,
-    bannersToday: 4,
-    storesToday: 0,
-    submissionsToday: 4,
-    approvalRate: 97.8,
-    avgTurnaround: '35 mins',
+    couponsToday: 8,
+    bannersToday: 3,
+    storesToday: 2,
+    submissionsToday: 13,
+    approvalRate: 97.4,
+    avgTurnaround: '12 mins',
     status: 'Online'
   }
 ]
+
 
 export const OperationsDashboardPage: React.FC = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null)
@@ -202,19 +170,61 @@ export const OperationsDashboardPage: React.FC = () => {
     }
   ])
 
+  // Load real pending submissions from API
+  useEffect(() => {
+    adminApi.getSubmissions({ status: 'Pending Approval' })
+      .then((res: any[]) => {
+        if (Array.isArray(res) && res.length > 0) {
+          const mapped: UrgentModerationItem[] = res.map((s: any, idx: number) => {
+            const snap = s.dataSnapshot || {}
+            return {
+              id: s._id || s.id || `appr-${idx + 1}`,
+              type: s.entityType === 'loot_deal' ? 'loot' :
+                    s.entityType === 'deal' ? 'deal' :
+                    s.entityType === 'coupon' ? 'coupon' :
+                    s.entityType === 'banner' ? 'banner' :
+                    s.entityType === 'advertisement' ? 'ad' :
+                    s.entityType === 'store' ? 'store' : 'deal',
+              title: s.title || snap.title || snap.name || 'Submitted Item',
+              brand: snap.brand || snap.store || s.store || 'Generic',
+              store: s.store || snap.store || snap.storeName || 'Partner Store',
+              submittedBy: s.submittedBy || 'executive@wouchify.com',
+              submittedAt: s.submittedAt ? new Date(s.submittedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : 'Recently',
+              price: snap.price || snap.currentPrice || snap.reward || 'Offer',
+              originalPrice: snap.originalPrice,
+              discount: snap.discount || snap.discountLabel,
+              code: snap.code,
+              priority: s.priority || 'Normal',
+              category: s.category || snap.category || 'General',
+              image: snap.image || snap.imageUrl || snap.productImage || snap.primaryImage || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop'
+            }
+          })
+          setUrgentItems(mapped)
+        }
+      })
+      .catch(err => {
+        console.warn('API error, using fallback urgent items:', err)
+      })
+  }, [])
+
   const showToast = (msg: string) => {
     setToastMessage(msg)
     setTimeout(() => setToastMessage(null), 3000)
   }
 
   const handleApprove = (id: string, title: string) => {
+    adminApi.approveSubmission(id).catch(console.warn)
     setUrgentItems(prev => prev.filter(item => item.id !== id))
     showToast(`Approved & published: ${title}`)
   }
 
   const handleReject = (id: string, title: string) => {
-    setUrgentItems(prev => prev.filter(item => item.id !== id))
-    showToast(`Rejected submission: ${title}`)
+    const reason = prompt(`Enter rejection reason for "${title}":`, 'Details need review')
+    if (reason) {
+      adminApi.rejectSubmission(id, reason).catch(console.warn)
+      setUrgentItems(prev => prev.filter(item => item.id !== id))
+      showToast(`Rejected submission: ${title}`)
+    }
   }
 
   const navigate = (path: string) => {
@@ -573,10 +583,10 @@ export const OperationsDashboardPage: React.FC = () => {
                         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                           <div className="product-table-thumb-wrap" style={{ width: '48px', height: '48px' }}>
                             <img 
-                              src={item.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop'} 
+                              src={item.image || PLACEHOLDER_DEAL_IMAGE} 
                               alt={item.title} 
                               className="product-table-thumb"
-                              onError={(e) => { (e.target as any).src = 'https://via.placeholder.com/48?text=Deal' }}
+                              onError={(e) => { (e.target as any).src = PLACEHOLDER_DEAL_IMAGE }}
                             />
                           </div>
                           <div className="submission-details-cell" style={{ maxWidth: '320px' }}>
@@ -612,7 +622,7 @@ export const OperationsDashboardPage: React.FC = () => {
                               src={getStoreLogo(item.store)} 
                               alt={item.store} 
                               className="store-partner-logo"
-                              onError={(e) => { (e.target as any).src = 'https://via.placeholder.com/56x18?text=' + item.store }}
+                              onError={(e) => { (e.target as any).src = PLACEHOLDER_STORE_LOGO }}
                             />
                           </div>
                           {item.code ? (

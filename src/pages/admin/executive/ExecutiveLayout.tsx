@@ -1,5 +1,21 @@
 import React, { useEffect, useState } from 'react'
-import { LayoutDashboard, Zap, Flame, Store, Tag, CreditCard, Image as ImageIcon, Megaphone, ChevronLeft, ChevronRight, LogOut } from 'lucide-react'
+import {
+  LayoutDashboard,
+  Zap,
+  Flame,
+  Store,
+  Tag,
+  CreditCard,
+  Image as ImageIcon,
+  Megaphone,
+  ShieldCheck,
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+  LogOut,
+  ExternalLink,
+  Plus
+} from 'lucide-react'
 import logo from '../../../assets/navbar/wouchify-logo.png'
 import './ExecutiveLayout.css'
 
@@ -9,21 +25,35 @@ interface ExecutiveLayoutProps {
 }
 
 export const ExecutiveLayout: React.FC<ExecutiveLayoutProps> = ({ children, activeMenu }) => {
-  const [user, setUser] = useState<{ email: string; role: string } | null>(null)
+  const [user, setUser] = useState<{ email: string; role: string; name?: string } | null>(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
 
   useEffect(() => {
-    const token = localStorage.getItem('staffToken')
-    const userData = localStorage.getItem('staffUser')
-    
-    if (!token || !userData) {
-      window.history.pushState({}, '', '/executive/login')
-      window.dispatchEvent(new PopStateEvent('popstate'))
-      return
+    // Specifically load executive user profile
+    const stored = localStorage.getItem('executiveUser')
+    if (stored) {
+      try {
+        setUser(JSON.parse(stored))
+        return
+      } catch {}
     }
 
-    setUser(JSON.parse(userData))
+    const staffUserStr = localStorage.getItem('staffUser')
+    if (staffUserStr) {
+      try {
+        const parsed = JSON.parse(staffUserStr)
+        if (parsed.role === 'executive' || (parsed.email && !parsed.email.includes('ops.manager') && !parsed.email.includes('admin'))) {
+          setUser(parsed)
+          return
+        }
+      } catch {}
+    }
+
+    // Default executive profile for Executive Panel
+    const defaultExec = { name: 'Balaji', email: 'balaji@wouchify.com', role: 'Content Executive' }
+    localStorage.setItem('executiveUser', JSON.stringify(defaultExec))
+    setUser(defaultExec)
   }, [])
 
   const handleLogout = () => {
@@ -40,14 +70,16 @@ export const ExecutiveLayout: React.FC<ExecutiveLayoutProps> = ({ children, acti
   }
 
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', path: '/executive/dashboard', icon: <LayoutDashboard size={20} /> },
-    { id: 'deals', label: 'Deals', path: '/executive/deals', icon: <Zap size={20} /> },
-    { id: 'loot-deals', label: 'Loot Deals', path: '/executive/loot-deals', icon: <Flame size={20} /> },
-    { id: 'stores', label: 'Stores', path: '/executive/stores', icon: <Store size={20} /> },
-    { id: 'coupons', label: 'Coupons', path: '/executive/coupons', icon: <Tag size={20} /> },
-    { id: 'credit-cards', label: 'Credit Cards', path: '/executive/credit-cards', icon: <CreditCard size={20} /> },
-    { id: 'banners', label: 'Banners', path: '/executive/banners', icon: <ImageIcon size={20} /> },
-    { id: 'advertisements', label: 'Advertisements', path: '/executive/advertisements', icon: <Megaphone size={20} /> },
+    { id: 'dashboard', label: 'Dashboard', path: '/executive/dashboard', icon: <LayoutDashboard size={19} /> },
+    { id: 'deals', label: 'Deals', path: '/executive/deals', icon: <Zap size={19} /> },
+    { id: 'loot-deals', label: 'Loot Deals', path: '/executive/loot-deals', icon: <Flame size={19} /> },
+    { id: 'stores', label: 'Stores', path: '/executive/stores', icon: <Store size={19} /> },
+    { id: 'coupons', label: 'Coupons', path: '/executive/coupons', icon: <Tag size={19} /> },
+    { id: 'credit-cards', label: 'Credit Cards', path: '/executive/credit-cards', icon: <CreditCard size={19} /> },
+    { id: 'banners', label: 'Banners', path: '/executive/banners', icon: <ImageIcon size={19} /> },
+    { id: 'advertisements', label: 'Advertisements', path: '/executive/advertisements', icon: <Megaphone size={19} /> },
+    { id: 'verification', label: 'Link & Coupon Verification', path: '/executive/verification', icon: <ShieldCheck size={19} /> },
+    { id: 'tickets', label: 'Flagged Issues & Tickets', path: '/executive/tickets', icon: <AlertTriangle size={19} /> },
   ]
 
   if (!user) return null
@@ -65,54 +97,114 @@ export const ExecutiveLayout: React.FC<ExecutiveLayoutProps> = ({ children, acti
         <div className="executive-sidebar-overlay" onClick={() => setIsSidebarOpen(false)}></div>
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar with Deep Navy Gradient */}
       <aside className={`executive-sidebar ${isSidebarOpen ? 'open' : ''} ${isCollapsed ? 'collapsed' : ''}`}>
         <button 
           className="collapse-btn" 
           onClick={() => setIsCollapsed(!isCollapsed)}
           title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
         >
-          {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          {isCollapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
         </button>
 
         <div className="sidebar-header">
           <img src={logo} alt="Wouchify" className="executive-logo" onClick={() => navigate('/executive/dashboard')} />
-          <div className="executive-badge">Executive</div>
+          <div className="executive-badge">Content Executive</div>
         </div>
 
         <nav className="executive-nav">
           <ul>
-            {menuItems.map((item) => (
-              <li 
-                key={item.id} 
-                className={activeMenu === item.id ? 'active' : ''}
-                onClick={() => navigate(item.path)}
-              >
-                <span className="nav-icon">{item.icon}</span>
-                <span className="nav-label">{item.label}</span>
-              </li>
-            ))}
+            {menuItems.map((item) => {
+              const isActive = activeMenu === item.id
+              return (
+                <li 
+                  key={item.id} 
+                  className={isActive ? 'active' : ''}
+                  onClick={() => navigate(item.path)}
+                  title={isCollapsed ? item.label : undefined}
+                >
+                  <span className="nav-icon">{item.icon}</span>
+                  <span className="nav-label">{item.label}</span>
+                </li>
+              )
+            })}
           </ul>
         </nav>
 
         <div className="sidebar-footer">
           <div className="executive-user-info">
-            <div className="executive-avatar">{user.email.charAt(0).toUpperCase()}</div>
+            <div className="executive-avatar">
+              {(user.name || user.email || 'E').charAt(0).toUpperCase()}
+            </div>
             <div className="executive-details">
-              <span className="executive-email">{user.email}</span>
-              <span className="executive-role">Executive</span>
+              <span className="executive-email">{user.name || user.email}</span>
+              <span className="executive-role">Content Executive</span>
             </div>
           </div>
           <button className="executive-logout-btn" onClick={handleLogout} title="Logout">
-            {isCollapsed ? <LogOut size={20} /> : "Logout"}
+            <LogOut size={16} />
+            {!isCollapsed && <span>Logout</span>}
           </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="executive-main-content">
-        {children}
+      <main className={`executive-main-content ${isCollapsed ? 'collapsed' : ''}`}>
+        {/* Top Bar with Clean Header and Quick Actions */}
+        <header className="executive-top-bar">
+          <div className="top-bar-left">
+            <span className="top-bar-title">Content Executive Portal</span>
+          </div>
+
+          <div className="top-bar-right">
+            <button 
+              type="button" 
+              className="quick-link-btn"
+              onClick={() => navigate('/executive/verification')}
+              title="Verify links and coupon codes"
+            >
+              <ShieldCheck size={15} className="quick-link-icon" />
+              <span>Link Checker</span>
+            </button>
+
+            <button 
+              type="button" 
+              className="quick-link-btn"
+              onClick={() => navigate('/executive/deals')}
+              title="Create a new deal"
+            >
+              <Plus size={15} className="quick-link-icon" />
+              <span>Add Deal</span>
+            </button>
+
+            <button 
+              type="button" 
+              className="quick-link-btn highlight"
+              onClick={() => navigate('/executive/tickets')}
+              title="Reported issues and broken links"
+            >
+              <AlertTriangle size={15} className="quick-link-icon" />
+              <span>Flagged Issues</span>
+            </button>
+
+            <a 
+              href="/" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="storefront-preview-btn"
+              title="View live website"
+            >
+              <ExternalLink size={14} />
+              <span>Storefront</span>
+            </a>
+          </div>
+        </header>
+
+        <div className="executive-view-wrapper">
+          {children}
+        </div>
       </main>
     </div>
   )
 }
+

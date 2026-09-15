@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { OperationsLayout } from './OperationsLayout'
+import { adminApi } from '../../../services/adminApi'
 import { 
   CheckCircle2, 
   Clock, 
@@ -18,7 +19,7 @@ import {
   Store
 } from 'lucide-react'
 import './OperationsShared.css'
-import { getStoreLogo } from '../../../data/dealsPage'
+import { getStoreLogo, PLACEHOLDER_DEAL_IMAGE, PLACEHOLDER_STORE_LOGO } from '../../../data/dealsPage'
 
 export interface ModerationItem {
   id: string
@@ -65,7 +66,7 @@ const initialApprovalQueue: ModerationItem[] = [
     title: 'Sony WH-1000XM5 Wireless ANC Headphones (Price Glitch at ₹4,999)',
     brand: 'Sony',
     store: 'Amazon',
-    submittedBy: 'rahul.executive@wouchify.com',
+    submittedBy: 'balaji@wouchify.com',
     submittedAt: '12 mins ago',
     price: '₹4,999',
     originalPrice: '₹29,990',
@@ -93,7 +94,7 @@ const initialApprovalQueue: ModerationItem[] = [
     title: 'Puma Speedcat OG Leather Sneakers (Under ₹999 Steal Deal)',
     brand: 'Puma',
     store: 'Myntra',
-    submittedBy: 'rahul.executive@wouchify.com',
+    submittedBy: 'balaji@wouchify.com',
     submittedAt: '25 mins ago',
     price: '₹949',
     originalPrice: '₹7,999',
@@ -112,7 +113,7 @@ const initialApprovalQueue: ModerationItem[] = [
     title: 'Samsung Galaxy S24 Ultra 5G (12GB RAM, 512GB Titanium Black)',
     brand: 'Samsung',
     store: 'Flipkart',
-    submittedBy: 'sneha.deals@wouchify.com',
+    submittedBy: 'balaji@wouchify.com',
     submittedAt: '35 mins ago',
     price: '₹1,09,999',
     originalPrice: '₹1,34,999',
@@ -130,7 +131,7 @@ const initialApprovalQueue: ModerationItem[] = [
     title: 'Apple MacBook Air M3 (13.6-inch Liquid Retina, 8GB/256GB SSD)',
     brand: 'Apple',
     store: 'Amazon',
-    submittedBy: 'sneha.deals@wouchify.com',
+    submittedBy: 'balaji@wouchify.com',
     submittedAt: '45 mins ago',
     price: '₹94,990',
     originalPrice: '₹1,14,900',
@@ -148,7 +149,7 @@ const initialApprovalQueue: ModerationItem[] = [
     title: 'Myntra Flat ₹500 OFF on Orders Above ₹1,999',
     brand: 'Myntra',
     store: 'Myntra',
-    submittedBy: 'arjun.coupons@wouchify.com',
+    submittedBy: 'jayanth@wouchify.com',
     submittedAt: '1 hour ago',
     price: 'Flat ₹500 OFF',
     code: 'MYNTRAPRO',
@@ -166,7 +167,7 @@ const initialApprovalQueue: ModerationItem[] = [
     title: 'Dominos Pizza: Flat 50% OFF up to ₹120 on Pizza Mania & Combos',
     brand: "Domino's",
     store: 'Dominos',
-    submittedBy: 'arjun.coupons@wouchify.com',
+    submittedBy: 'jayanth@wouchify.com',
     submittedAt: '2 hours ago',
     price: '50% OFF',
     code: 'DOM50FEST',
@@ -184,7 +185,7 @@ const initialApprovalQueue: ModerationItem[] = [
     title: 'Home Page Hero: Diwali Mega Cashback Bonanza (Up to 15% Extra)',
     brand: 'Wouchify',
     store: 'Wouchify',
-    submittedBy: 'priya.media@wouchify.com',
+    submittedBy: 'balaji@wouchify.com',
     submittedAt: '3 hours ago',
     price: 'Heroic Banner',
     discount: 'Up to 15% Cashback',
@@ -201,7 +202,7 @@ const initialApprovalQueue: ModerationItem[] = [
     title: 'Header Sticky Sponsor Banner: HDFC Regalia Gold Credit Card',
     brand: 'HDFC Bank',
     store: 'HDFC Bank',
-    submittedBy: 'priya.media@wouchify.com',
+    submittedBy: 'jayanth@wouchify.com',
     submittedAt: '4 hours ago',
     price: '₹45,000 / Week',
     discount: 'Sponsor Ad',
@@ -233,6 +234,50 @@ export const OperationsApprovalsPage: React.FC = () => {
     setToastMessage(msg)
     setTimeout(() => setToastMessage(null), 3000)
   }
+
+  // Load from backend API submissions queue
+  useEffect(() => {
+    adminApi.getSubmissions()
+      .then((res: any[]) => {
+        if (Array.isArray(res) && res.length > 0) {
+          const mapped: ModerationItem[] = res.map((s: any, idx: number) => {
+            const snap = s.dataSnapshot || {}
+            return {
+              id: s._id || s.id || `appr-${idx + 1}`,
+              type: s.entityType === 'loot_deal' ? 'loot' :
+                    s.entityType === 'deal' ? 'deal' :
+                    s.entityType === 'coupon' ? 'coupon' :
+                    s.entityType === 'banner' ? 'banner' :
+                    s.entityType === 'advertisement' ? 'ad' :
+                    s.entityType === 'store' ? 'store' : 'deal',
+              title: s.title || snap.title || snap.name || 'Submitted Item',
+              brand: snap.brand || snap.store || s.store || 'Generic',
+              store: s.store || snap.store || snap.storeName || 'Partner Store',
+              submittedBy: s.submittedBy || 'executive@wouchify.com',
+              submittedAt: s.submittedAt ? new Date(s.submittedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : 'Recently',
+              price: snap.price || snap.currentPrice || snap.reward || 'Special Offer',
+              originalPrice: snap.originalPrice || '',
+              discount: snap.discount || snap.discountLabel || '',
+              code: snap.code || '',
+              priority: s.priority || 'Normal',
+              link: snap.link || snap.href || snap.targetLink || 'https://wouchify.com',
+              image: snap.image || snap.imageUrl || snap.productImage || snap.primaryImage || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop',
+              notes: s.notes || snap.proofNote || snap.description || '',
+              category: s.category || snap.category || 'General',
+              status: s.status === 'Approved' ? 'Approved' : (s.status === 'Rejected' ? 'Rejected' : 'Pending Approval'),
+              rejectionReason: s.rejectionReason,
+              description: snap.description,
+              terms: snap.terms,
+              highlights: snap.highlights
+            }
+          })
+          setItems(mapped)
+        }
+      })
+      .catch(err => {
+        console.warn('API error, using mock moderation items:', err)
+      })
+  }, [])
 
   // KPIs
   const pendingCount = items.filter(i => i.status === 'Pending Approval').length
@@ -268,6 +313,7 @@ export const OperationsApprovalsPage: React.FC = () => {
   }, [items, filterType, filterExecutive, searchTerm])
 
   const handleApproveOne = (id: string, title: string) => {
+    adminApi.approveSubmission(id).catch(console.warn)
     setItems(prev => prev.map(item => item.id === id ? { ...item, status: 'Approved' } : item))
     setSelectedIds(prev => prev.filter(selId => selId !== id))
     showToast(`Approved & published to storefront: "${title}"`)
@@ -285,6 +331,7 @@ export const OperationsApprovalsPage: React.FC = () => {
       return
     }
 
+    adminApi.rejectSubmission(rejectingItem.id, rejectionReason).catch(console.warn)
     setItems(prev => prev.map(item => 
       item.id === rejectingItem.id ? { ...item, status: 'Rejected', rejectionReason } : item
     ))
@@ -296,6 +343,7 @@ export const OperationsApprovalsPage: React.FC = () => {
 
   const handleBulkApprove = () => {
     if (selectedIds.length === 0) return
+    selectedIds.forEach(id => adminApi.approveSubmission(id).catch(console.warn))
     setItems(prev => prev.map(item => selectedIds.includes(item.id) ? { ...item, status: 'Approved' } : item))
     showToast(`Bulk approved ${selectedIds.length} submissions`)
     setSelectedIds([])
@@ -305,6 +353,7 @@ export const OperationsApprovalsPage: React.FC = () => {
     if (selectedIds.length === 0) return
     const reason = prompt(`Enter rejection reason for ${selectedIds.length} selected items:`, 'Details incomplete or inaccurate')
     if (reason) {
+      selectedIds.forEach(id => adminApi.rejectSubmission(id, reason).catch(console.warn))
       setItems(prev => prev.map(item => selectedIds.includes(item.id) ? { ...item, status: 'Rejected', rejectionReason: reason } : item))
       showToast(`Rejected ${selectedIds.length} submissions`)
       setSelectedIds([])
@@ -491,10 +540,8 @@ export const OperationsApprovalsPage: React.FC = () => {
               aria-label="Filter by Executive"
             >
               <option value="all">👥 All Executives</option>
-              <option value="rahul.executive@wouchify.com">Rahul Sharma (Content Exec)</option>
-              <option value="sneha.deals@wouchify.com">Sneha Patel (Deals Exec)</option>
-              <option value="arjun.coupons@wouchify.com">Arjun Verma (Coupons Exec)</option>
-              <option value="priya.media@wouchify.com">Priya Sundaram (Creative Exec)</option>
+              <option value="balaji@wouchify.com">Balaji (Deals Exec)</option>
+              <option value="jayanth@wouchify.com">Jayanth (Coupons Exec)</option>
             </select>
           </div>
         </div>
@@ -551,7 +598,7 @@ export const OperationsApprovalsPage: React.FC = () => {
                               src={item.image} 
                               alt={item.title} 
                               className="product-table-thumb"
-                              onError={(e) => { (e.target as any).src = 'https://via.placeholder.com/48?text=Deal' }}
+                              onError={(e) => { (e.target as any).src = PLACEHOLDER_DEAL_IMAGE }}
                             />
                           </div>
                         </td>
@@ -601,7 +648,7 @@ export const OperationsApprovalsPage: React.FC = () => {
                               src={getStoreLogo(item.store)} 
                               alt={item.store} 
                               className="store-partner-logo"
-                              onError={(e) => { (e.target as any).src = 'https://via.placeholder.com/56x18?text=' + item.store }}
+                              onError={(e) => { (e.target as any).src = PLACEHOLDER_STORE_LOGO }}
                             />
                           </div>
                         </td>

@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { ExecutiveLayout } from './ExecutiveLayout'
+import { adminApi } from '../../../services/adminApi'
 import { 
   Plus, 
   Search, 
@@ -30,10 +31,11 @@ import {
   Calendar,
   SendHorizontal,
   Bell,
-  TrendingDown
+  TrendingDown,
+  Star
 } from 'lucide-react'
 import './ExecutiveShared.css'
-import { DEAL_PRODUCT_PRESETS, getStoreLogo, convertGoogleDriveUrl } from '../../../data/dealsPage'
+import { MASTER_EXECUTIVE_LOOT_DEALS, DEAL_PRODUCT_PRESETS, getStoreLogo, convertGoogleDriveUrl, PLACEHOLDER_DEAL_IMAGE, PLACEHOLDER_STORE_LOGO } from '../../../data/dealsPage'
 import { FAVOURITE_STORES } from '../../../data/storesHero'
 import { CATEGORIES_DATA } from '../../../data/categories'
 import { ImageUploadField } from './ImageUploadField'
@@ -72,6 +74,8 @@ export interface LootDeal {
   pushNotification: boolean
   isFeatured: boolean
   isVerified: boolean
+  isBestSelling?: boolean
+  sectionPlacement?: 'favourite' | 'best_selling' | 'both'
   clicks: number
 }
 
@@ -127,228 +131,58 @@ export const getExpiryCountdown = (isoStr?: string): { text: string; status: 'ex
   }
 }
 
-const initialLootDeals: LootDeal[] = [
-  {
-    id: 'loot-101',
-    title: 'Philips Bluetooth Soundbar 120W with Deep Bass Subwoofer',
-    store: 'Amazon',
-    brand: 'Philips',
-    category: 'Electronics',
-    lootType: 'glitch',
-    badge: '💥 PRICE ERROR',
-    status: 'Approved',
-    priority: 'Critical',
-    code: 'LOOT90',
-    link: 'https://amazon.in/dp/B0CH9871',
-    originalPrice: '₹14,990',
-    price: '₹1,499',
-    discountLabel: '90% OFF',
-    discountValue: 90,
-    effectivePrice: '₹1,299',
-    cashback: '+ ₹100 Wouchify Cash',
-    stockClaimedPercent: 94,
-    quantityAlert: 'Hurry! Only 3 units left at this price',
-    proofNote: 'Verified seller pricing error. Orders dispatching from Cloudtail warehouse.',
-    trickSteps: '1. Click "Grab Loot" to go to Amazon product page.\n2. Apply the ₹500 instant coupon checkbox.\n3. Enter promo code LOOT90 on the payment checkout page.\n4. Pay via UPI for extra ₹200 instant bank discount.',
-    terms: 'Price may revert back to MRP any minute. Cash on delivery or instant card pay supported.',
-    asinOrSku: 'B0CH9871XY',
-    deliveryInfo: 'Prime 1-Day Free Delivery',
-    rating: '4.6 ★ (28k)',
-    postedAt: 'Today, 11:15 AM',
-    expiresAt: new Date(Date.now() + 3600000 * 2).toISOString().slice(0, 16),
-    image: DEAL_PRODUCT_PRESETS[0]?.image || 'https://images.unsplash.com/photo-1545454675-3531b543be5d?w=500&auto=format&fit=crop',
-    images: [DEAL_PRODUCT_PRESETS[0]?.image || 'https://images.unsplash.com/photo-1545454675-3531b543be5d?w=500&auto=format&fit=crop'],
-    telegramAlert: true,
-    pushNotification: true,
-    isFeatured: true,
-    isVerified: true,
-    clicks: 4890
-  },
-  {
-    id: 'loot-102',
-    title: 'boAt Airdopes 141 ANC with 42H Playtime & Low Latency',
-    store: 'Flipkart',
-    brand: 'boAt',
-    category: 'Electronics',
-    lootType: 'flash',
-    badge: '⚡ FLASH DROP',
-    status: 'Approved',
-    priority: 'High',
-    code: 'AIR50',
-    link: 'https://flipkart.com/boat-airdopes',
-    originalPrice: '₹4,490',
-    price: '₹499',
-    discountLabel: '89% OFF',
-    discountValue: 89,
-    effectivePrice: '₹449',
-    cashback: '+ 5% Wouchify Cashback',
-    stockClaimedPercent: 88,
-    quantityAlert: 'Limited flash window (88% claimed)',
-    proofNote: 'Flipkart Super Flash Sale drop valid for top 500 buyers.',
-    trickSteps: '1. Add product to cart immediately.\n2. Use SuperCoins on Flipkart checkout to deduct ₹50.\n3. Make payment via UPI or RuPay Card.',
-    terms: 'Maximum 1 unit per customer account.',
-    asinOrSku: 'FSNAIR141B',
-    deliveryInfo: 'Free Flipkart Assured Delivery',
-    rating: '4.3 ★ (45k)',
-    postedAt: 'Today, 10:45 AM',
-    expiresAt: new Date(Date.now() + 3600000 * 5).toISOString().slice(0, 16),
-    image: DEAL_PRODUCT_PRESETS[1]?.image || 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500&auto=format&fit=crop',
-    images: [DEAL_PRODUCT_PRESETS[1]?.image || 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500&auto=format&fit=crop'],
-    telegramAlert: true,
-    pushNotification: true,
-    isFeatured: true,
-    isVerified: true,
-    clicks: 3410
-  },
-  {
-    id: 'loot-103',
-    title: 'Portronics 65W Fast USB-C Braided Cable (2 Metres)',
-    store: 'Amazon',
-    brand: 'Portronics',
-    category: 'Electronics',
-    lootType: 'under99',
-    badge: '🏷️ UNDER ₹99 LOOT',
-    status: 'Approved',
-    priority: 'High',
-    code: '',
-    link: 'https://amazon.in/dp/B0PORT01',
-    originalPrice: '₹899',
-    price: '₹79',
-    discountLabel: '91% OFF',
-    discountValue: 91,
-    effectivePrice: '₹79',
-    cashback: '+ ₹10 Wallet Cash',
-    stockClaimedPercent: 78,
-    quantityAlert: 'Selling fast! Stock limited',
-    proofNote: 'Lightning Under ₹99 store price drop.',
-    trickSteps: '1. Direct price drop active on Amazon.\n2. Click Grab Loot and proceed directly to buy now.\n3. Free delivery for Prime members.',
-    terms: 'Valid until stock runs out.',
-    asinOrSku: 'B0PORT0165W',
-    deliveryInfo: 'Prime Free Delivery',
-    rating: '4.2 ★ (8.2k)',
-    postedAt: 'Today, 09:20 AM',
-    expiresAt: new Date(Date.now() + 3600000 * 18).toISOString().slice(0, 16),
-    image: DEAL_PRODUCT_PRESETS[2]?.image || 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=500&auto=format&fit=crop',
-    images: [DEAL_PRODUCT_PRESETS[2]?.image || 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=500&auto=format&fit=crop'],
-    telegramAlert: false,
-    pushNotification: true,
-    isFeatured: false,
-    isVerified: true,
-    clicks: 2150
-  },
-  {
-    id: 'loot-104',
-    title: 'Puma Men Running Sports Shoes - Ultra Breathable Mesh',
-    store: 'Myntra',
-    brand: 'Puma',
-    category: 'Footwear',
-    lootType: 'steal',
-    badge: '🔥 83% OFF STEAL',
-    status: 'Approved',
-    priority: 'Normal',
-    code: 'PUMA80',
-    link: 'https://myntra.com/puma-shoes',
-    originalPrice: '₹4,999',
-    price: '₹849',
-    discountLabel: '83% OFF',
-    discountValue: 83,
-    effectivePrice: '₹799',
-    cashback: '+ 8% Wouchify Cashback',
-    stockClaimedPercent: 65,
-    quantityAlert: 'Sizes 7, 8, 9 & 10 in stock',
-    proofNote: 'Myntra End of Reason Steal Deal.',
-    trickSteps: '1. Select shoe size on Myntra.\n2. Enter coupon code PUMA80 at checkout.\n3. Pay with any UPI app for extra 5% instant discount.',
-    terms: '14-Day Free Returns supported.',
-    asinOrSku: 'MYNPUMA892',
-    deliveryInfo: 'Free Delivery on Myntra',
-    rating: '4.4 ★ (18.6k)',
-    postedAt: 'Yesterday, 06:40 PM',
-    expiresAt: new Date(Date.now() + 3600000 * 48).toISOString().slice(0, 16),
-    image: DEAL_PRODUCT_PRESETS[3]?.image || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&auto=format&fit=crop',
-    images: [DEAL_PRODUCT_PRESETS[3]?.image || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&auto=format&fit=crop'],
-    telegramAlert: true,
-    pushNotification: false,
-    isFeatured: false,
-    isVerified: true,
-    clicks: 1980
-  },
-  {
-    id: 'loot-105',
-    title: 'The Man Company Charcoal Grooming Kit (5-Piece Gift Set)',
-    store: 'Flipkart',
-    brand: 'The Man Company',
-    category: 'Beauty',
-    lootType: 'under199',
-    badge: '🏷️ UNDER ₹199',
-    status: 'Approved',
-    priority: 'Normal',
-    code: 'GROOM100',
-    link: 'https://flipkart.com/the-man-company',
-    originalPrice: '₹1,899',
-    price: '₹189',
-    discountLabel: '90% OFF',
-    discountValue: 90,
-    effectivePrice: '₹189',
-    cashback: '+ ₹25 Cashback',
-    stockClaimedPercent: 91,
-    quantityAlert: 'Lightning Deal (91% Claimed)',
-    proofNote: 'Flash kit sale verified on Flipkart seller portal.',
-    trickSteps: '1. Add 1 set to cart.\n2. Coupon GROOM100 auto-applies.\n3. Complete payment before flash sale expires.',
-    terms: 'Valid on single box per customer.',
-    asinOrSku: 'FSNTMC9018',
-    deliveryInfo: 'Free Delivery above ₹149',
-    rating: '4.5 ★ (9.1k)',
-    postedAt: 'Yesterday, 02:15 PM',
-    expiresAt: new Date(Date.now() + 3600000 * 12).toISOString().slice(0, 16),
-    image: DEAL_PRODUCT_PRESETS[4]?.image || 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&auto=format&fit=crop',
-    images: [DEAL_PRODUCT_PRESETS[4]?.image || 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&auto=format&fit=crop'],
-    telegramAlert: false,
-    pushNotification: false,
-    isFeatured: false,
-    isVerified: true,
-    clicks: 1420
-  },
-  {
-    id: 'loot-106',
-    title: 'Free Sample Coffee Tasting Box (3 Exotic Flavours 150g)',
-    store: 'Tata CLiQ',
-    brand: 'Tata Coffee',
-    category: 'Grocery',
-    lootType: 'freebie',
-    badge: '🎁 100% FREEBIE',
-    status: 'Pending Approval',
-    priority: 'High',
-    code: 'SAMPLEFREE',
-    link: 'https://tatacliq.com/free-sample',
-    originalPrice: '₹450',
-    price: '₹0',
-    discountLabel: '100% FREE',
-    discountValue: 100,
-    effectivePrice: '₹0 (Pay ₹49 Shipping)',
-    cashback: '₹49 Wouchify Cash Refund',
-    stockClaimedPercent: 96,
-    quantityAlert: 'Almost sold out! 96% claimed',
-    proofNote: 'Official trial sample program by Tata Consumer Products.',
-    trickSteps: '1. Register new email on trial landing page.\n2. Apply code SAMPLEFREE.\n3. Pay ₹49 nominal shipping which is refunded as Wouchify wallet cash.',
-    terms: '1 box per household delivery address.',
-    asinOrSku: 'TATASAMP01',
-    deliveryInfo: 'Delivered in 3-5 Business Days',
-    rating: '4.7 ★ (12k)',
-    postedAt: 'Today, 08:30 AM',
-    expiresAt: new Date(Date.now() + 3600000 * 3).toISOString().slice(0, 16),
-    image: DEAL_PRODUCT_PRESETS[5]?.image || 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&auto=format&fit=crop',
-    images: [DEAL_PRODUCT_PRESETS[5]?.image || 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&auto=format&fit=crop'],
-    telegramAlert: true,
-    pushNotification: true,
-    isFeatured: true,
-    isVerified: true,
-    clicks: 5210
-  }
-]
-
 export const ExecutiveLootDealsPage: React.FC = () => {
-  const [deals, setDeals] = useState<LootDeal[]>(initialLootDeals)
+  const [deals, setDeals] = useState<LootDeal[]>(() => {
+    try {
+      const cached = localStorage.getItem('wouchify_loot_deals')
+      if (cached) {
+        const parsed = JSON.parse(cached)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((d: any, index: number) => ({
+            id: String(d._id || d.id || `loot-${index + 1}`),
+            title: d.title || d.name || 'Untitled Loot Deal',
+            store: d.storeName || d.store || 'Amazon',
+            brand: d.brand || d.storeName || 'Generic',
+            category: d.category || 'Electronics',
+            lootType: d.lootType || (d.dealType === 'flash' ? 'flash' : 'steal'),
+            badge: d.badge || '⚡ HOT DROP',
+            status: d.submissionStatus === 'pending_approval' ? 'Pending Approval' : (d.status === 'active' || d.status === 'Approved' ? 'Approved' : 'Draft'),
+            priority: d.priority || 'High',
+            code: d.code || '',
+            link: d.href || d.link || 'https://amazon.in',
+            originalPrice: d.originalPrice || '₹999',
+            price: d.currentPrice || d.price || '₹199',
+            discountLabel: d.discount || d.discountLabel || '80% OFF',
+            discountValue: typeof d.discountValue === 'number' ? d.discountValue : 80,
+            effectivePrice: d.effectivePrice || d.currentPrice || d.price,
+            cashback: d.cashback || '+ 5% Wouchify Cashback',
+            stockClaimedPercent: d.stockClaimedPercent || 85,
+            quantityAlert: d.quantityAlert || 'Limited Flash Stock',
+            proofNote: d.proofNote || 'Verified via live automated checker',
+            trickSteps: d.trickSteps || '1. Click Grab Loot to open partner store.\n2. Proceed to checkout before stock runs out.',
+            terms: d.terms || 'Valid until stocks last.',
+            asinOrSku: d.asinOrSku || '',
+            deliveryInfo: d.deliveryInfo || 'Fast Delivery',
+            rating: d.rating || '4.5 ★ (10k)',
+            postedAt: d.postedAt || 'Today',
+            expiresAt: d.expiresAt || new Date(Date.now() + 86400000).toISOString().slice(0, 16),
+            image: d.image || d.productImage || DEAL_PRODUCT_PRESETS[0]?.image || '',
+            images: Array.isArray(d.images) && d.images.length > 0 ? d.images : [d.image || d.productImage || DEAL_PRODUCT_PRESETS[0]?.image || ''],
+            telegramAlert: Boolean(d.telegramAlert),
+            pushNotification: Boolean(d.pushNotification),
+            isFeatured: Boolean(d.isFeatured),
+            isVerified: Boolean(d.isVerified ?? true),
+            isBestSelling: Boolean(d.isBestSelling || d.sectionPlacement === 'best_selling' || d.sectionPlacement === 'both'),
+            sectionPlacement: d.sectionPlacement || (d.isBestSelling ? 'best_selling' : 'favourite'),
+            clicks: typeof d.clicks === 'number' ? d.clicks : (parseInt(d.clicks) || 0)
+          }))
+        }
+      }
+    } catch {}
+    return MASTER_EXECUTIVE_LOOT_DEALS as any
+  })
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table')
+  const [dealsTab, setDealsTab] = useState<'active' | 'expired'>('active')
   const [selectedDealIds, setSelectedDealIds] = useState<string[]>([])
   
   // Modals & Previews
@@ -356,6 +190,92 @@ export const ExecutiveLootDealsPage: React.FC = () => {
   const [editingDeal, setEditingDeal] = useState<LootDeal | null>(null)
   const [previewDeal, setPreviewDeal] = useState<LootDeal | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
+
+  // Load from backend API
+  useEffect(() => {
+    let isMounted = true
+    const fetchLoot = () => {
+      adminApi.getLootDeals()
+        .then((res: any[]) => {
+          if (!isMounted) return
+          if (Array.isArray(res) && res.length > 0) {
+            const mapped: LootDeal[] = res.map((d: any, index: number) => ({
+              id: String(d._id || d.id || `loot-${index + 1}`),
+              title: d.title || d.name || 'Untitled Loot Deal',
+              store: d.storeName || d.store || 'Amazon',
+              brand: d.brand || d.storeName || 'Generic',
+              category: d.category || 'Electronics',
+              lootType: d.lootType || (d.dealType === 'flash' ? 'flash' : 'steal'),
+              badge: d.badge || '⚡ HOT DROP',
+              status: d.submissionStatus === 'pending_approval' ? 'Pending Approval' : (d.status === 'active' || d.status === 'Approved' ? 'Approved' : 'Draft'),
+              priority: d.priority || 'High',
+              code: d.code || '',
+              link: d.href || d.link || 'https://amazon.in',
+              originalPrice: d.originalPrice || '₹999',
+              price: d.currentPrice || d.price || '₹199',
+              discountLabel: d.discount || d.discountLabel || '80% OFF',
+              discountValue: typeof d.discountValue === 'number' ? d.discountValue : 80,
+              effectivePrice: d.effectivePrice || d.currentPrice || d.price,
+              cashback: d.cashback || '+ 5% Wouchify Cashback',
+              stockClaimedPercent: d.stockClaimedPercent || 85,
+              quantityAlert: d.quantityAlert || 'Limited Flash Stock',
+              proofNote: d.proofNote || 'Verified via live automated checker',
+              trickSteps: d.trickSteps || '1. Click Grab Loot to open partner store.\n2. Proceed to checkout before stock runs out.',
+              terms: d.terms || 'Valid until stocks last.',
+              asinOrSku: d.asinOrSku || '',
+              deliveryInfo: d.deliveryInfo || 'Fast Delivery',
+              rating: d.rating || '4.5 ★ (10k)',
+              postedAt: d.postedAt || 'Today',
+              expiresAt: d.expiresAt || new Date(Date.now() + 86400000).toISOString().slice(0, 16),
+              image: d.image || d.productImage || DEAL_PRODUCT_PRESETS[0]?.image || '',
+              images: Array.isArray(d.images) && d.images.length > 0 ? d.images : [d.image || d.productImage || DEAL_PRODUCT_PRESETS[0]?.image || ''],
+              telegramAlert: Boolean(d.telegramAlert),
+              pushNotification: Boolean(d.pushNotification),
+              isFeatured: Boolean(d.isFeatured),
+              isVerified: Boolean(d.isVerified ?? true),
+              isBestSelling: Boolean(d.isBestSelling || d.sectionPlacement === 'best_selling' || d.sectionPlacement === 'both'),
+              sectionPlacement: d.sectionPlacement || (d.isBestSelling ? 'best_selling' : 'favourite'),
+              clicks: typeof d.clicks === 'number' ? d.clicks : (parseInt(d.clicks) || 0)
+            }))
+            setDeals(mapped)
+          }
+        })
+        .catch(err => {
+          console.warn('API error, using mock loot deals:', err)
+        })
+    }
+
+    fetchLoot()
+
+    const handleSync = () => {
+      fetchLoot()
+    }
+
+    const handleDealClicked = (e: Event) => {
+      const detail = (e as CustomEvent)?.detail
+      if (detail?.id) {
+        setDeals(prevDeals => prevDeals.map(d => {
+          const isMatch = String(d.id).toLowerCase() === String(detail.id).toLowerCase() ||
+            String(d.id).replace(/[^0-9]/g, '') === String(detail.id).replace(/[^0-9]/g, '')
+          if (isMatch) {
+            return { ...d, clicks: (d.clicks || 0) + 1 }
+          }
+          return d
+        }))
+      }
+      fetchLoot()
+    }
+
+    window.addEventListener('wouchify_loot_deals_updated', handleSync)
+    window.addEventListener('wouchify_deal_clicked', handleDealClicked)
+    window.addEventListener('storage', handleSync)
+    return () => {
+      isMounted = false
+      window.removeEventListener('wouchify_loot_deals_updated', handleSync)
+      window.removeEventListener('wouchify_deal_clicked', handleDealClicked)
+      window.removeEventListener('storage', handleSync)
+    }
+  }, [])
 
   // Filters & Sorting
   const [searchTerm, setSearchTerm] = useState('')
@@ -377,28 +297,28 @@ export const ExecutiveLootDealsPage: React.FC = () => {
     store: 'Amazon',
     brand: '',
     category: 'Electronics',
-    lootType: 'glitch',
-    badge: '💥 PRICE ERROR',
-    status: 'Approved',
-    priority: 'Critical',
+    lootType: 'flash',
+    badge: '⚡ FLASH LOOT',
+    status: 'Draft',
+    priority: 'High',
     code: '',
     link: '',
     originalPrice: '',
     price: '',
-    discountLabel: '90% OFF',
-    discountValue: 90,
+    discountLabel: '',
+    discountValue: 0,
     effectivePrice: '',
-    cashback: '+ ₹50 Wouchify Cash',
-    stockClaimedPercent: 85,
-    quantityAlert: 'Hurry! Only 5 units left',
-    proofNote: 'Price drop verified on official store app.',
-    trickSteps: '1. Click "Grab Loot" to open partner store.\n2. Apply any visible instant coupons on page.\n3. Pay with UPI/Net Banking for maximum instant price drop.',
-    terms: 'Price may revert anytime. Fast checkout recommended.',
+    cashback: '+ 5% Cashback',
+    stockClaimedPercent: 75,
+    quantityAlert: 'Limited Flash Units',
+    proofNote: '',
+    trickSteps: '1. Click "Grab Loot" to navigate to store.\n2. Apply available coupon code at checkout.\n3. Pay with instant UPI / Cards.',
+    terms: 'Offer valid for a limited time. Prices may revert without prior notice.',
     asinOrSku: '',
-    deliveryInfo: 'Free Fast Delivery',
+    deliveryInfo: 'Fast Express Delivery',
     rating: '4.5 ★ (10k)',
     postedAt: `Today, ${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}`,
-    expiresAt: new Date(Date.now() + 3600000 * 3).toISOString().slice(0, 16),
+    expiresAt: new Date(Date.now() + 3600000 * 6).toISOString().slice(0, 16),
     image: DEAL_PRODUCT_PRESETS[0]?.image || '',
     images: [DEAL_PRODUCT_PRESETS[0]?.image || ''],
     telegramAlert: true,
@@ -414,19 +334,29 @@ export const ExecutiveLootDealsPage: React.FC = () => {
     setTimeout(() => setToastMessage(null), 3000)
   }
 
+  // Helper: is loot deal expired (by status or date)
+  const isLootExpired = (deal: LootDeal): boolean => {
+    if (deal.status === 'Expired') return true
+    if (deal.expiresAt) {
+      const expTime = new Date(deal.expiresAt).getTime()
+      if (!isNaN(expTime) && expTime < Date.now()) return true
+    }
+    return false
+  }
+
   // KPI Metrics Calculation
   const kpiStats = useMemo(() => {
     const total = deals.length
-    const active = deals.filter(d => d.status === 'Approved').length
+    const active = deals.filter(d => d.status === 'Approved' && !isLootExpired(d)).length
     const glitches = deals.filter(d => d.lootType === 'glitch').length
     const under199 = deals.filter(d => d.lootType === 'under99' || d.lootType === 'under199').length
-    const expired = deals.filter(d => d.status === 'Expired').length
+    const expired = deals.filter(d => isLootExpired(d)).length
     const totalClicks = deals.reduce((acc, d) => acc + (d.clicks || 0), 0)
     return { total, active, glitches, under199, expired, totalClicks }
   }, [deals])
 
-  // Filtered & Sorted Deals
-  const filteredDeals = useMemo(() => {
+  // Base filtered list
+  const baseFilteredDeals = useMemo(() => {
     return deals.filter((deal) => {
       // Search
       if (searchTerm.trim()) {
@@ -489,6 +419,11 @@ export const ExecutiveLootDealsPage: React.FC = () => {
     })
   }, [deals, searchTerm, selectedStore, selectedCategory, selectedLootType, selectedStatus, sortOption])
 
+  // Split into active and expired loot deals
+  const activeLootDeals = useMemo(() => baseFilteredDeals.filter(d => !isLootExpired(d)), [baseFilteredDeals])
+  const expiredLootDeals = useMemo(() => baseFilteredDeals.filter(d => isLootExpired(d)), [baseFilteredDeals])
+  const filteredDeals = dealsTab === 'active' ? activeLootDeals : expiredLootDeals
+
   // Pagination slicing
   const totalPages = Math.ceil(filteredDeals.length / itemsPerPage) || 1
   const paginatedDeals = useMemo(() => {
@@ -550,6 +485,7 @@ export const ExecutiveLootDealsPage: React.FC = () => {
 
   const handleDeleteDeal = (id: string) => {
     if (window.confirm('Are you sure you want to delete this loot deal?')) {
+      adminApi.deleteLootDeal(id).catch(console.warn)
       setDeals(deals.filter(d => d.id !== id))
       setSelectedDealIds(selectedDealIds.filter(selId => selId !== id))
       showToast('Loot deal removed')
@@ -565,6 +501,39 @@ export const ExecutiveLootDealsPage: React.FC = () => {
       }
       return d
     }))
+  }
+
+  const handleToggleBestSelling = (id: string) => {
+    const target = deals.find(d => d.id === id)
+    if (!target) return
+    const nextVal = !target.isBestSelling
+    const nextPlacement: 'favourite' | 'best_selling' | 'both' = nextVal ? 'best_selling' : 'favourite'
+
+    const updated = deals.map(d => {
+      if (d.id === id) {
+        return { 
+          ...d, 
+          isBestSelling: nextVal,
+          sectionPlacement: nextPlacement
+        }
+      }
+      return d
+    })
+    setDeals(updated)
+
+    try {
+      localStorage.setItem('wouchify_loot_deals', JSON.stringify(updated))
+    } catch {}
+
+    window.dispatchEvent(new CustomEvent('wouchify_loot_deals_updated', { detail: { id, isBestSelling: nextVal } }))
+    window.dispatchEvent(new CustomEvent('wouchify_deals_updated', { detail: { id, isBestSelling: nextVal } }))
+
+    showToast(nextVal ? '⭐ Marked as Best Seller (Loot Deals Section)' : 'Removed from Best Sellers')
+
+    adminApi.updateLootDeal(id, {
+      isBestSelling: nextVal,
+      sectionPlacement: nextPlacement
+    }).catch(console.warn)
   }
 
   // Bulk Actions
@@ -702,11 +671,57 @@ export const ExecutiveLootDealsPage: React.FC = () => {
     }
 
     if (editingDeal) {
+      adminApi.updateLootDeal(dealToSave.id, {
+        title: dealToSave.title,
+        storeName: dealToSave.store,
+        category: dealToSave.category,
+        discount: dealToSave.discountLabel,
+        currentPrice: dealToSave.price,
+        originalPrice: dealToSave.originalPrice,
+        dealType: dealToSave.lootType === 'flash' ? 'flash' : 'exclusive',
+        status: statusToSet === 'Approved' ? 'active' : 'inactive',
+        href: dealToSave.link,
+        submissionStatus: statusToSet === 'Pending Approval' ? 'pending_approval' : 'approved',
+        image: dealToSave.image,
+        priority: dealToSave.priority,
+        code: dealToSave.code
+      }).catch(console.warn)
+
       setDeals(deals.map(d => d.id === editingDeal.id ? dealToSave : d))
       showToast('Loot deal updated successfully')
     } else {
+      adminApi.createLootDeal({
+        title: dealToSave.title,
+        storeName: dealToSave.store,
+        category: dealToSave.category,
+        discount: dealToSave.discountLabel,
+        currentPrice: dealToSave.price,
+        originalPrice: dealToSave.originalPrice,
+        dealType: dealToSave.lootType === 'flash' ? 'flash' : 'exclusive',
+        status: statusToSet === 'Approved' ? 'active' : 'inactive',
+        href: dealToSave.link,
+        submissionStatus: statusToSet === 'Pending Approval' ? 'pending_approval' : 'approved',
+        image: dealToSave.image,
+        priority: dealToSave.priority,
+        code: dealToSave.code
+      }).then((res: any) => {
+        if (statusToSet === 'Pending Approval') {
+          adminApi.createSubmission({
+            entityType: 'loot_deal',
+            entityId: res._id || res.id || dealToSave.id,
+            action: 'create',
+            title: dealToSave.title,
+            store: dealToSave.store,
+            category: dealToSave.category,
+            priority: dealToSave.priority,
+            submittedBy: localStorage.getItem('staffUser') ? JSON.parse(localStorage.getItem('staffUser')!).email : 'executive@wouchify.com',
+            dataSnapshot: dealToSave
+          }).catch(console.warn)
+        }
+      }).catch(console.warn)
+
       setDeals([dealToSave, ...deals])
-      showToast('New loot deal created successfully')
+      showToast(statusToSet === 'Pending Approval' ? 'Submitted for Ops Manager Approval!' : 'New loot deal saved')
     }
     setIsModalOpen(false)
   }
@@ -721,15 +736,9 @@ export const ExecutiveLootDealsPage: React.FC = () => {
         {/* Page Top Header */}
         <div className="crud-header">
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-              <span className="modal-badge" style={{ background: '#fef2f2', color: 'var(--color-red, #E31E25)' }}>
-                <Flame size={12} /> Live Loot Radar
-              </span>
-              <span style={{ fontSize: '0.8rem', color: '#64748b' }}>• Instant price drop & glitch monitoring active</span>
-            </div>
-            <h2 className="crud-title">Loot Deals Management Console</h2>
+            <h2 className="crud-title">Loot Deals</h2>
             <p style={{ margin: '4px 0 0', fontSize: '0.9rem', color: '#64748b' }}>
-              Publish, verify, broadcast, and manage flash drops, price errors, and budget steals across Wouchify.
+              Manage limited-time flash drops, price errors, and promotional discounts.
             </p>
           </div>
 
@@ -743,7 +752,7 @@ export const ExecutiveLootDealsPage: React.FC = () => {
               <Download size={16} /> Export CSV
             </button>
             <button className="crud-add-btn" onClick={handleAddDeal}>
-              <Plus size={18} /> Add New Loot Deal
+              <Plus size={18} /> Add Loot Deal
             </button>
           </div>
         </div>
@@ -792,13 +801,82 @@ export const ExecutiveLootDealsPage: React.FC = () => {
 
           <div className="deals-kpi-card">
             <div className="deals-kpi-info">
-              <span className="deals-kpi-label">Total Clicks</span>
-              <span className="deals-kpi-val">{kpiStats.totalClicks.toLocaleString()}</span>
+              <span className="deals-kpi-label">Expired Loots</span>
+              <span className="deals-kpi-val" style={{ color: '#ef4444' }}>{kpiStats.expired}</span>
             </div>
             <div className="deals-kpi-icon red">
+              <AlertTriangle size={20} />
+            </div>
+          </div>
+
+          <div className="deals-kpi-card">
+            <div className="deals-kpi-info">
+              <span className="deals-kpi-label">Total Clicks</span>
+              <span className="deals-kpi-val" style={{ color: '#0284c7' }}>{kpiStats.totalClicks.toLocaleString('en-IN')}</span>
+            </div>
+            <div className="deals-kpi-icon blue">
               <Eye size={20} />
             </div>
           </div>
+        </div>
+
+        {/* Active / Expired Tab Switcher */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0', borderBottom: '2px solid #e2e8f0', margin: '0 0 20px 0' }}>
+          <button
+            onClick={() => { setDealsTab('active'); setCurrentPage(1); }}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: dealsTab === 'active' ? '3px solid var(--color-red, #E31E25)' : '3px solid transparent',
+              marginBottom: '-2px',
+              padding: '12px 24px',
+              fontWeight: dealsTab === 'active' ? 700 : 500,
+              color: dealsTab === 'active' ? 'var(--color-red, #E31E25)' : '#64748b',
+              fontSize: '0.92rem',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <CheckCircle2 size={15} />
+            Active Loot Drops
+            <span style={{ background: dealsTab === 'active' ? 'var(--color-red, #E31E25)' : '#e2e8f0', color: dealsTab === 'active' ? '#fff' : '#64748b', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', minWidth: '20px', textAlign: 'center' }}>
+              {activeLootDeals.length}
+            </span>
+          </button>
+          <button
+            onClick={() => { setDealsTab('expired'); setCurrentPage(1); }}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: dealsTab === 'expired' ? '3px solid #ef4444' : '3px solid transparent',
+              marginBottom: '-2px',
+              padding: '12px 24px',
+              fontWeight: dealsTab === 'expired' ? 700 : 500,
+              color: dealsTab === 'expired' ? '#ef4444' : '#64748b',
+              fontSize: '0.92rem',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <AlertTriangle size={15} />
+            Expired / Ended Loots
+            {kpiStats.expired > 0 && (
+              <span style={{ background: dealsTab === 'expired' ? '#ef4444' : '#fee2e2', color: dealsTab === 'expired' ? '#fff' : '#ef4444', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', minWidth: '20px', textAlign: 'center' }}>
+                {kpiStats.expired}
+              </span>
+            )}
+          </button>
+          {dealsTab === 'expired' && (
+            <span style={{ marginLeft: 'auto', fontSize: '0.8rem', color: '#ef4444', fontStyle: 'italic', padding: '0 16px', fontWeight: 500 }}>
+              ⚠️ These flash drops & price glitches have ended.
+            </span>
+          )}
         </div>
 
         {/* Advanced Filter Toolbar */}
@@ -1010,16 +1088,35 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                         </td>
                         <td style={{ width: '56px' }}>
                           <img 
-                            src={deal.image || deal.images[0] || 'https://via.placeholder.com/50'} 
+                            src={deal.image || deal.images[0] || PLACEHOLDER_DEAL_IMAGE} 
                             alt={deal.title} 
                             style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e2e8f0' }}
-                            onError={(e) => { (e.target as any).src = 'https://via.placeholder.com/48?text=Loot' }}
+                            onError={(e) => { (e.target as any).src = PLACEHOLDER_DEAL_IMAGE }}
                           />
                         </td>
                         <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px', flexWrap: 'wrap' }}>
                             <span className={`loot-type-badge ${deal.lootType}`}>
                               {deal.badge || deal.lootType.toUpperCase()}
+                            </span>
+                            <span 
+                              style={{ 
+                                fontSize: '0.68rem', 
+                                background: deal.isBestSelling ? '#fef3c7' : '#f8fafc', 
+                                color: deal.isBestSelling ? '#92400e' : '#64748b', 
+                                padding: '1px 6px', 
+                                borderRadius: '4px', 
+                                fontWeight: 700, 
+                                display: 'inline-flex', 
+                                alignItems: 'center', 
+                                gap: '2px',
+                                border: deal.isBestSelling ? '1px solid #fde68a' : '1px solid #e2e8f0',
+                                cursor: 'pointer'
+                              }}
+                              onClick={() => handleToggleBestSelling(deal.id)}
+                              title={deal.isBestSelling ? "Click to remove Best Seller status" : "Click to mark as Best Seller in Loot Deals page"}
+                            >
+                              ⭐ {deal.isBestSelling ? 'Best Seller' : 'Mark Star'}
                             </span>
                             {deal.isVerified && (
                               <span className="verified-badge" title="Verified Loot">✓ Verified</span>
@@ -1058,7 +1155,7 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                               src={getStoreLogo(deal.store)} 
                               alt={deal.store} 
                               style={{ maxHeight: '20px', maxWidth: '65px', objectFit: 'contain' }} 
-                              onError={(e) => { (e.target as any).src = 'https://via.placeholder.com/60x20?text=' + deal.store }}
+                              onError={(e) => { (e.target as any).src = PLACEHOLDER_STORE_LOGO }}
                             />
                           </div>
                         </td>
@@ -1155,6 +1252,24 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                         <td>
                           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                             <button 
+                              className={`action-btn star ${deal.isBestSelling ? 'starred' : ''}`}
+                              onClick={() => handleToggleBestSelling(deal.id)}
+                              title={deal.isBestSelling ? "Remove from Best Selling Loot" : "Star as Best Seller (Display in Best Selling Loot)"}
+                              style={{ 
+                                background: deal.isBestSelling ? '#fef3c7' : 'transparent',
+                                border: deal.isBestSelling ? '1px solid #f59e0b' : '1px solid #e2e8f0',
+                                color: deal.isBestSelling ? '#d97706' : '#94a3b8',
+                                padding: '6px',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                            >
+                              <Star size={16} fill={deal.isBestSelling ? '#d97706' : 'none'} />
+                            </button>
+                            <button 
                               className="action-btn view" 
                               onClick={() => setPreviewDeal(deal)} 
                               title="Preview Customer Loot Page"
@@ -1240,11 +1355,27 @@ export const ExecutiveLootDealsPage: React.FC = () => {
 
                     <div className="deal-card-manage-thumb">
                       <img 
-                        src={deal.image || deal.images[0] || 'https://via.placeholder.com/280x160'} 
+                        src={deal.image || deal.images[0] || PLACEHOLDER_DEAL_IMAGE} 
                         alt={deal.title} 
-                        onError={(e) => { (e.target as any).src = 'https://via.placeholder.com/280x160?text=Loot' }}
+                        onError={(e) => { (e.target as any).src = PLACEHOLDER_DEAL_IMAGE }}
                       />
                       <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 4, display: 'flex', gap: '4px', alignItems: 'center' }}>
+                        {deal.isBestSelling && (
+                          <span style={{ 
+                            background: '#d97706', 
+                            color: '#ffffff', 
+                            padding: '3px 8px', 
+                            borderRadius: '999px', 
+                            fontSize: '0.68rem', 
+                            fontWeight: 800, 
+                            display: 'inline-flex', 
+                            alignItems: 'center', 
+                            gap: '3px',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.15)'
+                          }}>
+                            <Star size={10} fill="#ffffff" /> BEST SELLER
+                          </span>
+                        )}
                         <span className={`loot-type-badge ${deal.lootType}`}>
                           {deal.badge || deal.lootType.toUpperCase()}
                         </span>
@@ -1327,6 +1458,24 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                     </div>
 
                     <div className="deal-card-manage-actions">
+                      <button 
+                        className={`action-btn star ${deal.isBestSelling ? 'starred' : ''}`}
+                        onClick={() => handleToggleBestSelling(deal.id)}
+                        title={deal.isBestSelling ? "Remove from Best Selling Loot" : "Star as Best Seller (Display in Best Selling Loot)"}
+                        style={{ 
+                          background: deal.isBestSelling ? '#fef3c7' : 'transparent',
+                          border: deal.isBestSelling ? '1px solid #f59e0b' : '1px solid #e2e8f0',
+                          color: deal.isBestSelling ? '#d97706' : '#94a3b8',
+                          padding: '6px',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        <Star size={16} fill={deal.isBestSelling ? '#d97706' : 'none'} />
+                      </button>
                       <button className="action-btn view" onClick={() => setPreviewDeal(deal)} title="Preview Deal">
                         <Eye size={16} />
                       </button>
@@ -1366,12 +1515,12 @@ export const ExecutiveLootDealsPage: React.FC = () => {
             <div className="crud-modal" style={{ maxWidth: '840px' }} onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
                 <div>
-                  <span className="modal-badge" style={{ background: '#fef2f2', color: 'var(--color-red, #E31E25)' }}>
-                    <Flame size={12} /> {editingDeal ? 'Modify Loot Deal' : 'Publish New Loot Deal'}
-                  </span>
-                  <h3 className="modal-title" style={{ marginTop: '4px' }}>
-                    {editingDeal ? `Edit: ${editingDeal.title}` : 'Create High-Velocity Loot Deal'}
+                  <h3 className="modal-title" style={{ marginTop: '0' }}>
+                    {editingDeal ? `Edit Loot Deal` : 'Add New Loot Deal'}
                   </h3>
+                  <p className="modal-subtitle" style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b' }}>
+                    Configure pricing, partner store details, and flash drop settings.
+                  </p>
                 </div>
                 <button className="modal-close" onClick={() => setIsModalOpen(false)}>
                   <X size={18} />
@@ -1748,6 +1897,38 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                         <span className="form-section-desc">Multi-channel instant blast</span>
                       </div>
 
+                      {/* Granular Section Placement Dropdown */}
+                      <div className="form-group" style={{ marginBottom: '14px' }}>
+                        <label>Storefront Section Placement <span className="required-star">*</span></label>
+                        <select
+                          value={form.sectionPlacement || (form.isBestSelling ? 'best_selling' : 'both')}
+                          onChange={(e) => {
+                            const val = e.target.value as 'both' | 'favourite' | 'best_selling'
+                            setForm({
+                              ...form,
+                              sectionPlacement: val,
+                              isBestSelling: val === 'best_selling' || val === 'both'
+                            })
+                          }}
+                          style={{
+                            width: '100%',
+                            height: '42px',
+                            borderRadius: '8px',
+                            border: '1.5px solid #cbd5e1',
+                            padding: '0 12px',
+                            fontSize: '0.9rem',
+                            fontWeight: 600,
+                            color: '#1e293b',
+                            backgroundColor: '#ffffff'
+                          }}
+                        >
+                          <option value="both">Both (Section 1 - Main Loot Deals &amp; Section 2 - Best Selling Picks)</option>
+                          <option value="favourite">Section 1 (Main Loot Deals Search Catalog Only)</option>
+                          <option value="best_selling">Section 2 (Best Selling Loot Picks Only)</option>
+                        </select>
+                        <span className="field-hint">Choose whether this loot deal appears in Section 1, Section 2, or Both sections on the Loot Deals storefront page.</span>
+                      </div>
+
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                         <label className="feature-checkbox-label">
                           <input 
@@ -1838,9 +2019,9 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                         <div className="preview-deal-card">
                           <div className="preview-deal-image-wrap">
                             <img 
-                              src={form.image || 'https://via.placeholder.com/320x150?text=Loot+Image'} 
+                              src={form.image || PLACEHOLDER_DEAL_IMAGE} 
                               alt="Live Preview" 
-                              onError={(e) => { (e.target as any).src = 'https://via.placeholder.com/320x150?text=Image+Preview' }}
+                              onError={(e) => { (e.target as any).src = PLACEHOLDER_DEAL_IMAGE }}
                             />
                           </div>
                           <div className="preview-deal-body">
@@ -1979,7 +2160,7 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                       src={getStoreLogo(previewDeal.store)} 
                       alt={previewDeal.store} 
                       style={{ maxHeight: '18px', maxWidth: '56px', objectFit: 'contain' }} 
-                      onError={(e) => { (e.target as any).src = 'https://via.placeholder.com/56x18?text=' + previewDeal.store }}
+                      onError={(e) => { (e.target as any).src = PLACEHOLDER_STORE_LOGO }}
                     />
                   </div>
 
@@ -2006,9 +2187,9 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                   <div className="deal-product-media-col">
                     <div className="deal-product-main-img-card">
                       <img 
-                        src={previewDeal.image || previewDeal.images[0]} 
+                        src={previewDeal.image || previewDeal.images[0] || PLACEHOLDER_DEAL_IMAGE} 
                         alt={previewDeal.title} 
-                        onError={(e) => { (e.target as any).src = 'https://via.placeholder.com/350x250?text=Loot+Image' }}
+                        onError={(e) => { (e.target as any).src = PLACEHOLDER_DEAL_IMAGE }}
                       />
                       {previewDeal.discountLabel && (
                         <div style={{ position: 'absolute', top: '12px', left: '12px' }}>

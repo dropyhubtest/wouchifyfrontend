@@ -1,5 +1,6 @@
-import React, { useState, useMemo, useRef } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { ExecutiveLayout } from './ExecutiveLayout'
+import { adminApi } from '../../../services/adminApi'
 import {
   Plus,
   Search,
@@ -18,6 +19,14 @@ import {
   MousePointer
 } from 'lucide-react'
 import './ExecutiveShared.css'
+
+import advertisementImage from '../../../assets/advertisement/image-7.png'
+import advertiseHero from '../../../assets/advertise/advertise_hero.png'
+import advertiseBg from '../../../assets/advertise/advertise_bg.png'
+import iciciPlatinumCard from '../../../assets/credit-cards/icici-platinum-card.png'
+import swiggyLogo from '../../../assets/brand-logos/swiggy-logo.png'
+import myntraLogo from '../../../assets/brand-logos/myntra-logo.png'
+import { PLACEHOLDER_DEAL_IMAGE } from '../../../data/dealsPage'
 
 /* ============================================================
    Types & Config
@@ -155,27 +164,27 @@ function statusConfig(status: AdStatus) {
 const MOCK_ADS: Advertisement[] = [
   {
     id: 'ad-1',
-    title: 'SBI SimplyCLICK Card 10X Points Campaign',
-    advertiser: 'SBI Cards',
+    title: 'Wouchify Mega Cashback Festival Sale',
+    advertiser: 'Wouchify Official',
     placement: 'sidebar-300x250',
-    imageUrl: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=500&auto=format&fit=crop&q=80',
-    targetLink: '/executive/credit-cards',
-    ctaText: 'Apply in 2 Mins',
-    badgeText: 'SPONSORED',
-    pricingModel: 'CPC',
-    budgetOrRate: '₹18 / click',
+    imageUrl: advertisementImage,
+    targetLink: '/offers/sale',
+    ctaText: 'Claim Bonus Cashback',
+    badgeText: 'OFFICIAL PARTNER',
+    pricingModel: 'Flat Monthly',
+    budgetOrRate: 'Internal Campaign',
     status: 'active',
-    expiryDate: '2026-10-31',
-    impressions: 54200,
-    clicks: 4890,
+    expiryDate: '2026-12-31',
+    impressions: 64200,
+    clicks: 5890,
     createdAt: '2026-09-01'
   },
   {
     id: 'ad-2',
-    title: 'Amazon Great Indian Festival Early Access',
+    title: 'Amazon Great Indian Festival Early Prime Access',
     advertiser: 'Amazon India',
     placement: 'leaderboard-728x90',
-    imageUrl: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&auto=format&fit=crop&q=80',
+    imageUrl: advertiseHero,
     targetLink: 'https://amazon.in',
     ctaText: 'Shop Prime Deals',
     badgeText: 'FEATURED PARTNER',
@@ -189,54 +198,71 @@ const MOCK_ADS: Advertisement[] = [
   },
   {
     id: 'ad-3',
-    title: 'Hostinger 75% Off Web Hosting + Free Domain',
-    advertiser: 'Hostinger India',
+    title: 'ICICI Platinum Chip Credit Card 5% Cashback',
+    advertiser: 'ICICI Bank Cards',
     placement: 'billboard-300x600',
-    imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&auto=format&fit=crop&q=80',
-    targetLink: 'https://hostinger.in',
-    ctaText: 'Claim 75% Off',
-    badgeText: 'ADVERTISEMENT',
-    pricingModel: 'Flat Monthly',
-    budgetOrRate: '₹35,000 / mo',
+    imageUrl: iciciPlatinumCard,
+    targetLink: '/credit-cards',
+    ctaText: 'Apply in 2 Mins',
+    badgeText: 'BANK SPONSOR',
+    pricingModel: 'CPC',
+    budgetOrRate: '₹22 / click',
     status: 'active',
-    expiryDate: '2026-09-28',
-    impressions: 32000,
-    clicks: 2900,
+    expiryDate: '2026-10-31',
+    impressions: 42000,
+    clicks: 3900,
     createdAt: '2026-09-03'
   },
   {
     id: 'ad-4',
     title: 'Swiggy Gourmet Flat ₹150 OFF Voucher',
     advertiser: 'Swiggy Gourmet',
-    placement: 'popup-modal-500x350',
-    imageUrl: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&auto=format&fit=crop&q=80',
-    targetLink: '/executive/coupons',
-    ctaText: 'Order Food Now',
-    badgeText: 'LIMITED SPONSOR',
-    pricingModel: 'CPC',
-    budgetOrRate: '₹14 / click',
-    status: 'paused',
-    expiryDate: '2026-10-10',
-    impressions: 16400,
-    clicks: 1420,
+    placement: 'coupon-box-250x250',
+    imageUrl: swiggyLogo,
+    targetLink: 'https://swiggy.com',
+    ctaText: 'Order Gourmet Food',
+    badgeText: 'FOOD DEAL',
+    pricingModel: 'Affiliate',
+    budgetOrRate: '8% RevShare',
+    status: 'active',
+    expiryDate: '2026-10-20',
+    impressions: 21500,
+    clicks: 2840,
     createdAt: '2026-09-04'
   },
   {
     id: 'ad-5',
-    title: 'Myntra End of Reason Sale Brand Showcase',
+    title: 'Myntra Big Fashion Festival 50-80% Off',
     advertiser: 'Myntra Fashion',
     placement: 'store-card-360x180',
-    imageUrl: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&auto=format&fit=crop&q=80',
+    imageUrl: myntraLogo,
+    targetLink: 'https://myntra.com',
+    ctaText: 'Shop Fashion Trends',
+    badgeText: 'TRENDING STORE',
+    pricingModel: 'CPM',
+    budgetOrRate: '₹150 / CPM',
+    status: 'active',
+    expiryDate: '2026-11-30',
+    impressions: 76000,
+    clicks: 6540,
+    createdAt: '2026-09-05'
+  },
+  {
+    id: 'ad-6',
+    title: 'Wouchify Partner Brand Network Showcase',
+    advertiser: 'Wouchify Media',
+    placement: 'bottom-strip-full',
+    imageUrl: advertiseBg,
     targetLink: '/stores',
-    ctaText: 'Explore Styles',
-    badgeText: 'PROMOTED BRAND',
+    ctaText: 'Explore 100+ Brands',
+    badgeText: 'PLATFORM HIGHLIGHT',
     pricingModel: 'Flat Monthly',
-    budgetOrRate: '₹40,000 / mo',
-    status: 'scheduled',
-    expiryDate: '2026-12-25',
-    impressions: 0,
-    clicks: 0,
-    createdAt: '2026-09-08'
+    budgetOrRate: 'Internal Promo',
+    status: 'active',
+    expiryDate: '2026-12-31',
+    impressions: 89000,
+    clicks: 7420,
+    createdAt: '2026-09-06'
   }
 ]
 
@@ -246,7 +272,7 @@ const MOCK_ADS: Advertisement[] = [
 
 export const AdSlotPreview: React.FC<{ ad: Partial<Advertisement> }> = ({ ad }) => {
   const placement = ad.placement || 'sidebar-300x250'
-  const img = ad.imageUrl || 'https://via.placeholder.com/300x200?text=Ad+Creative+Image'
+  const img = ad.imageUrl || advertisementImage || PLACEHOLDER_DEAL_IMAGE
   const badge = ad.badgeText || 'SPONSORED'
   const cta = ad.ctaText || 'Learn More'
 
@@ -458,6 +484,35 @@ export const ExecutiveAdvertisementsPage: React.FC = () => {
   const [editingAd, setEditingAd] = useState<Advertisement | null>(null)
   const [previewingAd, setPreviewingAd] = useState<Advertisement | null>(null)
 
+  useEffect(() => {
+    adminApi.getAdvertisements()
+      .then((res: any[]) => {
+        if (Array.isArray(res) && res.length > 0) {
+          const mapped: Advertisement[] = res.map((a: any, i: number) => ({
+            id: a._id || a.id || `ad-${i + 1}`,
+            title: a.title,
+            advertiser: a.advertiser || 'Brand Partner',
+            placement: a.placement || 'sidebar-300x250',
+            imageUrl: a.imageUrl || '',
+            targetLink: a.targetLink || 'https://wouchify.com',
+            ctaText: a.ctaText || 'Shop Now',
+            badgeText: a.badgeText || 'SPONSORED',
+            pricingModel: a.pricingModel || 'CPC',
+            budgetOrRate: a.budgetOrRate || '₹15 / click',
+            status: a.status || 'active',
+            expiryDate: a.expiryDate || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+            impressions: a.impressions || 0,
+            clicks: a.clicks || 0,
+            createdAt: a.createdAt ? new Date(a.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+          }))
+          setAds(mapped)
+        }
+      })
+      .catch(err => {
+        console.warn('API error, using mock ads:', err)
+      })
+  }, [])
+
   // Form State
   const [formData, setFormData] = useState<Partial<Advertisement>>({
     title: '',
@@ -551,6 +606,7 @@ export const ExecutiveAdvertisementsPage: React.FC = () => {
 
   const handleDelete = (id: string) => {
     if (window.confirm('Are you sure you want to delete this ad campaign?')) {
+      adminApi.deleteAdvertisement(id).catch(console.warn)
       setAds(prev => prev.filter(a => a.id !== id))
     }
   }
@@ -585,7 +641,9 @@ export const ExecutiveAdvertisementsPage: React.FC = () => {
     }
 
     if (editingAd) {
-      setAds(prev => prev.map(a => a.id === editingAd.id ? { ...a, ...(formData as Advertisement) } : a))
+      const updatedAd: Advertisement = { ...editingAd, ...(formData as Advertisement) }
+      adminApi.updateAdvertisement(updatedAd.id, updatedAd).catch(console.warn)
+      setAds(prev => prev.map(a => a.id === editingAd.id ? updatedAd : a))
     } else {
       const newAd: Advertisement = {
         id: `ad-${Date.now()}`,
@@ -604,6 +662,21 @@ export const ExecutiveAdvertisementsPage: React.FC = () => {
         clicks: 0,
         createdAt: new Date().toISOString().split('T')[0]
       }
+
+      adminApi.createAdvertisement(newAd).then((res: any) => {
+        adminApi.createSubmission({
+          entityType: 'advertisement',
+          entityId: res._id || res.id || newAd.id,
+          action: 'create',
+          title: newAd.title,
+          store: newAd.advertiser,
+          category: 'Advertisement Campaign',
+          priority: 'Normal',
+          submittedBy: localStorage.getItem('staffUser') ? JSON.parse(localStorage.getItem('staffUser')!).email : 'executive@wouchify.com',
+          dataSnapshot: newAd
+        }).catch(console.warn)
+      }).catch(console.warn)
+
       setAds(prev => [newAd, ...prev])
     }
 

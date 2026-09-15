@@ -1,14 +1,12 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import { ExecutiveLayout } from './ExecutiveLayout'
 import { FAVOURITE_STORES } from '../../../data/storesHero'
-import { FLASH_LOOT_DEALS } from '../../../data/flashLootDeals'
-import { EXCLUSIVE_LOOT_DEALS } from '../../../data/exclusiveLootDeals'
-import { DEALS_CARD_ITEMS, getStoreLogo } from '../../../data/dealsPage'
+import { DEALS_CARD_ITEMS, MASTER_EXECUTIVE_DEALS, MASTER_EXECUTIVE_LOOT_DEALS, getStoreLogo, PLACEHOLDER_STORE_LOGO } from '../../../data/dealsPage'
 import { 
   Search, 
   ArrowUpDown, 
   Clock, 
-  Sparkles, 
+  Layers, 
   Zap, 
   Flame, 
   Tag, 
@@ -17,6 +15,7 @@ import {
   AlertCircle,
   Eye
 } from 'lucide-react'
+import { adminApi } from '../../../services/adminApi'
 import './ExecutiveDashboardPage.css'
 
 type TimeframeType = 'today' | 'yesterday' | 'week' | 'month' | 'all'
@@ -273,8 +272,8 @@ const WEEKLY_POSTING_DATA = [
 export const ExecutiveDashboardPage: React.FC = () => {
   const [user, setUser] = useState<{ email: string; role: string; name?: string } | null>(null)
   const [greeting, setGreeting] = useState('')
-  const [greetingIcon, setGreetingIcon] = useState('')
   const [timeStr, setTimeStr] = useState('')
+  const [submissions, setSubmissions] = useState<SubmissionItem[]>(MOCK_SUBMISSIONS)
 
   // Filter States
   const [activeTimeframe, setActiveTimeframe] = useState<TimeframeType>('today')
@@ -288,15 +287,55 @@ export const ExecutiveDashboardPage: React.FC = () => {
     if (userData) {
       setUser(JSON.parse(userData))
     }
+
+    const loadLiveSubmissions = async () => {
+      try {
+        const live = await adminApi.getSubmissions()
+        if (Array.isArray(live) && live.length > 0) {
+          const mapped: SubmissionItem[] = live.map((s: any, idx: number) => ({
+            id: s.id || s._id || `sub-live-${idx}`,
+            title: s.title || 'Untitled Submission',
+            type: (s.entityType === 'loot_deal' ? 'loot' : s.entityType === 'coupon' ? 'coupon' : 'deal') as 'deal' | 'loot' | 'coupon',
+            store: s.store || 'Amazon',
+            category: s.category || 'General',
+            price: s.dataSnapshot?.price || '₹999',
+            originalPrice: s.dataSnapshot?.originalPrice || '₹1,999',
+            discount: s.dataSnapshot?.discount || '50% OFF',
+            postedAt: s.submittedAt ? new Date(s.submittedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }) : 'Just now',
+            timeframe: 'today',
+            status: (s.status === 'Approved' ? 'Approved' : s.status === 'Rejected' ? 'Draft' : 'Pending Review') as 'Approved' | 'Pending Review' | 'Draft',
+            clicks: s.dataSnapshot?.clicks || Math.floor(Math.random() * 500 + 50),
+            link: s.entityType === 'loot_deal' ? '/executive/loot-deals' : s.entityType === 'coupon' ? '/executive/coupons' : '/executive/deals'
+          }))
+          setSubmissions(mapped)
+        }
+      } catch (e) {
+        console.warn('Fallback to local submissions:', e)
+      }
+    }
+
+    loadLiveSubmissions()
+
+    const handleSync = () => { loadLiveSubmissions() }
+    window.addEventListener('wouchify_deals_updated', handleSync)
+    window.addEventListener('wouchify_loot_deals_updated', handleSync)
+    window.addEventListener('wouchify_deal_clicked', handleSync)
+    window.addEventListener('storage', handleSync)
+    return () => {
+      window.removeEventListener('wouchify_deals_updated', handleSync)
+      window.removeEventListener('wouchify_loot_deals_updated', handleSync)
+      window.removeEventListener('wouchify_deal_clicked', handleSync)
+      window.removeEventListener('storage', handleSync)
+    }
   }, [])
 
   useEffect(() => {
     const update = () => {
       const h = new Date().getHours()
-      if (h >= 5 && h < 12)  { setGreeting('Good Morning');   setGreetingIcon('🌅') }
-      else if (h >= 12 && h < 17) { setGreeting('Good Afternoon'); setGreetingIcon('☀️') }
-      else if (h >= 17 && h < 21) { setGreeting('Good Evening');   setGreetingIcon('🌆') }
-      else                        { setGreeting('Good Night');     setGreetingIcon('🌙') }
+      if (h >= 5 && h < 12)  { setGreeting('Good Morning') }
+      else if (h >= 12 && h < 17) { setGreeting('Good Afternoon') }
+      else if (h >= 17 && h < 21) { setGreeting('Good Evening') }
+      else                        { setGreeting('Good Night') }
       setTimeStr(new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }))
     }
     update()
@@ -314,18 +353,18 @@ export const ExecutiveDashboardPage: React.FC = () => {
       return true
     }
 
-    const items = MOCK_SUBMISSIONS.filter(matchesTimeframe)
+    const items = submissions.filter(matchesTimeframe)
     const deals = items.filter(i => i.type === 'deal').length
     const loot = items.filter(i => i.type === 'loot').length
     const coupons = items.filter(i => i.type === 'coupon').length
     const total = items.length
 
     return { deals, loot, coupons, total }
-  }, [activeTimeframe])
+  }, [submissions, activeTimeframe])
 
   // Filtered and Sorted Submissions list
   const filteredSubmissions = useMemo(() => {
-    return MOCK_SUBMISSIONS.filter((item) => {
+    return submissions.filter((item) => {
       // Timeframe match
       if (activeTimeframe === 'today' && item.timeframe !== 'today') return false
       if (activeTimeframe === 'yesterday' && item.timeframe !== 'yesterday') return false
@@ -355,14 +394,113 @@ export const ExecutiveDashboardPage: React.FC = () => {
     })
   }, [activeTimeframe, activeType, statusFilter, searchTerm, sortOption])
 
-  // Global CMS stats
-  const totalDealsGlobal = DEALS_CARD_ITEMS.length
-  const totalLootGlobal = FLASH_LOOT_DEALS.length + EXCLUSIVE_LOOT_DEALS.length
-  const totalStoresGlobal = FAVOURITE_STORES.length
-  const totalCouponsGlobal = 45
-  const totalClicksGlobal = 125430
+  // Dynamic Global CMS stats that sync in real-time
+  const [globalStats, setGlobalStats] = useState({
+    deals: DEALS_CARD_ITEMS.length,
+    loot: MASTER_EXECUTIVE_LOOT_DEALS.length,
+    stores: FAVOURITE_STORES.length,
+    coupons: 45,
+    clicks: 125430,
+    pending: 5
+  })
+
+  const refreshGlobalStats = () => {
+    try {
+      // 1. Deals count & clicks
+      let dealClicks = 0
+      let dealsCount = MASTER_EXECUTIVE_DEALS.length
+      const savedDealsRaw = localStorage.getItem('wouchify_public_deals') || localStorage.getItem('wouchify_executive_deals')
+      if (savedDealsRaw) {
+        const parsed = JSON.parse(savedDealsRaw)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          dealsCount = parsed.length
+          dealClicks = parsed.reduce((sum: number, d: any) => sum + (parseInt(String(d.clicks || 0)) || 0), 0)
+        }
+      } else {
+        dealClicks = MASTER_EXECUTIVE_DEALS.reduce((sum, d) => sum + (d.clicks || 0), 0)
+      }
+
+      // 2. Loot deals count & clicks
+      let lootClicks = 0
+      let lootCount = MASTER_EXECUTIVE_LOOT_DEALS.length
+      const savedLootRaw = localStorage.getItem('wouchify_loot_deals')
+      if (savedLootRaw) {
+        const parsed = JSON.parse(savedLootRaw)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          lootCount = parsed.length
+          lootClicks = parsed.reduce((sum: number, d: any) => sum + (parseInt(String(d.clicks || 0)) || 0), 0)
+        }
+      } else {
+        lootClicks = MASTER_EXECUTIVE_LOOT_DEALS.reduce((sum, d) => sum + (d.clicks || 0), 0)
+      }
+
+      // 3. Coupons count & clicks
+      let couponClicks = 0
+      let couponCount = 45
+      const savedCouponsRaw = localStorage.getItem('wouchify_coupons')
+      if (savedCouponsRaw) {
+        const parsed = JSON.parse(savedCouponsRaw)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          couponCount = parsed.length
+          couponClicks = parsed.reduce((sum: number, c: any) => sum + (parseInt(String(c.usageCount || c.clicks || 0)) || 0), 0)
+        }
+      }
+
+      // 4. Stores count & clicks
+      let storeClicks = 0
+      let storesCount = FAVOURITE_STORES.length
+      const savedStoresRaw = localStorage.getItem('wouchify_stores')
+      if (savedStoresRaw) {
+        const parsed = JSON.parse(savedStoresRaw)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          storesCount = parsed.length
+          storeClicks = parsed.reduce((sum: number, s: any) => sum + (parseInt(String(s.clicks || 0)) || 0), 0)
+        }
+      }
+
+      // Base historical clicks + live aggregated clicks
+      const baseHistoricalClicks = 112500
+      const totalClicks = baseHistoricalClicks + dealClicks + lootClicks + couponClicks + storeClicks
+
+      setGlobalStats({
+        deals: dealsCount,
+        loot: lootCount,
+        stores: storesCount,
+        coupons: couponCount,
+        clicks: totalClicks,
+        pending: 5
+      })
+    } catch (e) {
+      console.warn('Error computing global dashboard stats:', e)
+    }
+  }
+
+  useEffect(() => {
+    refreshGlobalStats()
+    const handleStatsSync = () => { refreshGlobalStats() }
+    window.addEventListener('wouchify_deals_updated', handleStatsSync)
+    window.addEventListener('wouchify_loot_deals_updated', handleStatsSync)
+    window.addEventListener('wouchify_stores_updated', handleStatsSync)
+    window.addEventListener('wouchify_store_clicked', handleStatsSync)
+    window.addEventListener('wouchify_deal_clicked', handleStatsSync)
+    window.addEventListener('storage', handleStatsSync)
+    return () => {
+      window.removeEventListener('wouchify_deals_updated', handleStatsSync)
+      window.removeEventListener('wouchify_loot_deals_updated', handleStatsSync)
+      window.removeEventListener('wouchify_stores_updated', handleStatsSync)
+      window.removeEventListener('wouchify_store_clicked', handleStatsSync)
+      window.removeEventListener('wouchify_deal_clicked', handleStatsSync)
+      window.removeEventListener('storage', handleStatsSync)
+    }
+  }, [])
+
+  const totalDealsGlobal = globalStats.deals
+  const totalLootGlobal = globalStats.loot
+  const totalStoresGlobal = globalStats.stores
+  const totalCouponsGlobal = globalStats.coupons
+  const totalClicksGlobal = globalStats.clicks
   const totalExpiredGlobal = 12
-  const pendingApprovalsCount = 5
+  const pendingApprovalsCount = globalStats.pending
 
   const adminName = user?.name || 'Executive'
 
@@ -372,8 +510,8 @@ export const ExecutiveDashboardPage: React.FC = () => {
         
         {/* ── Greeting Banner ── */}
         <div className="dashboard-header" style={{
-          background: 'linear-gradient(135deg, rgba(227,30,37,0.08) 0%, rgba(47,54,140,0.04) 100%)',
-          border: '1.5px solid rgba(227,30,37,0.18)',
+          background: 'linear-gradient(135deg, rgba(227,30,37,0.06) 0%, rgba(47,54,140,0.03) 100%)',
+          border: '1.5px solid rgba(227,30,37,0.14)',
           borderRadius: '16px',
           padding: '24px 28px',
           display: 'flex',
@@ -382,45 +520,46 @@ export const ExecutiveDashboardPage: React.FC = () => {
           marginBottom: '28px'
         }}>
           <div>
-            <p style={{ color: 'var(--color-red, #E31E25)', fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', margin: 0, marginBottom: '4px' }}>
-              {greetingIcon} {timeStr} • EXECUTIVE CMS CONSOLE
+            <p style={{ color: 'var(--color-red, #E31E25)', fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0, marginBottom: '4px' }}>
+              Content Executive Portal
             </p>
             <h2 className="dashboard-title" style={{ margin: 0 }}>
               {greeting}, <span style={{ color: 'var(--color-red, #E31E25)' }}>{adminName}</span>! 👋
             </h2>
             <p className="dashboard-subtitle">
-              Here is your live performance summary, submission metrics, and publication activity.
+              Here is your daily activity, submission status, and content metrics.
             </p>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '6px',
               background: '#ffffff',
               border: '1px solid #e2e8f0',
               padding: '6px 14px',
-              borderRadius: '9999px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+              borderRadius: '8px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
             }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }} />
-              <span style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a' }}>Live Storefront Active</span>
+              <Clock size={14} style={{ color: '#64748b' }} />
+              <span style={{ fontSize: '12px', fontWeight: 600, color: '#334155' }}>{timeStr}</span>
             </div>
-            <p style={{ fontSize: '11px', color: '#64748b', margin: 0 }}>All feeds syncing in real-time</p>
+            <p style={{ fontSize: '11px', color: '#64748b', margin: 0 }}>
+              {new Date().toLocaleDateString('en-IN', { weekday: 'long', month: 'short', day: 'numeric' })}
+            </p>
           </div>
         </div>
 
-        {/* ── SECTION 1: TODAY'S EXECUTIVE ACTIVITY SPOTLIGHT (User Requested) ── */}
+        {/* ── SECTION 1: TODAY'S EXECUTIVE ACTIVITY SPOTLIGHT ── */}
         <div className="today-spotlight-section">
           <div className="today-spotlight-header">
             <div className="today-spotlight-title-group">
-              <div className="today-pulse-dot" />
               <div>
                 <h3 className="today-spotlight-heading">
-                  Executive Activity & Submissions
+                  Submission Activity
                 </h3>
                 <p className="today-spotlight-sub">
-                  Review how many deals, loot deals, and coupons have been submitted during this timeframe.
+                  Track the deals, loot deals, and coupons submitted during this period.
                 </p>
               </div>
             </div>
@@ -465,10 +604,10 @@ export const ExecutiveDashboardPage: React.FC = () => {
             {/* Deals Posted */}
             <div className="today-metric-card">
               <div className="today-metric-info">
-                <span className="today-metric-label">Deals Posted</span>
+                <span className="today-metric-label">Deals Submitted</span>
                 <span className="today-metric-value">{timeframeCounts.deals}</span>
                 <span className="today-metric-trend up">
-                  <TrendingUp size={13} /> {activeTimeframe === 'today' ? '+2 vs morning' : 'Active'}
+                  <TrendingUp size={13} /> {activeTimeframe === 'today' ? 'Active today' : 'Recorded'}
                 </span>
               </div>
               <div className="today-metric-icon deals">
@@ -479,10 +618,10 @@ export const ExecutiveDashboardPage: React.FC = () => {
             {/* Loot Deals Posted */}
             <div className="today-metric-card">
               <div className="today-metric-info">
-                <span className="today-metric-label">Loot Deals Posted</span>
+                <span className="today-metric-label">Loot Deals Submitted</span>
                 <span className="today-metric-value">{timeframeCounts.loot}</span>
                 <span className="today-metric-trend up">
-                  <TrendingUp size={13} /> High Demand
+                  <TrendingUp size={13} /> Flash offers
                 </span>
               </div>
               <div className="today-metric-icon loot">
@@ -493,10 +632,10 @@ export const ExecutiveDashboardPage: React.FC = () => {
             {/* Coupons Posted */}
             <div className="today-metric-card">
               <div className="today-metric-info">
-                <span className="today-metric-label">Coupons Posted</span>
+                <span className="today-metric-label">Coupons Submitted</span>
                 <span className="today-metric-value">{timeframeCounts.coupons}</span>
                 <span className="today-metric-trend up">
-                  <TrendingUp size={13} /> 94% Verified
+                  <TrendingUp size={13} /> Active codes
                 </span>
               </div>
               <div className="today-metric-icon coupons">
@@ -508,7 +647,7 @@ export const ExecutiveDashboardPage: React.FC = () => {
             <div className="today-metric-card highlight">
               <div className="today-metric-info">
                 <span className="today-metric-label" style={{ color: 'var(--color-red, #E31E25)' }}>
-                  Total {activeTimeframe === 'today' ? 'Today' : 'Posts'}
+                  Total {activeTimeframe === 'today' ? 'Today' : 'Submissions'}
                 </span>
                 <span className="today-metric-value">{timeframeCounts.total}</span>
                 <span className="today-metric-trend" style={{ color: '#64748b' }}>
@@ -516,20 +655,20 @@ export const ExecutiveDashboardPage: React.FC = () => {
                 </span>
               </div>
               <div className="today-metric-icon total">
-                <Sparkles size={22} />
+                <Layers size={22} />
               </div>
             </div>
           </div>
         </div>
 
-        {/* ── SECTION 2: EXPANDED SMART INSIGHTS GLOBAL CARDS ── */}
+        {/* ── SECTION 2: PLATFORM OVERVIEW METRICS ── */}
         <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           <div>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-              Platform Overview & Global Metrics
+              Platform Overview
             </h3>
             <p style={{ fontSize: '0.875rem', color: '#64748b', margin: '4px 0 0 0' }}>
-              High-level system totals, catalog sizes, and engagement status.
+              Summary of live offers, catalog counts, and partner stores.
             </p>
           </div>
         </div>
@@ -743,25 +882,25 @@ export const ExecutiveDashboardPage: React.FC = () => {
                 className={`type-pill-btn ${activeType === 'all' ? 'active' : ''}`}
                 onClick={() => setActiveType('all')}
               >
-                All ({MOCK_SUBMISSIONS.length})
+                All ({submissions.length})
               </button>
               <button 
                 className={`type-pill-btn ${activeType === 'deal' ? 'active' : ''}`}
                 onClick={() => setActiveType('deal')}
               >
-                Deals ({MOCK_SUBMISSIONS.filter(s => s.type === 'deal').length})
+                Deals ({submissions.filter(s => s.type === 'deal').length})
               </button>
               <button 
                 className={`type-pill-btn ${activeType === 'loot' ? 'active' : ''}`}
                 onClick={() => setActiveType('loot')}
               >
-                Loot Deals ({MOCK_SUBMISSIONS.filter(s => s.type === 'loot').length})
+                Loot Deals ({submissions.filter(s => s.type === 'loot').length})
               </button>
               <button 
                 className={`type-pill-btn ${activeType === 'coupon' ? 'active' : ''}`}
                 onClick={() => setActiveType('coupon')}
               >
-                Coupons ({MOCK_SUBMISSIONS.filter(s => s.type === 'coupon').length})
+                Coupons ({submissions.filter(s => s.type === 'coupon').length})
               </button>
             </div>
 
@@ -844,7 +983,7 @@ export const ExecutiveDashboardPage: React.FC = () => {
                           src={getStoreLogo(sub.store)} 
                           alt={sub.store} 
                           style={{ maxHeight: '20px', maxWidth: '65px', objectFit: 'contain' }} 
-                          onError={(e) => { (e.target as any).src = 'https://via.placeholder.com/60x20?text=' + sub.store }}
+                          onError={(e) => { (e.target as any).src = PLACEHOLDER_STORE_LOGO }}
                         />
                       </div>
                     </td>

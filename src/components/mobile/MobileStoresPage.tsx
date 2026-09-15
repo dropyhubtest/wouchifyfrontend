@@ -3,6 +3,7 @@ import { MobileHeader } from './MobileHeader'
 import { MobileFooter } from './MobileFooter'
 import { FAVOURITE_STORES } from '../../data/storesHero'
 import type { StoreItem } from '../../data/storesHero'
+import { adminApi } from '../../services/adminApi'
 import searchIcon from '../../assets/icons/search.svg'
 import './MobileStoresPage.css'
 
@@ -145,11 +146,16 @@ const StoreCard: React.FC<{ store: StoreItem }> = ({ store }) => {
 
   const isLongName = store.name.length > 12
 
+  const handleClick = () => {
+    adminApi.trackStoreClick(store.id)
+  }
+
   return (
     <div className="mobile-stores__card-wrap" ref={cardRef}>
       <div 
         className="mobile-stores__card" 
         style={{ backgroundColor: store.cardBg }}
+        onClick={handleClick}
       >
         <div 
           className="mobile-stores__card-logo-container"
@@ -185,6 +191,10 @@ const StoreCard: React.FC<{ store: StoreItem }> = ({ store }) => {
           href={`/brands/${store.slug}`}
           className="mobile-stores__card-btn"
           style={{ textDecoration: 'none' }}
+          onClick={(e) => {
+            e.stopPropagation()
+            handleClick()
+          }}
         >
           View Details &gt;&gt;
         </a>

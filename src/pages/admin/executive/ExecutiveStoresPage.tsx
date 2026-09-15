@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { ExecutiveLayout } from './ExecutiveLayout'
+import { adminApi } from '../../../services/adminApi'
 import {
   Plus,
   Search,
@@ -26,8 +27,10 @@ import {
   Image as ImageIcon,
 } from 'lucide-react'
 import './ExecutiveShared.css'
-import { FAVOURITE_STORES, STORE_CATEGORIES } from '../../../data/storesHero'
+import { STORE_CATEGORIES } from '../../../data/storesHero'
+import { getStoreLogo } from '../../../data/dealsPage'
 import { ImageUploadField } from './ImageUploadField'
+import { MASTER_STORES_DATA } from '../../../services/adminApi'
 
 /* ============================================================
    Types
@@ -55,32 +58,63 @@ interface ManagedStore {
 }
 
 /* ============================================================
-   Seed data from FAVOURITE_STORES
+   Seed data from MASTER_STORES_DATA
    ============================================================ */
 
 const CATEGORY_LIST: StoreCategory[] = [...STORE_CATEGORIES]
 
-function buildMockStores(): ManagedStore[] {
-  return FAVOURITE_STORES.map((s, i) => ({
-    id: s.id,
-    name: s.name,
-    slug: s.slug,
-    logoUrl: s.logo as unknown as string,
-    category: s.category as StoreCategory,
-    reward: s.reward,
-    description: s.description,
-    affiliateLink: `https://${s.slug}.com/?affid=wouchify`,
-    cardBg: s.cardBg,
-    badgeBg: s.badgeBg,
-    status: i % 5 === 2 ? 'inactive' : i % 7 === 0 ? 'featured' : 'active',
-    isFeatured: i % 7 === 0,
-    clicks: Math.floor(Math.random() * 9000) + 500,
-    totalDeals: Math.floor(Math.random() * 120) + 5,
-    addedOn: new Date(Date.now() - i * 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-  }))
+const normalizeStoreKey = (val?: string) => (val || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+
+function loadInitialStores(): ManagedStore[] {
+  try {
+    const cached = localStorage.getItem('wouchify_stores')
+    if (cached) {
+      const parsed = JSON.parse(cached)
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const cachedMap = new Map<string, any>()
+        parsed.forEach((s: any) => {
+          if (s.id) cachedMap.set(normalizeStoreKey(s.id), s)
+          if (s._id) cachedMap.set(normalizeStoreKey(s._id), s)
+          if (s.slug) cachedMap.set(normalizeStoreKey(s.slug), s)
+          if (s.name) cachedMap.set(normalizeStoreKey(s.name), s)
+        })
+
+        // Merge with all 20 MASTER_STORES_DATA to guarantee NO stores are ever lost or missing
+        const all20Stores = MASTER_STORES_DATA.map((master: any) => {
+          const matched =
+            cachedMap.get(normalizeStoreKey(master.id)) ||
+            cachedMap.get(normalizeStoreKey(master.slug)) ||
+            cachedMap.get(normalizeStoreKey(master.name)) ||
+            master
+          return {
+            id: matched._id || matched.id || master.id,
+            name: matched.name || master.name,
+            slug: matched.slug || master.slug,
+            logoUrl: matched.logoUrl || matched.logo || getStoreLogo(matched.slug || matched.name),
+            category: (matched.category as StoreCategory) || master.category || 'Fashion',
+            reward: matched.reward || master.reward || 'Upto 5% rewards',
+            description: matched.description || master.description || `${master.name} online deals & cashback`,
+            affiliateLink: matched.affiliateLink || matched.href || master.affiliateLink,
+            cardBg: matched.cardBg || master.cardBg || '#E8F5FF',
+            badgeBg: matched.badgeBg || master.badgeBg || '#B3DCFA',
+            status: matched.status === 'inactive' ? 'inactive' : (matched.isFeatured ? 'featured' : 'active'),
+            isFeatured: Boolean(matched.isFeatured || matched.status === 'featured'),
+            clicks: typeof matched.clicks === 'number' ? matched.clicks : (parseInt(String(matched.clicks || 0)) || master.clicks || 1000),
+            totalDeals: typeof matched.totalDeals === 'number' ? matched.totalDeals : (master.totalDeals || 15),
+            addedOn: matched.addedOn || master.addedOn || '2026-01-15',
+          }
+        })
+        return all20Stores as ManagedStore[]
+      }
+    }
+  } catch {}
+  return (MASTER_STORES_DATA as any[]).map((master: any) => ({
+    ...master,
+    logoUrl: master.logoUrl || master.logo || getStoreLogo(master.slug || master.name)
+  })) as unknown as ManagedStore[]
 }
 
-const INITIAL_STORES = buildMockStores()
+const INITIAL_STORES = loadInitialStores()
 
 const EMPTY_FORM: Partial<ManagedStore> = {
   name: '',
@@ -143,30 +177,41 @@ const KpiCard: React.FC<{
    Live Preview Card (customer-facing mini card)
    ============================================================ */
 
-const StorePreviewCard: React.FC<{ store: Partial<ManagedStore> }> = ({ store }) => (
-  <div
-    className="store-preview-card"
-    style={{ background: store.cardBg || '#E8F5FF' }}
-  >
-    <div className="store-preview-badge" style={{ background: store.badgeBg || '#B3DCFA' }}>
-      <Tag size={10} />
-      <span>{store.category || 'Category'}</span>
+const StorePreviewCard: React.FC<{ store: Partial<ManagedStore> }> = ({ store }) => {
+  const logoSrc = store.logoUrl || (store.name || store.slug ? getStoreLogo(store.slug || store.name) : '')
+
+  return (
+    <div
+      className="store-preview-card"
+      style={{ background: store.cardBg || '#E8F5FF' }}
+    >
+      <div className="store-preview-badge" style={{ background: store.badgeBg || '#B3DCFA' }}>
+        <Tag size={10} />
+        <span>{store.category || 'Category'}</span>
+      </div>
+      <div className="store-preview-logo-wrap">
+        {logoSrc ? (
+          <img
+            src={logoSrc}
+            alt={store.name || 'Store Logo'}
+            className="store-preview-logo"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = getStoreLogo(store.slug || store.name)
+            }}
+          />
+        ) : (
+          <div className="store-preview-logo-placeholder">
+            <ImageIcon size={28} color="#94a3b8" />
+          </div>
+        )}
+      </div>
+      <div className="store-preview-name">{store.name || 'Store Name'}</div>
+      <div className="store-preview-reward">{store.reward || 'Reward Info'}</div>
+      <div className="store-preview-desc">{store.description || 'Store description goes here'}</div>
+      <div className="store-preview-cta">Shop Now →</div>
     </div>
-    <div className="store-preview-logo-wrap">
-      {store.logoUrl ? (
-        <img src={store.logoUrl as string} alt={store.name} className="store-preview-logo" />
-      ) : (
-        <div className="store-preview-logo-placeholder">
-          <ImageIcon size={28} color="#94a3b8" />
-        </div>
-      )}
-    </div>
-    <div className="store-preview-name">{store.name || 'Store Name'}</div>
-    <div className="store-preview-reward">{store.reward || 'Reward Info'}</div>
-    <div className="store-preview-desc">{store.description || 'Store description goes here'}</div>
-    <div className="store-preview-cta">Shop Now →</div>
-  </div>
-)
+  )
+}
 
 /* ============================================================
    Add / Edit Modal
@@ -471,15 +516,16 @@ const CustomerPreviewModal: React.FC<{
               <Tag size={10} />{store.category}
             </div>
             <div style={{
-              width: 90, height: 90, borderRadius: 18,
+              width: 90, height: 60, borderRadius: 14,
               background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)', padding: '6px 12px'
             }}>
-              {store.logoUrl ? (
-                <img src={store.logoUrl as string} alt={store.name} style={{ width: 70, height: 70, objectFit: 'contain' }} />
-              ) : (
-                <StoreIcon size={36} color="#94a3b8" />
-              )}
+              <img
+                src={store.logoUrl || getStoreLogo(store.slug || store.name)}
+                alt={store.name}
+                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                onError={e => { (e.currentTarget as HTMLImageElement).src = getStoreLogo(store.slug || store.name) }}
+              />
             </div>
             <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>{store.name}</div>
             <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#ef4444' }}>{store.reward}</div>
@@ -560,60 +606,62 @@ const StoreGridCard: React.FC<{
   onEdit: () => void
   onDelete: () => void
   onPreview: () => void
-}> = ({ store, onEdit, onDelete, onPreview }) => (
-  <div className="store-grid-card" style={{ borderTop: `4px solid ${store.badgeBg}` }}>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+}> = ({ store, onEdit, onDelete, onPreview }) => {
+  const logoSrc = store.logoUrl || getStoreLogo(store.slug || store.name)
+
+  return (
+    <div className="store-grid-card" style={{ borderTop: `4px solid ${store.badgeBg}` }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+        <div style={{
+          background: store.badgeBg, borderRadius: 16, padding: '3px 10px',
+          fontSize: '0.7rem', fontWeight: 700, color: '#0f172a',
+        }}>
+          {store.category}
+        </div>
+        <span className={statusClass(store.status)} style={{ fontSize: '0.68rem' }}>
+          {statusLabel(store.status)}
+        </span>
+      </div>
+
       <div style={{
-        background: store.badgeBg, borderRadius: 16, padding: '3px 10px',
-        fontSize: '0.7rem', fontWeight: 700, color: '#0f172a',
+        width: 84, height: 46, borderRadius: 10,
+        background: store.cardBg || '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        margin: '0 auto 10px', padding: '4px 8px', border: '1px solid rgba(0,0,0,0.06)'
       }}>
-        {store.category}
-      </div>
-      <span className={statusClass(store.status)} style={{ fontSize: '0.68rem' }}>
-        {statusLabel(store.status)}
-      </span>
-    </div>
-
-    <div style={{
-      width: 64, height: 64, borderRadius: 14,
-      background: store.cardBg, display: 'flex', alignItems: 'center', justifyContent: 'center',
-      margin: '0 auto 10px',
-    }}>
-      {store.logoUrl ? (
-        <img src={store.logoUrl as string} alt={store.name}
-          style={{ width: 52, height: 52, objectFit: 'contain' }}
-          onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+        <img
+          src={logoSrc}
+          alt={store.name}
+          style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+          onError={e => { (e.currentTarget as HTMLImageElement).src = getStoreLogo(store.slug || store.name) }}
         />
-      ) : (
-        <StoreIcon size={28} color="#94a3b8" />
-      )}
-    </div>
-
-    <div style={{ textAlign: 'center', marginBottom: 10 }}>
-      <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>{store.name}</div>
-      <div style={{ fontSize: '0.78rem', color: '#ef4444', fontWeight: 600, marginTop: 2 }}>{store.reward}</div>
-      <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: 2, lineHeight: 1.4 }}>{store.description}</div>
-    </div>
-
-    <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 12 }}>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a' }}>{store.clicks.toLocaleString()}</div>
-        <div style={{ fontSize: '0.65rem', color: '#94a3b8' }}>Clicks</div>
       </div>
-      <div style={{ width: 1, background: '#e2e8f0' }} />
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a' }}>{store.totalDeals}</div>
-        <div style={{ fontSize: '0.65rem', color: '#94a3b8' }}>Deals</div>
+
+      <div style={{ textAlign: 'center', marginBottom: 10 }}>
+        <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>{store.name}</div>
+        <div style={{ fontSize: '0.78rem', color: '#ef4444', fontWeight: 600, marginTop: 2 }}>{store.reward}</div>
+        <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: 2, lineHeight: 1.4 }}>{store.description}</div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 12 }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a' }}>{store.clicks.toLocaleString()}</div>
+          <div style={{ fontSize: '0.65rem', color: '#94a3b8' }}>Clicks</div>
+        </div>
+        <div style={{ width: 1, background: '#e2e8f0' }} />
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a' }}>{store.totalDeals}</div>
+          <div style={{ fontSize: '0.65rem', color: '#94a3b8' }}>Deals</div>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 6 }}>
+        <button className="action-btn" onClick={onPreview} title="Preview" style={{ flex: 1 }}><Eye size={15} /></button>
+        <button className="action-btn" onClick={onEdit} title="Edit" style={{ flex: 1 }}><Edit2 size={15} /></button>
+        <button className="action-btn delete" onClick={onDelete} title="Delete" style={{ flex: 1 }}><Trash2 size={15} /></button>
       </div>
     </div>
-
-    <div style={{ display: 'flex', gap: 6 }}>
-      <button className="action-btn" onClick={onPreview} title="Preview" style={{ flex: 1 }}><Eye size={15} /></button>
-      <button className="action-btn" onClick={onEdit} title="Edit" style={{ flex: 1 }}><Edit2 size={15} /></button>
-      <button className="action-btn delete" onClick={onDelete} title="Delete" style={{ flex: 1 }}><Trash2 size={15} /></button>
-    </div>
-  </div>
-)
+  )
+}
 
 /* ============================================================
    Main Page
@@ -629,6 +677,68 @@ export const ExecutiveStoresPage: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editing, setEditing] = useState<ManagedStore | null>(null)
   const [previewing, setPreviewing] = useState<ManagedStore | null>(null)
+
+  useEffect(() => {
+    let isMounted = true
+    const fetchLiveStores = () => {
+      adminApi.getStores()
+        .then((res: any[]) => {
+          if (!isMounted) return
+          if (Array.isArray(res) && res.length > 0) {
+            const cachedMap = new Map<string, any>()
+            res.forEach((s: any) => {
+              if (s.id) cachedMap.set(normalizeStoreKey(s.id), s)
+              if (s._id) cachedMap.set(normalizeStoreKey(s._id), s)
+              if (s.slug) cachedMap.set(normalizeStoreKey(s.slug), s)
+              if (s.name) cachedMap.set(normalizeStoreKey(s.name), s)
+            })
+
+            // Guarantee all 20 stores from MASTER_STORES_DATA are included
+            const mapped: ManagedStore[] = MASTER_STORES_DATA.map((master: any) => {
+              const matched =
+                cachedMap.get(normalizeStoreKey(master.id)) ||
+                cachedMap.get(normalizeStoreKey(master.slug)) ||
+                cachedMap.get(normalizeStoreKey(master.name)) ||
+                master
+              return {
+                id: matched._id || matched.id || master.id,
+                name: matched.name || master.name,
+                slug: matched.slug || master.slug,
+                logoUrl: matched.logoUrl || matched.logo || getStoreLogo(matched.slug || matched.name),
+                category: (matched.category as StoreCategory) || master.category || 'Fashion',
+                reward: matched.reward || master.reward || 'Upto 5% rewards',
+                description: matched.description || master.description || `${master.name} online deals & cashback`,
+                affiliateLink: matched.affiliateLink || matched.href || master.affiliateLink,
+                cardBg: matched.cardBg || master.cardBg || '#E8F5FF',
+                badgeBg: matched.badgeBg || master.badgeBg || '#B3DCFA',
+                status: matched.status === 'inactive' ? 'inactive' : (matched.isFeatured ? 'featured' : 'active'),
+                isFeatured: Boolean(matched.isFeatured || matched.status === 'featured'),
+                clicks: typeof matched.clicks === 'number' ? matched.clicks : (parseInt(String(matched.clicks || 0)) || master.clicks || 1000),
+                totalDeals: typeof matched.totalDeals === 'number' ? matched.totalDeals : (master.totalDeals || 15),
+                addedOn: matched.addedOn || master.addedOn || '2026-01-15'
+              }
+            })
+            setStores(mapped)
+          }
+        })
+        .catch(err => {
+          console.warn('API error, using initial stores:', err)
+        })
+    }
+
+    fetchLiveStores()
+
+    const handleSync = () => { fetchLiveStores() }
+    window.addEventListener('wouchify_store_clicked', handleSync)
+    window.addEventListener('wouchify_stores_updated', handleSync)
+    window.addEventListener('storage', handleSync)
+    return () => {
+      isMounted = false
+      window.removeEventListener('wouchify_store_clicked', handleSync)
+      window.removeEventListener('wouchify_stores_updated', handleSync)
+      window.removeEventListener('storage', handleSync)
+    }
+  }, [])
 
   /* KPI stats */
   const kpi = useMemo(() => ({
@@ -668,14 +778,35 @@ export const ExecutiveStoresPage: React.FC = () => {
   const openEdit = (s: ManagedStore) => { setEditing(s); setIsFormOpen(true) }
 
   const handleSave = (data: ManagedStore) => {
-    setStores(prev =>
-      editing ? prev.map(s => s.id === data.id ? data : s) : [data, ...prev]
-    )
+    if (editing) {
+      adminApi.updateStore(data.id, {
+        name: data.name,
+        category: data.category,
+        logo: data.logoUrl,
+        reward: data.reward,
+        href: data.affiliateLink,
+        status: data.status === 'inactive' ? 'inactive' : 'active'
+      }).catch(console.warn)
+
+      setStores(prev => prev.map(s => s.id === data.id ? data : s))
+    } else {
+      adminApi.createStore({
+        name: data.name,
+        category: data.category,
+        logo: data.logoUrl,
+        reward: data.reward,
+        href: data.affiliateLink,
+        status: data.status === 'inactive' ? 'inactive' : 'active'
+      }).catch(console.warn)
+
+      setStores(prev => [data, ...prev])
+    }
     setIsFormOpen(false)
   }
 
   const handleDelete = (id: string) => {
     if (window.confirm('Delete this store? This cannot be undone.')) {
+      adminApi.deleteStore(id).catch(console.warn)
       setStores(prev => prev.filter(s => s.id !== id))
     }
   }
@@ -848,15 +979,16 @@ export const ExecutiveStoresPage: React.FC = () => {
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <div style={{
-                          width: 40, height: 40, borderRadius: 10, flexShrink: 0,
-                          background: store.cardBg, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          width: 50, height: 32, borderRadius: 8, flexShrink: 0,
+                          background: store.cardBg || '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          padding: '2px 4px', border: '1px solid #e2e8f0'
                         }}>
-                          {store.logoUrl ? (
-                            <img src={store.logoUrl as string} alt={store.name}
-                              style={{ width: 32, height: 32, objectFit: 'contain' }}
-                              onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
-                            />
-                          ) : <StoreIcon size={18} color="#94a3b8" />}
+                          <img
+                            src={store.logoUrl || getStoreLogo(store.slug || store.name)}
+                            alt={store.name}
+                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                            onError={e => { (e.currentTarget as HTMLImageElement).src = getStoreLogo(store.slug || store.name) }}
+                          />
                         </div>
                         <div>
                           <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.9rem' }}>{store.name}</div>

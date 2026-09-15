@@ -72,8 +72,8 @@
 
 /* ── Sidebar ──────────────────────────────────────────────────────── */
 .admin-sidebar {
-  width: 230px;
-  background: #171C46;
+  width: 275px;
+  background: linear-gradient(180deg, #1E2460 0%, #2F368C 100%);
   display: flex;
   flex-direction: column;
   transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -131,31 +131,39 @@
 .sidebar-studio-badge {
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
   font-size: 8.5px;
-  font-weight: 700;
-  color: #FFFFFF;
-  background: #E31E25;
-  padding: 2.5px 6px;
+  font-weight: 800;
+  color: #1E2460;
+  background: #E5E7FF;
+  padding: 3px 8px;
   border-radius: 999px;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
-  gap: 3px;
   flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(227, 30, 37, 0.35);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
-.studio-pulse-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #FFFFFF;
-  animation: pulseStudioDot 1.5s infinite;
+.topbar-portal-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #2F368C;
+  background: #EEF2FF;
+  border: 1px solid #C7D2FE;
+  border-radius: 7px;
+  text-decoration: none;
+  transition: all 0.15s ease;
 }
 
-@keyframes pulseStudioDot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.7); }
+.topbar-portal-link:hover {
+  background: #2F368C;
+  color: #FFFFFF;
+  border-color: #2F368C;
 }
 
 .sidebar-toggle-btn {
@@ -2860,3 +2868,423 @@
 .cat-view-live-btn:hover {
   background: #EFF6FF;
 }
+
+/* ── Staff Management Studio ───────────────────────────────────────── */
+.staff-user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.staff-avatar-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.staff-avatar-circle.executive {
+  background: #EEF2FF;
+  color: #4F46E5;
+  border: 1.5px solid #C7D2FE;
+}
+
+.staff-avatar-circle.operational_manager {
+  background: #FAF5FF;
+  color: #7C3AED;
+  border: 1.5px solid #E9D5FF;
+}
+
+.staff-avatar-circle.manager {
+  background: #FEF2F2;
+  color: #E31E25;
+  border: 1.5px solid #FECACA;
+}
+
+.staff-user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.staff-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #1E2460;
+}
+
+.staff-email {
+  font-size: 11.5px;
+  color: #64748B;
+}
+
+.staff-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.staff-role-badge.executive {
+  background: #EFF6FF;
+  color: #2563EB;
+  border: 1px solid #BFDBFE;
+}
+
+.staff-role-badge.operational_manager {
+  background: #FAF5FF;
+  color: #7C3AED;
+  border: 1px solid #E9D5FF;
+}
+
+.staff-role-badge.manager {
+  background: #FEF2F2;
+  color: #E31E25;
+  border: 1px solid #FECACA;
+}
+
+.staff-domain-text {
+  font-size: 12.5px;
+  color: #334155;
+  font-weight: 500;
+}
+
+.staff-metrics-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.metric-pill {
+  font-size: 11px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  padding: 2px 7px;
+  border-radius: 5px;
+  color: #475569;
+}
+
+.metric-pill strong {
+  color: #1E2460;
+}
+
+.metric-pill.approval strong {
+  color: #16A34A;
+}
+
+.staff-status-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: #FFFFFF;
+}
+
+.staff-status-toggle.online {
+  background: #F0FDF4;
+  color: #166534;
+  border-color: #BBF7D0;
+}
+
+.staff-status-toggle.away {
+  background: #FEFCE8;
+  color: #854D0E;
+  border-color: #FEF08A;
+}
+
+.staff-status-toggle.offline {
+  background: #F8FAFC;
+  color: #64748B;
+  border-color: #E2E8F0;
+}
+
+.staff-status-toggle:hover {
+  filter: brightness(0.95);
+  transform: translateY(-1px);
+}
+
+.status-indicator-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.staff-status-toggle.online .status-indicator-dot {
+  background: #22C55E;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+}
+
+.staff-status-toggle.away .status-indicator-dot {
+  background: #EAB308;
+}
+
+.staff-status-toggle.offline .status-indicator-dot {
+  background: #94A3B8;
+}
+
+.table-action-btn.edit-btn {
+  background: #EFF6FF;
+  color: #2563EB;
+  border: 1px solid #BFDBFE;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.table-action-btn.edit-btn:hover {
+  background: #2563EB;
+  color: #FFFFFF;
+}
+
+/* ── Commercial Analytics & Platform Insights ──────────────────────── */
+.dashboard-grid-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 24px;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-grid-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+.merchant-analytics-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.merchant-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  transition: all 0.15s ease;
+}
+
+.merchant-row:hover {
+  background: #F1F5F9;
+  border-color: #CBD5E1;
+  transform: translateX(2px);
+}
+
+.m-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.m-info strong {
+  font-size: 13.5px;
+  color: #1E2460;
+  font-weight: 600;
+}
+
+.m-info span {
+  font-size: 11.5px;
+  color: #64748B;
+}
+
+.m-rev {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.m-rev strong {
+  font-size: 14.5px;
+  color: #16A34A;
+  font-weight: 700;
+}
+
+.rev-sub {
+  font-size: 11px;
+  color: #64748B;
+  font-weight: 500;
+}
+
+/* Category Progress Bars */
+.category-bars-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.cat-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cat-bar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12.5px;
+}
+
+.cat-bar-header span {
+  color: #334155;
+  font-weight: 500;
+}
+
+.cat-bar-header strong {
+  color: #1E2460;
+  font-weight: 700;
+}
+
+.bar-track {
+  width: 100%;
+  height: 8px;
+  background: #EEF2F6;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── Affiliate Networks & Monetization ─────────────────────────────── */
+.badge-connected {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #F0FDF4;
+  color: #16A34A;
+  border: 1px solid #BBF7D0;
+}
+
+.toolbar-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1E2460;
+}
+
+/* ── Global Layout & Algorithm Configuration ────────────────────────── */
+.algo-grid-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 1024px) {
+  .algo-grid-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.algo-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 16px;
+}
+
+.algo-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #F8FAFC;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #E2E8F0;
+}
+
+.algo-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.algo-label-row label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1E2460;
+}
+
+.algo-label-row strong {
+  font-size: 14px;
+  font-weight: 700;
+  color: #E31E25;
+  background: #FEF2F2;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid #FECACA;
+}
+
+.algo-field input[type="range"] {
+  width: 100%;
+  accent-color: #E31E25;
+  cursor: pointer;
+}
+
+.algo-field small {
+  font-size: 11.5px;
+  color: #64748B;
+}
+
+/* ── Data Governance & Risk Badges ──────────────────────────────────── */
+.risk-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.risk-pill.low {
+  background: #F0FDF4;
+  color: #16A34A;
+  border: 1px solid #BBF7D0;
+}
+
+.risk-pill.medium {
+  background: #FEFCE8;
+  color: #CA8A04;
+  border: 1px solid #FEF08A;
+}
+
+.risk-pill.high {
+  background: #FEF2F2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+}
+
+

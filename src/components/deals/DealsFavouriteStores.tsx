@@ -4,7 +4,9 @@ import {
   DEALS_FILTER_CATEGORIES,
   DEALS_FAVOURITE_STORES,
   DEALS_CARD_ITEMS,
+  MASTER_EXECUTIVE_LOOT_DEALS,
   normalizeDealToCard,
+  normalizeLootToCard,
   type DealCardItem,
 } from '../../data/dealsPage'
 import { adminApi } from '../../services/adminApi'
@@ -16,6 +18,7 @@ export interface DealsFavouriteStoresProps {
   searchPlaceholder?: string
   singleCardMode?: boolean
   hideCards?: boolean
+  dataSource?: 'deals' | 'loot'
 }
 
 const FILTER_OPTIONS_MAP: Record<string, string[]> = {
@@ -32,6 +35,7 @@ export const DealsFavouriteStores: React.FC<DealsFavouriteStoresProps> = ({
   searchPlaceholder = 'Search Deals',
   singleCardMode = false,
   hideCards = false,
+  dataSource = 'deals',
 }) => {
   const scale = useDesktopScale()
   const canvasRef = useRef<HTMLDivElement>(null)
@@ -52,47 +56,74 @@ export const DealsFavouriteStores: React.FC<DealsFavouriteStoresProps> = ({
   // Live deals list initialized from cache or static default items
   const [dealsList, setDealsList] = useState<DealCardItem[]>(() => {
     try {
-      const cached = localStorage.getItem('wouchify_public_deals')
-      if (cached) {
-        const parsed = JSON.parse(cached)
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map((d: any, idx: number) => normalizeDealToCard(d, idx))
+      if (dataSource === 'loot') {
+        const cached = localStorage.getItem('wouchify_loot_deals')
+        if (cached) {
+          const parsed = JSON.parse(cached)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed.map((l: any, idx: number) => normalizeLootToCard(l, idx))
+          }
+        }
+      } else {
+        const cached = localStorage.getItem('wouchify_public_deals')
+        if (cached) {
+          const parsed = JSON.parse(cached)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed.map((d: any, idx: number) => normalizeDealToCard(d, idx))
+          }
         }
       }
     } catch {}
-    return DEALS_CARD_ITEMS
+    return dataSource === 'loot' 
+      ? MASTER_EXECUTIVE_LOOT_DEALS.map((l: any, idx: number) => normalizeLootToCard(l, idx)) 
+      : DEALS_CARD_ITEMS
   })
 
   // Fetch live deals from Backend API & listen to update events
   useEffect(() => {
     let isMounted = true
-    const fetchLiveDeals = async () => {
+    const fetchLiveItems = async () => {
       try {
-        const res = await adminApi.getPublicDeals()
-        if (!isMounted) return
-        if (Array.isArray(res) && res.length > 0) {
-          const normalized = res.map((d: any, idx: number) => normalizeDealToCard(d, idx))
-          setDealsList(normalized)
+        if (dataSource === 'loot') {
+          const res = await adminApi.getLootDeals()
+          if (!isMounted) return
+          if (Array.isArray(res) && res.length > 0) {
+            const normalized = res
+              .filter((l: any) => l.status === 'active' || l.status === 'Approved')
+              .map((l: any, idx: number) => normalizeLootToCard(l, idx))
+            setDealsList(normalized)
+          }
+        } else {
+          const res = await adminApi.getPublicDeals()
+          if (!isMounted) return
+          if (Array.isArray(res) && res.length > 0) {
+            const normalized = res
+              .filter((d: any) => d.status === 'active' || d.status === 'Approved')
+              .map((d: any, idx: number) => normalizeDealToCard(d, idx))
+            setDealsList(normalized)
+          }
         }
       } catch {
         // Keeps cached/static fallback
       }
     }
 
-    fetchLiveDeals()
+    fetchLiveItems()
 
-    const handleDealsUpdate = () => {
-      fetchLiveDeals()
+    const handleUpdate = () => {
+      fetchLiveItems()
     }
 
-    window.addEventListener('wouchify_deals_updated', handleDealsUpdate)
-    window.addEventListener('storage', handleDealsUpdate)
+    window.addEventListener(dataSource === 'loot' ? 'wouchify_loot_deals_updated' : 'wouchify_deals_updated', handleUpdate)
+    window.addEventListener('wouchify_deal_clicked', handleUpdate)
+    window.addEventListener('storage', handleUpdate)
     return () => {
       isMounted = false
-      window.removeEventListener('wouchify_deals_updated', handleDealsUpdate)
-      window.removeEventListener('storage', handleDealsUpdate)
+      window.removeEventListener(dataSource === 'loot' ? 'wouchify_loot_deals_updated' : 'wouchify_deals_updated', handleUpdate)
+      window.removeEventListener('wouchify_deal_clicked', handleUpdate)
+      window.removeEventListener('storage', handleUpdate)
     }
-  }, [])
+  }, [dataSource])
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -108,7 +139,10 @@ export const DealsFavouriteStores: React.FC<DealsFavouriteStoresProps> = ({
   const filteredDeals = useMemo(() => {
     return dealsList.filter((item) => {
       // Only show active deals
-      if (item.status && item.status !== 'active') return false
+      if (item.status && item.status.toLowerCase() !== 'active' && item.status.toLowerCase() !== 'approved') return false
+
+      // Section Placement check: hide deals designated strictly for Section 2 (Best Selling Only)
+      if (item.sectionPlacement === 'best_selling') return false
 
       const matchesSearch =
         !searchQuery.trim() ||
@@ -345,10 +379,10 @@ export const DealsFavouriteStores: React.FC<DealsFavouriteStoresProps> = ({
           <div className={`deals-favourite__grid ${singleCardMode ? 'deals-favourite__grid--single' : ''}`}>
             {filteredDeals.length > 0 ? (
               singleCardMode ? (
-                <DealCard key={filteredDeals[0].id} deal={filteredDeals[0]} />
+                <DealCard key={filteredDeals[0].id} deal={filteredDeals[0]} isLoot={dataSource === 'loot'} />
               ) : (
                 filteredDeals.map((deal) => (
-                  <DealCard key={deal.id} deal={deal} />
+                  <DealCard key={deal.id} deal={deal} isLoot={dataSource === 'loot'} />
                 ))
               )
             ) : (

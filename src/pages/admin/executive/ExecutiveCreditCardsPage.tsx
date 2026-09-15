@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { ExecutiveLayout } from './ExecutiveLayout'
+import { adminApi } from '../../../services/adminApi'
 import {
   Plus,
   Search,
@@ -24,6 +25,13 @@ import {
 } from 'lucide-react'
 import './ExecutiveShared.css'
 import { ImageUploadField } from './ImageUploadField'
+
+import indusindLogo from '../../../assets/creditcardpage/indusind_bank.png'
+import iciciLogo from '../../../assets/creditcardpage/ICICI_bank.png'
+import idfcLogo from '../../../assets/creditcardpage/IDFC_back.png'
+import tataNeuLogo from '../../../assets/creditcardpage/Tata_neu.svg'
+import axisLogo from '../../../assets/creditcardpage/Axis_Bank.png'
+import bajajLogo from '../../../assets/creditcardpage/Bajaj-Finsery.png'
 
 /* ============================================================
    Types
@@ -68,11 +76,13 @@ interface CreditCard {
   addedOn: string
 }
 
+import { CREDIT_CARDS } from '../../../data/creditCardsData'
+
 /* ============================================================
    Constants
    ============================================================ */
 
-const BANKS = ['ICICI Bank', 'HDFC Bank', 'SBI Card', 'Axis Bank', 'Kotak Mahindra', 'IndusInd Bank', 'Yes Bank', 'RBL Bank', 'American Express', 'Standard Chartered']
+const BANKS = ['IndusInd Bank', 'ICICI Bank', 'IDFC First Bank', 'TataNeu', 'Axis Bank']
 const NETWORKS: CardNetwork[] = ['Visa', 'Mastercard', 'Rupay', 'Amex', 'Diners']
 const TIERS: CardTier[] = ['Entry', 'Classic', 'Premium', 'Super Premium', 'Infinite']
 
@@ -85,77 +95,35 @@ const NETWORK_COLOR: Record<CardNetwork, string> = {
 }
 
 /* ============================================================
-   Seed mock data
+   Seed mock data (Directly synced with public Credit Cards webpage)
    ============================================================ */
 
-const MOCK_CARDS: CreditCard[] = [
-  {
-    id: 'icici-platinum', cardName: 'ICICI Platinum Chip', bank: 'ICICI Bank',
-    network: 'Visa', tier: 'Classic', imageUrl: '', bankLogoUrl: '',
-    welcomeOffer: '₹1000 Amazon Gift Card on joining', rewardRate: '5% Cashback on Amazon',
-    keyBenefits: 'Fuel surcharge waiver, Lounge access ×2/qtr',
-    partnerBrands: 'Amazon, Flipkart, Swiggy',
-    affiliateLink: 'https://icicibank.com/?affid=wouchify',
-    annualFee: '₹999', joiningFee: '₹999', feeWaiver: 'Spend ₹1L/year',
-    offerStartDate: '2026-01-01', offerExpiryDate: '2026-12-31', lastUpdated: '2026-09-01',
-    status: 'featured', isFeatured: true, isVerified: true, applyCount: 3200, viewCount: 18400, addedOn: '2026-01-01',
-  },
-  {
-    id: 'hdfc-regalia', cardName: 'HDFC Regalia Gold', bank: 'HDFC Bank',
-    network: 'Visa', tier: 'Premium', imageUrl: '', bankLogoUrl: '',
-    welcomeOffer: '2500 Reward Points on first swipe', rewardRate: '4 Reward Points / ₹150',
-    keyBenefits: 'Airport lounge ×8/qtr, Golf access, Concierge',
-    partnerBrands: 'Marriott, Taj, Swiggy, Amazon',
-    affiliateLink: 'https://hdfcbank.com/?affid=wouchify',
-    annualFee: '₹2500', joiningFee: '₹2500', feeWaiver: 'Spend ₹3L/year',
-    offerStartDate: '2026-01-01', offerExpiryDate: '2026-09-30', lastUpdated: '2026-09-05',
-    status: 'active', isFeatured: false, isVerified: true, applyCount: 2800, viewCount: 14200, addedOn: '2026-02-10',
-  },
-  {
-    id: 'sbi-simplyclick', cardName: 'SBI SimplyCLICK', bank: 'SBI Card',
-    network: 'Visa', tier: 'Entry', imageUrl: '', bankLogoUrl: '',
-    welcomeOffer: '₹500 Amazon Gift Card on joining', rewardRate: '10X Points on select partners',
-    keyBenefits: 'Online shopping rewards, Cleartrip voucher',
-    partnerBrands: 'Amazon, BookMyShow, Cleartrip, Lenskart',
-    affiliateLink: 'https://sbicard.com/?affid=wouchify',
-    annualFee: '₹499', joiningFee: '₹499', feeWaiver: 'Spend ₹1L/year',
-    offerStartDate: '2026-03-01', offerExpiryDate: '2026-09-11', lastUpdated: '2026-09-07',
-    status: 'active', isFeatured: false, isVerified: true, applyCount: 5100, viewCount: 24000, addedOn: '2026-03-01',
-  },
-  {
-    id: 'axis-ace', cardName: 'Axis Ace Credit Card', bank: 'Axis Bank',
-    network: 'Visa', tier: 'Classic', imageUrl: '', bankLogoUrl: '',
-    welcomeOffer: 'Flat ₹500 cashback on first txn', rewardRate: 'Flat 2% Cashback on all spends',
-    keyBenefits: 'Unlimited cashback, GPay 5% extra, Swiggy 5%',
-    partnerBrands: 'Google Pay, Swiggy, Ola',
-    affiliateLink: 'https://axisbank.com/?affid=wouchify',
-    annualFee: '₹499', joiningFee: '₹0', feeWaiver: 'Spend ₹2L/year',
-    offerStartDate: '2026-04-01', offerExpiryDate: '2026-10-31', lastUpdated: '2026-09-01',
-    status: 'active', isFeatured: true, isVerified: true, applyCount: 4400, viewCount: 21000, addedOn: '2026-04-01',
-  },
-  {
-    id: 'kotak-zen', cardName: 'Kotak Zen Signature', bank: 'Kotak Mahindra',
-    network: 'Visa', tier: 'Premium', imageUrl: '', bankLogoUrl: '',
-    welcomeOffer: '2000 Zen Points + ₹250 BookMyShow voucher', rewardRate: 'Zen Points on every ₹100',
-    keyBenefits: 'Fuel surcharge waiver, 8 Lounge passes/year',
-    partnerBrands: 'BookMyShow, Myntra, Zomato',
-    affiliateLink: 'https://kotak.com/?affid=wouchify',
-    annualFee: '₹1499', joiningFee: '₹1499', feeWaiver: 'Spend ₹1.5L/year',
-    offerStartDate: '2026-05-01', offerExpiryDate: '2026-11-30', lastUpdated: '2026-09-02',
-    status: 'inactive', isFeatured: false, isVerified: false, applyCount: 980, viewCount: 5600, addedOn: '2026-05-01',
-  },
-  {
-    id: 'amex-mrcc', cardName: 'Amex Membership Rewards', bank: 'American Express',
-    network: 'Amex', tier: 'Super Premium', imageUrl: '', bankLogoUrl: '',
-    welcomeOffer: '4000 Bonus Points on ₹15000 spend in 90 days', rewardRate: '1 MR Point / ₹50',
-    keyBenefits: 'Taj Epicure, ITC, Priority Pass lounge',
-    partnerBrands: 'Taj Hotels, Amazon, Flipkart, Uber',
-    affiliateLink: 'https://americanexpress.com/?affid=wouchify',
-    annualFee: '₹4500', joiningFee: '₹4500', feeWaiver: 'Spend ₹4.5L/year',
-    offerStartDate: '2026-06-01', offerExpiryDate: '2027-06-30', lastUpdated: '2026-09-03',
-    status: 'featured', isFeatured: true, isVerified: true, applyCount: 1200, viewCount: 9800, addedOn: '2026-06-01',
-  },
-]
+const MOCK_CARDS: CreditCard[] = CREDIT_CARDS.map((c, i) => ({
+  id: c.id,
+  cardName: c.name,
+  bank: c.tagText,
+  network: (c.id === 'axis-bank' || c.id === 'tata-neu-2' ? 'Mastercard' : c.id === 'tata-neu-1' ? 'Rupay' : 'Visa') as CardNetwork,
+  tier: (c.section === 'premium' ? 'Premium' : 'Classic') as CardTier,
+  imageUrl: '',
+  bankLogoUrl: c.logo,
+  welcomeOffer: c.keyBenefitValue,
+  rewardRate: c.rewardsValue,
+  keyBenefits: c.suitedFor.join(', '),
+  partnerBrands: c.suitedFor.join(', '),
+  affiliateLink: c.applyHref || '#',
+  annualFee: c.section === 'premium' ? '₹0' : 'Lifetime Free',
+  joiningFee: '₹0',
+  feeWaiver: 'Lifetime Free',
+  offerStartDate: '2026-01-01',
+  offerExpiryDate: '2026-12-31',
+  lastUpdated: '2026-09-01',
+  status: (c.section === 'premium' ? 'featured' : 'active') as CardStatus,
+  isFeatured: c.section === 'premium',
+  isVerified: true,
+  applyCount: 2400,
+  viewCount: 15000 + i * 2000,
+  addedOn: '2026-01-01',
+}))
 
 const EMPTY_FORM: Partial<CreditCard> = {
   cardName: '', bank: BANKS[0], network: 'Visa', tier: 'Classic',
@@ -236,10 +204,20 @@ const CardVisual: React.FC<{ card: Partial<CreditCard>; size?: 'sm' | 'lg' }> = 
       {/* Content */}
       <div style={{ position: 'absolute', inset: 0, padding: isLg ? 18 : 8, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          {card.bankLogoUrl
-            ? <img src={card.bankLogoUrl as string} alt="" style={{ height: isLg ? 22 : 12, objectFit: 'contain', filter: 'brightness(10)' }} />
-            : <span style={{ fontSize: isLg ? '0.65rem' : '0.45rem', fontWeight: 800, color: 'rgba(255,255,255,0.9)', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{card.bank}</span>
-          }
+          {card.bankLogoUrl ? (
+            <div style={{
+              background: 'rgba(255,255,255,0.92)',
+              padding: isLg ? '3px 8px' : '2px 4px',
+              borderRadius: 6,
+              display: 'inline-flex',
+              alignItems: 'center',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.15)'
+            }}>
+              <img src={card.bankLogoUrl as string} alt="" style={{ height: isLg ? 18 : 10, maxWidth: isLg ? 80 : 45, objectFit: 'contain' }} />
+            </div>
+          ) : (
+            <span style={{ fontSize: isLg ? '0.65rem' : '0.45rem', fontWeight: 800, color: 'rgba(255,255,255,0.9)', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{card.bank}</span>
+          )}
           <span style={{ fontSize: isLg ? '0.7rem' : '0.5rem', fontWeight: 700, color: 'rgba(255,255,255,0.8)', textTransform: 'uppercase' }}>{card.network}</span>
         </div>
         <div>
@@ -657,6 +635,61 @@ export const ExecutiveCreditCardsPage: React.FC = () => {
   const [editing, setEditing] = useState<CreditCard | null>(null)
   const [previewing, setPreviewing] = useState<CreditCard | null>(null)
 
+  useEffect(() => {
+    const resolveBankLogo = (bank: string, id: string, logoUrl?: string) => {
+      if (logoUrl && typeof logoUrl === 'string' && (logoUrl.startsWith('data:') || logoUrl.startsWith('blob:') || logoUrl.startsWith('http'))) {
+        return logoUrl
+      }
+      const b = (bank || '').toLowerCase()
+      const i = (id || '').toLowerCase()
+      if (b.includes('indusind') || i.includes('indusind')) return indusindLogo
+      if (b.includes('icici') || i.includes('icici')) return iciciLogo
+      if (b.includes('idfc') || i.includes('idfc')) return idfcLogo
+      if (b.includes('tata') || i.includes('tata')) return tataNeuLogo
+      if (b.includes('axis') || i.includes('axis')) return axisLogo
+      if (b.includes('bajaj') || i.includes('bajaj')) return bajajLogo
+      return logoUrl || indusindLogo
+    }
+
+    const fetchLiveCards = async () => {
+      try {
+        const live = await adminApi.getCreditCards()
+        if (Array.isArray(live) && live.length > 0) {
+          const mapped: CreditCard[] = live.map((c: any, idx: number) => ({
+            id: String(c._id || c.id || `card-${idx}`),
+            cardName: c.cardName || 'Credit Card',
+            bank: c.bank || 'IndusInd Bank',
+            network: (c.network || 'Visa') as any,
+            tier: (c.tier || 'Classic') as any,
+            imageUrl: c.imageUrl || '',
+            bankLogoUrl: resolveBankLogo(c.bank || '', c._id || c.id || '', c.bankLogoUrl),
+            welcomeOffer: c.welcomeOffer || c.keyBenefitValue || 'Upto 5% Cashback',
+            rewardRate: c.rewardRate || c.rewardsValue || 'Exclusive Rewards',
+            keyBenefits: Array.isArray(c.keyBenefits) ? c.keyBenefits.join(', ') : (c.keyBenefits || (Array.isArray(c.suitedFor) ? c.suitedFor.join(', ') : '')),
+            partnerBrands: Array.isArray(c.partnerBrands) ? c.partnerBrands.join(', ') : (c.partnerBrands || (Array.isArray(c.suitedFor) ? c.suitedFor.join(', ') : '')),
+            affiliateLink: c.affiliateLink || c.applyHref || '',
+            annualFee: c.annualFee || '₹0',
+            joiningFee: c.joiningFee || '₹0',
+            feeWaiver: c.feeWaiver || 'Lifetime Free',
+            offerStartDate: c.offerStartDate || new Date().toISOString().slice(0, 10),
+            offerExpiryDate: c.offerExpiryDate || new Date(Date.now() + 86400000 * 60).toISOString().slice(0, 10),
+            lastUpdated: c.lastUpdated || new Date().toISOString().slice(0, 10),
+            status: (c.status || 'active') as any,
+            isFeatured: Boolean(c.isFeatured),
+            isVerified: Boolean(c.isVerified !== false),
+            applyCount: c.applyCount || (parseInt(String(c.userCount || '').replace(/[^0-9]/g, '')) * 100) || 2400,
+            viewCount: c.viewCount || (15000 + idx * 2000),
+            addedOn: c.createdAt ? new Date(c.createdAt).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10)
+          }))
+          setCards(mapped)
+        }
+      } catch (err) {
+        console.warn('Credit cards fallback to local data:', err)
+      }
+    }
+    fetchLiveCards()
+  }, [])
+
   const kpi = useMemo(() => ({
     total: cards.length,
     active: cards.filter(c => c.status === 'active').length,
@@ -694,12 +727,73 @@ export const ExecutiveCreditCardsPage: React.FC = () => {
   const openEdit = (c: CreditCard) => { setEditing(c); setIsFormOpen(true) }
 
   const handleSave = (data: CreditCard) => {
-    setCards(prev => editing ? prev.map(c => c.id === data.id ? data : c) : [data, ...prev])
+    if (editing) {
+      adminApi.updateCreditCard(data.id, {
+        cardName: data.cardName,
+        bank: data.bank,
+        network: data.network,
+        tier: data.tier,
+        imageUrl: data.imageUrl,
+        bankLogoUrl: data.bankLogoUrl,
+        welcomeOffer: data.welcomeOffer,
+        rewardRate: data.rewardRate,
+        keyBenefits: data.keyBenefits.split(',').map(s => s.trim()).filter(Boolean),
+        partnerBrands: data.partnerBrands.split(',').map(s => s.trim()).filter(Boolean),
+        affiliateLink: data.affiliateLink,
+        annualFee: data.annualFee,
+        joiningFee: data.joiningFee,
+        feeWaiver: data.feeWaiver,
+        offerExpiryDate: data.offerExpiryDate,
+        status: data.status,
+        isFeatured: data.isFeatured,
+        isVerified: data.isVerified
+      }).catch(console.warn)
+
+      setCards(prev => prev.map(c => c.id === data.id ? data : c))
+    } else {
+      adminApi.createCreditCard({
+        cardName: data.cardName,
+        bank: data.bank,
+        network: data.network,
+        tier: data.tier,
+        imageUrl: data.imageUrl,
+        bankLogoUrl: data.bankLogoUrl,
+        welcomeOffer: data.welcomeOffer,
+        rewardRate: data.rewardRate,
+        keyBenefits: data.keyBenefits.split(',').map(s => s.trim()).filter(Boolean),
+        partnerBrands: data.partnerBrands.split(',').map(s => s.trim()).filter(Boolean),
+        affiliateLink: data.affiliateLink,
+        annualFee: data.annualFee,
+        joiningFee: data.joiningFee,
+        feeWaiver: data.feeWaiver,
+        offerExpiryDate: data.offerExpiryDate,
+        status: data.status,
+        isFeatured: data.isFeatured,
+        isVerified: data.isVerified
+      }).then(res => {
+        adminApi.createSubmission({
+          entityType: 'credit_card',
+          entityId: res._id || res.id || data.id,
+          action: 'create',
+          title: `${data.cardName} (${data.bank})`,
+          store: data.bank,
+          category: 'Credit Cards',
+          priority: data.isFeatured ? 'High' : 'Normal',
+          submittedBy: localStorage.getItem('staffUser') ? JSON.parse(localStorage.getItem('staffUser')!).email : 'executive@wouchify.com',
+          dataSnapshot: data
+        }).catch(console.warn)
+      }).catch(console.warn)
+
+      setCards(prev => [data, ...prev])
+    }
     setIsFormOpen(false)
   }
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Delete this credit card?')) setCards(prev => prev.filter(c => c.id !== id))
+    if (window.confirm('Delete this credit card?')) {
+      adminApi.deleteCreditCard(id).catch(console.warn)
+      setCards(prev => prev.filter(c => c.id !== id))
+    }
   }
 
   const hasFilters = search || filterBank !== 'All' || filterStatus !== 'all' || filterTier !== 'all'

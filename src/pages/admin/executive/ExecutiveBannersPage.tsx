@@ -1,5 +1,6 @@
-import React, { useState, useMemo, useRef } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { ExecutiveLayout } from './ExecutiveLayout'
+import { adminApi } from '../../../services/adminApi'
 import {
   Plus,
   Search,
@@ -26,6 +27,16 @@ import {
   Palette
 } from 'lucide-react'
 import './ExecutiveShared.css'
+
+import heroImage from '../../../assets/deals/hero/hero_image.png'
+import deal1 from '../../../assets/deals/deal1.png'
+import deal2 from '../../../assets/deals/deal2.png'
+import banner1 from '../../../assets/recent-deals/banner_1.png'
+import banner2 from '../../../assets/recent-deals/banner_2.png'
+import amazonHero from '../../../assets/brands-inner/amazon-hero.png'
+import advertiseHero from '../../../assets/advertise/advertise_hero.png'
+import iciciPlatinumCard from '../../../assets/credit-cards/icici-platinum-card.png'
+import { PLACEHOLDER_DEAL_IMAGE } from '../../../data/dealsPage'
 
 /* ============================================================
    Types & Enums
@@ -195,7 +206,7 @@ const MOCK_BANNERS: Banner[] = [
     description: 'Find verified coupons, loot deals & credit card rewards from 500+ top brands.',
     ctaText: 'Explore All Deals',
     targetLink: '/deals',
-    primaryImage: 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=600&auto=format&fit=crop&q=80',
+    primaryImage: heroImage,
     dealChip1: 'Instant Deals',
     dealChip2: 'Flat 90% Off',
     themeColor: '#E31E25',
@@ -217,8 +228,8 @@ const MOCK_BANNERS: Banner[] = [
     description: 'Find exclusive promo codes, real-time cashback, and verified store vouchers updated every hour.',
     ctaText: 'Explore Stores',
     targetLink: '/stores',
-    primaryImage: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&auto=format&fit=crop&q=80',
-    secondaryImage: 'https://images.unsplash.com/photo-1573855619003-97b4799dcd8b?w=400&auto=format&fit=crop&q=80',
+    primaryImage: amazonHero,
+    secondaryImage: advertiseHero,
     themeColor: '#f59e0b',
     priority: 9,
     status: 'active',
@@ -238,7 +249,8 @@ const MOCK_BANNERS: Banner[] = [
     description: 'Handpicked error deals, price drop glitches and lightning loot verified by our team in real-time.',
     ctaText: 'Grab Loot Now',
     targetLink: '/loot-deals',
-    primaryImage: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=600&auto=format&fit=crop&q=80',
+    primaryImage: banner1,
+    secondaryImage: banner2,
     themeColor: '#ef4444',
     priority: 8,
     status: 'active',
@@ -258,7 +270,7 @@ const MOCK_BANNERS: Banner[] = [
     description: 'Earn up to 20% bonus reward points, airport lounge access and welcome gift vouchers worth ₹10,000.',
     ctaText: 'Compare Cards',
     targetLink: '/credit-cards',
-    primaryImage: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=600&auto=format&fit=crop&q=80',
+    primaryImage: iciciPlatinumCard,
     themeColor: '#8b5cf6',
     priority: 7,
     status: 'active',
@@ -278,7 +290,8 @@ const MOCK_BANNERS: Banner[] = [
     description: 'Double cashback across Amazon, Flipkart, Myntra & Swiggy during our festive shopping bonanza.',
     ctaText: 'Unlock Festival Deals',
     targetLink: '/deals?tag=diwali',
-    primaryImage: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=600&auto=format&fit=crop&q=80',
+    primaryImage: deal1,
+    secondaryImage: deal2,
     themeColor: '#ec4899',
     priority: 9,
     status: 'scheduled',
@@ -320,7 +333,7 @@ interface HeroPreviewProps {
 
 export const HeroLivePreview: React.FC<HeroPreviewProps> = ({ banner }) => {
   const target = banner.targetPage || 'home-hero'
-  const primaryImg = banner.primaryImage || 'https://via.placeholder.com/400x240?text=Hero+Graphic'
+  const primaryImg = banner.primaryImage || heroImage || PLACEHOLDER_DEAL_IMAGE
   const accent = banner.themeColor || '#E31E25'
 
   // 1. Home Page Hero Simulation
@@ -739,6 +752,42 @@ export const ExecutiveBannersPage: React.FC = () => {
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null)
   const [previewingBanner, setPreviewingBanner] = useState<Banner | null>(null)
 
+  useEffect(() => {
+    adminApi.getBanners()
+      .then((res: any[]) => {
+        if (Array.isArray(res) && res.length > 0) {
+          const mapped: Banner[] = res.map((b: any, index: number) => ({
+            id: b._id || b.id || `ban-${index + 1}`,
+            title: b.title,
+            targetPage: b.targetPage || 'home-hero',
+            badgeText: b.badgeText || '',
+            headingLine1: b.headingLine1 || '',
+            headingLine2: b.headingLine2 || '',
+            headingLine3: b.headingLine3 || '',
+            description: b.description || '',
+            ctaText: b.ctaText || 'Explore Deals',
+            targetLink: b.targetLink || '/deals',
+            primaryImage: b.primaryImage || '',
+            secondaryImage: b.secondaryImage || '',
+            backgroundImage: b.backgroundImage || '',
+            dealChip1: b.dealChip1 || '',
+            dealChip2: b.dealChip2 || '',
+            themeColor: b.themeColor || '#E31E25',
+            priority: Number(b.priority) || 5,
+            status: (b.status as BannerStatus) || 'active',
+            expiryDate: b.expiryDate || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+            views: b.views || 0,
+            clicks: b.clicks || 0,
+            createdAt: b.createdAt ? new Date(b.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+          }))
+          setBanners(mapped)
+        }
+      })
+      .catch(err => {
+        console.warn('API error, using mock banners:', err)
+      })
+  }, [])
+
   // Form State
   const [formData, setFormData] = useState<Partial<Banner>>({
     targetPage: 'home-hero',
@@ -848,6 +897,7 @@ export const ExecutiveBannersPage: React.FC = () => {
 
   const handleDelete = (id: string) => {
     if (window.confirm('Are you sure you want to permanently delete this hero banner?')) {
+      adminApi.deleteBanner(id).catch(console.warn)
       setBanners(prev => prev.filter(b => b.id !== id))
     }
   }
@@ -877,7 +927,9 @@ export const ExecutiveBannersPage: React.FC = () => {
     }
 
     if (editingBanner) {
-      setBanners(prev => prev.map(b => b.id === editingBanner.id ? { ...b, ...(formData as Banner) } : b))
+      const updatedBanner: Banner = { ...editingBanner, ...(formData as Banner) }
+      adminApi.updateBanner(updatedBanner.id, updatedBanner).catch(console.warn)
+      setBanners(prev => prev.map(b => b.id === editingBanner.id ? updatedBanner : b))
     } else {
       const newBanner: Banner = {
         id: `ban-${Date.now()}`,
@@ -903,6 +955,21 @@ export const ExecutiveBannersPage: React.FC = () => {
         clicks: 0,
         createdAt: new Date().toISOString().split('T')[0]
       }
+
+      adminApi.createBanner(newBanner).then((res: any) => {
+        adminApi.createSubmission({
+          entityType: 'banner',
+          entityId: res._id || res.id || newBanner.id,
+          action: 'create',
+          title: newBanner.title,
+          store: newBanner.targetPage,
+          category: 'Banner Media',
+          priority: newBanner.priority >= 8 ? 'High' : 'Normal',
+          submittedBy: localStorage.getItem('staffUser') ? JSON.parse(localStorage.getItem('staffUser')!).email : 'executive@wouchify.com',
+          dataSnapshot: newBanner
+        }).catch(console.warn)
+      }).catch(console.warn)
+
       setBanners(prev => [newBanner, ...prev])
     }
 

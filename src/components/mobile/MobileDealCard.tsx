@@ -1,16 +1,27 @@
 import React from 'react'
 import type { DealCardItem } from '../../data/dealsPage'
+import { adminApi } from '../../services/adminApi'
 import styles from './MobileDealCard.module.css'
 
 interface MobileDealCardProps {
   deal: DealCardItem
+  isLoot?: boolean
 }
 
-export const MobileDealCard: React.FC<MobileDealCardProps> = ({ deal }) => {
+export const MobileDealCard: React.FC<MobileDealCardProps> = ({ deal, isLoot = false }) => {
+  const handleClick = () => {
+    if (isLoot) {
+      adminApi.trackLootClick(deal.id);
+    } else {
+      adminApi.trackDealClick(deal.id);
+    }
+  };
+
   return (
     <a
       href={deal.ctaHref || '/deals'}
       className={styles.card}
+      onClick={handleClick}
       aria-label={`View deal: ${deal.title} at ${deal.store}`}
     >
       {/* Top Banner Image (174px) with rounded top corners */}

@@ -6,74 +6,737 @@ const DATA_FILE = path.join(DATA_DIR, 'dev_store.json');
 
 // In-memory fallback store for development when MongoDB is not connected
 let deals = [
-  { _id: '11', id: 11, name: 'Xiaomi 138 cm (55 inch) FX Pro QLED Ultra HD 4K Smart Fire TV L55MB-FPIN', store: 'Amazon', category: 'Electronics', price: '₹37,998', originalPrice: '₹62,999', discount: '40% OFF', status: 'active', expiry: 'Sep 30, 2026', isBestSelling: true, sectionPlacement: 'both' },
-  { _id: '10', id: 10, name: 'Milton Rapid Electric Kettle 1.8L [Trending]', store: 'Amazon', category: 'Electronics', price: '₹604', originalPrice: '₹1,499', discount: '60% OFF', status: 'active', expiry: 'Sep 28, 2026', isBestSelling: true, sectionPlacement: 'both' },
-  { _id: '1', id: 1, name: 'Apple iPhone 16 Pro (128 GB) - Natural Titanium', store: 'Amazon', category: 'Electronics', price: '₹1,19,900', originalPrice: '₹1,34,900', discount: '11% OFF', status: 'active', expiry: 'Sep 25, 2026', isBestSelling: true, sectionPlacement: 'both' },
-  { _id: '2', id: 2, name: 'Nike Air Max Men Sneaker Shoes', store: 'Myntra', category: 'Fashion', price: '₹5,499', originalPrice: '₹9,995', discount: '45% OFF', status: 'active', expiry: 'Sep 18, 2026', isBestSelling: false, sectionPlacement: 'favourite' },
-  { _id: '3', id: 3, name: 'Sony WH-1000XM5 Wireless Noise Cancelling Headphones', store: 'Flipkart', category: 'Electronics', price: '₹26,990', originalPrice: '₹34,990', discount: '23% OFF', status: 'active', expiry: 'Sep 22, 2026', isBestSelling: true, sectionPlacement: 'best_selling' },
-  { _id: '4', id: 4, name: 'Swiggy Gourmet Feast - Flat 50% Off First 3 Orders', store: 'Swiggy', category: 'Food', price: '₹250', originalPrice: '₹500', discount: '50% OFF', status: 'pending', expiry: 'Sep 12, 2026', isBestSelling: false, sectionPlacement: 'favourite' },
-  { _id: '5', id: 5, name: 'Zomato Gold 12-Month Dining Membership', store: 'Zomato', category: 'Food', price: '₹499', originalPrice: '₹999', discount: '50% OFF', status: 'expired', expiry: 'Sep 02, 2026', isBestSelling: false, sectionPlacement: 'favourite' },
-  { _id: '6', id: 6, name: 'Nykaa Beauty Mega Sale - MAC & Clinique Combos', store: 'Nykaa', category: 'Beauty', price: '₹1,890', originalPrice: '₹3,500', discount: '46% OFF', status: 'active', expiry: 'Sep 30, 2026', isBestSelling: false, sectionPlacement: 'favourite' },
-  { _id: '7', id: 7, name: 'Fresh Organic Produce Combo Pack (5kg)', store: 'Big Basket', category: 'Grocery', price: '₹399', originalPrice: '₹650', discount: '38% OFF', status: 'active', expiry: 'Sep 15, 2026', isBestSelling: false, sectionPlacement: 'favourite' },
-  { _id: '8', id: 8, name: '10-Minute Grocery Rush Flash Pass', store: 'Zepto', category: 'Grocery', price: '₹99', originalPrice: '₹299', discount: '67% OFF', status: 'active', expiry: 'Sep 14, 2026', isBestSelling: false, sectionPlacement: 'favourite' },
-  { _id: '9', id: 9, name: 'Oval Up Down LED Wall Light 2W [Flash Loot]', store: 'Amazon', category: 'Electronics', price: '₹179', originalPrice: '₹1,899', discount: '91% OFF', status: 'active', expiry: 'Sep 30, 2026', isBestSelling: false, sectionPlacement: 'favourite' }
+  {
+    _id: 'deal-1',
+    id: 'deal-1',
+    name: 'Xiaomi 138 cm (55 inch) FX Pro QLED Ultra HD 4K Smart Fire TV',
+    title: 'Xiaomi 138 cm (55 inch) FX Pro QLED Ultra HD 4K Smart Fire TV',
+    brand: 'Xiaomi',
+    store: 'Amazon',
+    category: 'Electronics',
+    subCategory: 'Smart Televisions',
+    asinOrSku: 'B0CHX1W1XY',
+    type: 'deal',
+    price: '₹37,998',
+    originalPrice: '₹62,999',
+    discount: '40% OFF',
+    discountLabel: '40% OFF',
+    discountValue: 40,
+    bankOffer: 'Flat ₹1,500 Instant Discount on HDFC Credit Cards',
+    effectivePrice: '₹36,498',
+    code: 'XIAOMI1500',
+    cashback: '+ 5% Wouchify Cashback',
+    stockStatus: 'In Stock',
+    rating: '4.5 ★ (14.2k)',
+    deliveryInfo: 'Prime 1-Day Delivery',
+    warranty: '2 Years Comprehensive Brand Warranty',
+    variantNote: '55-inch QLED 4K Display',
+    howToClaim: 'Click Grab Deal, apply coupon on product page, and checkout using HDFC card for extra discount.',
+    highlights: ['Quantum Dot 4K Display with Dolby Vision', 'Fire TV OS with Alexa Voice Remote', '30W Dolby Audio Speakers'],
+    isBestSelling: true,
+    sectionPlacement: 'both',
+    isFeatured: true,
+    isVerified: true,
+    productImage: '/src/assets/deals/deal1.png',
+    image: '/src/assets/deals/deal1.png',
+    images: ['/src/assets/deals/deal1.png'],
+    ctaHref: '/stores#amazon',
+    link: '/stores#amazon',
+    badge: "Amazon's Choice",
+    dealTag: 'Hot Deal',
+    priority: 'High',
+    status: 'active',
+    submissionStatus: 'approved',
+    postedAt: 'Today, 10:30 AM',
+    expiresAt: '2026-11-30T23:59:59.000Z',
+    expiry: '2026-11-30T23:59:59.000Z',
+    description: 'Experience cinema-grade entertainment with 4K QLED clarity and vibrant Dolby Vision colours.',
+    terms: 'Valid on online prepaid orders. Limited period promotional offer.',
+    clicks: 1420
+  },
+  {
+    _id: 'deal-2',
+    id: 'deal-2',
+    name: 'Apple iPhone 16 Pro (128 GB) - Natural Titanium',
+    title: 'Apple iPhone 16 Pro (128 GB) - Natural Titanium',
+    brand: 'Apple',
+    store: 'Amazon',
+    category: 'Electronics',
+    subCategory: 'Flagship Smartphones',
+    asinOrSku: 'B0DGHX8811',
+    type: 'deal',
+    price: '₹1,19,900',
+    originalPrice: '₹1,34,900',
+    discount: '11% OFF',
+    discountLabel: '11% OFF',
+    discountValue: 11,
+    bankOffer: '₹5,000 Instant Cashback on ICICI Bank Cards',
+    effectivePrice: '₹1,14,900',
+    code: 'IPHONE5K',
+    cashback: '+ ₹1,200 Wouchify Cash',
+    stockStatus: 'Limited Stock',
+    rating: '4.9 ★ (32.8k)',
+    deliveryInfo: 'Free Express Delivery',
+    warranty: '1 Year Apple India Warranty',
+    variantNote: 'Natural Titanium 128GB',
+    howToClaim: 'Click Grab Deal, select ICICI Bank credit card at checkout to get ₹5,000 instant discount.',
+    highlights: ['A18 Pro Chip with 6-core GPU', 'Camera Control Button & 48MP Fusion Camera', 'Grade 5 Titanium Design'],
+    isBestSelling: true,
+    sectionPlacement: 'both',
+    isFeatured: true,
+    isVerified: true,
+    productImage: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=600&auto=format&fit=crop&q=80',
+    image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=600&auto=format&fit=crop&q=80',
+    images: ['https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=600&auto=format&fit=crop&q=80'],
+    ctaHref: '/stores#amazon',
+    link: '/stores#amazon',
+    badge: 'Top Flagship',
+    dealTag: 'Best Seller',
+    priority: 'Critical',
+    status: 'active',
+    submissionStatus: 'approved',
+    postedAt: 'Today, 11:15 AM',
+    expiresAt: '2026-12-15T23:59:59.000Z',
+    expiry: '2026-12-15T23:59:59.000Z',
+    description: 'The ultimate iPhone with pro camera system, A18 Pro silicon, and titanium enclosure.',
+    terms: 'Offer valid till stocks last. Maximum 1 unit per customer.',
+    clicks: 2890
+  },
+  {
+    _id: 'deal-3',
+    id: 'deal-3',
+    name: 'Sony WH-1000XM5 Wireless Noise Cancelling Headphones',
+    title: 'Sony WH-1000XM5 Wireless Noise Cancelling Headphones',
+    brand: 'Sony',
+    store: 'Flipkart',
+    category: 'Electronics',
+    subCategory: 'Premium Audio',
+    asinOrSku: 'FSNSON8921',
+    type: 'deal',
+    price: '₹26,990',
+    originalPrice: '₹34,990',
+    discount: '23% OFF',
+    discountLabel: '23% OFF',
+    discountValue: 23,
+    bankOffer: '10% Instant Discount up to ₹2,000 on SBI Cards',
+    effectivePrice: '₹24,990',
+    code: 'SONYANC20',
+    cashback: '+ ₹500 Wouchify Cash',
+    stockStatus: 'In Stock',
+    rating: '4.8 ★ (18.6k)',
+    deliveryInfo: 'Next Day Delivery',
+    warranty: '1 Year Official Sony India Warranty',
+    variantNote: 'Silver & Midnight Black Available',
+    howToClaim: 'Collect deal on Flipkart and pay with SBI Credit Card for maximum savings.',
+    highlights: ['Industry-leading Active Noise Cancellation', '30-Hour Battery Life with Quick Charge', 'Speak-to-Chat & Multipoint Connection'],
+    isBestSelling: true,
+    sectionPlacement: 'both',
+    isFeatured: true,
+    isVerified: true,
+    productImage: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80',
+    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80',
+    images: ['https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80'],
+    ctaHref: '/stores#flipkart',
+    link: '/stores#flipkart',
+    badge: 'Flipkart Assured',
+    dealTag: 'Top Audio Deal',
+    priority: 'High',
+    status: 'active',
+    submissionStatus: 'approved',
+    postedAt: 'Today, 09:45 AM',
+    expiresAt: '2026-11-20T23:59:59.000Z',
+    expiry: '2026-11-20T23:59:59.000Z',
+    description: 'Industry leading noise cancellation with two processors and 8 microphones for flawless audio clarity.',
+    terms: 'Valid on Flipkart partner seller transactions.',
+    clicks: 1980
+  },
+  {
+    _id: 'deal-4',
+    id: 'deal-4',
+    name: 'Milton Rapid 1.8L Stainless Steel Electric Kettle',
+    title: 'Milton Rapid 1.8L Stainless Steel Electric Kettle',
+    brand: 'Milton',
+    store: 'Amazon',
+    category: 'Home & Lifestyle',
+    subCategory: 'Kitchen Appliances',
+    asinOrSku: 'B089XYZ332',
+    type: 'deal',
+    price: '₹604',
+    originalPrice: '₹1,499',
+    discount: '60% OFF',
+    discountLabel: '60% OFF',
+    discountValue: 60,
+    bankOffer: 'Extra 5% off with Amazon Pay ICICI Card',
+    effectivePrice: '₹574',
+    code: 'KETTLE60',
+    cashback: '+ 5% Cashback',
+    stockStatus: 'In Stock',
+    rating: '4.4 ★ (28.4k)',
+    deliveryInfo: 'Free Delivery',
+    warranty: '1 Year Milton Warranty',
+    variantNote: '1.8 Litre Stainless Steel 1500W',
+    howToClaim: 'Click Grab Deal and add to cart on Amazon with 60% instant price drop.',
+    highlights: ['1500 Watts Fast Boiling Technology', 'Automatic Cut-off & Boil-Dry Protection', '360-Degree Swivel Base'],
+    isBestSelling: true,
+    sectionPlacement: 'both',
+    isFeatured: false,
+    isVerified: true,
+    productImage: '/src/assets/deals/deal2.png',
+    image: '/src/assets/deals/deal2.png',
+    images: ['/src/assets/deals/deal2.png'],
+    ctaHref: '/stores#amazon',
+    link: '/stores#amazon',
+    badge: 'Lowest in 30 Days',
+    dealTag: 'Flash Price Drop',
+    priority: 'Normal',
+    status: 'active',
+    submissionStatus: 'approved',
+    postedAt: 'Today, 08:20 AM',
+    expiresAt: '2026-10-31T23:59:59.000Z',
+    expiry: '2026-10-31T23:59:59.000Z',
+    description: 'Fast-boiling durable 1.8L stainless steel electric kettle perfect for tea, coffee, and noodles.',
+    terms: 'Applicable on 1.8L classic metallic variant.',
+    clicks: 1530
+  },
+  {
+    _id: 'deal-5',
+    id: 'deal-5',
+    name: 'Nike Air Max Men Lightweight Running Sneaker Shoes',
+    title: 'Nike Air Max Men Lightweight Running Sneaker Shoes',
+    brand: 'Nike',
+    store: 'Myntra',
+    category: 'Fashion & Apparel',
+    subCategory: "Men's Footwear",
+    asinOrSku: 'MYNNIK8812',
+    type: 'deal',
+    price: '₹5,499',
+    originalPrice: '₹9,995',
+    discount: '45% OFF',
+    discountLabel: '45% OFF',
+    discountValue: 45,
+    bankOffer: '10% Instant Off on Axis Bank Credit Cards',
+    effectivePrice: '₹4,949',
+    code: 'NIKE45',
+    cashback: '+ 8% Wouchify Cashback',
+    stockStatus: 'In Stock',
+    rating: '4.7 ★ (9.3k)',
+    deliveryInfo: 'Free Shipping & 14-Day Returns',
+    warranty: '6 Months Brand Warranty',
+    variantNote: 'Sizes UK 6 to 11 Available',
+    howToClaim: 'Use coupon NIKE45 on Myntra checkout page.',
+    highlights: ['Max Air Cushioning Unit in Heel', 'Breathable Mesh Upper', 'Durable Traction Rubber Outsole'],
+    isBestSelling: false,
+    sectionPlacement: 'favourite',
+    isFeatured: false,
+    isVerified: true,
+    productImage: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&auto=format&fit=crop&q=80',
+    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&auto=format&fit=crop&q=80',
+    images: ['https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&auto=format&fit=crop&q=80'],
+    ctaHref: '/stores#myntra',
+    link: '/stores#myntra',
+    badge: 'Trending Fashion',
+    dealTag: 'Myntra Exclusive',
+    priority: 'Normal',
+    status: 'active',
+    submissionStatus: 'approved',
+    postedAt: 'Yesterday, 06:40 PM',
+    expiresAt: '2026-11-15T23:59:59.000Z',
+    expiry: '2026-11-15T23:59:59.000Z',
+    description: 'Iconic Air Max comfort designed for daily jogging, marathon training, and street style.',
+    terms: 'Sizes subject to availability.',
+    clicks: 1120
+  },
+  {
+    _id: 'deal-6',
+    id: 'deal-6',
+    name: 'LEGO Batman Batmobile 1989 Collectors Edition',
+    title: 'LEGO Batman Batmobile 1989 Collectors Edition',
+    brand: 'LEGO',
+    store: 'Zepto',
+    category: 'Home & Lifestyle',
+    subCategory: 'Collectibles & Toys',
+    asinOrSku: 'ZEPLEG9910',
+    type: 'deal',
+    price: '₹6,999',
+    originalPrice: '₹8,499',
+    discount: '18% OFF',
+    discountLabel: '18% OFF',
+    discountValue: 18,
+    bankOffer: '₹500 Instant Cashback via Simpl Pay Later',
+    effectivePrice: '₹6,499',
+    code: 'BATMAN18',
+    cashback: '+ ₹200 Wallet Cash',
+    stockStatus: 'Limited Stock',
+    rating: '4.9 ★ (4.8k)',
+    deliveryInfo: '10-Min Flash Delivery',
+    warranty: '100% Genuine Certified LEGO Set',
+    variantNote: 'Includes 3 Exclusive Minifigures',
+    howToClaim: 'Order via Zepto for instant 10-minute doorstep delivery.',
+    highlights: ['3,306 Authentic LEGO Pieces', 'Slide-open Cockpit & Concealed Machine Guns', 'Rotating Display Turntable Base'],
+    isBestSelling: false,
+    sectionPlacement: 'favourite',
+    isFeatured: false,
+    isVerified: true,
+    productImage: 'https://images.unsplash.com/photo-1585366119957-e9730b6d0f60?w=600&auto=format&fit=crop&q=80',
+    image: 'https://images.unsplash.com/photo-1585366119957-e9730b6d0f60?w=600&auto=format&fit=crop&q=80',
+    images: ['https://images.unsplash.com/photo-1585366119957-e9730b6d0f60?w=600&auto=format&fit=crop&q=80'],
+    ctaHref: '/stores#zepto',
+    link: '/stores#zepto',
+    badge: "Collector's Pick",
+    dealTag: '10-Min Delivery',
+    priority: 'Normal',
+    status: 'active',
+    submissionStatus: 'approved',
+    postedAt: 'Yesterday, 04:15 PM',
+    expiresAt: '2026-11-10T23:59:59.000Z',
+    expiry: '2026-11-10T23:59:59.000Z',
+    description: 'Detailed LEGO model of the classic 1989 Batmobile with custom display plaque and authentic weaponry.',
+    terms: 'Available in select delivery pin codes.',
+    clicks: 870
+  },
+  {
+    _id: 'deal-7',
+    id: 'deal-7',
+    name: 'Nykaa Luxe MAC & Clinique Skincare Essentials Combo Box',
+    title: 'Nykaa Luxe MAC & Clinique Skincare Essentials Combo Box',
+    brand: 'MAC & Clinique',
+    store: 'Nykaa',
+    category: 'Beauty & Wellness',
+    subCategory: 'Luxury Cosmetics',
+    asinOrSku: 'NYKMAC7714',
+    type: 'deal',
+    price: '₹1,890',
+    originalPrice: '₹3,500',
+    discount: '46% OFF',
+    discountLabel: '46% OFF',
+    discountValue: 46,
+    bankOffer: 'Flat ₹250 Off on HDFC Debit & Credit Cards',
+    effectivePrice: '₹1,640',
+    code: 'LUXE46',
+    cashback: '+ 7% Nykaa Rewards',
+    stockStatus: 'In Stock',
+    rating: '4.8 ★ (16.2k)',
+    deliveryInfo: '2-Day Guaranteed Delivery',
+    warranty: '100% Authentic Beauty Guarantee',
+    variantNote: 'Includes 4 Full-size Best Sellers',
+    howToClaim: 'Collect beauty voucher in Nykaa app and apply LUXE46 promo.',
+    highlights: ['Clinique Moisture Surge 100H 50ml', 'MAC Retro Matte Ruby Woo Lipstick', 'MAC Prep + Prime Fix+ 30ml'],
+    isBestSelling: false,
+    sectionPlacement: 'favourite',
+    isFeatured: false,
+    isVerified: true,
+    productImage: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&auto=format&fit=crop&q=80',
+    image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&auto=format&fit=crop&q=80',
+    images: ['https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&auto=format&fit=crop&q=80'],
+    ctaHref: '/stores#nykaa',
+    link: '/stores#nykaa',
+    badge: 'Nykaa Mega Sale',
+    dealTag: 'Festive Glam',
+    priority: 'Normal',
+    status: 'active',
+    submissionStatus: 'approved',
+    postedAt: 'Yesterday, 02:30 PM',
+    expiresAt: '2026-12-05T23:59:59.000Z',
+    expiry: '2026-12-05T23:59:59.000Z',
+    description: 'Curated luxury skincare and makeup bundle with dermatologist-tested formulas.',
+    terms: 'Non-returnable personal care product.',
+    clicks: 1340
+  },
+  {
+    _id: 'deal-8',
+    id: 'deal-8',
+    name: 'Fresh Organic Produce & Seasonal Fruits Combo Pack (5kg)',
+    title: 'Fresh Organic Produce & Seasonal Fruits Combo Pack (5kg)',
+    brand: 'bb Royal Organic',
+    store: 'Big Basket',
+    category: 'Quick Grocery',
+    subCategory: 'Farm Fresh Vegetables',
+    asinOrSku: 'BBGROC1120',
+    type: 'deal',
+    price: '₹399',
+    originalPrice: '₹650',
+    discount: '38% OFF',
+    discountLabel: '38% OFF',
+    discountValue: 38,
+    bankOffer: '15% Cashback up to ₹100 with Paytm UPI',
+    effectivePrice: '₹349',
+    code: 'ORGANIC38',
+    cashback: '+ 4% Wouchify Cashback',
+    stockStatus: 'In Stock',
+    rating: '4.6 ★ (21.5k)',
+    deliveryInfo: 'Early Morning Slot (6 AM - 8 AM)',
+    warranty: '100% Quality & Freshness Guarantee',
+    variantNote: 'Farm Harvested within 12 Hours',
+    howToClaim: 'Add to cart on Big Basket and choose morning delivery slot.',
+    highlights: ['Zero Chemical Pesticides Certified', 'Direct Sourcing from Nilgiri Farmers', 'Eco-friendly Biodegradable Packaging'],
+    isBestSelling: false,
+    sectionPlacement: 'favourite',
+    isFeatured: false,
+    isVerified: true,
+    productImage: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&auto=format&fit=crop&q=80',
+    image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&auto=format&fit=crop&q=80',
+    images: ['https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&auto=format&fit=crop&q=80'],
+    ctaHref: '/stores#big-basket',
+    link: '/stores#big-basket',
+    badge: 'Farm Fresh',
+    dealTag: 'Daily Saver',
+    priority: 'Normal',
+    status: 'active',
+    submissionStatus: 'approved',
+    postedAt: 'Sep 14, 2026, 07:00 AM',
+    expiresAt: '2026-11-25T23:59:59.000Z',
+    expiry: '2026-11-25T23:59:59.000Z',
+    description: 'Farm-fresh organic daily cooking vegetables and juicy seasonal fruits delivered fresh.',
+    terms: 'Weight tolerance +/- 5%. Delivered in insulated crates.',
+    clicks: 940
+  },
+  {
+    _id: 'deal-9',
+    id: 'deal-9',
+    name: 'Samsung 108 cm (43 inch) Crystal 4K Dynamic UHD Smart TV',
+    title: 'Samsung 108 cm (43 inch) Crystal 4K Dynamic UHD Smart TV',
+    brand: 'Samsung',
+    store: 'Flipkart',
+    category: 'Electronics',
+    subCategory: 'Smart Televisions',
+    asinOrSku: 'FSNSAM4399',
+    type: 'deal',
+    price: '₹28,990',
+    originalPrice: '₹44,900',
+    discount: '35% OFF',
+    discountLabel: '35% OFF',
+    discountValue: 35,
+    bankOffer: '₹2,000 Instant Discount on Axis Bank Credit Cards',
+    effectivePrice: '₹26,990',
+    code: 'SAM4K2000',
+    cashback: '+ ₹700 Wouchify Cash',
+    stockStatus: 'In Stock',
+    rating: '4.6 ★ (24.1k)',
+    deliveryInfo: 'Free Installation & Wall-mount Included',
+    warranty: '1 Year Standard + 1 Year Panel Warranty',
+    variantNote: '43-inch Crystal Processor 4K',
+    howToClaim: 'Claim Flipkart supercoins discount and pay via Axis credit card.',
+    highlights: ['Crystal Processor 4K with PurColor', 'HDR 10+ and Motion Xcelerator', 'Q-Symphony Audio Integration'],
+    isBestSelling: false,
+    sectionPlacement: 'favourite',
+    isFeatured: false,
+    isVerified: true,
+    productImage: 'https://images.unsplash.com/photo-1593784991095-a205069470b6?w=600&auto=format&fit=crop&q=80',
+    image: 'https://images.unsplash.com/photo-1593784991095-a205069470b6?w=600&auto=format&fit=crop&q=80',
+    images: ['https://images.unsplash.com/photo-1593784991095-a205069470b6?w=600&auto=format&fit=crop&q=80'],
+    ctaHref: '/stores#flipkart',
+    link: '/stores#flipkart',
+    badge: 'Flipkart Assured',
+    dealTag: 'Bestseller TV',
+    priority: 'Normal',
+    status: 'active',
+    submissionStatus: 'approved',
+    postedAt: 'Sep 13, 2026, 11:30 AM',
+    expiresAt: '2026-11-28T23:59:59.000Z',
+    expiry: '2026-11-28T23:59:59.000Z',
+    description: 'Crisp 4K resolution with billions of realistic shades powered by Samsung Crystal Processor.',
+    terms: 'Includes free brand installation within 48 hours.',
+    clicks: 1680
+  },
+  {
+    _id: 'deal-10',
+    id: 'deal-10',
+    name: 'OnePlus 12R 5G (16GB RAM, 256GB Storage, Cool Blue)',
+    title: 'OnePlus 12R 5G (16GB RAM, 256GB Storage, Cool Blue)',
+    brand: 'OnePlus',
+    store: 'Amazon',
+    category: 'Electronics',
+    subCategory: '5G Smartphones',
+    asinOrSku: 'B0CQPVH772',
+    type: 'deal',
+    price: '₹39,999',
+    originalPrice: '₹45,999',
+    discount: '13% OFF',
+    discountLabel: '13% OFF',
+    discountValue: 13,
+    bankOffer: 'Flat ₹2,000 Instant Discount on ICICI & OneCard',
+    effectivePrice: '₹37,999',
+    code: 'ONEPLUS2K',
+    cashback: '+ ₹800 Wouchify Cash',
+    stockStatus: 'In Stock',
+    rating: '4.7 ★ (31.2k)',
+    deliveryInfo: 'Prime Fast 1-Day Delivery',
+    warranty: '1 Year Manufacturer Warranty',
+    variantNote: '16GB RAM + 256GB Storage',
+    howToClaim: 'Collect ₹2,000 instant coupon on Amazon product page.',
+    highlights: ['Snapdragon 8 Gen 2 Mobile Platform', '5500 mAh Battery with 100W SUPERVOOC', '1.5K 120Hz ProXDR Display with LTPO4.0'],
+    isBestSelling: false,
+    sectionPlacement: 'favourite',
+    isFeatured: false,
+    isVerified: true,
+    productImage: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&auto=format&fit=crop&q=80',
+    image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&auto=format&fit=crop&q=80',
+    images: ['https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&auto=format&fit=crop&q=80'],
+    ctaHref: '/stores#amazon',
+    link: '/stores#amazon',
+    badge: "Amazon's Choice",
+    dealTag: 'Flagship Killer',
+    priority: 'Normal',
+    status: 'active',
+    submissionStatus: 'approved',
+    postedAt: 'Sep 12, 2026, 03:20 PM',
+    expiresAt: '2026-12-10T23:59:59.000Z',
+    expiry: '2026-12-10T23:59:59.000Z',
+    description: 'Peak performance smartphone with Snapdragon 8 Gen 2 and longest battery life in OnePlus history.',
+    terms: 'Includes 100W power adapter in the box.',
+    clicks: 2150
+  },
+  {
+    _id: 'deal-11',
+    id: 'deal-11',
+    name: 'Puma Smashic Unisex Lifestyle Casual Sneakers',
+    title: 'Puma Smashic Unisex Lifestyle Casual Sneakers',
+    brand: 'Puma',
+    store: 'Ajio',
+    category: 'Fashion & Apparel',
+    subCategory: 'Casual Footwear',
+    asinOrSku: 'AJIPUM6621',
+    type: 'deal',
+    price: '₹1,749',
+    originalPrice: '₹3,999',
+    discount: '56% OFF',
+    discountLabel: '56% OFF',
+    discountValue: 56,
+    bankOffer: 'Extra 10% Instant Off on Federal Bank Cards',
+    effectivePrice: '₹1,574',
+    code: 'AJIOPUMA10',
+    cashback: '+ 6% Ajio Rewards',
+    stockStatus: 'In Stock',
+    rating: '4.5 ★ (11.8k)',
+    deliveryInfo: 'Free Delivery over ₹1,199',
+    warranty: '90 Days Puma Quality Warranty',
+    variantNote: 'Puma White & Castlerock Gray',
+    howToClaim: 'Apply coupon AJIOPUMA10 on Ajio bag page.',
+    highlights: ['SoftFoam+ Comfort Sockliner', 'Clean Tennis-inspired Silhouette', 'Sturdy Non-marking Rubber Outsole'],
+    isBestSelling: false,
+    sectionPlacement: 'favourite',
+    isFeatured: false,
+    isVerified: true,
+    productImage: 'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=600&auto=format&fit=crop&q=80',
+    image: 'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=600&auto=format&fit=crop&q=80',
+    images: ['https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=600&auto=format&fit=crop&q=80'],
+    ctaHref: '/stores#ajio',
+    link: '/stores#ajio',
+    badge: 'Ajio Mania Deal',
+    dealTag: 'Huge 56% Drop',
+    priority: 'Normal',
+    status: 'active',
+    submissionStatus: 'approved',
+    postedAt: 'Sep 11, 2026, 01:10 PM',
+    expiresAt: '2026-11-05T23:59:59.000Z',
+    expiry: '2026-11-05T23:59:59.000Z',
+    description: 'Everyday comfort sneakers with heritage tennis aesthetics and cushioned SoftFoam insoles.',
+    terms: 'Available in unisex sizes 5 to 11.',
+    clicks: 1210
+  },
+  {
+    _id: 'deal-12',
+    id: 'deal-12',
+    name: 'Boat Airdopes 141 ANC TWS Earbuds with 42H Playtime',
+    title: 'Boat Airdopes 141 ANC TWS Earbuds with 42H Playtime',
+    brand: 'Boat',
+    store: 'Amazon',
+    category: 'Electronics',
+    subCategory: 'Wireless Earbuds',
+    asinOrSku: 'B09N3Z375X',
+    type: 'deal',
+    price: '₹1,299',
+    originalPrice: '₹4,490',
+    discount: '71% OFF',
+    discountLabel: '71% OFF',
+    discountValue: 71,
+    bankOffer: 'Flat 5% Back with Amazon Pay UPI',
+    effectivePrice: '₹1,234',
+    code: 'BOAT71',
+    cashback: '+ ₹65 Wallet Cash',
+    stockStatus: 'In Stock',
+    rating: '4.3 ★ (84.5k)',
+    deliveryInfo: 'Prime Same-Day Delivery',
+    warranty: '1 Year boAt Replacement Warranty',
+    variantNote: 'Active Noise Cancellation up to 32dB',
+    howToClaim: 'Click Grab Deal to buy at 71% discount on Amazon.',
+    highlights: ['32dB Active Noise Cancellation', 'ENx Technology for Quad Mic Clear Calls', 'BEAST Mode with 50ms Ultra-low Latency'],
+    isBestSelling: false,
+    sectionPlacement: 'favourite',
+    isFeatured: false,
+    isVerified: true,
+    productImage: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600&auto=format&fit=crop&q=80',
+    image: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600&auto=format&fit=crop&q=80',
+    images: ['https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600&auto=format&fit=crop&q=80'],
+    ctaHref: '/stores#amazon',
+    link: '/stores#amazon',
+    badge: 'Amazon #1 Bestseller',
+    dealTag: 'Steal Deal',
+    priority: 'Normal',
+    status: 'active',
+    submissionStatus: 'approved',
+    postedAt: 'Sep 10, 2026, 05:45 PM',
+    expiresAt: '2026-11-30T23:59:59.000Z',
+    expiry: '2026-11-30T23:59:59.000Z',
+    description: 'Top-selling noise cancelling wireless earbuds with deep boAt signature bass and 42-hour playtime.',
+    terms: 'Valid on Bold Black, Cider Cyan, and Gunmetal White colors.',
+    clicks: 3420
+  },
+  {
+    _id: 'deal-13',
+    id: 'deal-13',
+    name: 'Zomato Gold 12-Month Dining Membership',
+    title: 'Zomato Gold 12-Month Dining Membership',
+    brand: 'Zomato',
+    store: 'Zomato',
+    category: 'Food & Dining',
+    subCategory: 'Dining Subscriptions',
+    asinOrSku: 'ZOMGLD5512',
+    type: 'deal',
+    price: '₹499',
+    originalPrice: '₹999',
+    discount: '50% OFF',
+    discountLabel: '50% OFF',
+    discountValue: 50,
+    status: 'expired',
+    submissionStatus: 'approved',
+    postedAt: 'Aug 15, 2026',
+    expiresAt: '2026-09-02T00:00:00.000Z',
+    expiry: '2026-09-02T00:00:00.000Z',
+    productImage: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&auto=format&fit=crop&q=80',
+    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&auto=format&fit=crop&q=80',
+    images: ['https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&auto=format&fit=crop&q=80'],
+    ctaHref: '/stores#zomato',
+    link: '/stores#zomato',
+    isBestSelling: false,
+    sectionPlacement: 'favourite',
+    description: 'Exclusive dining perks and 1+1 on gourmet dishes across partner restaurants.',
+    clicks: 420
+  },
+  {
+    _id: 'deal-14',
+    id: 'deal-14',
+    name: 'Zepto 10-Minute Super Saver Delivery Pass',
+    title: 'Zepto 10-Minute Super Saver Delivery Pass',
+    brand: 'Zepto',
+    store: 'Zepto',
+    category: 'Quick Grocery',
+    subCategory: 'Delivery Subscriptions',
+    asinOrSku: 'ZEPPASS4411',
+    type: 'deal',
+    price: '₹99',
+    originalPrice: '₹299',
+    discount: '67% OFF',
+    discountLabel: '67% OFF',
+    discountValue: 67,
+    status: 'expired',
+    submissionStatus: 'approved',
+    postedAt: 'Aug 20, 2026',
+    expiresAt: '2026-09-05T00:00:00.000Z',
+    expiry: '2026-09-05T00:00:00.000Z',
+    productImage: 'https://images.unsplash.com/photo-1583258292688-d0213dc5a3a8?w=600&auto=format&fit=crop&q=80',
+    image: 'https://images.unsplash.com/photo-1583258292688-d0213dc5a3a8?w=600&auto=format&fit=crop&q=80',
+    images: ['https://images.unsplash.com/photo-1583258292688-d0213dc5a3a8?w=600&auto=format&fit=crop&q=80'],
+    ctaHref: '/stores#zepto',
+    link: '/stores#zepto',
+    isBestSelling: false,
+    sectionPlacement: 'favourite',
+    description: 'Unlimited free grocery deliveries on orders above ₹99.',
+    clicks: 290
+  },
+  {
+    _id: 'deal-15',
+    id: 'deal-15',
+    name: 'Swiggy Gourmet Feast - Flat 50% Off First 3 Orders',
+    title: 'Swiggy Gourmet Feast - Flat 50% Off First 3 Orders',
+    brand: 'Swiggy',
+    store: 'Swiggy',
+    category: 'Food & Dining',
+    subCategory: 'Food Delivery',
+    asinOrSku: 'SWIGOUR771',
+    type: 'deal',
+    price: '₹250',
+    originalPrice: '₹500',
+    discount: '50% OFF',
+    discountLabel: '50% OFF',
+    discountValue: 50,
+    status: 'pending',
+    submissionStatus: 'pending_approval',
+    postedAt: 'Today, 02:15 PM',
+    expiresAt: '2026-11-20T00:00:00.000Z',
+    expiry: '2026-11-20T00:00:00.000Z',
+    productImage: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&auto=format&fit=crop&q=80',
+    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&auto=format&fit=crop&q=80',
+    images: ['https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&auto=format&fit=crop&q=80'],
+    ctaHref: '/stores#swiggy',
+    link: '/stores#swiggy',
+    isBestSelling: false,
+    sectionPlacement: 'favourite',
+    description: 'Flat 50% discount on gourmet restaurants across major metropolitan cities.',
+    clicks: 110
+  },
+  {
+    _id: 'deal-16',
+    id: 'deal-16',
+    name: 'Philips Multi-Grooming All-in-One Series 7000 Kit',
+    title: 'Philips Multi-Grooming All-in-One Series 7000 Kit',
+    brand: 'Philips',
+    store: 'Amazon',
+    category: 'Beauty & Wellness',
+    subCategory: 'Personal Grooming',
+    asinOrSku: 'B07B4M9V11',
+    type: 'deal',
+    price: '₹2,499',
+    originalPrice: '₹4,295',
+    discount: '42% OFF',
+    discountLabel: '42% OFF',
+    discountValue: 42,
+    status: 'pending',
+    submissionStatus: 'pending_approval',
+    postedAt: 'Today, 03:00 PM',
+    expiresAt: '2026-11-20T00:00:00.000Z',
+    expiry: '2026-11-20T00:00:00.000Z',
+    productImage: 'https://images.unsplash.com/photo-1621607512214-68297480165e?w=600&auto=format&fit=crop&q=80',
+    image: 'https://images.unsplash.com/photo-1621607512214-68297480165e?w=600&auto=format&fit=crop&q=80',
+    images: ['https://images.unsplash.com/photo-1621607512214-68297480165e?w=600&auto=format&fit=crop&q=80'],
+    ctaHref: '/stores#amazon',
+    link: '/stores#amazon',
+    isBestSelling: false,
+    sectionPlacement: 'favourite',
+    description: '14-in-1 premium face, head and body trimmer with DualCut technology.',
+    clicks: 45
+  }
 ];
 
-function saveToDisk() {
-  try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
-    const payload = { deals, coupons, lootDeals, stores, categories, users, transactions };
-    fs.writeFileSync(DATA_FILE, JSON.stringify(payload, null, 2), 'utf8');
-  } catch (err) {
-    console.error('Failed to save inMemoryStore to disk:', err.message);
-  }
-}
-
-function loadFromDisk() {
-  try {
-    if (fs.existsSync(DATA_FILE)) {
-      const raw = fs.readFileSync(DATA_FILE, 'utf8');
-      const data = JSON.parse(raw);
-      if (Array.isArray(data.deals) && data.deals.length > 0) deals = data.deals;
-      if (Array.isArray(data.coupons) && data.coupons.length > 0) coupons = data.coupons;
-      if (Array.isArray(data.lootDeals) && data.lootDeals.length > 0) lootDeals = data.lootDeals;
-      if (Array.isArray(data.stores) && data.stores.length > 0) stores = data.stores;
-      if (Array.isArray(data.categories) && data.categories.length > 0) categories = data.categories;
-      if (Array.isArray(data.users) && data.users.length > 0) users = data.users;
-      if (Array.isArray(data.transactions) && data.transactions.length > 0) transactions = data.transactions;
-      console.log(`Loaded persisted store from ${DATA_FILE} (${deals.length} deals)`);
-    }
-  } catch (err) {
-    console.error('Failed to load inMemoryStore from disk:', err.message);
-  }
-}
-
 let coupons = [
-  { _id: '1', id: 1, code: 'WOUCH50', store: 'Swiggy', discount: '50% OFF', category: 'Food', usageCount: 1420, usageLimit: 2000, status: 'active', expiry: 'Sep 30, 2026' },
-  { _id: '2', id: 2, code: 'MYNTRA20', store: 'Myntra', discount: '20% OFF', category: 'Fashion', usageCount: 890, usageLimit: 1500, status: 'active', expiry: 'Sep 28, 2026' },
-  { _id: '3', id: 3, code: 'AMZTECH1000', store: 'Amazon', discount: '₹1000 Flat', category: 'Electronics', usageCount: 2310, usageLimit: 2500, status: 'active', expiry: 'Sep 20, 2026' },
-  { _id: '4', id: 4, code: 'ZEPTOFREE', store: 'Zepto', discount: 'Free Delivery', category: 'Grocery', usageCount: 3100, usageLimit: 5000, status: 'active', expiry: 'Oct 05, 2026' },
-  { _id: '5', id: 5, code: 'ZOMATOEATS', store: 'Zomato', discount: '60% OFF', category: 'Food', usageCount: 4200, usageLimit: 4200, status: 'expired', expiry: 'Sep 01, 2026' },
-  { _id: '6', id: 6, code: 'AJIOFIRST', store: 'Ajio', discount: '₹500 OFF', category: 'Fashion', usageCount: 650, usageLimit: 1000, status: 'active', expiry: 'Oct 15, 2026' }
+  { _id: '1', id: 1, code: 'AMAZON10', store: 'Amazon', discount: '10% off', category: 'Electronics', usageCount: 2840, usageLimit: 5000, status: 'active', expiry: 'Sep 18, 2026', minOrder: 'Min Order: 499', description: 'Valid for Amazon users across groceries and daily essentials with zero delivery fee.', submissionStatus: 'approved' },
+  { _id: '2', id: 2, code: 'FLIPKART15', store: 'Flipkart', discount: '15% off', category: 'Electronics', usageCount: 3950, usageLimit: 8000, status: 'active', expiry: 'Sep 28, 2026', minOrder: 'Min Order: ₹999', description: 'Instant discount on top smartphone and laptop brands with valid bank cards.', submissionStatus: 'approved' },
+  { _id: '3', id: 3, code: 'MYNTRA20', store: 'Myntra', discount: '20% off', category: 'Fashion', usageCount: 1950, usageLimit: 3000, status: 'active', expiry: 'Oct 05, 2026', minOrder: 'Min Order: ₹1,499', description: "Applicable on top brands including Nike, Puma, Levi's, and Roadster.", submissionStatus: 'approved' },
+  { _id: '4', id: 4, code: 'SWIGGY50', store: 'Swiggy', discount: '50% off', category: 'Food', usageCount: 4320, usageLimit: 5000, status: 'active', expiry: 'Sep 24, 2026', minOrder: 'Min Order: ₹149', description: 'Instant half-price discount on top-rated restaurants and cafes.', submissionStatus: 'approved' },
+  { _id: '5', id: 5, code: 'ZEPTOFREE', store: 'Zepto', discount: 'Free Delivery', category: 'Grocery', usageCount: 3120, usageLimit: 5000, status: 'active', expiry: 'Oct 01, 2026', minOrder: 'Min Order: ₹99', description: 'Instant 10-minute grocery delivery at zero shipping cost.', submissionStatus: 'approved' },
+  { _id: '6', id: 6, code: 'ZOMATOEATS', store: 'Zomato', discount: '60% off', category: 'Food', usageCount: 2280, usageLimit: 4000, status: 'active', expiry: 'Sep 21, 2026', minOrder: 'Min Order: ₹199', description: 'Valid on orders from top dining partners and gourmet cloud kitchens.', submissionStatus: 'approved' },
+  { _id: '7', id: 7, code: 'AJIOFIRST', store: 'Ajio', discount: '₹500 off', category: 'Fashion', usageCount: 1640, usageLimit: 2500, status: 'active', expiry: 'Oct 06, 2026', minOrder: 'Min Order: ₹1,999', description: 'Valid on premium styles and footwear collections at Ajio Luxe and Trends.', submissionStatus: 'approved' },
+  { _id: '8', id: 8, code: 'NYKAA25', store: 'Nykaa', discount: '25% off', category: 'Beauty', usageCount: 2190, usageLimit: 3500, status: 'active', expiry: 'Oct 04, 2026', minOrder: 'Min Order: ₹799', description: 'Applicable on authentic makeup, skincare, and fragrance collections.', submissionStatus: 'approved' },
+  { _id: '9', id: 9, code: 'BBBIGSAVER', store: 'Big Basket', discount: '₹150 off', category: 'Grocery', usageCount: 1840, usageLimit: 3000, status: 'active', expiry: 'Oct 03, 2026', minOrder: 'Min Order: ₹999', description: 'Super savings on weekly groceries and dairy deliveries directly to doorstep.', submissionStatus: 'approved' },
+  { _id: '10', id: 10, code: 'JIOMART100', store: 'Jio Mart', discount: '₹100 off', category: 'Grocery', usageCount: 1420, usageLimit: 2000, status: 'active', expiry: 'Sep 26, 2026', minOrder: 'Min Order: ₹750', description: 'Valid across branded FMCG, personal hygiene, and pantry essentials.', submissionStatus: 'approved' },
+  { _id: '11', id: 11, code: 'RELTECH', store: 'Reliance Digital', discount: '₹1,000 off', category: 'Electronics', usageCount: 1530, usageLimit: 3000, status: 'active', expiry: 'Oct 16, 2026', minOrder: 'Min Order: ₹9,999', description: 'Instant discount voucher at Reliance Digital store and website.', submissionStatus: 'approved' }
 ];
 
 let lootDeals = [
-  { _id: 'flash-1', id: 'flash-1', title: 'Oval Up Down LED Wall Light 2W', storeName: 'Amazon', category: 'Electronics', discount: '91% OFF', currentPrice: '₹179', originalPrice: '₹1,899', dealType: 'flash', status: 'active', href: '/deals' },
-  { _id: 'excl-1', id: 'excl-1', title: 'Noise ColorFit Pulse Grand Smartwatch', storeName: 'Flipkart', category: 'Electronics', discount: '75% OFF', currentPrice: '₹999', originalPrice: '₹3,999', dealType: 'exclusive', status: 'active', href: '/deals' }
+  { _id: 'flash-1', id: 'flash-1', title: 'Oval Up Down LED Wall Light 2W', storeName: 'Amazon', category: 'Electronics', discount: '91% OFF', currentPrice: '₹179', originalPrice: '₹1,899', dealType: 'flash', status: 'active', href: '/deals', submissionStatus: 'approved' },
+  { _id: 'excl-1', id: 'excl-1', title: 'Noise ColorFit Pulse Grand Smartwatch', storeName: 'Flipkart', category: 'Electronics', discount: '75% OFF', currentPrice: '₹999', originalPrice: '₹3,999', dealType: 'exclusive', status: 'active', href: '/deals', submissionStatus: 'approved' }
 ];
 
 let stores = [
-  { _id: '1', name: 'Ajio', category: 'Fashion', reward: 'Upto 5% rewards', status: 'active' },
-  { _id: '2', name: 'Amazon', category: 'Electronics', reward: 'Upto 7.5% rewards', status: 'active' },
-  { _id: '3', name: 'Big Basket', category: 'Grocery', reward: 'Upto 4% rewards', status: 'active' },
-  { _id: '4', name: 'Flipkart', category: 'Electronics', reward: 'Upto 8% rewards', status: 'active' },
-  { _id: '5', name: 'Myntra', category: 'Fashion', reward: 'Upto 6% rewards', status: 'active' },
-  { _id: '6', name: 'Nykaa', category: 'Beauty', reward: 'Upto 7% rewards', status: 'active' },
-  { _id: '7', name: 'Swiggy', category: 'Food', reward: 'Upto 10% rewards', status: 'active' },
-  { _id: '8', name: 'Zepto', category: 'Grocery', reward: 'Upto 5% rewards', status: 'active' },
-  { _id: '9', name: 'Zomato', category: 'Food', reward: 'Upto 8% rewards', status: 'active' }
+  { _id: '1', name: 'Ajio', category: 'Fashion', reward: 'Upto 5% rewards', status: 'active', submissionStatus: 'approved' },
+  { _id: '2', name: 'Amazon', category: 'Electronics', reward: 'Upto 7.5% rewards', status: 'active', submissionStatus: 'approved' },
+  { _id: '3', name: 'Big Basket', category: 'Grocery', reward: 'Upto 4% rewards', status: 'active', submissionStatus: 'approved' },
+  { _id: '4', name: 'Flipkart', category: 'Electronics', reward: 'Upto 8% rewards', status: 'active', submissionStatus: 'approved' },
+  { _id: '5', name: 'Myntra', category: 'Fashion', reward: 'Upto 6% rewards', status: 'active', submissionStatus: 'approved' },
+  { _id: '6', name: 'Nykaa', category: 'Beauty', reward: 'Upto 7% rewards', status: 'active', submissionStatus: 'approved' },
+  { _id: '7', name: 'Swiggy', category: 'Food', reward: 'Upto 10% rewards', status: 'active', submissionStatus: 'approved' },
+  { _id: '8', name: 'Zepto', category: 'Grocery', reward: 'Upto 5% rewards', status: 'active', submissionStatus: 'approved' },
+  { _id: '9', name: 'Zomato', category: 'Food', reward: 'Upto 8% rewards', status: 'active', submissionStatus: 'approved' }
 ];
 
 let categories = [
@@ -105,7 +768,755 @@ let transactions = [
   { _id: 'TXN-9015', id: 'TXN-9015', transactionId: 'TXN-9015', user: 'Rohan Deshmukh', email: 'rohan.d@gmail.com', type: 'Redemption', amount: '₹750', status: 'Pending', time: '8 hrs ago' }
 ];
 
-// Load persisted data after all collections are declared
+let creditCards = [
+  {
+    _id: 'indusind-bank',
+    id: 'indusind-bank',
+    cardName: 'IndusInd Bank Credit Card',
+    bank: 'IndusInd Bank',
+    network: 'Visa',
+    tier: 'Premium',
+    imageUrl: '',
+    bankLogoUrl: '/src/assets/creditcardpage/indusind_bank.png',
+    welcomeOffer: 'Upto 5% Cashback',
+    rewardRate: 'Exclusive Rewards',
+    keyBenefits: [
+      'Upto 5% Cashback',
+      'Exclusive Rewards',
+      'Zero liability on lost card'
+    ],
+    partnerBrands: ['Shopping', 'Travel', 'Dining'],
+    affiliateLink: '#',
+    annualFee: '₹0',
+    joiningFee: '₹0',
+    feeWaiver: 'Lifetime Free',
+    offerStartDate: '2026-01-01',
+    offerExpiryDate: '2026-12-31',
+    lastUpdated: '2026-09-01',
+    status: 'featured',
+    isFeatured: true,
+    isVerified: true,
+    applyCount: 2400,
+    viewCount: 19800,
+    submittedBy: 'executive@wouchify.com',
+    submissionStatus: 'approved',
+    createdAt: '2026-01-01T10:00:00.000Z',
+    updatedAt: '2026-09-01T14:30:00.000Z'
+  },
+  {
+    _id: 'icici-bank',
+    id: 'icici-bank',
+    cardName: 'ICICI Credit Card',
+    bank: 'ICICI Bank',
+    network: 'Visa',
+    tier: 'Classic',
+    imageUrl: '',
+    bankLogoUrl: '/src/assets/creditcardpage/ICICI_bank.png',
+    welcomeOffer: 'Upto 5% Cashback',
+    rewardRate: 'Earn Reward Points',
+    keyBenefits: [
+      'Upto 5% Cashback',
+      'Earn Reward Points',
+      'Lifetime Free Card'
+    ],
+    partnerBrands: ['Amazon', 'Flipkart', 'Swiggy'],
+    affiliateLink: '#',
+    annualFee: 'Lifetime Free',
+    joiningFee: '₹0',
+    feeWaiver: 'Always Free (Lifetime Free Card)',
+    offerStartDate: '2026-01-01',
+    offerExpiryDate: '2026-12-31',
+    lastUpdated: '2026-09-01',
+    status: 'featured',
+    isFeatured: true,
+    isVerified: true,
+    applyCount: 2400,
+    viewCount: 21100,
+    submittedBy: 'executive@wouchify.com',
+    submissionStatus: 'approved',
+    createdAt: '2026-01-01T08:00:00.000Z',
+    updatedAt: '2026-09-01T11:20:00.000Z'
+  },
+  {
+    _id: 'idfc-bank',
+    id: 'idfc-bank',
+    cardName: 'IDFC Credit Card',
+    bank: 'IDFC First Bank',
+    network: 'Visa',
+    tier: 'Premium',
+    imageUrl: '',
+    bankLogoUrl: '/src/assets/creditcardpage/IDFC_back.png',
+    welcomeOffer: 'Never Expiring Rewards',
+    rewardRate: 'Lifetime Free',
+    keyBenefits: [
+      'Never Expiring Rewards',
+      'Lifetime Free',
+      'Zero Annual Fee'
+    ],
+    partnerBrands: ['All Round Spends'],
+    affiliateLink: '#',
+    annualFee: 'Lifetime Free',
+    joiningFee: '₹0',
+    feeWaiver: 'Always Free (Lifetime Free Card)',
+    offerStartDate: '2026-01-01',
+    offerExpiryDate: '2026-12-31',
+    lastUpdated: '2026-09-01',
+    status: 'active',
+    isFeatured: true,
+    isVerified: true,
+    applyCount: 2400,
+    viewCount: 16500,
+    submittedBy: 'executive@wouchify.com',
+    submissionStatus: 'approved',
+    createdAt: '2026-01-01T12:00:00.000Z',
+    updatedAt: '2026-09-01T09:40:00.000Z'
+  },
+  {
+    _id: 'tata-neu-1',
+    id: 'tata-neu-1',
+    cardName: 'Tata Neu Card',
+    bank: 'TataNeu',
+    network: 'Rupay',
+    tier: 'Premium',
+    imageUrl: '',
+    bankLogoUrl: '/src/assets/creditcardpage/Tata_neu.svg',
+    welcomeOffer: 'Up to 10% NeuCoins',
+    rewardRate: 'Lifetime Free Offers',
+    keyBenefits: [
+      'Up to 10% NeuCoins',
+      'Lifetime Free Offers',
+      'Domestic airport lounge access'
+    ],
+    partnerBrands: ['Shopping', 'Travel', 'Dining'],
+    affiliateLink: '#',
+    annualFee: '₹0',
+    joiningFee: '₹0',
+    feeWaiver: 'Lifetime Free',
+    offerStartDate: '2026-01-01',
+    offerExpiryDate: '2026-12-31',
+    lastUpdated: '2026-09-01',
+    status: 'active',
+    isFeatured: false,
+    isVerified: true,
+    applyCount: 2400,
+    viewCount: 18000,
+    submittedBy: 'executive@wouchify.com',
+    submissionStatus: 'approved',
+    createdAt: '2026-01-01T14:00:00.000Z',
+    updatedAt: '2026-09-01T16:00:00.000Z'
+  },
+  {
+    _id: 'axis-bank',
+    id: 'axis-bank',
+    cardName: 'Axis Credit Card',
+    bank: 'Axis Bank',
+    network: 'Mastercard',
+    tier: 'Classic',
+    imageUrl: '',
+    bankLogoUrl: '/src/assets/creditcardpage/Axis_Bank.png',
+    welcomeOffer: 'Up to 7.5% Cashback',
+    rewardRate: 'Flat ₹1,400 Rewards',
+    keyBenefits: [
+      'Up to 7.5% Cashback',
+      'Flat ₹1,400 Rewards',
+      'Cashback on online spends'
+    ],
+    partnerBrands: ['Amazon', 'Flipkart', 'Swiggy'],
+    affiliateLink: '#',
+    annualFee: '₹0',
+    joiningFee: '₹0',
+    feeWaiver: 'Lifetime Free',
+    offerStartDate: '2026-01-01',
+    offerExpiryDate: '2026-12-31',
+    lastUpdated: '2026-09-01',
+    status: 'active',
+    isFeatured: false,
+    isVerified: true,
+    applyCount: 2400,
+    viewCount: 19500,
+    submittedBy: 'executive@wouchify.com',
+    submissionStatus: 'approved',
+    createdAt: '2026-01-01T10:00:00.000Z',
+    updatedAt: '2026-09-01T14:00:00.000Z'
+  },
+  {
+    _id: 'tata-neu-2',
+    id: 'tata-neu-2',
+    cardName: 'Tata Neu Card',
+    bank: 'TataNeu',
+    network: 'Mastercard',
+    tier: 'Super Premium',
+    imageUrl: '',
+    bankLogoUrl: '/src/assets/creditcardpage/Bajaj-Finsery.png',
+    welcomeOffer: 'Up to 10% NeuCoins',
+    rewardRate: 'Lifetime Free Offers',
+    keyBenefits: [
+      'Up to 10% NeuCoins',
+      'Lifetime Free Offers',
+      'Shopping, Travel, Dining rewards'
+    ],
+    partnerBrands: ['Shopping', 'Travel', 'Dining'],
+    affiliateLink: '#',
+    annualFee: '₹0',
+    joiningFee: '₹0',
+    feeWaiver: 'Lifetime Free',
+    offerStartDate: '2026-01-01',
+    offerExpiryDate: '2026-12-31',
+    lastUpdated: '2026-09-01',
+    status: 'active',
+    isFeatured: false,
+    isVerified: true,
+    applyCount: 2400,
+    viewCount: 17200,
+    submittedBy: 'executive@wouchify.com',
+    submissionStatus: 'approved',
+    createdAt: '2026-01-01T10:00:00.000Z',
+    updatedAt: '2026-09-01T14:00:00.000Z'
+  }
+];
+
+let banners = [
+  {
+    _id: 'banner-1',
+    id: 'banner-1',
+    title: 'Great Indian Festival & Big Billion Days Mega Sale',
+    targetPage: 'home',
+    badgeText: 'FESTIVE BONANZA 2026',
+    headingLine1: 'UP TO 85% OFF +',
+    headingLine2: 'EXTRA 10% BANK CASHBACK',
+    headingLine3: 'ON TOP BRANDS & GADGETS',
+    description: 'Stack exclusive Wouchify coupon codes with bank discounts on Amazon, Flipkart, Myntra & more.',
+    ctaText: 'Shop Festive Deals',
+    targetLink: '/deals?category=Electronics',
+    primaryImage: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200&auto=format&fit=crop&q=80',
+    secondaryImage: 'https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=600&auto=format&fit=crop&q=80',
+    backgroundImage: 'https://images.unsplash.com/photo-1557683316-973673baf926?w=1600&auto=format&fit=crop&q=80',
+    dealChip1: '⚡ Instant ₹1,000 Off on SBI & HDFC Cards',
+    dealChip2: '🔥 100% Verified Cashback Tracking',
+    themeColor: '#4F46E5',
+    priority: 1,
+    status: 'active',
+    expiryDate: '2026-10-31',
+    views: 124500,
+    clicks: 18920,
+    submittedBy: 'marketing@wouchify.com',
+    submissionStatus: 'approved',
+    createdAt: '2026-09-01T00:00:00.000Z',
+    updatedAt: '2026-09-15T08:00:00.000Z'
+  },
+  {
+    _id: 'banner-2',
+    id: 'banner-2',
+    title: 'Super Credit Card Offers & Welcome Vouchers',
+    targetPage: 'credit-cards',
+    badgeText: 'HOT FINTECH REWARDS',
+    headingLine1: 'APPLY & GET ₹2,500',
+    headingLine2: 'AMAZON VOUCHERS',
+    headingLine3: 'ZERO JOINING FEE CARDS',
+    description: 'Compare 50+ credit cards with high reward rates, lounge perks, and instant approval links.',
+    ctaText: 'Compare Credit Cards',
+    targetLink: '/credit-cards',
+    primaryImage: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=1200&auto=format&fit=crop&q=80',
+    secondaryImage: '',
+    backgroundImage: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1600&auto=format&fit=crop&q=80',
+    dealChip1: '💳 Lifetime Free Cards Available',
+    dealChip2: '✈️ Unlimited Airport Lounge Access',
+    themeColor: '#059669',
+    priority: 2,
+    status: 'active',
+    expiryDate: '2026-12-31',
+    views: 64200,
+    clicks: 8430,
+    submittedBy: 'executive@wouchify.com',
+    submissionStatus: 'approved',
+    createdAt: '2026-09-05T00:00:00.000Z',
+    updatedAt: '2026-09-12T10:00:00.000Z'
+  },
+  {
+    _id: 'banner-3',
+    id: 'banner-3',
+    title: 'Foodie Weekend Carnival: Flat 60% OFF',
+    targetPage: 'home',
+    badgeText: 'WEEKEND SPECIAL',
+    headingLine1: 'FLAT ₹150 OFF +',
+    headingLine2: 'FREE DELIVERY',
+    headingLine3: 'ON SWIGGY & ZOMATO',
+    description: 'Order food, snacks, and midnight desserts with exclusive weekend promo codes.',
+    ctaText: 'Grab Food Coupons',
+    targetLink: '/coupons?category=Food',
+    primaryImage: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&auto=format&fit=crop&q=80',
+    secondaryImage: '',
+    backgroundImage: '',
+    dealChip1: '🍔 Code: WOUCH50',
+    dealChip2: '⏱️ 20 Min Flash Delivery',
+    themeColor: '#EA580C',
+    priority: 3,
+    status: 'active',
+    expiryDate: '2026-09-30',
+    views: 45000,
+    clicks: 6100,
+    submittedBy: 'executive@wouchify.com',
+    submissionStatus: 'approved',
+    createdAt: '2026-09-08T00:00:00.000Z',
+    updatedAt: '2026-09-14T09:00:00.000Z'
+  }
+];
+
+let advertisements = [
+  {
+    _id: 'ad-1',
+    id: 'ad-1',
+    title: 'Samsung Galaxy S24 Ultra Festive Promo',
+    advertiser: 'Samsung India',
+    placement: 'homepage_top_banner',
+    imageUrl: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=800&auto=format&fit=crop&q=80',
+    targetLink: 'https://samsung.com/in/smartphones/galaxy-s24-ultra/?aff=wouchify',
+    ctaText: 'Buy Now with ₹10k Bonus',
+    badgeText: 'Sponsored Ad',
+    pricingModel: 'CPC',
+    budgetOrRate: '₹12.50 / click',
+    status: 'active',
+    expiryDate: '2026-10-31',
+    impressions: 89000,
+    clicks: 4320,
+    submittedBy: 'marketing@wouchify.com',
+    submissionStatus: 'approved',
+    createdAt: '2026-09-01T00:00:00.000Z',
+    updatedAt: '2026-09-15T07:00:00.000Z'
+  },
+  {
+    _id: 'ad-2',
+    id: 'ad-2',
+    title: 'Hostinger Cloud Hosting - 78% OFF + Free SSL',
+    advertiser: 'Hostinger International',
+    placement: 'sidebar_deal_view',
+    imageUrl: 'https://images.unsplash.com/photo-1542744094-3a31f272c490?w=800&auto=format&fit=crop&q=80',
+    targetLink: 'https://hostinger.in/web-hosting?aff=wouchify',
+    ctaText: 'Claim 78% Discount',
+    badgeText: 'Featured Partner',
+    pricingModel: 'Affiliate',
+    budgetOrRate: '40% RevShare',
+    status: 'active',
+    expiryDate: '2026-11-30',
+    impressions: 42100,
+    clicks: 1980,
+    submittedBy: 'executive@wouchify.com',
+    submissionStatus: 'approved',
+    createdAt: '2026-09-02T00:00:00.000Z',
+    updatedAt: '2026-09-11T12:00:00.000Z'
+  },
+  {
+    _id: 'ad-3',
+    id: 'ad-3',
+    title: 'Tata Neu Infinity HDFC Credit Card Promotion',
+    advertiser: 'Tata Digital / HDFC',
+    placement: 'credit_card_list_ad',
+    imageUrl: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=800&auto=format&fit=crop&q=80',
+    targetLink: 'https://tatadigital.com/finance/creditcard?aff=wouchify',
+    ctaText: 'Apply in 2 Mins',
+    badgeText: 'Promoted',
+    pricingModel: 'CPM',
+    budgetOrRate: '₹85 / 1000 impressions',
+    status: 'active',
+    expiryDate: '2026-12-15',
+    impressions: 110200,
+    clicks: 5800,
+    submittedBy: 'executive@wouchify.com',
+    submissionStatus: 'approved',
+    createdAt: '2026-09-04T00:00:00.000Z',
+    updatedAt: '2026-09-13T15:00:00.000Z'
+  }
+];
+
+let submissions = [
+  {
+    _id: 'sub-101',
+    id: 'sub-101',
+    entityType: 'deal',
+    entityId: '4',
+    action: 'create',
+    title: 'Swiggy Gourmet Feast - Flat 50% Off First 3 Orders',
+    store: 'Swiggy',
+    category: 'Food & Dining',
+    priority: 'High',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rohan Gupta (Deal Executive)',
+    submittedAt: '2026-09-15T09:15:00.000Z',
+    status: 'Pending Approval',
+    rejectionReason: '',
+    reviewedBy: '',
+    reviewedAt: null,
+    notes: 'Verified against Swiggy active merchant coupon code gourmet50. High CTR expected.',
+    dataSnapshot: {
+      name: 'Swiggy Gourmet Feast - Flat 50% Off First 3 Orders',
+      store: 'Swiggy',
+      category: 'Food',
+      price: '₹250',
+      originalPrice: '₹500',
+      discount: '50% OFF',
+      expiry: 'Sep 30, 2026'
+    },
+    createdAt: '2026-09-15T09:15:00.000Z',
+    updatedAt: '2026-09-15T09:15:00.000Z'
+  },
+  {
+    _id: 'sub-102',
+    id: 'sub-102',
+    entityType: 'credit_card',
+    entityId: 'card-4',
+    action: 'create',
+    title: 'Axis Bank Atlas Credit Card - Miles Program',
+    store: 'Axis Bank',
+    category: 'Finance',
+    priority: 'Critical',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Ananya Sharma (Fintech Ops)',
+    submittedAt: '2026-09-14T14:20:00.000Z',
+    status: 'Approved',
+    rejectionReason: '',
+    reviewedBy: 'manager@wouchify.com',
+    reviewedAt: '2026-09-14T16:00:00.000Z',
+    notes: 'All milestone terms and lounge access verified with Axis Bank official affiliate brochure.',
+    dataSnapshot: {
+      cardName: 'Axis Bank Atlas Credit Card',
+      bank: 'Axis Bank',
+      network: 'Visa',
+      tier: 'Super Premium',
+      annualFee: '₹5,000 + GST'
+    },
+    createdAt: '2026-09-14T14:20:00.000Z',
+    updatedAt: '2026-09-14T16:00:00.000Z'
+  },
+  {
+    _id: 'sub-103',
+    id: 'sub-103',
+    entityType: 'coupon',
+    entityId: 'c-draft-9',
+    action: 'create',
+    title: 'FLIPKART500 - ₹500 Off on Fashion Sale',
+    store: 'Flipkart',
+    category: 'Fashion & Apparel',
+    priority: 'Normal',
+    submittedBy: 'executive2@wouchify.com',
+    submittedByName: 'Vikram Sen (Content Executive)',
+    submittedAt: '2026-09-13T11:00:00.000Z',
+    status: 'Rejected',
+    rejectionReason: 'Coupon code failed live verification test: Expired promo code on merchant cart page.',
+    reviewedBy: 'manager@wouchify.com',
+    reviewedAt: '2026-09-13T12:30:00.000Z',
+    notes: 'Please re-verify with updated valid code for Flipkart Big Billion Days.',
+    dataSnapshot: {
+      code: 'FLIPKART500',
+      store: 'Flipkart',
+      discount: '₹500 OFF',
+      category: 'Fashion'
+    },
+    createdAt: '2026-09-13T11:00:00.000Z',
+    updatedAt: '2026-09-13T12:30:00.000Z'
+  },
+  {
+    _id: 'sub-104',
+    id: 'sub-104',
+    entityType: 'banner',
+    entityId: 'banner-1',
+    action: 'update',
+    title: 'Update Festive Hero Banner for Big Billion Days',
+    store: 'Multi-Store',
+    category: 'Marketing',
+    priority: 'Critical',
+    submittedBy: 'marketing@wouchify.com',
+    submittedByName: 'Pooja Verma (Growth Lead)',
+    submittedAt: '2026-09-15T08:00:00.000Z',
+    status: 'Approved',
+    rejectionReason: '',
+    reviewedBy: 'manager@wouchify.com',
+    reviewedAt: '2026-09-15T08:30:00.000Z',
+    notes: 'Updated banner graphic assets and copy for festive season launch.',
+    dataSnapshot: {
+      title: 'Great Indian Festival & Big Billion Days Mega Sale',
+      targetPage: 'home',
+      priority: 1
+    },
+    createdAt: '2026-09-15T08:00:00.000Z',
+    updatedAt: '2026-09-15T08:30:00.000Z'
+  }
+];
+
+let supportTickets = [
+  {
+    _id: 'TICK-801',
+    id: 'TICK-801',
+    ticketId: 'TICK-801',
+    userName: 'Rahul Sharma',
+    userEmail: 'rahul.sharma@gmail.com',
+    category: 'Cashback Dispute',
+    subject: 'Missing Cashback for Amazon Order #402-981273-19',
+    priority: 'High',
+    status: 'In Progress',
+    orderId: 'AMZ-402-981273',
+    disputeAmount: '₹350',
+    assignedTo: 'Kavita Nair (Support Ops)',
+    messages: [
+      {
+        sender: 'user',
+        senderName: 'Rahul Sharma',
+        time: '2026-09-14T10:30:00.000Z',
+        text: 'I placed an order on Amazon for ₹7,000 using Wouchify affiliate link on 12th Sept, but cashback of ₹350 is not tracking in my wallet.'
+      },
+      {
+        sender: 'support',
+        senderName: 'Kavita Nair',
+        time: '2026-09-14T11:45:00.000Z',
+        text: 'Hello Rahul, we have escalated this transaction to Amazon affiliate network team with your click reference ID. Investigation turnaround is typically 48 hours.'
+      }
+    ],
+    createdAt: '2026-09-14T10:30:00.000Z',
+    updatedAt: '2026-09-14T11:45:00.000Z'
+  },
+  {
+    _id: 'TICK-802',
+    id: 'TICK-802',
+    ticketId: 'TICK-802',
+    userName: 'Priya Patel',
+    userEmail: 'priya.patel@outlook.com',
+    category: 'Withdrawal / Payout',
+    subject: 'UPI Payout delayed for ₹500 redemption',
+    priority: 'Urgent',
+    status: 'Open',
+    orderId: 'TXN-9020',
+    disputeAmount: '₹500',
+    assignedTo: 'Rohan Gupta',
+    messages: [
+      {
+        sender: 'user',
+        senderName: 'Priya Patel',
+        time: '2026-09-15T09:00:00.000Z',
+        text: 'I requested UPI payout of ₹500 to priya.patel@okhdfcbank earlier today. Status still shows Pending.'
+      }
+    ],
+    createdAt: '2026-09-15T09:00:00.000Z',
+    updatedAt: '2026-09-15T09:00:00.000Z'
+  },
+  {
+    _id: 'TICK-803',
+    id: 'TICK-803',
+    ticketId: 'TICK-803',
+    userName: 'Amit Kumar',
+    userEmail: 'amit.k@gmail.com',
+    category: 'Coupon Inquiry',
+    subject: 'WOUCH50 coupon code error on Swiggy App',
+    priority: 'Medium',
+    status: 'Resolved',
+    orderId: '',
+    disputeAmount: '₹150',
+    assignedTo: 'Kavita Nair',
+    messages: [
+      {
+        sender: 'user',
+        senderName: 'Amit Kumar',
+        time: '2026-09-13T14:10:00.000Z',
+        text: 'Swiggy said the coupon WOUCH50 is valid only on orders above ₹299.'
+      },
+      {
+        sender: 'support',
+        senderName: 'Kavita Nair',
+        time: '2026-09-13T15:00:00.000Z',
+        text: 'Hi Amit, that is correct. We have updated the terms and conditions badge on the coupon card to clarify the ₹299 min order limit.'
+      }
+    ],
+    createdAt: '2026-09-13T14:10:00.000Z',
+    updatedAt: '2026-09-13T15:00:00.000Z'
+  }
+];
+
+let cashbackClaims = [
+  {
+    _id: 'CLM-501',
+    id: 'CLM-501',
+    claimId: 'CLM-501',
+    userName: 'Rahul Sharma',
+    userEmail: 'rahul.sharma@gmail.com',
+    store: 'Amazon',
+    orderId: 'OD-892173-AMZ',
+    orderAmount: '₹4,999',
+    cashbackAmount: '₹375',
+    claimedAt: '2026-09-14T10:00:00.000Z',
+    status: 'Approved',
+    payoutMethod: 'UPI',
+    payoutDetails: 'rahul.sharma@okaxis',
+    receiptUrl: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600&auto=format&fit=crop&q=80',
+    notes: 'Invoice verified with merchant click timestamp.',
+    reviewedBy: 'manager@wouchify.com',
+    createdAt: '2026-09-14T10:00:00.000Z',
+    updatedAt: '2026-09-14T15:30:00.000Z'
+  },
+  {
+    _id: 'CLM-502',
+    id: 'CLM-502',
+    claimId: 'CLM-502',
+    userName: 'Sneha Verma',
+    userEmail: 'sneha.v@yahoo.com',
+    store: 'Myntra',
+    orderId: 'MYN-29182736',
+    orderAmount: '₹2,499',
+    cashbackAmount: '₹150',
+    claimedAt: '2026-09-15T08:20:00.000Z',
+    status: 'Pending',
+    payoutMethod: 'Bank Transfer',
+    payoutDetails: 'HDFC0001234 - AC 50100492817261',
+    receiptUrl: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=600&auto=format&fit=crop&q=80',
+    notes: 'Under review by ops team.',
+    reviewedBy: '',
+    createdAt: '2026-09-15T08:20:00.000Z',
+    updatedAt: '2026-09-15T08:20:00.000Z'
+  },
+  {
+    _id: 'CLM-503',
+    id: 'CLM-503',
+    claimId: 'CLM-503',
+    userName: 'Vikram Mehta',
+    userEmail: 'v.mehta@gmail.com',
+    store: 'Swiggy',
+    orderId: 'SWG-91028374',
+    orderAmount: '₹650',
+    cashbackAmount: '₹65',
+    claimedAt: '2026-09-13T18:00:00.000Z',
+    status: 'Processed',
+    payoutMethod: 'UPI',
+    payoutDetails: 'vmehta@paytm',
+    receiptUrl: '',
+    notes: 'Cashback paid via UPI reference UPI-78192019.',
+    reviewedBy: 'manager@wouchify.com',
+    createdAt: '2026-09-13T18:00:00.000Z',
+    updatedAt: '2026-09-14T09:10:00.000Z'
+  }
+];
+
+let staffMembers = [
+  {
+    _id: 'staff-balaji',
+    id: 'staff-balaji',
+    name: 'Balaji',
+    email: 'balaji@wouchify.com',
+    password: 'staff123',
+    role: 'executive',
+    domain: 'Deals & Loot Deals',
+    status: 'Online',
+    submissionsToday: 12,
+    totalSubmissions: 145,
+    approvalRate: '98%',
+    rejectionsCount: 3,
+    avgTurnaround: '10m',
+    createdAt: '2026-06-01T00:00:00.000Z',
+    updatedAt: '2026-09-15T09:00:00.000Z'
+  },
+  {
+    _id: 'staff-jayanth',
+    id: 'staff-jayanth',
+    name: 'Jayanth',
+    email: 'jayanth@wouchify.com',
+    password: 'staff123',
+    role: 'executive',
+    domain: 'Coupons & Credit Cards',
+    status: 'Online',
+    submissionsToday: 9,
+    totalSubmissions: 120,
+    approvalRate: '97%',
+    rejectionsCount: 4,
+    avgTurnaround: '12m',
+    createdAt: '2026-06-15T00:00:00.000Z',
+    updatedAt: '2026-09-15T09:30:00.000Z'
+  },
+  {
+    _id: 'staff-ops-manager',
+    id: 'staff-ops-manager',
+    name: 'Operational Manager',
+    email: 'ops.manager@wouchify.com',
+    password: 'staff123',
+    role: 'operational_manager',
+    domain: 'Approvals & Quality Assurance',
+    status: 'Online',
+    submissionsToday: 21,
+    totalSubmissions: 580,
+    approvalRate: '99%',
+    rejectionsCount: 7,
+    avgTurnaround: '8m',
+    createdAt: '2026-05-01T00:00:00.000Z',
+    updatedAt: '2026-09-15T08:45:00.000Z'
+  },
+  {
+    _id: 'staff-manager',
+    id: 'staff-manager',
+    name: 'Manager',
+    email: 'manager@wouchify.com',
+    password: 'staff123',
+    role: 'manager',
+    domain: 'Platform Administration & Team Management',
+    status: 'Online',
+    submissionsToday: 0,
+    totalSubmissions: 940,
+    approvalRate: '100%',
+    rejectionsCount: 0,
+    avgTurnaround: '5m',
+    createdAt: '2026-04-01T00:00:00.000Z',
+    updatedAt: '2026-09-15T09:40:00.000Z'
+  }
+];
+
+function saveToDisk() {
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    const payload = { 
+      deals, 
+      coupons, 
+      lootDeals, 
+      stores, 
+      categories, 
+      users, 
+      transactions,
+      creditCards,
+      banners,
+      advertisements,
+      submissions,
+      supportTickets,
+      cashbackClaims,
+      staffMembers
+    };
+    fs.writeFileSync(DATA_FILE, JSON.stringify(payload, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Failed to save inMemoryStore to disk:', err.message);
+  }
+}
+
+function loadFromDisk() {
+  try {
+    if (fs.existsSync(DATA_FILE)) {
+      const raw = fs.readFileSync(DATA_FILE, 'utf8');
+      const data = JSON.parse(raw);
+      if (Array.isArray(data.deals) && data.deals.length > 0) deals = data.deals;
+      if (Array.isArray(data.coupons) && data.coupons.length > 0) coupons = data.coupons;
+      if (Array.isArray(data.lootDeals) && data.lootDeals.length > 0) lootDeals = data.lootDeals;
+      if (Array.isArray(data.stores) && data.stores.length > 0) stores = data.stores;
+      if (Array.isArray(data.categories) && data.categories.length > 0) categories = data.categories;
+      if (Array.isArray(data.users) && data.users.length > 0) users = data.users;
+      if (Array.isArray(data.transactions) && data.transactions.length > 0) transactions = data.transactions;
+      if (Array.isArray(data.creditCards) && data.creditCards.length > 0) creditCards = data.creditCards;
+      if (Array.isArray(data.banners) && data.banners.length > 0) banners = data.banners;
+      if (Array.isArray(data.advertisements) && data.advertisements.length > 0) advertisements = data.advertisements;
+      if (Array.isArray(data.submissions) && data.submissions.length > 0) submissions = data.submissions;
+      if (Array.isArray(data.supportTickets) && data.supportTickets.length > 0) supportTickets = data.supportTickets;
+      if (Array.isArray(data.cashbackClaims) && data.cashbackClaims.length > 0) cashbackClaims = data.cashbackClaims;
+      if (Array.isArray(data.staffMembers) && data.staffMembers.length > 0) staffMembers = data.staffMembers;
+      console.log(`Loaded persisted store from ${DATA_FILE}`);
+    }
+  } catch (err) {
+    console.error('Failed to load inMemoryStore from disk:', err.message);
+  }
+}
+
+// Load initial persisted data
 loadFromDisk();
 
 module.exports = {
@@ -113,19 +1524,19 @@ module.exports = {
   getDeals: (filter = {}) => {
     let result = [...deals];
     if (filter.category && filter.category !== 'All') {
-      result = result.filter(d => d.category.toLowerCase() === filter.category.toLowerCase());
+      result = result.filter(d => d.category && d.category.toLowerCase() === filter.category.toLowerCase());
     }
     if (filter.status && filter.status !== 'All') {
-      result = result.filter(d => d.status.toLowerCase() === filter.status.toLowerCase());
+      result = result.filter(d => d.status && d.status.toLowerCase() === filter.status.toLowerCase());
     }
     return result;
   },
   addDeal: (item) => {
     const id = item.id ? String(item.id) : Date.now().toString();
-    const created = { _id: id, id: item.id || Date.now(), ...item };
-    const existingIdx = deals.findIndex(d => d._id === id || String(d.id) === String(id) || (item.name && d.name.toLowerCase().trim() === item.name.toLowerCase().trim()));
+    const created = { _id: id, id: item.id || Date.now(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), ...item };
+    const existingIdx = deals.findIndex(d => d._id === id || String(d.id) === String(id) || (item.name && d.name && d.name.toLowerCase().trim() === item.name.toLowerCase().trim()));
     if (existingIdx !== -1) {
-      deals[existingIdx] = { ...deals[existingIdx], ...created };
+      deals[existingIdx] = { ...deals[existingIdx], ...created, updatedAt: new Date().toISOString() };
       saveToDisk();
       return deals[existingIdx];
     }
@@ -136,7 +1547,7 @@ module.exports = {
   updateDeal: (id, updates) => {
     const idx = deals.findIndex(d => d._id === id || String(d.id) === String(id));
     if (idx === -1) return null;
-    deals[idx] = { ...deals[idx], ...updates };
+    deals[idx] = { ...deals[idx], ...updates, updatedAt: new Date().toISOString() };
     saveToDisk();
     return deals[idx];
   },
@@ -151,15 +1562,33 @@ module.exports = {
     const deal = deals.find(d => d._id === id || String(d.id) === String(id));
     if (!deal) return null;
     deal.status = deal.status === 'active' ? 'pending' : 'active';
+    deal.updatedAt = new Date().toISOString();
+    saveToDisk();
+    return deal;
+  },
+  incrementDealClicks: (id) => {
+    const deal = deals.find(d => d._id === String(id) || String(d.id) === String(id));
+    if (!deal) return null;
+    deal.clicks = (deal.clicks || 0) + 1;
+    deal.updatedAt = new Date().toISOString();
     saveToDisk();
     return deal;
   },
 
   // Coupons
-  getCoupons: () => [...coupons],
+  getCoupons: (filter = {}) => {
+    let result = [...coupons];
+    if (filter.store && filter.store !== 'All') {
+      result = result.filter(c => c.store && c.store.toLowerCase() === filter.store.toLowerCase());
+    }
+    if (filter.status && filter.status !== 'All') {
+      result = result.filter(c => c.status && c.status.toLowerCase() === filter.status.toLowerCase());
+    }
+    return result;
+  },
   addCoupon: (item) => {
     const id = Date.now().toString();
-    const created = { _id: id, id: Date.now(), usageCount: 0, usageLimit: 1000, status: 'active', ...item };
+    const created = { _id: id, id: Date.now(), usageCount: 0, usageLimit: 1000, status: 'active', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), ...item };
     coupons.unshift(created);
     saveToDisk();
     return created;
@@ -167,7 +1596,7 @@ module.exports = {
   updateCoupon: (id, updates) => {
     const idx = coupons.findIndex(c => c._id === id || String(c.id) === String(id));
     if (idx === -1) return null;
-    coupons[idx] = { ...coupons[idx], ...updates };
+    coupons[idx] = { ...coupons[idx], ...updates, updatedAt: new Date().toISOString() };
     saveToDisk();
     return coupons[idx];
   },
@@ -189,7 +1618,7 @@ module.exports = {
   },
   addLootDeal: (item) => {
     const id = `loot-${Date.now()}`;
-    const created = { _id: id, id, status: 'active', ...item };
+    const created = { _id: id, id, status: 'active', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), ...item };
     lootDeals.unshift(created);
     saveToDisk();
     return created;
@@ -197,7 +1626,7 @@ module.exports = {
   updateLootDeal: (id, updates) => {
     const idx = lootDeals.findIndex(l => l._id === id || l.id === id);
     if (idx === -1) return null;
-    lootDeals[idx] = { ...lootDeals[idx], ...updates };
+    lootDeals[idx] = { ...lootDeals[idx], ...updates, updatedAt: new Date().toISOString() };
     saveToDisk();
     return lootDeals[idx];
   },
@@ -212,6 +1641,15 @@ module.exports = {
     const loot = lootDeals.find(l => l._id === id || l.id === id);
     if (!loot) return null;
     loot.status = loot.status === 'active' ? 'inactive' : 'active';
+    loot.updatedAt = new Date().toISOString();
+    saveToDisk();
+    return loot;
+  },
+  incrementLootClicks: (id) => {
+    const loot = lootDeals.find(l => l._id === String(id) || String(l.id) === String(id));
+    if (!loot) return null;
+    loot.clicks = (loot.clicks || 0) + 1;
+    loot.updatedAt = new Date().toISOString();
     saveToDisk();
     return loot;
   },
@@ -220,7 +1658,7 @@ module.exports = {
   getStores: () => [...stores],
   addStore: (item) => {
     const id = Date.now().toString();
-    const created = { _id: id, status: 'active', ...item };
+    const created = { _id: id, status: 'active', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), ...item };
     stores.unshift(created);
     saveToDisk();
     return created;
@@ -228,7 +1666,7 @@ module.exports = {
   updateStore: (id, updates) => {
     const idx = stores.findIndex(s => s._id === id);
     if (idx === -1) return null;
-    stores[idx] = { ...stores[idx], ...updates };
+    stores[idx] = { ...stores[idx], ...updates, updatedAt: new Date().toISOString() };
     saveToDisk();
     return stores[idx];
   },
@@ -244,7 +1682,7 @@ module.exports = {
   getCategories: () => [...categories],
   addCategory: (item) => {
     const id = Date.now().toString();
-    const created = { _id: id, dealsCount: 0, ...item };
+    const created = { _id: id, dealsCount: 0, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), ...item };
     categories.push(created);
     saveToDisk();
     return created;
@@ -252,7 +1690,7 @@ module.exports = {
   updateCategory: (id, updates) => {
     const idx = categories.findIndex(c => c._id === id);
     if (idx === -1) return null;
-    categories[idx] = { ...categories[idx], ...updates };
+    categories[idx] = { ...categories[idx], ...updates, updatedAt: new Date().toISOString() };
     saveToDisk();
     return categories[idx];
   },
@@ -268,7 +1706,7 @@ module.exports = {
   getUsers: () => [...users],
   addUser: (item) => {
     const id = Date.now().toString();
-    const created = { _id: id, id: Date.now(), walletBalance: '₹0', totalCashback: '₹0', joinedDate: 'Today', status: 'active', ...item };
+    const created = { _id: id, id: Date.now(), walletBalance: '₹0', totalCashback: '₹0', joinedDate: 'Today', status: 'active', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), ...item };
     users.unshift(created);
     saveToDisk();
     return created;
@@ -276,7 +1714,7 @@ module.exports = {
   updateUser: (id, updates) => {
     const idx = users.findIndex(u => u._id === id || String(u.id) === String(id));
     if (idx === -1) return null;
-    users[idx] = { ...users[idx], ...updates };
+    users[idx] = { ...users[idx], ...updates, updatedAt: new Date().toISOString() };
     saveToDisk();
     return users[idx];
   },
@@ -291,6 +1729,7 @@ module.exports = {
     const user = users.find(u => u._id === id || String(u.id) === String(id));
     if (!user) return null;
     user.status = status || (user.status === 'active' ? 'suspended' : 'active');
+    user.updatedAt = new Date().toISOString();
     saveToDisk();
     return user;
   },
@@ -300,7 +1739,7 @@ module.exports = {
   addTransaction: (item) => {
     const num = Math.floor(Math.random() * 9000 + 1000);
     const txnId = `TXN-${num}`;
-    const created = { _id: txnId, id: txnId, transactionId: txnId, status: 'Pending', time: 'Just now', ...item };
+    const created = { _id: txnId, id: txnId, transactionId: txnId, status: 'Pending', time: 'Just now', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), ...item };
     transactions.unshift(created);
     saveToDisk();
     return created;
@@ -309,8 +1748,545 @@ module.exports = {
     const txn = transactions.find(t => t._id === id || t.id === id || t.transactionId === id);
     if (!txn) return null;
     txn.status = 'Completed';
+    txn.updatedAt = new Date().toISOString();
     saveToDisk();
     return txn;
+  },
+
+  // ================= Credit Cards =================
+  getCreditCards: (filter = {}) => {
+    let result = [...creditCards];
+    if (filter.bank && filter.bank !== 'All') {
+      result = result.filter(c => c.bank && c.bank.toLowerCase() === filter.bank.toLowerCase());
+    }
+    if (filter.network && filter.network !== 'All') {
+      result = result.filter(c => c.network && c.network.toLowerCase() === filter.network.toLowerCase());
+    }
+    if (filter.tier && filter.tier !== 'All') {
+      result = result.filter(c => c.tier && c.tier.toLowerCase() === filter.tier.toLowerCase());
+    }
+    if (filter.status && filter.status !== 'All') {
+      result = result.filter(c => c.status && c.status.toLowerCase() === filter.status.toLowerCase());
+    }
+    if (filter.submissionStatus && filter.submissionStatus !== 'All') {
+      result = result.filter(c => c.submissionStatus && c.submissionStatus.toLowerCase() === filter.submissionStatus.toLowerCase());
+    }
+    if (filter.isFeatured !== undefined) {
+      const isFeat = String(filter.isFeatured) === 'true';
+      result = result.filter(c => c.isFeatured === isFeat);
+    }
+    if (filter.q) {
+      const q = filter.q.toLowerCase();
+      result = result.filter(c => 
+        (c.cardName && c.cardName.toLowerCase().includes(q)) ||
+        (c.bank && c.bank.toLowerCase().includes(q)) ||
+        (c.welcomeOffer && c.welcomeOffer.toLowerCase().includes(q))
+      );
+    }
+    return result;
+  },
+  getCreditCardById: (id) => {
+    return creditCards.find(c => c._id === id || String(c.id) === String(id)) || null;
+  },
+  addCreditCard: (item) => {
+    const id = item.id ? String(item.id) : `card-${Date.now()}`;
+    const created = {
+      _id: id,
+      id,
+      keyBenefits: [],
+      partnerBrands: [],
+      annualFee: '₹0',
+      joiningFee: '₹0',
+      status: 'active',
+      submissionStatus: 'approved',
+      isFeatured: false,
+      isVerified: true,
+      applyCount: 0,
+      viewCount: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      ...item
+    };
+    creditCards.unshift(created);
+    saveToDisk();
+    return created;
+  },
+  updateCreditCard: (id, updates) => {
+    const idx = creditCards.findIndex(c => c._id === id || String(c.id) === String(id));
+    if (idx === -1) return null;
+    creditCards[idx] = { ...creditCards[idx], ...updates, updatedAt: new Date().toISOString() };
+    saveToDisk();
+    return creditCards[idx];
+  },
+  deleteCreditCard: (id) => {
+    const idx = creditCards.findIndex(c => c._id === id || String(c.id) === String(id));
+    if (idx === -1) return false;
+    creditCards.splice(idx, 1);
+    saveToDisk();
+    return true;
+  },
+  toggleCreditCardStatus: (id, newStatus) => {
+    const card = creditCards.find(c => c._id === id || String(c.id) === String(id));
+    if (!card) return null;
+    if (newStatus) {
+      card.status = newStatus;
+    } else {
+      card.status = card.status === 'active' ? 'inactive' : 'active';
+    }
+    card.updatedAt = new Date().toISOString();
+    saveToDisk();
+    return card;
+  },
+
+  // ================= Banners =================
+  getBanners: (filter = {}) => {
+    let result = [...banners];
+    if (filter.targetPage && filter.targetPage !== 'All') {
+      result = result.filter(b => b.targetPage && b.targetPage.toLowerCase() === filter.targetPage.toLowerCase());
+    }
+    if (filter.status && filter.status !== 'All') {
+      result = result.filter(b => b.status && b.status.toLowerCase() === filter.status.toLowerCase());
+    }
+    if (filter.submissionStatus && filter.submissionStatus !== 'All') {
+      result = result.filter(b => b.submissionStatus && b.submissionStatus.toLowerCase() === filter.submissionStatus.toLowerCase());
+    }
+    return result.sort((a, b) => (a.priority || 0) - (b.priority || 0));
+  },
+  getBannerById: (id) => {
+    return banners.find(b => b._id === id || String(b.id) === String(id)) || null;
+  },
+  addBanner: (item) => {
+    const id = item.id ? String(item.id) : `banner-${Date.now()}`;
+    const created = {
+      _id: id,
+      id,
+      targetPage: 'home',
+      status: 'active',
+      submissionStatus: 'approved',
+      views: 0,
+      clicks: 0,
+      priority: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      ...item
+    };
+    banners.push(created);
+    banners.sort((a, b) => (a.priority || 0) - (b.priority || 0));
+    saveToDisk();
+    return created;
+  },
+  updateBanner: (id, updates) => {
+    const idx = banners.findIndex(b => b._id === id || String(b.id) === String(id));
+    if (idx === -1) return null;
+    banners[idx] = { ...banners[idx], ...updates, updatedAt: new Date().toISOString() };
+    banners.sort((a, b) => (a.priority || 0) - (b.priority || 0));
+    saveToDisk();
+    return banners[idx];
+  },
+  deleteBanner: (id) => {
+    const idx = banners.findIndex(b => b._id === id || String(b.id) === String(id));
+    if (idx === -1) return false;
+    banners.splice(idx, 1);
+    saveToDisk();
+    return true;
+  },
+  toggleBannerStatus: (id, newStatus) => {
+    const banner = banners.find(b => b._id === id || String(b.id) === String(id));
+    if (!banner) return null;
+    if (newStatus) {
+      banner.status = newStatus;
+    } else {
+      banner.status = banner.status === 'active' ? 'inactive' : 'active';
+    }
+    banner.updatedAt = new Date().toISOString();
+    saveToDisk();
+    return banner;
+  },
+
+  // ================= Advertisements =================
+  getAdvertisements: (filter = {}) => {
+    let result = [...advertisements];
+    if (filter.placement && filter.placement !== 'All') {
+      result = result.filter(a => a.placement && a.placement.toLowerCase() === filter.placement.toLowerCase());
+    }
+    if (filter.status && filter.status !== 'All') {
+      result = result.filter(a => a.status && a.status.toLowerCase() === filter.status.toLowerCase());
+    }
+    if (filter.pricingModel && filter.pricingModel !== 'All') {
+      result = result.filter(a => a.pricingModel && a.pricingModel.toLowerCase() === filter.pricingModel.toLowerCase());
+    }
+    if (filter.submissionStatus && filter.submissionStatus !== 'All') {
+      result = result.filter(a => a.submissionStatus && a.submissionStatus.toLowerCase() === filter.submissionStatus.toLowerCase());
+    }
+    return result;
+  },
+  getAdvertisementById: (id) => {
+    return advertisements.find(a => a._id === id || String(a.id) === String(id)) || null;
+  },
+  addAdvertisement: (item) => {
+    const id = item.id ? String(item.id) : `ad-${Date.now()}`;
+    const created = {
+      _id: id,
+      id,
+      placement: 'sidebar',
+      status: 'active',
+      submissionStatus: 'approved',
+      impressions: 0,
+      clicks: 0,
+      pricingModel: 'CPC',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      ...item
+    };
+    advertisements.unshift(created);
+    saveToDisk();
+    return created;
+  },
+  updateAdvertisement: (id, updates) => {
+    const idx = advertisements.findIndex(a => a._id === id || String(a.id) === String(id));
+    if (idx === -1) return null;
+    advertisements[idx] = { ...advertisements[idx], ...updates, updatedAt: new Date().toISOString() };
+    saveToDisk();
+    return advertisements[idx];
+  },
+  deleteAdvertisement: (id) => {
+    const idx = advertisements.findIndex(a => a._id === id || String(a.id) === String(id));
+    if (idx === -1) return false;
+    advertisements.splice(idx, 1);
+    saveToDisk();
+    return true;
+  },
+  toggleAdvertisementStatus: (id, newStatus) => {
+    const ad = advertisements.find(a => a._id === id || String(a.id) === String(id));
+    if (!ad) return null;
+    if (newStatus) {
+      ad.status = newStatus;
+    } else {
+      ad.status = ad.status === 'active' ? 'inactive' : 'active';
+    }
+    ad.updatedAt = new Date().toISOString();
+    saveToDisk();
+    return ad;
+  },
+
+  // ================= Submissions (Queue & Workflow) =================
+  getSubmissions: (filter = {}) => {
+    let result = [...submissions];
+    if (filter.status && filter.status !== 'All') {
+      result = result.filter(s => s.status && s.status.toLowerCase() === filter.status.toLowerCase());
+    }
+    if (filter.entityType && filter.entityType !== 'All') {
+      result = result.filter(s => s.entityType && s.entityType.toLowerCase() === filter.entityType.toLowerCase());
+    }
+    if (filter.submittedBy && filter.submittedBy !== 'All') {
+      result = result.filter(s => s.submittedBy && s.submittedBy.toLowerCase() === filter.submittedBy.toLowerCase());
+    }
+    if (filter.priority && filter.priority !== 'All') {
+      result = result.filter(s => s.priority && s.priority.toLowerCase() === filter.priority.toLowerCase());
+    }
+    return result;
+  },
+  getSubmissionById: (id) => {
+    return submissions.find(s => s._id === id || String(s.id) === String(id)) || null;
+  },
+  addSubmission: (item) => {
+    const id = item.id ? String(item.id) : `sub-${Date.now()}`;
+    const created = {
+      _id: id,
+      id,
+      status: 'Pending Approval',
+      submittedAt: new Date().toISOString(),
+      priority: 'Normal',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      ...item
+    };
+    submissions.unshift(created);
+
+    // If there is an associated entity in inMemoryStore, set its submissionStatus to 'pending_approval'
+    if (created.entityType && created.entityId) {
+      const entType = created.entityType;
+      const entId = created.entityId;
+      if (entType === 'deal') module.exports.updateDeal(entId, { submissionStatus: 'pending_approval' });
+      else if (entType === 'credit_card') module.exports.updateCreditCard(entId, { submissionStatus: 'pending_approval' });
+      else if (entType === 'coupon') module.exports.updateCoupon(entId, { submissionStatus: 'pending_approval' });
+      else if (entType === 'banner') module.exports.updateBanner(entId, { submissionStatus: 'pending_approval' });
+      else if (entType === 'advertisement') module.exports.updateAdvertisement(entId, { submissionStatus: 'pending_approval' });
+      else if (entType === 'loot_deal') module.exports.updateLootDeal(entId, { submissionStatus: 'pending_approval' });
+      else if (entType === 'store') module.exports.updateStore(entId, { submissionStatus: 'pending_approval' });
+    }
+
+    saveToDisk();
+    return created;
+  },
+  updateSubmission: (id, updates) => {
+    const idx = submissions.findIndex(s => s._id === id || String(s.id) === String(id));
+    if (idx === -1) return null;
+    submissions[idx] = { ...submissions[idx], ...updates, updatedAt: new Date().toISOString() };
+    saveToDisk();
+    return submissions[idx];
+  },
+  deleteSubmission: (id) => {
+    const idx = submissions.findIndex(s => s._id === id || String(s.id) === String(id));
+    if (idx === -1) return false;
+    submissions.splice(idx, 1);
+    saveToDisk();
+    return true;
+  },
+  approveSubmission: (id, reviewer = 'manager@wouchify.com') => {
+    const sub = submissions.find(s => s._id === id || String(s.id) === String(id));
+    if (!sub) return null;
+    sub.status = 'Approved';
+    sub.reviewedBy = reviewer;
+    sub.reviewedAt = new Date().toISOString();
+    sub.updatedAt = new Date().toISOString();
+
+    // Propagate approval to associated entity
+    if (sub.entityType && sub.entityId) {
+      const entType = sub.entityType;
+      const entId = sub.entityId;
+      const patch = { submissionStatus: 'approved', status: 'active' };
+      if (sub.action === 'delete') {
+        if (entType === 'deal') module.exports.deleteDeal(entId);
+        else if (entType === 'credit_card') module.exports.deleteCreditCard(entId);
+        else if (entType === 'coupon') module.exports.deleteCoupon(entId);
+        else if (entType === 'banner') module.exports.deleteBanner(entId);
+        else if (entType === 'advertisement') module.exports.deleteAdvertisement(entId);
+        else if (entType === 'loot_deal') module.exports.deleteLootDeal(entId);
+        else if (entType === 'store') module.exports.deleteStore(entId);
+      } else {
+        if (entType === 'deal') module.exports.updateDeal(entId, patch);
+        else if (entType === 'credit_card') module.exports.updateCreditCard(entId, patch);
+        else if (entType === 'coupon') module.exports.updateCoupon(entId, patch);
+        else if (entType === 'banner') module.exports.updateBanner(entId, patch);
+        else if (entType === 'advertisement') module.exports.updateAdvertisement(entId, patch);
+        else if (entType === 'loot_deal') module.exports.updateLootDeal(entId, patch);
+        else if (entType === 'store') module.exports.updateStore(entId, patch);
+      }
+    }
+    saveToDisk();
+    return sub;
+  },
+  rejectSubmission: (id, rejectionReason = '', reviewer = 'manager@wouchify.com') => {
+    const sub = submissions.find(s => s._id === id || String(s.id) === String(id));
+    if (!sub) return null;
+    sub.status = 'Rejected';
+    sub.rejectionReason = rejectionReason;
+    sub.reviewedBy = reviewer;
+    sub.reviewedAt = new Date().toISOString();
+    sub.updatedAt = new Date().toISOString();
+
+    // Propagate rejection to associated entity
+    if (sub.entityType && sub.entityId) {
+      const entType = sub.entityType;
+      const entId = sub.entityId;
+      const patch = { submissionStatus: 'rejected' };
+      if (entType === 'deal') module.exports.updateDeal(entId, patch);
+      else if (entType === 'credit_card') module.exports.updateCreditCard(entId, patch);
+      else if (entType === 'coupon') module.exports.updateCoupon(entId, patch);
+      else if (entType === 'banner') module.exports.updateBanner(entId, patch);
+      else if (entType === 'advertisement') module.exports.updateAdvertisement(entId, patch);
+      else if (entType === 'loot_deal') module.exports.updateLootDeal(entId, patch);
+      else if (entType === 'store') module.exports.updateStore(entId, patch);
+    }
+    saveToDisk();
+    return sub;
+  },
+
+  // ================= Support Tickets =================
+  getSupportTickets: (filter = {}) => {
+    let result = [...supportTickets];
+    if (filter.status && filter.status !== 'All') {
+      result = result.filter(t => t.status && t.status.toLowerCase() === filter.status.toLowerCase());
+    }
+    if (filter.priority && filter.priority !== 'All') {
+      result = result.filter(t => t.priority && t.priority.toLowerCase() === filter.priority.toLowerCase());
+    }
+    if (filter.category && filter.category !== 'All') {
+      result = result.filter(t => t.category && t.category.toLowerCase() === filter.category.toLowerCase());
+    }
+    if (filter.userEmail) {
+      result = result.filter(t => t.userEmail && t.userEmail.toLowerCase() === filter.userEmail.toLowerCase());
+    }
+    if (filter.assignedTo && filter.assignedTo !== 'All') {
+      result = result.filter(t => t.assignedTo && t.assignedTo.toLowerCase().includes(filter.assignedTo.toLowerCase()));
+    }
+    return result;
+  },
+  getSupportTicketById: (id) => {
+    return supportTickets.find(t => t._id === id || String(t.id) === String(id) || t.ticketId === id) || null;
+  },
+  addSupportTicket: (item) => {
+    const num = Math.floor(Math.random() * 900 + 100);
+    const tid = item.ticketId || `TICK-${num}`;
+    const created = {
+      _id: tid,
+      id: tid,
+      ticketId: tid,
+      status: 'Open',
+      priority: 'Medium',
+      messages: item.messages || [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      ...item
+    };
+    supportTickets.unshift(created);
+    saveToDisk();
+    return created;
+  },
+  updateSupportTicket: (id, updates) => {
+    const idx = supportTickets.findIndex(t => t._id === id || String(t.id) === String(id) || t.ticketId === id);
+    if (idx === -1) return null;
+    supportTickets[idx] = { ...supportTickets[idx], ...updates, updatedAt: new Date().toISOString() };
+    saveToDisk();
+    return supportTickets[idx];
+  },
+  deleteSupportTicket: (id) => {
+    const idx = supportTickets.findIndex(t => t._id === id || String(t.id) === String(id) || t.ticketId === id);
+    if (idx === -1) return false;
+    supportTickets.splice(idx, 1);
+    saveToDisk();
+    return true;
+  },
+  replySupportTicket: (id, message) => {
+    const ticket = supportTickets.find(t => t._id === id || String(t.id) === String(id) || t.ticketId === id);
+    if (!ticket) return null;
+    if (!ticket.messages) ticket.messages = [];
+    ticket.messages.push({
+      sender: message.sender || 'support',
+      senderName: message.senderName || 'Support Agent',
+      time: message.time || new Date().toISOString(),
+      text: message.text || ''
+    });
+    if (message.sender === 'support' && ticket.status === 'Open') {
+      ticket.status = 'In Progress';
+    }
+    ticket.updatedAt = new Date().toISOString();
+    saveToDisk();
+    return ticket;
+  },
+  updateSupportTicketStatus: (id, status) => {
+    const ticket = supportTickets.find(t => t._id === id || String(t.id) === String(id) || t.ticketId === id);
+    if (!ticket) return null;
+    ticket.status = status;
+    ticket.updatedAt = new Date().toISOString();
+    saveToDisk();
+    return ticket;
+  },
+
+  // ================= Cashback Claims =================
+  getCashbackClaims: (filter = {}) => {
+    let result = [...cashbackClaims];
+    if (filter.status && filter.status !== 'All') {
+      result = result.filter(c => c.status && c.status.toLowerCase() === filter.status.toLowerCase());
+    }
+    if (filter.userEmail) {
+      result = result.filter(c => c.userEmail && c.userEmail.toLowerCase() === filter.userEmail.toLowerCase());
+    }
+    if (filter.store && filter.store !== 'All') {
+      result = result.filter(c => c.store && c.store.toLowerCase() === filter.store.toLowerCase());
+    }
+    if (filter.payoutMethod && filter.payoutMethod !== 'All') {
+      result = result.filter(c => c.payoutMethod && c.payoutMethod.toLowerCase() === filter.payoutMethod.toLowerCase());
+    }
+    return result;
+  },
+  getCashbackClaimById: (id) => {
+    return cashbackClaims.find(c => c._id === id || String(c.id) === String(id) || c.claimId === id) || null;
+  },
+  addCashbackClaim: (item) => {
+    const num = Math.floor(Math.random() * 900 + 100);
+    const cid = item.claimId || `CLM-${num}`;
+    const created = {
+      _id: cid,
+      id: cid,
+      claimId: cid,
+      status: 'Pending',
+      claimedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      ...item
+    };
+    cashbackClaims.unshift(created);
+    saveToDisk();
+    return created;
+  },
+  updateCashbackClaim: (id, updates) => {
+    const idx = cashbackClaims.findIndex(c => c._id === id || String(c.id) === String(id) || c.claimId === id);
+    if (idx === -1) return null;
+    cashbackClaims[idx] = { ...cashbackClaims[idx], ...updates, updatedAt: new Date().toISOString() };
+    saveToDisk();
+    return cashbackClaims[idx];
+  },
+  deleteCashbackClaim: (id) => {
+    const idx = cashbackClaims.findIndex(c => c._id === id || String(c.id) === String(id) || c.claimId === id);
+    if (idx === -1) return false;
+    cashbackClaims.splice(idx, 1);
+    saveToDisk();
+    return true;
+  },
+  updateCashbackClaimStatus: (id, status, details = {}) => {
+    const claim = cashbackClaims.find(c => c._id === id || String(c.id) === String(id) || c.claimId === id);
+    if (!claim) return null;
+    claim.status = status;
+    if (details.reviewedBy) claim.reviewedBy = details.reviewedBy;
+    if (details.notes) claim.notes = details.notes;
+    claim.updatedAt = new Date().toISOString();
+    saveToDisk();
+    return claim;
+  },
+
+  // ================= Staff Members =================
+  getStaffMembers: (filter = {}) => {
+    let result = [...staffMembers];
+    if (filter.role && filter.role !== 'All') {
+      result = result.filter(s => s.role && s.role.toLowerCase() === filter.role.toLowerCase());
+    }
+    if (filter.status && filter.status !== 'All') {
+      result = result.filter(s => s.status && s.status.toLowerCase() === filter.status.toLowerCase());
+    }
+    return result;
+  },
+  getStaffMemberById: (id) => {
+    return staffMembers.find(s => s._id === id || String(s.id) === String(id) || s.email === id) || null;
+  },
+  createStaffMember: (item) => {
+    return inMemoryStore.addStaffMember(item);
+  },
+  addStaffMember: (item) => {
+    const id = item.id ? String(item.id) : `staff-${Date.now()}`;
+    const created = {
+      _id: id,
+      id,
+      role: 'executive',
+      domain: 'General',
+      status: 'Online',
+      submissionsToday: 0,
+      totalSubmissions: 0,
+      approvalRate: '100%',
+      rejectionsCount: 0,
+      avgTurnaround: '15m',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      ...item
+    };
+    staffMembers.push(created);
+    saveToDisk();
+    return created;
+  },
+  updateStaffMember: (id, updates) => {
+    const idx = staffMembers.findIndex(s => s._id === id || String(s.id) === String(id) || s.email === id);
+    if (idx === -1) return null;
+    staffMembers[idx] = { ...staffMembers[idx], ...updates, updatedAt: new Date().toISOString() };
+    saveToDisk();
+    return staffMembers[idx];
+  },
+  deleteStaffMember: (id) => {
+    const idx = staffMembers.findIndex(s => s._id === id || String(s.id) === String(id) || s.email === id);
+    if (idx === -1) return false;
+    staffMembers.splice(idx, 1);
+    saveToDisk();
+    return true;
   },
 
   // Seed / Reset
@@ -323,7 +2299,14 @@ module.exports = {
       storesCount: stores.length,
       categoriesCount: categories.length,
       usersCount: users.length,
-      transactionsCount: transactions.length
+      transactionsCount: transactions.length,
+      creditCardsCount: creditCards.length,
+      bannersCount: banners.length,
+      advertisementsCount: advertisements.length,
+      submissionsCount: submissions.length,
+      supportTicketsCount: supportTickets.length,
+      cashbackClaimsCount: cashbackClaims.length,
+      staffMembersCount: staffMembers.length
     };
   }
 };

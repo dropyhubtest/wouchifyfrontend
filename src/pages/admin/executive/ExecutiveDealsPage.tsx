@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { ExecutiveLayout } from './ExecutiveLayout'
+import { adminApi } from '../../../services/adminApi'
 import { 
   Plus, 
   Search, 
@@ -26,14 +27,15 @@ import {
   CheckCircle2, 
   ChevronLeft, 
   ChevronRight, 
-  Flame,
   Layers,
-  Calendar
+  Calendar,
+  Star
 } from 'lucide-react'
 import './ExecutiveShared.css'
-import { DEALS_CARD_ITEMS, DEAL_PRODUCT_PRESETS, getStoreLogo, convertGoogleDriveUrl } from '../../../data/dealsPage'
+import { MASTER_EXECUTIVE_DEALS, DEAL_PRODUCT_PRESETS, getStoreLogo, convertGoogleDriveUrl, PLACEHOLDER_DEAL_IMAGE, PLACEHOLDER_STORE_LOGO } from '../../../data/dealsPage'
 import { FAVOURITE_STORES } from '../../../data/storesHero'
 import { CATEGORIES_DATA } from '../../../data/categories'
+import { ImageUploadField } from './ImageUploadField'
 
 export interface Deal {
   id: string
@@ -65,6 +67,8 @@ export interface Deal {
   highlights?: string[]
   isFeatured?: boolean
   isVerified?: boolean
+  isBestSelling?: boolean
+  sectionPlacement?: 'favourite' | 'best_selling' | 'both'
   postedAt: string
   expiresAt: string
   description: string
@@ -127,95 +131,65 @@ export const getExpiryCountdown = (isoStr?: string): { text: string; status: 'ex
 }
 
 const mapInitialDealsToFullSchema = (): Deal[] => {
-  const brands = ['Apple', 'Sony', 'Samsung', 'OnePlus', 'Boat', 'Nike', 'Philips', 'Puma', 'Xiaomi', 'Dell']
-  const bankOffers = [
-    'Flat ₹1,500 Instant Discount on HDFC Bank Credit Cards',
-    '10% Instant Discount up to ₹1,000 on SBI Credit Cards',
-    'Extra ₹750 Off on ICICI Bank Net Banking',
-    'Flat ₹500 Cashback with Axis Bank UPI'
-  ]
-  const cashbacks = [
-    '+ 5% Wouchify Cashback (₹120)',
-    '+ ₹150 Wouchify Cash Rewards',
-    '+ 8% Super Cashback',
-    '+ ₹250 Wouchify Wallet Cash'
-  ]
-  const stockStatuses: NonNullable<Deal['stockStatus']>[] = [
-    'In Stock',
-    'Limited Stock',
-    'Lightning Deal (85% Claimed)',
-    'In Stock'
-  ]
-
-  return DEALS_CARD_ITEMS.map((d, index) => {
-    const origNum = parseInt(String(d.originalPrice || '').replace(/[^0-9]/g, ''), 10) || 0
-    const currNum = parseInt(String(d.price || '999').replace(/[^0-9]/g, ''), 10) || 999
-    const disc = origNum > currNum && origNum > 0 ? Math.round(((origNum - currNum) / origNum) * 100) : 0
-
-    const statuses: Deal['status'][] = ['Approved', 'Approved', 'Pending Approval', 'Draft', 'Expired']
-    const priorities: Deal['priority'][] = ['Normal', 'High', 'Normal', 'Critical', 'Normal']
-    const types: Deal['type'][] = ['deal', 'deal', 'loot', 'flash', 'daily']
-    const postDates = [
-      'Today, 11:30 AM',
-      'Today, 10:15 AM',
-      'Today, 08:45 AM',
-      'Yesterday, 06:20 PM',
-      'Yesterday, 02:40 PM',
-      'Sep 7, 2026, 11:00 AM',
-      'Sep 6, 2026, 04:30 PM'
-    ]
-
-    const effectiveNum = currNum > 1000 ? Math.round(currNum - 500) : currNum > 500 ? Math.round(currNum - 150) : 0
-    const effective = effectiveNum > 0 ? `₹${effectiveNum.toLocaleString('en-IN')}` : ''
-
-    return {
-      id: String(d.id || index + 1),
-      title: d.title || 'Special Promotional Deal',
-      store: d.store || 'Amazon',
-      brand: brands[index % brands.length],
-      category: d.category || 'Electronics',
-      subCategory: 'Smart Devices & Tech',
-      asinOrSku: index % 2 === 0 ? `B0CH${1000 + index}` : `FSN${5000 + index}`,
-      type: types[index % types.length],
-      status: statuses[index % statuses.length],
-      priority: priorities[index % priorities.length],
-      badge: d.dealTag || (index % 2 === 0 ? "Amazon's Choice" : 'Flipkart Assured'),
-      code: index % 3 === 0 ? `SAVE${index + 10}` : '',
-      link: d.ctaHref || '/stores',
-      originalPrice: origNum > 0 ? `₹${origNum.toLocaleString('en-IN')}` : `₹${Math.round(currNum * 1.35).toLocaleString('en-IN')}`,
-      price: `₹${currNum.toLocaleString('en-IN')}`,
-      discountLabel: d.discountPercentage || (disc > 0 ? `${disc}% OFF` : '25% OFF'),
-      discountValue: disc || 25,
-      bankOffer: bankOffers[index % bankOffers.length],
-      effectivePrice: effective,
-      cashback: cashbacks[index % cashbacks.length],
-      stockStatus: stockStatuses[index % stockStatuses.length],
-      rating: `${(4.1 + (index % 8) * 0.1).toFixed(1)} ★ (${(8 + index * 3)}k)`,
-      deliveryInfo: index % 2 === 0 ? 'Free Delivery' : 'Prime Fast 1-Day Delivery',
-      warranty: index % 2 === 0 ? '1 Year Brand Warranty • 7 Days Replacement' : '2 Years Manufacturer Warranty',
-      variantNote: index % 2 === 0 ? 'Valid on Black & Titanium finishes' : 'All standard variants in stock',
-      howToClaim: '1. Click "Grab Deal" to open partner store.\n2. Collect instant coupon if visible on page.\n3. Pay with eligible bank card at checkout for maximum discount.',
-      highlights: [
-        '100% Genuine with Manufacturer Warranty',
-        'Verified Lowest Price in last 30 Days',
-        '7-Day Replacement Support'
-      ],
-      isFeatured: index % 3 === 0,
-      isVerified: true,
-      postedAt: postDates[index % postDates.length],
-      expiresAt: new Date(Date.now() + 86400000 * (index + 2)).toISOString().slice(0, 16),
-      description: 'Handpicked verified e-commerce deal with maximum savings for Wouchify shoppers.',
-      terms: 'Valid on select product variants and eligible bank payment instruments.',
-      image: d.productImage || (DEAL_PRODUCT_PRESETS[index % DEAL_PRODUCT_PRESETS.length]?.image || ''),
-      images: [d.productImage || ''],
-      clicks: Math.floor(Math.random() * 2500) + 120
+  try {
+    const cached = localStorage.getItem('wouchify_public_deals')
+    if (cached) {
+      const parsed = JSON.parse(cached)
+      if (Array.isArray(parsed) && parsed.length >= 12) {
+        return parsed.map((d: any, idx: number) => {
+          const matchingMaster = MASTER_EXECUTIVE_DEALS.find(m => m.id === String(d._id || d.id))
+          return {
+            id: String(d._id || d.id || `deal-${idx + 1}`),
+            title: d.name || d.title || matchingMaster?.title || 'Untitled Deal',
+            store: d.store || matchingMaster?.store || 'Amazon',
+            brand: d.brand || matchingMaster?.brand || '',
+            category: d.category || matchingMaster?.category || 'Electronics',
+            subCategory: d.subCategory || matchingMaster?.subCategory || '',
+            asinOrSku: d.asinOrSku || matchingMaster?.asinOrSku || '',
+            type: (d.type || matchingMaster?.type || 'deal') as any,
+            status: (d.status === 'expired' || d.status === 'Expired' ? 'Expired' : d.status === 'pending' || d.status === 'Pending Approval' || d.submissionStatus === 'pending_approval' ? 'Pending Approval' : d.status === 'draft' || d.status === 'Draft' ? 'Draft' : 'Approved') as any,
+            priority: (d.priority || matchingMaster?.priority || 'Normal') as any,
+            badge: d.dealTag || d.badge || matchingMaster?.badge || 'Deal',
+            code: d.code || matchingMaster?.code || '',
+            link: d.ctaHref || d.link || matchingMaster?.link || '',
+            originalPrice: d.originalPrice || matchingMaster?.originalPrice || '',
+            price: d.price || matchingMaster?.price || '₹0',
+            discountLabel: d.discount || d.discountLabel || matchingMaster?.discountLabel || '',
+            discountValue: parseInt(String(d.discount || d.discountLabel || matchingMaster?.discountValue || '0').replace(/[^0-9]/g, '')) || 0,
+            bankOffer: d.bankOffer || matchingMaster?.bankOffer || '',
+            effectivePrice: d.effectivePrice || matchingMaster?.effectivePrice || d.price || '',
+            cashback: d.cashback || matchingMaster?.cashback || '',
+            stockStatus: d.stockStatus || matchingMaster?.stockStatus || 'In Stock',
+            rating: d.rating || matchingMaster?.rating || '4.8',
+            deliveryInfo: d.deliveryInfo || matchingMaster?.deliveryInfo || 'Free Express Delivery',
+            warranty: d.warranty || matchingMaster?.warranty || '1 Year Brand Warranty',
+            variantNote: d.variantNote || matchingMaster?.variantNote || '',
+            howToClaim: d.howToClaim || matchingMaster?.howToClaim || '',
+            highlights: d.highlights || matchingMaster?.highlights || ['100% Verified Deal'],
+            isBestSelling: Boolean(d.isBestSelling || d.sectionPlacement === 'best_selling' || d.sectionPlacement === 'both'),
+            sectionPlacement: (d.sectionPlacement || (d.isBestSelling ? 'best_selling' : 'favourite')) as any,
+            isFeatured: Boolean(d.isFeatured ?? matchingMaster?.isFeatured),
+            isVerified: Boolean(d.isVerified ?? matchingMaster?.isVerified ?? true),
+            postedAt: d.createdAt ? new Date(d.createdAt).toLocaleDateString('en-IN') : (d.postedAt || matchingMaster?.postedAt || 'Recently'),
+            expiresAt: d.expiry || d.expiresAt || matchingMaster?.expiresAt || '',
+            description: d.description || matchingMaster?.description || 'Handpicked verified e-commerce deal.',
+            terms: d.terms || matchingMaster?.terms || '',
+            image: convertGoogleDriveUrl(d.productImage || d.image || matchingMaster?.image || ''),
+            images: d.images?.length ? d.images.map(convertGoogleDriveUrl) : [convertGoogleDriveUrl(d.productImage || d.image || matchingMaster?.image || '')],
+            clicks: typeof d.clicks === 'number' ? d.clicks : (parseInt(d.clicks) || matchingMaster?.clicks || 0)
+          }
+        })
+      }
     }
-  })
+  } catch {}
+
+  return [...MASTER_EXECUTIVE_DEALS]
 }
 
 export const ExecutiveDealsPage: React.FC = () => {
   const [deals, setDeals] = useState<Deal[]>(mapInitialDealsToFullSchema())
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table')
+  const [dealsTab, setDealsTab] = useState<'active' | 'expired'>('active')
   const [selectedDealIds, setSelectedDealIds] = useState<string[]>([])
   
   // Modals & Previews
@@ -225,6 +199,80 @@ export const ExecutiveDealsPage: React.FC = () => {
   const [previewDeal, setPreviewDeal] = useState<Deal | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
 
+  useEffect(() => {
+    let isMounted = true
+    const fetchLiveDeals = async () => {
+      try {
+        const liveDeals = await adminApi.getDeals()
+        if (!isMounted) return
+        if (Array.isArray(liveDeals) && liveDeals.length > 0) {
+          const mapped: Deal[] = liveDeals.map((d: any, idx: number) => {
+            const matchingMaster = MASTER_EXECUTIVE_DEALS.find(m => m.id === String(d._id || d.id))
+            return {
+              id: String(d._id || d.id || `deal-${idx + 1}`),
+              title: d.name || d.title || matchingMaster?.title || 'Untitled Deal',
+              store: d.store || matchingMaster?.store || 'Amazon',
+              brand: d.brand || matchingMaster?.brand || '',
+              category: d.category || matchingMaster?.category || 'Electronics',
+              subCategory: d.subCategory || matchingMaster?.subCategory || '',
+              asinOrSku: d.asinOrSku || matchingMaster?.asinOrSku || '',
+              type: (d.type || matchingMaster?.type || 'deal') as any,
+              status: (d.status === 'expired' || d.status === 'Expired' ? 'Expired' : d.status === 'pending' || d.status === 'Pending Approval' || d.submissionStatus === 'pending_approval' ? 'Pending Approval' : d.status === 'draft' || d.status === 'Draft' ? 'Draft' : 'Approved') as any,
+              priority: (d.priority || matchingMaster?.priority || 'Normal') as any,
+              badge: d.dealTag || d.badge || matchingMaster?.badge || 'Deal',
+              code: d.code || matchingMaster?.code || '',
+              link: d.ctaHref || d.link || matchingMaster?.link || '',
+              originalPrice: d.originalPrice || matchingMaster?.originalPrice || '',
+              price: d.price || matchingMaster?.price || '₹0',
+              discountLabel: d.discount || d.discountLabel || matchingMaster?.discountLabel || '',
+              discountValue: parseInt(String(d.discount || d.discountLabel || matchingMaster?.discountValue || '0').replace(/[^0-9]/g, '')) || 0,
+              bankOffer: d.bankOffer || matchingMaster?.bankOffer || '',
+              effectivePrice: d.effectivePrice || matchingMaster?.effectivePrice || d.price || '',
+              cashback: d.cashback || matchingMaster?.cashback || '',
+              stockStatus: d.stockStatus || matchingMaster?.stockStatus || 'In Stock',
+              rating: d.rating || matchingMaster?.rating || '4.8',
+              deliveryInfo: d.deliveryInfo || matchingMaster?.deliveryInfo || 'Free Express Delivery',
+              warranty: d.warranty || matchingMaster?.warranty || '1 Year Brand Warranty',
+              variantNote: d.variantNote || matchingMaster?.variantNote || '',
+              howToClaim: d.howToClaim || matchingMaster?.howToClaim || '',
+              highlights: d.highlights || matchingMaster?.highlights || ['100% Verified Deal'],
+              isBestSelling: Boolean(d.isBestSelling || d.sectionPlacement === 'best_selling' || d.sectionPlacement === 'both'),
+              sectionPlacement: (d.sectionPlacement || (d.isBestSelling ? 'best_selling' : 'favourite')) as any,
+              isFeatured: Boolean(d.isFeatured ?? matchingMaster?.isFeatured),
+              isVerified: Boolean(d.isVerified ?? matchingMaster?.isVerified ?? true),
+              postedAt: d.createdAt ? new Date(d.createdAt).toLocaleDateString('en-IN') : (d.postedAt || matchingMaster?.postedAt || 'Recently'),
+              expiresAt: d.expiry || d.expiresAt || matchingMaster?.expiresAt || '',
+              description: d.description || matchingMaster?.description || 'Handpicked verified e-commerce deal.',
+              terms: d.terms || matchingMaster?.terms || '',
+              image: convertGoogleDriveUrl(d.productImage || d.image || matchingMaster?.image || ''),
+              images: d.images?.length ? d.images.map(convertGoogleDriveUrl) : [convertGoogleDriveUrl(d.productImage || d.image || matchingMaster?.image || '')],
+              clicks: typeof d.clicks === 'number' ? d.clicks : (parseInt(d.clicks) || matchingMaster?.clicks || 0)
+            }
+          })
+          setDeals(mapped)
+        }
+      } catch (err) {
+        console.warn('Deals fallback to local store:', err)
+      }
+    }
+
+    fetchLiveDeals()
+
+    const handleSync = () => {
+      fetchLiveDeals()
+    }
+
+    window.addEventListener('wouchify_deals_updated', handleSync)
+    window.addEventListener('wouchify_deal_clicked', handleSync)
+    window.addEventListener('storage', handleSync)
+    return () => {
+      isMounted = false
+      window.removeEventListener('wouchify_deals_updated', handleSync)
+      window.removeEventListener('wouchify_deal_clicked', handleSync)
+      window.removeEventListener('storage', handleSync)
+    }
+  }, [])
+
   // Filters & Sorting
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
@@ -232,11 +280,12 @@ export const ExecutiveDealsPage: React.FC = () => {
   const [selectedType, setSelectedType] = useState('all')
   const [selectedStatus, setSelectedStatus] = useState('all')
   const [selectedPriority, setSelectedPriority] = useState('all')
+  const [showBestSellingOnly, setShowBestSellingOnly] = useState(false)
   const [sortOption, setSortOption] = useState<string>('recent')
 
-  // Pagination
+  // Pagination - default to 50 so all deals are visible at once
   const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage] = useState(10)
+  const [itemsPerPage, setItemsPerPage] = useState(50)
 
   // Form State
   const emptyDeal: Deal = {
@@ -293,13 +342,24 @@ export const ExecutiveDealsPage: React.FC = () => {
     const approved = deals.filter(d => d.status === 'Approved').length
     const pending = deals.filter(d => d.status === 'Pending Approval').length
     const loot = deals.filter(d => d.type === 'loot').length
-    const expired = deals.filter(d => d.status === 'Expired').length
+    const expired = deals.filter(d => d.status === 'Expired' || (d.expiresAt && new Date(d.expiresAt).getTime() < Date.now())).length
+    const bestSelling = deals.filter(d => d.isBestSelling).length
     const totalClicks = deals.reduce((acc, d) => acc + (d.clicks || 0), 0)
-    return { total, approved, pending, loot, expired, totalClicks }
+    return { total, approved, pending, loot, expired, bestSelling, totalClicks }
   }, [deals])
 
-  // Filtered & Sorted Deals
-  const filteredDeals = useMemo(() => {
+  // Helper: is a deal truly expired (by status OR by expiry date)
+  const isDealExpired = (deal: Deal): boolean => {
+    if (deal.status === 'Expired') return true
+    if (deal.expiresAt) {
+      const expTime = new Date(deal.expiresAt).getTime()
+      if (!isNaN(expTime) && expTime < Date.now()) return true
+    }
+    return false
+  }
+
+  // Base filtered list (no tab split yet, applies search + filters)
+  const baseFilteredDeals = useMemo(() => {
     return deals.filter((deal) => {
       // Search
       if (searchTerm.trim()) {
@@ -328,7 +388,7 @@ export const ExecutiveDealsPage: React.FC = () => {
         return false
       }
 
-      // Status
+      // Status filter (only applies in active tab context)
       if (selectedStatus !== 'all' && deal.status !== selectedStatus) {
         return false
       }
@@ -338,8 +398,17 @@ export const ExecutiveDealsPage: React.FC = () => {
         return false
       }
 
+      // Best Selling filter
+      if (showBestSellingOnly && !deal.isBestSelling) {
+        return false
+      }
+
       return true
     }).sort((a, b) => {
+      // Best selling deals always surface first when filter is on
+      if (showBestSellingOnly) {
+        return (b.isBestSelling ? 1 : 0) - (a.isBestSelling ? 1 : 0)
+      }
       if (sortOption === 'posted-oldest') {
         return a.id.localeCompare(b.id)
       }
@@ -370,7 +439,12 @@ export const ExecutiveDealsPage: React.FC = () => {
       // default: recent (descending id / newest posted)
       return b.id.localeCompare(a.id)
     })
-  }, [deals, searchTerm, selectedCategory, selectedStore, selectedType, selectedStatus, selectedPriority, sortOption])
+  }, [deals, searchTerm, selectedCategory, selectedStore, selectedType, selectedStatus, selectedPriority, sortOption, showBestSellingOnly])
+
+  // Tab-split: active deals vs expired deals
+  const activeDeals = useMemo(() => baseFilteredDeals.filter(d => !isDealExpired(d)), [baseFilteredDeals])
+  const expiredDeals = useMemo(() => baseFilteredDeals.filter(d => isDealExpired(d)), [baseFilteredDeals])
+  const filteredDeals = dealsTab === 'active' ? activeDeals : expiredDeals
 
   // Pagination slicing
   const totalPages = Math.ceil(filteredDeals.length / itemsPerPage) || 1
@@ -385,6 +459,7 @@ export const ExecutiveDealsPage: React.FC = () => {
     selectedType !== 'all',
     selectedStatus !== 'all',
     selectedPriority !== 'all',
+    showBestSellingOnly,
     searchTerm.trim().length > 0
   ].filter(Boolean).length
 
@@ -395,6 +470,7 @@ export const ExecutiveDealsPage: React.FC = () => {
     setSelectedType('all')
     setSelectedStatus('all')
     setSelectedPriority('all')
+    setShowBestSellingOnly(false)
     setSortOption('recent')
     setCurrentPage(1)
     showToast('Filters reset')
@@ -434,18 +510,54 @@ export const ExecutiveDealsPage: React.FC = () => {
       setDeals(deals.filter(d => d.id !== id))
       setSelectedDealIds(selectedDealIds.filter(selId => selId !== id))
       showToast('Deal removed successfully')
+      adminApi.deleteDeal(id).catch(console.warn)
     }
   }
 
   const handleToggleStatus = (id: string) => {
+    const target = deals.find(d => d.id === id)
+    if (!target) return
+    const nextStatus = target.status === 'Approved' ? 'Draft' : 'Approved'
+    const nextDbStatus = nextStatus === 'Approved' ? 'active' : 'pending'
+
     setDeals(deals.map(d => {
       if (d.id === id) {
-        const nextStatus = d.status === 'Approved' ? 'Draft' : 'Approved'
-        showToast(`Status changed to ${nextStatus}`)
         return { ...d, status: nextStatus }
       }
       return d
     }))
+
+    showToast(`Status changed to ${nextStatus}`)
+
+    adminApi.updateDeal(id, {
+      status: nextDbStatus,
+      submissionStatus: nextStatus === 'Approved' ? 'approved' : 'draft'
+    }).catch(console.warn)
+  }
+
+  const handleToggleBestSelling = (id: string) => {
+    const target = deals.find(d => d.id === id)
+    if (!target) return
+    const nextVal = !target.isBestSelling
+    const nextPlacement = nextVal ? 'best_selling' : 'favourite'
+
+    setDeals(deals.map(d => {
+      if (d.id === id) {
+        return { 
+          ...d, 
+          isBestSelling: nextVal,
+          sectionPlacement: nextPlacement
+        }
+      }
+      return d
+    }))
+
+    showToast(nextVal ? '⭐ Marked as Best Seller (Main Section)' : 'Removed from Best Sellers')
+
+    adminApi.updateDeal(id, {
+      isBestSelling: nextVal,
+      sectionPlacement: nextPlacement
+    }).catch(console.warn)
   }
 
   // Bulk Actions
@@ -470,20 +582,30 @@ export const ExecutiveDealsPage: React.FC = () => {
 
   const handleBulkApprove = () => {
     setDeals(deals.map(d => selectedDealIds.includes(d.id) ? { ...d, status: 'Approved' } : d))
+    selectedDealIds.forEach(id => {
+      adminApi.updateDeal(id, { status: 'active', submissionStatus: 'approved' }).catch(console.warn)
+    })
     showToast(`Approved ${selectedDealIds.length} deals`)
     setSelectedDealIds([])
   }
 
   const handleBulkDraft = () => {
     setDeals(deals.map(d => selectedDealIds.includes(d.id) ? { ...d, status: 'Draft' } : d))
+    selectedDealIds.forEach(id => {
+      adminApi.updateDeal(id, { status: 'pending', submissionStatus: 'draft' }).catch(console.warn)
+    })
     showToast(`Moved ${selectedDealIds.length} deals to Draft`)
     setSelectedDealIds([])
   }
 
   const handleBulkDelete = () => {
     if (window.confirm(`Delete ${selectedDealIds.length} selected deals permanently?`)) {
-      setDeals(deals.filter(d => !selectedDealIds.includes(d.id)))
-      showToast(`Deleted ${selectedDealIds.length} deals`)
+      const idsToDelete = [...selectedDealIds]
+      setDeals(deals.filter(d => !idsToDelete.includes(d.id)))
+      idsToDelete.forEach(id => {
+        adminApi.deleteDeal(id).catch(console.warn)
+      })
+      showToast(`Deleted ${idsToDelete.length} deals`)
       setSelectedDealIds([])
     }
   }
@@ -591,11 +713,107 @@ export const ExecutiveDealsPage: React.FC = () => {
     }
 
     if (editingDeal) {
+      adminApi.updateDeal(dealToSave.id, {
+        name: dealToSave.title,
+        title: dealToSave.title,
+        store: dealToSave.store,
+        brand: dealToSave.brand,
+        category: dealToSave.category,
+        subCategory: dealToSave.subCategory,
+        asinOrSku: dealToSave.asinOrSku,
+        type: dealToSave.type,
+        price: dealToSave.price,
+        originalPrice: dealToSave.originalPrice,
+        discount: dealToSave.discountLabel,
+        discountLabel: dealToSave.discountLabel,
+        bankOffer: dealToSave.bankOffer,
+        effectivePrice: dealToSave.effectivePrice,
+        code: dealToSave.code,
+        cashback: dealToSave.cashback,
+        stockStatus: dealToSave.stockStatus,
+        rating: dealToSave.rating,
+        deliveryInfo: dealToSave.deliveryInfo,
+        warranty: dealToSave.warranty,
+        productImage: dealToSave.image,
+        image: dealToSave.image,
+        images: dealToSave.images,
+        ctaHref: dealToSave.link,
+        link: dealToSave.link,
+        badge: dealToSave.badge,
+        dealTag: dealToSave.badge,
+        priority: dealToSave.priority,
+        status: statusToSet === 'Pending Approval' ? 'pending' : statusToSet === 'Draft' ? 'draft' : 'active',
+        submissionStatus: statusToSet === 'Pending Approval' ? 'pending_approval' : statusToSet === 'Draft' ? 'draft' : 'approved',
+        isBestSelling: Boolean(dealToSave.isBestSelling),
+        sectionPlacement: dealToSave.sectionPlacement || (dealToSave.isBestSelling ? 'best_selling' : 'favourite'),
+        isFeatured: Boolean(dealToSave.isFeatured),
+        isVerified: Boolean(dealToSave.isVerified),
+        expiry: dealToSave.expiresAt,
+        expiresAt: dealToSave.expiresAt,
+        description: dealToSave.description,
+        terms: dealToSave.terms
+      }).catch(console.warn)
+
       setDeals(deals.map(d => d.id === editingDeal.id ? dealToSave : d))
       showToast('Deal updated successfully')
     } else {
+      adminApi.createDeal({
+        name: dealToSave.title,
+        title: dealToSave.title,
+        store: dealToSave.store,
+        brand: dealToSave.brand,
+        category: dealToSave.category,
+        subCategory: dealToSave.subCategory,
+        asinOrSku: dealToSave.asinOrSku,
+        type: dealToSave.type,
+        price: dealToSave.price,
+        originalPrice: dealToSave.originalPrice,
+        discount: dealToSave.discountLabel,
+        discountLabel: dealToSave.discountLabel,
+        bankOffer: dealToSave.bankOffer,
+        effectivePrice: dealToSave.effectivePrice,
+        code: dealToSave.code,
+        cashback: dealToSave.cashback,
+        stockStatus: dealToSave.stockStatus,
+        rating: dealToSave.rating,
+        deliveryInfo: dealToSave.deliveryInfo,
+        warranty: dealToSave.warranty,
+        productImage: dealToSave.image,
+        image: dealToSave.image,
+        images: dealToSave.images,
+        ctaHref: dealToSave.link,
+        link: dealToSave.link,
+        badge: dealToSave.badge,
+        dealTag: dealToSave.badge,
+        priority: dealToSave.priority,
+        status: statusToSet === 'Pending Approval' ? 'pending' : statusToSet === 'Draft' ? 'draft' : 'active',
+        submissionStatus: statusToSet === 'Pending Approval' ? 'pending_approval' : statusToSet === 'Draft' ? 'draft' : 'approved',
+        isBestSelling: Boolean(dealToSave.isBestSelling),
+        sectionPlacement: dealToSave.sectionPlacement || (dealToSave.isBestSelling ? 'best_selling' : 'favourite'),
+        isFeatured: Boolean(dealToSave.isFeatured),
+        isVerified: Boolean(dealToSave.isVerified),
+        expiry: dealToSave.expiresAt,
+        expiresAt: dealToSave.expiresAt,
+        description: dealToSave.description,
+        terms: dealToSave.terms
+      }).then(res => {
+        if (statusToSet === 'Pending Approval') {
+          adminApi.createSubmission({
+            entityType: 'deal',
+            entityId: res._id || res.id || dealToSave.id,
+            action: 'create',
+            title: dealToSave.title,
+            store: dealToSave.store,
+            category: dealToSave.category,
+            priority: dealToSave.priority,
+            submittedBy: localStorage.getItem('staffUser') ? JSON.parse(localStorage.getItem('staffUser')!).email : 'executive@wouchify.com',
+            dataSnapshot: dealToSave
+          }).catch(console.warn)
+        }
+      }).catch(console.warn)
+
       setDeals([dealToSave, ...deals])
-      showToast('New deal created successfully')
+      showToast(statusToSet === 'Pending Approval' ? 'Submitted for Ops Manager Approval!' : 'New deal saved to drafts')
     }
     setIsModalOpen(false)
   }
@@ -610,15 +828,9 @@ export const ExecutiveDealsPage: React.FC = () => {
         {/* Page Top Header */}
         <div className="crud-header">
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-              <span className="modal-badge">
-                <Sparkles size={12} /> Live CMS
-              </span>
-              <span style={{ fontSize: '0.8rem', color: '#64748b' }}>• Real-time synchronization active</span>
-            </div>
-            <h2 className="crud-title">Deals Management Console</h2>
+            <h2 className="crud-title">Deals</h2>
             <p style={{ margin: '4px 0 0', fontSize: '0.9rem', color: '#64748b' }}>
-              Publish, filter, organize, and inspect all promotional and loot deals across Wouchify storefront.
+              Manage, filter, and organize promotional deals across partner stores.
             </p>
           </div>
 
@@ -632,7 +844,7 @@ export const ExecutiveDealsPage: React.FC = () => {
               <Download size={16} /> Export CSV
             </button>
             <button className="crud-add-btn" onClick={handleAddDeal}>
-              <Plus size={18} /> Add New Deal
+              <Plus size={18} /> Add Deal
             </button>
           </div>
         </div>
@@ -669,25 +881,99 @@ export const ExecutiveDealsPage: React.FC = () => {
             </div>
           </div>
 
+          <div
+            className="deals-kpi-card"
+            style={{ cursor: 'pointer', borderColor: showBestSellingOnly ? 'var(--color-navy, #2F368C)' : undefined, background: showBestSellingOnly ? '#eef0ff' : undefined }}
+            onClick={() => { setShowBestSellingOnly(v => !v); setCurrentPage(1); }}
+            title={showBestSellingOnly ? 'Click to clear Best Selling filter' : 'Click to show only Best Selling deals'}
+          >
+            <div className="deals-kpi-info">
+              <span className="deals-kpi-label">⭐ Best Selling</span>
+              <span className="deals-kpi-val" style={{ color: 'var(--color-navy, #2F368C)' }}>{kpiStats.bestSelling}</span>
+            </div>
+            <div className="deals-kpi-icon blue">
+              <Sparkles size={20} />
+            </div>
+          </div>
+
           <div className="deals-kpi-card">
             <div className="deals-kpi-info">
-              <span className="deals-kpi-label">Loot Deals</span>
-              <span className="deals-kpi-val" style={{ color: '#ea580c' }}>{kpiStats.loot}</span>
+              <span className="deals-kpi-label">Expired Deals</span>
+              <span className="deals-kpi-val" style={{ color: '#ef4444' }}>{kpiStats.expired}</span>
             </div>
-            <div className="deals-kpi-icon orange">
-              <Flame size={20} />
+            <div className="deals-kpi-icon red">
+              <AlertTriangle size={20} />
             </div>
           </div>
 
           <div className="deals-kpi-card">
             <div className="deals-kpi-info">
               <span className="deals-kpi-label">Total Engagements</span>
-              <span className="deals-kpi-val">{kpiStats.totalClicks.toLocaleString()}</span>
+              <span className="deals-kpi-val" style={{ color: '#0284c7' }}>{kpiStats.totalClicks.toLocaleString('en-IN')}</span>
             </div>
-            <div className="deals-kpi-icon red">
+            <div className="deals-kpi-icon blue">
               <Eye size={20} />
             </div>
           </div>
+        </div>
+
+        {/* Active / Expired Tab Switcher */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0', borderBottom: '2px solid #e2e8f0', margin: '0 0 20px 0' }}>
+          <button
+            onClick={() => { setDealsTab('active'); setCurrentPage(1); }}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: dealsTab === 'active' ? '3px solid var(--color-red, #E31E25)' : '3px solid transparent',
+              marginBottom: '-2px',
+              padding: '12px 24px',
+              fontWeight: dealsTab === 'active' ? 700 : 500,
+              color: dealsTab === 'active' ? 'var(--color-red, #E31E25)' : '#64748b',
+              fontSize: '0.92rem',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <CheckCircle2 size={15} />
+            Active Deals
+            <span style={{ background: dealsTab === 'active' ? 'var(--color-red, #E31E25)' : '#e2e8f0', color: dealsTab === 'active' ? '#fff' : '#64748b', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', minWidth: '20px', textAlign: 'center' }}>
+              {activeDeals.length}
+            </span>
+          </button>
+          <button
+            onClick={() => { setDealsTab('expired'); setCurrentPage(1); }}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: dealsTab === 'expired' ? '3px solid #ef4444' : '3px solid transparent',
+              marginBottom: '-2px',
+              padding: '12px 24px',
+              fontWeight: dealsTab === 'expired' ? 700 : 500,
+              color: dealsTab === 'expired' ? '#ef4444' : '#64748b',
+              fontSize: '0.92rem',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <AlertTriangle size={15} />
+            Expired Deals
+            {kpiStats.expired > 0 && (
+              <span style={{ background: dealsTab === 'expired' ? '#ef4444' : '#fee2e2', color: dealsTab === 'expired' ? '#fff' : '#ef4444', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', minWidth: '20px', textAlign: 'center' }}>
+                {kpiStats.expired}
+              </span>
+            )}
+          </button>
+          {dealsTab === 'expired' && (
+            <span style={{ marginLeft: 'auto', fontSize: '0.8rem', color: '#ef4444', fontStyle: 'italic', padding: '0 16px', fontWeight: 500 }}>
+              ⚠️ These deals are no longer live. Review or remove them.
+            </span>
+          )}
         </div>
 
         {/* Advanced Filter Toolbar */}
@@ -907,10 +1193,10 @@ export const ExecutiveDealsPage: React.FC = () => {
                       </td>
                       <td style={{ width: '56px' }}>
                         <img 
-                          src={deal.image || deal.images[0] || 'https://via.placeholder.com/50'} 
+                          src={deal.image || deal.images[0] || PLACEHOLDER_DEAL_IMAGE} 
                           alt={deal.title} 
                           style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e2e8f0' }}
-                          onError={(e) => { (e.target as any).src = 'https://via.placeholder.com/48?text=Deal' }}
+                          onError={(e) => { (e.target as any).src = PLACEHOLDER_DEAL_IMAGE }}
                         />
                       </td>
                       <td>
@@ -956,7 +1242,7 @@ export const ExecutiveDealsPage: React.FC = () => {
                             src={getStoreLogo(deal.store)} 
                             alt={deal.store} 
                             style={{ maxHeight: '20px', maxWidth: '65px', objectFit: 'contain' }} 
-                            onError={(e) => { (e.target as any).src = 'https://via.placeholder.com/60x20?text=' + deal.store }}
+                            onError={(e) => { (e.target as any).src = PLACEHOLDER_STORE_LOGO }}
                           />
                         </div>
                       </td>
@@ -972,7 +1258,28 @@ export const ExecutiveDealsPage: React.FC = () => {
                               </span>
                             )}
                           </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                            {deal.isBestSelling && (
+                              <span 
+                                style={{ 
+                                  fontSize: '0.68rem', 
+                                  background: '#fef3c7', 
+                                  color: '#92400e', 
+                                  padding: '1px 6px', 
+                                  borderRadius: '4px', 
+                                  fontWeight: 700, 
+                                  display: 'inline-flex', 
+                                  alignItems: 'center', 
+                                  gap: '2px',
+                                  border: '1px solid #fde68a',
+                                  cursor: 'pointer'
+                                }}
+                                onClick={() => handleToggleBestSelling(deal.id)}
+                                title="Click to toggle Best Seller status"
+                              >
+                                ⭐ Best Seller
+                              </span>
+                            )}
                             {deal.badge && (
                               <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>
                                 {deal.badge}
@@ -1064,6 +1371,14 @@ export const ExecutiveDealsPage: React.FC = () => {
                       <td>
                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                           <button 
+                            className="action-btn"
+                            style={{ color: deal.isBestSelling ? '#d97706' : '#94a3b8', background: deal.isBestSelling ? '#fef3c7' : '#f8fafc' }}
+                            onClick={() => handleToggleBestSelling(deal.id)}
+                            title={deal.isBestSelling ? "Remove from Best Selling" : "Mark as Best Selling (Featured in Main Section)"}
+                          >
+                            <Star size={16} fill={deal.isBestSelling ? '#d97706' : 'none'} />
+                          </button>
+                          <button 
                             className="action-btn view" 
                             onClick={() => setPreviewDeal(deal)} 
                             title="Preview Customer Deal Page"
@@ -1104,8 +1419,34 @@ export const ExecutiveDealsPage: React.FC = () => {
 
           {/* Pagination Controls */}
           <div className="pagination-wrap">
-              <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                Showing <strong>{filteredDeals.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}</strong> to <strong>{Math.min(currentPage * itemsPerPage, filteredDeals.length)}</strong> of <strong>{filteredDeals.length}</strong> deals
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', fontSize: '0.85rem', color: '#64748b' }}>
+                <span>
+                  Showing <strong>{filteredDeals.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}</strong> to <strong>{Math.min(currentPage * itemsPerPage, filteredDeals.length)}</strong> of <strong>{filteredDeals.length}</strong> deals
+                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: '0.8rem' }}>Per page:</span>
+                  <select
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                      setItemsPerPage(Number(e.target.value));
+                      setCurrentPage(1);
+                    }}
+                    style={{
+                      padding: '3px 8px',
+                      borderRadius: '6px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.82rem',
+                      background: '#fff',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                    <option value={1000}>All</option>
+                  </select>
+                </div>
               </div>
 
               <div className="pagination-controls">
@@ -1156,11 +1497,16 @@ export const ExecutiveDealsPage: React.FC = () => {
                     {/* Image Thumbnail */}
                     <div className="deal-card-manage-thumb">
                       <img 
-                        src={deal.image || deal.images[0] || 'https://via.placeholder.com/280x160'} 
+                        src={deal.image || deal.images[0] || PLACEHOLDER_DEAL_IMAGE} 
                         alt={deal.title} 
-                        onError={(e) => { (e.target as any).src = 'https://via.placeholder.com/280x160?text=Product' }}
+                        onError={(e) => { (e.target as any).src = PLACEHOLDER_DEAL_IMAGE }}
                       />
                       <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 4, display: 'flex', gap: '4px', alignItems: 'center' }}>
+                        {deal.isBestSelling && (
+                          <span style={{ background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a', borderRadius: '4px', fontSize: '10px', fontWeight: 800, padding: '2px 5px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                            ⭐ Best Seller
+                          </span>
+                        )}
                         <span className={`type-badge ${deal.type}`}>
                           {deal.type === 'loot' ? '⚡ Loot' : deal.type === 'flash' ? '⚡ Flash' : deal.type === 'daily' ? '🌟 Daily' : '• Deal'}
                         </span>
@@ -1262,9 +1608,19 @@ export const ExecutiveDealsPage: React.FC = () => {
 
                     {/* Action footer */}
                     <div className="deal-card-manage-actions">
-                      <button className="action-btn view" onClick={() => setPreviewDeal(deal)} title="Preview Deal">
-                        <Eye size={16} />
-                      </button>
+                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                        <button 
+                          className="action-btn" 
+                          style={{ color: deal.isBestSelling ? '#d97706' : '#94a3b8', background: deal.isBestSelling ? '#fef3c7' : '#f8fafc' }}
+                          onClick={() => handleToggleBestSelling(deal.id)} 
+                          title={deal.isBestSelling ? "Remove from Best Selling" : "Mark as Best Selling"}
+                        >
+                          <Star size={15} fill={deal.isBestSelling ? '#d97706' : 'none'} />
+                        </button>
+                        <button className="action-btn view" onClick={() => setPreviewDeal(deal)} title="Preview Deal">
+                          <Eye size={16} />
+                        </button>
+                      </div>
                       <div style={{ display: 'flex', gap: '8px' }}>
                         <button className="action-btn edit" onClick={() => handleEditDeal(deal)} title="Edit Deal">
                           <Edit2 size={16} />
@@ -1281,8 +1637,34 @@ export const ExecutiveDealsPage: React.FC = () => {
 
             {/* Pagination Controls */}
             <div className="pagination-wrap" style={{ borderRadius: '12px' }}>
-              <div style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                Showing <strong>{filteredDeals.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}</strong> to <strong>{Math.min(currentPage * itemsPerPage, filteredDeals.length)}</strong> of <strong>{filteredDeals.length}</strong> deals
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', fontSize: '0.85rem', color: '#64748b' }}>
+                <span>
+                  Showing <strong>{filteredDeals.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}</strong> to <strong>{Math.min(currentPage * itemsPerPage, filteredDeals.length)}</strong> of <strong>{filteredDeals.length}</strong> deals
+                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: '0.8rem' }}>Per page:</span>
+                  <select
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                      setItemsPerPage(Number(e.target.value));
+                      setCurrentPage(1);
+                    }}
+                    style={{
+                      padding: '3px 8px',
+                      borderRadius: '6px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.82rem',
+                      background: '#fff',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                    <option value={1000}>All</option>
+                  </select>
+                </div>
               </div>
 
               <div className="pagination-controls">
@@ -1322,14 +1704,11 @@ export const ExecutiveDealsPage: React.FC = () => {
             <div className="crud-modal modal-lg" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
                 <div className="modal-header-content">
-                  <span className="modal-badge">
-                    <Sparkles size={12} /> Executive Deal Creator
-                  </span>
                   <h3 className="modal-title">
-                    {editingDeal ? 'Edit Deal Details' : 'Create New Promotional Deal'}
+                    {editingDeal ? 'Edit Deal' : 'Add New Deal'}
                   </h3>
                   <p className="modal-subtitle">
-                    Configure pricing, store affiliation, and product media for live publication.
+                    Enter pricing, partner store details, and product information.
                   </p>
                 </div>
                 <button className="modal-close" onClick={() => setIsModalOpen(false)} title="Close">
@@ -1419,7 +1798,7 @@ export const ExecutiveDealsPage: React.FC = () => {
                             src={getStoreLogo(form.store)} 
                             alt={form.store} 
                             style={{ maxHeight: '20px', maxWidth: '38px', objectFit: 'contain' }} 
-                            onError={(e) => { (e.target as any).src = 'https://via.placeholder.com/38x20?text=' + form.store }}
+                            onError={(e) => { (e.target as any).src = PLACEHOLDER_STORE_LOGO }}
                           />
                         </div>
                       </div>
@@ -1700,7 +2079,39 @@ export const ExecutiveDealsPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Placement Checkbox Cards */}
+                  {/* Granular Section Placement Dropdown */}
+                  <div className="form-group" style={{ marginTop: '14px' }}>
+                    <label>Storefront Section Placement <span className="required-star">*</span></label>
+                    <select
+                      value={form.sectionPlacement || (form.isBestSelling ? 'best_selling' : 'both')}
+                      onChange={(e) => {
+                        const val = e.target.value as 'both' | 'favourite' | 'best_selling'
+                        setForm({
+                          ...form,
+                          sectionPlacement: val,
+                          isBestSelling: val === 'best_selling' || val === 'both'
+                        })
+                      }}
+                      style={{
+                        width: '100%',
+                        height: '42px',
+                        borderRadius: '8px',
+                        border: '1.5px solid #cbd5e1',
+                        padding: '0 12px',
+                        fontSize: '0.9rem',
+                        fontWeight: 600,
+                        color: '#1e293b',
+                        backgroundColor: '#ffffff'
+                      }}
+                    >
+                      <option value="both">Both (Section 1 - Main Deals &amp; Section 2 - Best Selling Picks)</option>
+                      <option value="favourite">Section 1 (Main Deals / Favourite Stores Catalog Only)</option>
+                      <option value="best_selling">Section 2 (Best Selling Deals Picks Only)</option>
+                    </select>
+                    <span className="field-hint">Choose whether this deal appears in Section 1, Section 2, or Both sections on the Deals storefront page.</span>
+                  </div>
+
+                  {/* Feature Checkbox Cards */}
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '14px' }}>
                     <label className="feature-checkbox-label">
                       <input 
@@ -1733,30 +2144,17 @@ export const ExecutiveDealsPage: React.FC = () => {
                   <div className="form-section-header">
                     <div className="form-section-icon"><ImageIcon size={16} /></div>
                     <h4 className="form-section-title">Product Media & Gallery</h4>
-                    <span className="form-section-desc">Web URL or Google Drive link</span>
+                    <span className="form-section-desc">Upload from device / local storage, paste URL or Google Drive link</span>
                   </div>
 
-                  <div className="form-group">
-                    <label>Primary Image URL / Google Drive Share Link <span className="required-star">*</span></label>
-                    <div className="image-input-container">
-                      <div className="image-preview-thumb">
-                        <img 
-                          src={form.image || form.images[0] || 'https://via.placeholder.com/52'} 
-                          alt="Thumbnail preview"
-                          onError={(e) => { (e.target as any).src = 'https://via.placeholder.com/52?text=Image' }}
-                        />
-                      </div>
-                      <input 
-                        type="text" 
-                        placeholder="Paste image URL or Google Drive view link..." 
-                        value={form.image}
-                        onChange={(e) => handleImageUrlChange(e.target.value)}
-                      />
-                    </div>
-                    <span className="field-hint">Google Drive links are automatically converted to high-speed CDN image streams.</span>
-                  </div>
+                  <ImageUploadField
+                    label="Primary Deal Image *"
+                    placeholder="Paste URL, Google Drive link, or click Upload from device..."
+                    value={form.image}
+                    onChange={(val) => handleImageUrlChange(val)}
+                  />
 
-                  <div className="form-group">
+                  <div className="form-group" style={{ marginTop: '10px' }}>
                     <label style={{ fontSize: '0.8rem', color: '#64748b' }}>Quick Sample Image Presets (Click to Select):</label>
                     <div className="image-preset-list">
                       {DEAL_PRODUCT_PRESETS.map((preset) => (
@@ -1878,9 +2276,9 @@ export const ExecutiveDealsPage: React.FC = () => {
                     <div className="preview-deal-card">
                       <div className="preview-deal-image-wrap">
                         <img 
-                          src={form.image || form.images[0] || 'https://via.placeholder.com/320x150?text=Deal+Image'} 
+                          src={form.image || form.images[0] || PLACEHOLDER_DEAL_IMAGE} 
                           alt="Live Preview" 
-                          onError={(e) => { (e.target as any).src = 'https://via.placeholder.com/320x150?text=Image+Preview' }}
+                          onError={(e) => { (e.target as any).src = PLACEHOLDER_DEAL_IMAGE }}
                         />
                       </div>
                       <div className="preview-deal-body">
@@ -2032,7 +2430,7 @@ export const ExecutiveDealsPage: React.FC = () => {
                       src={getStoreLogo(previewDeal.store)} 
                       alt={previewDeal.store} 
                       style={{ maxHeight: '18px', maxWidth: '56px', objectFit: 'contain' }} 
-                      onError={(e) => { (e.target as any).src = 'https://via.placeholder.com/56x18?text=' + previewDeal.store }}
+                      onError={(e) => { (e.target as any).src = PLACEHOLDER_STORE_LOGO }}
                     />
                   </div>
 
@@ -2060,9 +2458,9 @@ export const ExecutiveDealsPage: React.FC = () => {
                   <div className="deal-product-media-col">
                     <div className="deal-product-main-img-card">
                       <img 
-                        src={previewDeal.image || previewDeal.images[0]} 
+                        src={previewDeal.image || previewDeal.images[0] || PLACEHOLDER_DEAL_IMAGE} 
                         alt={previewDeal.title} 
-                        onError={(e) => { (e.target as any).src = 'https://via.placeholder.com/350x250?text=' + encodeURIComponent(previewDeal.title) }}
+                        onError={(e) => { (e.target as any).src = PLACEHOLDER_DEAL_IMAGE }}
                       />
                       {previewDeal.discountLabel && (
                         <div style={{ position: 'absolute', top: '12px', left: '12px' }}>

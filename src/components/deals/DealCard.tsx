@@ -1,16 +1,26 @@
 import React from 'react'
 import type { DealCardItem } from '../../data/dealsPage'
+import { adminApi } from '../../services/adminApi'
 import './DealCard.css'
 
 interface DealCardProps {
   deal: DealCardItem
   horizontal?: boolean
+  isLoot?: boolean
 }
 
-export const DealCard: React.FC<DealCardProps> = ({ deal, horizontal = false }) => {
+export const DealCard: React.FC<DealCardProps> = ({ deal, horizontal = false, isLoot = false }) => {
+  const handleClick = (_e?: React.MouseEvent) => {
+    if (isLoot) {
+      adminApi.trackLootClick(deal.id);
+    } else {
+      adminApi.trackDealClick(deal.id);
+    }
+  };
+
   if (horizontal) {
     return (
-      <div className="deal-card deal-card--horizontal">
+      <div className="deal-card deal-card--horizontal" onClick={handleClick}>
         <div className="deal-card__image-container deal-card__image-container--horizontal">
           <img
             src={deal.productImage}
@@ -43,7 +53,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, horizontal = false }) 
             )}
           </div>
 
-          <a href={deal.ctaHref} className="deal-card__grab-btn">
+          <a href={deal.ctaHref} className="deal-card__grab-btn" onClick={handleClick}>
             {deal.ctaText}
           </a>
         </div>
@@ -52,7 +62,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, horizontal = false }) 
   }
 
   return (
-    <div className="deal-card">
+    <div className="deal-card" onClick={handleClick}>
       <div className="deal-card__image-container">
         <img
           src={deal.productImage}
@@ -85,7 +95,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, horizontal = false }) 
           )}
         </div>
 
-        <a href={deal.ctaHref} className="deal-card__grab-btn">
+        <a href={deal.ctaHref} className="deal-card__grab-btn" onClick={handleClick}>
           {deal.ctaText}
         </a>
       </div>
