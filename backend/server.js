@@ -42,6 +42,9 @@ const StaffMember = require('./models/StaffMember');
 
 const inMemoryStore = require('./services/inMemoryStore');
 
+const dns = require('dns');
+try { dns.setServers(['8.8.8.8', '1.1.1.1']); } catch (e) {}
+
 dotenv.config();
 
 const app = express();
