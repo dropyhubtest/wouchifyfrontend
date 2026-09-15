@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import { adminApi } from '../../services/adminApi'
-import { Check, X, Eye, ShieldAlert, AlertCircle, Clock } from 'lucide-react'
+import { Check, X } from 'lucide-react'
 import './AdminDashboardPage.css' // Reuse the same CSS
 
 interface ModerationItem {

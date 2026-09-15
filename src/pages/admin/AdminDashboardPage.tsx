@@ -3,22 +3,6 @@ import wouchifyLogo from '../../assets/navbar/wouchify-logo.png'
 import { FAVOURITE_STORES } from '../../data/storesHero'
 import { CATEGORIES_DATA } from '../../data/categories'
 import { adminApi } from '../../services/adminApi'
-import { CustomDropdown } from '../../components/common/CustomDropdown'
-import { DEAL_PRODUCT_PRESETS, convertGoogleDriveUrl } from '../../data/dealsPage'
-import { Line, Bar, Doughnut } from 'react-chartjs-2'
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-} from 'chart.js'
 import './AdminDashboardPage.css'
 import { AdminApprovalsView } from './AdminApprovalsView'
 
@@ -313,9 +297,9 @@ export const AdminDashboardPage: React.FC = () => {
       staffCount: staffMembers.length,
       onlineStaffCount,
       disbursedCashback: '₹12,45,890',
-      systemHealth: '100% Operational'
+      systemHealth: isBackendConnected ? '100% Operational' : 'Offline Mode'
     }
-  }, [deals, coupons, lootDeals, users, staffMembers])
+  }, [deals, coupons, lootDeals, users, staffMembers, isBackendConnected])
 
   // Toast Helper
   const showToast = (msg: string) => {

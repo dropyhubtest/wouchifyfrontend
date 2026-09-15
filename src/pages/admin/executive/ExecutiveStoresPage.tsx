@@ -802,7 +802,7 @@ export const ExecutiveStoresPage: React.FC = () => {
       if (sortBy === 'name') return a.name.localeCompare(b.name)
       if (sortBy === 'clicks') return b.clicks - a.clicks
       if (sortBy === 'deals') return b.totalDeals - a.totalDeals
-      if (sortBy === 'added') return b.addedOn.localeCompare(a.addedOn)
+      if (sortBy === 'added') return (b.addedOn || '').localeCompare(a.addedOn || '')
       return 0
     })
     return list
@@ -844,7 +844,6 @@ export const ExecutiveStoresPage: React.FC = () => {
       console.error('Failed to delete store', err)
     } finally {
       setStoreToDelete(null)
->>>>>>> b3642cb34aed66a219c8f7f965ab366ca8f476b5
     }
   }
 

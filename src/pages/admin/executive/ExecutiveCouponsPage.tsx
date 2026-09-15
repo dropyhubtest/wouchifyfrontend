@@ -26,7 +26,6 @@ import {
 import './ExecutiveShared.css'
 import { FAVOURITE_STORES } from '../../../data/storesHero'
 import { CATEGORIES_DATA } from '../../../data/categories'
-import api from '../../../services/api'
 
 /* ============================================================
    Types
@@ -667,7 +666,7 @@ export const ExecutiveCouponsPage: React.FC = () => {
       if (sortBy === 'expiry')   return a.expiryDate.localeCompare(b.expiryDate)
       if (sortBy === 'discount') return b.discountValue - a.discountValue
       if (sortBy === 'usage')    return b.usageCount - a.usageCount
-      if (sortBy === 'added')    return b.addedOn.localeCompare(a.addedOn)
+      if (sortBy === 'added')    return (b.addedOn || '').localeCompare(a.addedOn || '')
       return 0
     })
     return list

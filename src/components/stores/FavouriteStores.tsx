@@ -4,10 +4,8 @@ import { StoreSearch } from './StoreSearch'
 import { StoreCategoryFilter } from './StoreCategoryFilter'
 import { StoreAlphabetFilter } from './StoreAlphabetFilter'
 import { FAVOURITE_STORES, STORE_CATEGORIES, type StoreItem } from '../../data/storesHero'
-import { adminApi } from '../../services/adminApi'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
 import { getPublicStores } from '../../services/api'
-import { getStoreLogo } from '../../data/storesDirectoryData'
 import './FavouriteStores.css'
 
 const normalizeStoreKey = (val?: string) => (val || '').toLowerCase().replace(/[^a-z0-9]/g, '')
