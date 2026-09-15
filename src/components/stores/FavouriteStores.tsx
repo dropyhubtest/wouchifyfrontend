@@ -6,6 +6,8 @@ import { StoreAlphabetFilter } from './StoreAlphabetFilter'
 import { FAVOURITE_STORES, STORE_CATEGORIES, type StoreItem } from '../../data/storesHero'
 import { adminApi } from '../../services/adminApi'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
+import { getPublicStores } from '../../services/api'
+import { getStoreLogo } from '../../data/storesDirectoryData'
 import './FavouriteStores.css'
 
 const normalizeStoreKey = (val?: string) => (val || '').toLowerCase().replace(/[^a-z0-9]/g, '')
@@ -108,20 +110,25 @@ export const FavouriteStores: React.FC = () => {
     let isMounted = true
     const fetchLiveStores = async () => {
       try {
-        const data = await adminApi.getStores()
+        const fetched = await getPublicStores()
         if (!isMounted) return
-        if (Array.isArray(data) && data.length > 0) {
-          setStoresList(mergeWithMasterStores(data))
+        if (Array.isArray(fetched) && fetched.length > 0) {
+          setStoresList(mergeWithMasterStores(fetched))
         }
-      } catch {}
+      } catch (err) {
+        console.error("Failed to auto-refresh stores:", err)
+      }
     }
+
     fetchLiveStores()
+    const intervalId = setInterval(fetchLiveStores, 10000)
 
     const handleSync = () => { fetchLiveStores() }
     window.addEventListener('wouchify_stores_updated', handleSync)
     window.addEventListener('storage', handleSync)
     return () => {
       isMounted = false
+      clearInterval(intervalId)
       window.removeEventListener('wouchify_stores_updated', handleSync)
       window.removeEventListener('storage', handleSync)
     }

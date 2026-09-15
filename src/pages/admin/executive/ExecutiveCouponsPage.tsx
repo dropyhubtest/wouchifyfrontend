@@ -26,12 +26,13 @@ import {
 import './ExecutiveShared.css'
 import { FAVOURITE_STORES } from '../../../data/storesHero'
 import { CATEGORIES_DATA } from '../../../data/categories'
+import api from '../../../services/api'
 
 /* ============================================================
    Types
    ============================================================ */
 
-type CouponStatus = 'active' | 'inactive' | 'expired' | 'scheduled'
+type CouponStatus = 'active' | 'inactive' | 'expired' | 'scheduled' | 'pending' | 'rejected'
 type CouponType = 'percent' | 'flat' | 'bogo' | 'freebie' | 'cashback' | 'bank'
 
 interface Coupon {
@@ -56,7 +57,9 @@ interface Coupon {
   expiryDate: string
   usageCount: number
   totalUses: number         // cap (0 = unlimited)
-  addedOn: string
+  addedOn?: string
+  createdAt?: string
+  _id?: string
 }
 
 /* ============================================================
@@ -146,6 +149,8 @@ function statusConfig(s: CouponStatus) {
     inactive:  { label: 'Inactive',   bg: '#f1f5f9', color: '#64748b' },
     expired:   { label: 'Expired',    bg: '#fee2e2', color: '#ef4444' },
     scheduled: { label: 'Scheduled',  bg: '#e0f2fe', color: '#0284c7' },
+    pending:   { label: 'Pending',    bg: '#fef3c7', color: '#d97706' },
+    rejected:  { label: 'Rejected',   bg: '#fee2e2', color: '#ef4444' },
   }
   return map[s]
 }
@@ -507,6 +512,8 @@ const CouponFormModal: React.FC<CouponFormProps> = ({ editing, onClose, onSave }
                     <option value="scheduled">Scheduled</option>
                     <option value="inactive">Inactive</option>
                     <option value="expired">Expired</option>
+                    <option value="pending">Pending</option>
+                    <option value="rejected">Rejected</option>
                   </select>
                 </div>
                 <div className="form-group">
@@ -593,44 +600,44 @@ export const ExecutiveCouponsPage: React.FC = () => {
   const [editing, setEditing] = useState<Coupon | null>(null)
   const [previewing, setPreviewing] = useState<Coupon | null>(null)
 
-  useEffect(() => {
-    const fetchLiveCoupons = async () => {
-      try {
-        const live = await adminApi.getCoupons()
-        if (Array.isArray(live) && live.length > 0) {
-          const mapped: Coupon[] = live.map((c: any, idx: number) => ({
-            id: String(c._id || c.id || `cpn-${idx}`),
-            title: c.title || `${c.discount || 'Special'} Discount at ${c.store || 'Store'}`,
-            description: c.description || 'Verified promo discount code.',
-            store: c.store || 'Amazon',
-            category: c.category || 'Electronics',
-            code: (c.code || 'AMAZON10').toUpperCase(),
-            couponType: (c.couponType || (String(c.discount || '').includes('%') ? 'percent' : String(c.discount || '').toLowerCase().includes('free') ? 'freebie' : 'flat')) as any,
-            discount: c.discount || '10% off',
-            discountValue: parseInt(String(c.discount || '0').replace(/[^0-9]/g, '')) || 10,
-            minOrder: c.minOrder || 'Min Order: 499',
-            maxDiscount: c.maxDiscount || 'Max ₹250',
-            affiliateLink: c.affiliateLink || `https://${String(c.store || 'store').toLowerCase().replace(/\s+/g, '')}.com/?tag=wouchify`,
-            status: (c.status || 'active') as any,
-            isExclusive: Boolean(c.isExclusive !== false),
-            isFeatured: Boolean(c.isFeatured !== false),
-            isVerified: true,
-            telegramAlert: Boolean(c.telegramAlert),
-            startDate: c.startDate || new Date().toISOString().slice(0, 10),
-            expiryDate: c.expiry || c.expiryDate || new Date(Date.now() + 86400000 * 30).toISOString().slice(0, 10),
-            usageCount: c.usageCount || 0,
-            totalUses: c.usageLimit || 5000,
-            addedOn: c.createdAt ? new Date(c.createdAt).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10)
-          }))
-          setCoupons(mapped)
-        }
-      } catch (err) {
-        console.warn('Coupons fallback to local data:', err)
+  const fetchCoupons = async () => {
+    try {
+      const live = await adminApi.getCoupons()
+      if (Array.isArray(live) && live.length > 0) {
+        const mapped: Coupon[] = live.map((c: any, idx: number) => ({
+          id: String(c._id || c.id || `cpn-${idx}`),
+          title: c.title || `${c.discount || 'Special'} Discount at ${c.store || 'Store'}`,
+          description: c.description || 'Verified promo discount code.',
+          store: c.store || 'Amazon',
+          category: c.category || 'Electronics',
+          code: (c.code || 'AMAZON10').toUpperCase(),
+          couponType: (c.couponType || (String(c.discount || '').includes('%') ? 'percent' : String(c.discount || '').toLowerCase().includes('free') ? 'freebie' : 'flat')) as any,
+          discount: c.discount || '10% off',
+          discountValue: parseInt(String(c.discount || '0').replace(/[^0-9]/g, '')) || 10,
+          minOrder: c.minOrder || 'Min Order: 499',
+          maxDiscount: c.maxDiscount || 'Max ₹250',
+          affiliateLink: c.affiliateLink || `https://${String(c.store || 'store').toLowerCase().replace(/\s+/g, '')}.com/?tag=wouchify`,
+          status: (c.status || 'active') as any,
+          isExclusive: Boolean(c.isExclusive !== false),
+          isFeatured: Boolean(c.isFeatured !== false),
+          isVerified: true,
+          telegramAlert: Boolean(c.telegramAlert),
+          startDate: c.startDate || new Date().toISOString().slice(0, 10),
+          expiryDate: c.expiry || c.expiryDate || new Date(Date.now() + 86400000 * 30).toISOString().slice(0, 10),
+          usageCount: c.usageCount || 0,
+          totalUses: c.usageLimit || 5000,
+          addedOn: c.createdAt ? new Date(c.createdAt).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10)
+        }))
+        setCoupons(mapped)
       }
+    } catch (err) {
+      console.warn('Coupons fallback to local data:', err)
     }
-    fetchLiveCoupons()
-  }, [])
+  }
 
+  useEffect(() => {
+    fetchCoupons()
+  }, [])
   /* KPI stats */
   const kpi = useMemo(() => ({
     total: coupons.length,
@@ -714,7 +721,7 @@ export const ExecutiveCouponsPage: React.FC = () => {
     setIsFormOpen(false)
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Delete this coupon permanently?')) {
       adminApi.deleteCoupon(id).catch(console.warn)
       setCoupons(prev => prev.filter(c => c.id !== id))
@@ -816,6 +823,8 @@ export const ExecutiveCouponsPage: React.FC = () => {
               <option value="scheduled">Scheduled</option>
               <option value="inactive">Inactive</option>
               <option value="expired">Expired</option>
+              <option value="pending">Pending</option>
+              <option value="rejected">Rejected</option>
             </select>
           </div>
 

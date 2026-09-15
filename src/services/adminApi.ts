@@ -658,6 +658,29 @@ export const adminApi = {
     return backendStores;
   },
 
+  getManagerPendingStores: async () => {
+    const res = await fetch(`${API_BASE}/stores/manager-pending`, {
+      headers: getAuthHeaders()
+    });
+    return handleResponse<any[]>(res);
+  },
+
+  approveManagerStore: async (id: string) => {
+    const res = await fetch(`${API_BASE}/stores/${id}/approve/manager`, {
+      method: 'PATCH',
+      headers: getAuthHeaders()
+    });
+    return handleResponse<any>(res);
+  },
+
+  rejectManagerStore: async (id: string) => {
+    const res = await fetch(`${API_BASE}/stores/${id}/reject/manager`, {
+      method: 'PATCH',
+      headers: getAuthHeaders()
+    });
+    return handleResponse<any>(res);
+  },
+
   createStore: async (storeData: Record<string, any>) => {
     const newEntry = { _id: storeData._id || `store-${Date.now()}`, id: storeData.id || `store-${Date.now()}`, clicks: 0, totalDeals: 0, status: 'active', ...storeData };
     try {
@@ -766,6 +789,29 @@ export const adminApi = {
       if (res.ok) return await res.json();
     } catch {}
     return { success: true, id };
+  },
+
+  getManagerPendingCoupons: async () => {
+    const res = await fetch(`${API_BASE}/coupons/manager-pending`, {
+      headers: getAuthHeaders()
+    });
+    return handleResponse<any[]>(res);
+  },
+
+  approveManagerCoupon: async (id: string) => {
+    const res = await fetch(`${API_BASE}/coupons/${id}/approve/manager`, {
+      method: 'PATCH',
+      headers: getAuthHeaders()
+    });
+    return handleResponse<any>(res);
+  },
+
+  rejectManagerCoupon: async (id: string) => {
+    const res = await fetch(`${API_BASE}/coupons/${id}/reject/manager`, {
+      method: 'PATCH',
+      headers: getAuthHeaders()
+    });
+    return handleResponse<any>(res);
   },
 
   // Categories

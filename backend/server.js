@@ -54,7 +54,8 @@ app.use(cors({
   },
   credentials: true
 }));
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -606,7 +607,8 @@ app.post('/api/seed', async (req, res, next) => {
 // Global Error Handler
 app.use((err, req, res, next) => {
   console.error(err.stack || err);
-  res.status(500).json({ message: err.message || 'Internal Server Error' });
+  const status = err.status || 500;
+  res.status(status).json({ message: err.message || 'Internal Server Error' });
 });
 
 // Port & Server Startup

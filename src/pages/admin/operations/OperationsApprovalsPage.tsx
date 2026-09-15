@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import './OperationsShared.css'
 import { getStoreLogo, PLACEHOLDER_DEAL_IMAGE, PLACEHOLDER_STORE_LOGO } from '../../../data/dealsPage'
+import api from '../../../services/api'
 
 export interface ModerationItem {
   id: string
@@ -230,6 +231,52 @@ export const OperationsApprovalsPage: React.FC = () => {
   // Preview Modal
   const [previewItem, setPreviewItem] = useState<ModerationItem | null>(null)
 
+  React.useEffect(() => {
+    fetchPendingItems()
+  }, [])
+
+  const fetchPendingItems = async () => {
+    try {
+      const storesRes = await api.get('/stores/pending')
+      const couponsRes = await api.get('/coupons/pending')
+      
+      const mappedStores = storesRes.data.map((s: any) => ({
+        id: s._id || s.id,
+        type: 'store',
+        title: s.name,
+        store: s.name,
+        submittedBy: s.submittedBy || 'executive@wouchify.com',
+        submittedAt: s.createdAt ? new Date(s.createdAt).toISOString().split('T')[0] : 'Just now',
+        price: '-',
+        priority: 'Normal',
+        link: s.affiliateLink || '',
+        image: s.logo || '',
+        category: s.categories?.[0] || 'Store',
+        status: 'Pending Approval'
+      }))
+
+      const mappedCoupons = couponsRes.data.map((c: any) => ({
+        id: c._id || c.id,
+        type: 'coupon',
+        title: c.title,
+        store: c.store,
+        submittedBy: c.submittedBy || 'executive@wouchify.com',
+        submittedAt: c.createdAt ? new Date(c.createdAt).toISOString().split('T')[0] : 'Just now',
+        price: c.discount || '',
+        code: c.code || '',
+        priority: 'Normal',
+        link: c.affiliateLink || '',
+        image: '',
+        category: c.category || 'Coupon',
+        status: 'Pending Approval'
+      }))
+
+      setItems([...mappedStores, ...mappedCoupons])
+    } catch (err) {
+      console.error('Failed to fetch pending items', err)
+    }
+  }
+
   const showToast = (msg: string) => {
     setToastMessage(msg)
     setTimeout(() => setToastMessage(null), 3000)
@@ -312,11 +359,24 @@ export const OperationsApprovalsPage: React.FC = () => {
     })
   }, [items, filterType, filterExecutive, searchTerm])
 
-  const handleApproveOne = (id: string, title: string) => {
-    adminApi.approveSubmission(id).catch(console.warn)
-    setItems(prev => prev.map(item => item.id === id ? { ...item, status: 'Approved' } : item))
-    setSelectedIds(prev => prev.filter(selId => selId !== id))
-    showToast(`Approved & published to storefront: "${title}"`)
+  const handleApproveOne = async (id: string, title: string) => {
+    const item = items.find(i => i.id === id)
+    try {
+      if (item && (item.type === 'store' || item.type === 'coupon')) {
+        const endpoint = item.type === 'store' ? `/stores/${id}/approve/opsManager` : `/coupons/${id}/approve/opsManager`
+        await api.patch(endpoint)
+      } else {
+        await adminApi.approveSubmission(id)
+      }
+      setItems(prev => prev.map(i => i.id === id ? { ...i, status: 'Approved' } : i))
+      setSelectedIds(prev => prev.filter(selId => selId !== id))
+      showToast(`Approved: "${title}"`)
+    } catch (err) {
+      adminApi.approveSubmission(id).catch(console.warn)
+      setItems(prev => prev.map(i => i.id === id ? { ...i, status: 'Approved' } : i))
+      setSelectedIds(prev => prev.filter(selId => selId !== id))
+      showToast(`Approved: "${title}"`)
+    }
   }
 
   const handleOpenRejectModal = (item: ModerationItem) => {
@@ -324,14 +384,25 @@ export const OperationsApprovalsPage: React.FC = () => {
     setRejectionReason('')
   }
 
-  const handleConfirmReject = () => {
+  const handleConfirmReject = async () => {
     if (!rejectingItem) return
     if (!rejectionReason.trim()) {
       alert('Please enter a rejection reason note for the executive team.')
       return
     }
 
-    adminApi.rejectSubmission(rejectingItem.id, rejectionReason).catch(console.warn)
+    try {
+      if (rejectingItem.type === 'store' || rejectingItem.type === 'coupon') {
+        const endpoint = rejectingItem.type === 'store' 
+          ? `/stores/${rejectingItem.id}/reject/opsManager` 
+          : `/coupons/${rejectingItem.id}/reject/opsManager`
+        await api.patch(endpoint, { reason: rejectionReason })
+      } else {
+        await adminApi.rejectSubmission(rejectingItem.id, rejectionReason)
+      }
+    } catch {
+      adminApi.rejectSubmission(rejectingItem.id, rejectionReason).catch(console.warn)
+    }
     setItems(prev => prev.map(item => 
       item.id === rejectingItem.id ? { ...item, status: 'Rejected', rejectionReason } : item
     ))
@@ -341,7 +412,7 @@ export const OperationsApprovalsPage: React.FC = () => {
     setRejectionReason('')
   }
 
-  const handleBulkApprove = () => {
+  const handleBulkApprove = async () => {
     if (selectedIds.length === 0) return
     selectedIds.forEach(id => adminApi.approveSubmission(id).catch(console.warn))
     setItems(prev => prev.map(item => selectedIds.includes(item.id) ? { ...item, status: 'Approved' } : item))
@@ -349,7 +420,7 @@ export const OperationsApprovalsPage: React.FC = () => {
     setSelectedIds([])
   }
 
-  const handleBulkReject = () => {
+  const handleBulkReject = async () => {
     if (selectedIds.length === 0) return
     const reason = prompt(`Enter rejection reason for ${selectedIds.length} selected items:`, 'Details incomplete or inaccurate')
     if (reason) {

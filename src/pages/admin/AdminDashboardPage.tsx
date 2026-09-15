@@ -3,7 +3,24 @@ import wouchifyLogo from '../../assets/navbar/wouchify-logo.png'
 import { FAVOURITE_STORES } from '../../data/storesHero'
 import { CATEGORIES_DATA } from '../../data/categories'
 import { adminApi } from '../../services/adminApi'
+import { CustomDropdown } from '../../components/common/CustomDropdown'
+import { DEAL_PRODUCT_PRESETS, convertGoogleDriveUrl } from '../../data/dealsPage'
+import { Line, Bar, Doughnut } from 'react-chartjs-2'
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js'
 import './AdminDashboardPage.css'
+import { AdminApprovalsView } from './AdminApprovalsView'
 
 // Types
 import type {
@@ -101,6 +118,8 @@ export const AdminDashboardPage: React.FC = () => {
   const [users] = useState<UserItem[]>(INITIAL_USERS)
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const [isBackendConnected, setIsBackendConnected] = useState<boolean>(true)
+  const [pendingApprovalsCount, setPendingApprovalsCount] = useState<number>(0)
 
   const [staffMembers, setStaffMembers] = useState<StaffItem[]>(() => {
     try {
@@ -112,6 +131,74 @@ export const AdminDashboardPage: React.FC = () => {
     } catch {}
     return INITIAL_STAFF
   })
+
+  // Load live data from Backend API on mount
+  useEffect(() => {
+    let isMounted = true
+    const fetchLiveData = async () => {
+      try {
+        const [dealsRes, couponsRes, lootRes, txnsRes, pendingStoresRes, pendingCouponsRes] = await Promise.allSettled([
+          adminApi.getDeals(),
+          adminApi.getCoupons(),
+          adminApi.getLootDeals(),
+          adminApi.getTransactions(),
+          adminApi.getManagerPendingStores(),
+          adminApi.getManagerPendingCoupons()
+        ])
+        if (!isMounted) return
+
+        if (dealsRes.status === 'fulfilled' && Array.isArray(dealsRes.value) && dealsRes.value.length > 0) {
+          setDeals((prevDeals) => {
+            const backendDeals = dealsRes.value
+            const backendIds = new Set(backendDeals.map((d: any) => String(d._id || d.id)))
+            const backendNames = new Set(backendDeals.map((d: any) => String(d.name).toLowerCase().trim()))
+
+            // Retain any custom deals created by the user locally that backend might not have yet
+            const locallyCreated = prevDeals.filter(
+              (d) => !backendIds.has(String(d._id || d.id)) && !backendNames.has(d.name.toLowerCase().trim())
+            )
+
+            // Auto-sync any local custom deals to backend so backend persists them too!
+            if (locallyCreated.length > 0) {
+              locallyCreated.forEach((deal) => {
+                adminApi.createDeal(deal).catch(() => {})
+              })
+            }
+
+            const merged = [...locallyCreated, ...backendDeals]
+            try {
+              localStorage.setItem('wouchify_public_deals', JSON.stringify(merged))
+            } catch {}
+            return merged
+          })
+        }
+        if (couponsRes.status === 'fulfilled' && Array.isArray(couponsRes.value) && couponsRes.value.length > 0) {
+          setCoupons(couponsRes.value)
+        }
+        if (lootRes.status === 'fulfilled' && Array.isArray(lootRes.value) && lootRes.value.length > 0) {
+          setLootDeals(lootRes.value)
+        }
+        if (txnsRes.status === 'fulfilled' && Array.isArray(txnsRes.value) && txnsRes.value.length > 0) {
+          setTransactions(txnsRes.value)
+        }
+        
+        let managerCount = 0
+        if (pendingStoresRes.status === 'fulfilled' && Array.isArray(pendingStoresRes.value)) {
+          managerCount += pendingStoresRes.value.length
+        }
+        if (pendingCouponsRes.status === 'fulfilled' && Array.isArray(pendingCouponsRes.value)) {
+          managerCount += pendingCouponsRes.value.length
+        }
+        setPendingApprovalsCount(managerCount)
+
+        setIsBackendConnected(true)
+      } catch (err) {
+        if (isMounted) setIsBackendConnected(false)
+      }
+    }
+    fetchLiveData()
+    return () => { isMounted = false }
+  }, [])
 
   const [algoConfig, setAlgoConfig] = useState<AlgorithmConfig>({
     trendingWeight: 1.5,
@@ -619,6 +706,7 @@ export const AdminDashboardPage: React.FC = () => {
   // Navigation Items
   const navItems = [
     { key: 'dashboard', label: 'Commercial Analytics', icon: <IconDashboard />, badge: null },
+    { key: 'approvals', label: 'Manager Approvals', icon: <IconCheck />, badge: pendingApprovalsCount },
     { key: 'staff', label: 'Staff & Team (RBAC)', icon: <IconStaff />, badge: staffMembers.length },
     { key: 'algorithms', label: 'Layout & Algorithm Config', icon: <IconAlgorithm />, badge: null },
     { key: 'governance', label: 'Data Governance & Audit', icon: <IconShield />, badge: auditLogs.length },
@@ -856,6 +944,7 @@ export const AdminDashboardPage: React.FC = () => {
               <div>
                 <h1>
                   {activeNav === 'dashboard' && 'Commercial Performance & Analytics'}
+                  {activeNav === 'approvals' && 'Manager Approvals Queue'}
                   {activeNav === 'staff' && 'Staff & Team Access Studio (RBAC)'}
                   {activeNav === 'algorithms' && 'Global Layout & Algorithm Configuration'}
                   {activeNav === 'governance' && 'Data Governance & System Security'}
@@ -869,6 +958,7 @@ export const AdminDashboardPage: React.FC = () => {
                 </h1>
                 <p>
                   {activeNav === 'dashboard' && 'Aggregated commercial metrics, outbound click-through rates (CTR), revenue generated per merchant, and traffic analytics.'}
+                  {activeNav === 'approvals' && 'Review operations-approved items and publish them to live.'}
                   {activeNav === 'staff' && 'Provision, deactivate, and manage operational managers and content executives with assigned vertical permissions.'}
                   {activeNav === 'algorithms' && 'Fine-tune homepage recommendation formulas, trending deal boost multipliers, and scheduled event campaigns.'}
                   {activeNav === 'governance' && 'System-wide audit trail for high-risk actions, manual database snapshot triggering, and full catalog JSON/CSV exports.'}
@@ -920,6 +1010,9 @@ export const AdminDashboardPage: React.FC = () => {
           </div>
 
           {/* Render Active View Subcomponent */}
+          {activeNav === 'approvals' && (
+            <AdminApprovalsView />
+          )}
           {activeNav === 'dashboard' && (
             <CommercialAnalyticsView liveStats={liveStats} />
           )}
