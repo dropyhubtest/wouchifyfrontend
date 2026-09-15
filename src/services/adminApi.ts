@@ -96,7 +96,7 @@ export const MASTER_STORES_DATA = FAVOURITE_STORES.map((s, i) => {
   };
 });
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? '/api' : 'http://localhost:5000/api');
 
 const getAuthHeaders = (): HeadersInit => {
   const token =

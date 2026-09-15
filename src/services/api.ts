@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create a centralized Axios instance
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? '/api' : 'http://localhost:5000/api'),
   headers: {
     'Content-Type': 'application/json',
   },

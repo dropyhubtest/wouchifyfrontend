@@ -19,7 +19,8 @@ export const AdminLoginPage: React.FC = () => {
 
       // Try backend first
       try {
-        const response = await fetch('http://localhost:5000/api/admin/login', {
+        const baseUrl = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? '/api' : 'http://localhost:5000/api')
+        const response = await fetch(`${baseUrl}/admin/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password }),

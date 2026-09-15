@@ -616,20 +616,24 @@ app.use((err, req, res, next) => {
 
 // Port & Server Startup
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/wouchify';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://rahuldropyhub_db_user:Wouchify%402026@cluster0.shilkmv.mongodb.net/wouchify?appName=Cluster0';
 
-// Always start the HTTP server so API works regardless of DB state
-const server = app.listen(PORT, () => {
-  console.log(`Backend server running on http://localhost:${PORT}`);
-});
+// Connect to MongoDB asynchronously
+if (mongoose.connection.readyState === 0) {
+  mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 })
+    .then(() => {
+      console.log('Connected to MongoDB Atlas');
+    })
+    .catch((err) => {
+      console.log('MongoDB connection error - using fallback data.', err);
+    });
+}
 
-// Connect to MongoDB asynchronously; if unavailable, seamlessly fall back
-mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 2000 })
-  .then(() => {
-    console.log('Connected to MongoDB');
-  })
-  .catch((err) => {
-    console.log('MongoDB not connected - running with in-memory dev database.');
+// Only start HTTP listener if not running on Vercel serverless
+if (!process.env.VERCEL && require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Backend server running on http://localhost:${PORT}`);
   });
+}
 
 module.exports = app;

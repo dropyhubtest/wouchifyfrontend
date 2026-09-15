@@ -32,8 +32,8 @@ export const StaffLoginPage: React.FC = () => {
     setError('')
 
     try {
-      const baseUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000'
-      const response = await fetch(`${baseUrl}/api/admin/staff-login`, {
+      const baseUrl = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? '/api' : 'http://localhost:5000/api')
+      const response = await fetch(`${baseUrl}/admin/staff-login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, requestedRole: role })
