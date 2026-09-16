@@ -28,10 +28,11 @@ export const getPublicStores = async () => {
   }
 };
 
+import { adminApi } from './adminApi';
+
 export const getPublicCoupons = async () => {
   try {
-    const res = await api.get('/coupons?status=active&public=true');
-    return res.data;
+    return await adminApi.getPublicCoupons();
   } catch (err) {
     console.error('Failed to fetch public coupons', err);
     return [];

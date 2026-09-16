@@ -589,7 +589,53 @@ const CouponFormModal: React.FC<CouponFormProps> = ({ editing, onClose, onSave }
    ============================================================ */
 
 export const ExecutiveCouponsPage: React.FC = () => {
-  const [coupons, setCoupons] = useState<Coupon[]>(MOCK_COUPONS)
+  const [coupons, setCoupons] = useState<Coupon[]>(() => {
+    try {
+      let deletedSet = new Set<string>()
+      const delStr = localStorage.getItem('wouchify_deleted_coupons')
+      if (delStr) {
+        deletedSet = new Set(JSON.parse(delStr).map((s: string) => String(s).trim().toLowerCase()))
+      }
+      const cached = localStorage.getItem('wouchify_coupons')
+      if (cached) {
+        const parsed = JSON.parse(cached)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed
+            .filter((c: any) => {
+              const cId = String(c._id || '').toLowerCase()
+              const cCustomId = String(c.id || '').toLowerCase()
+              const cCode = String(c.code || '').toLowerCase()
+              return !deletedSet.has(cId) && !deletedSet.has(cCustomId) && !deletedSet.has(cCode)
+            })
+            .map((c: any, idx: number) => ({
+              id: String(c._id || c.id || `cpn-${idx}`),
+              title: c.title || `${c.discount || 'Special'} Discount at ${c.store || 'Store'}`,
+              description: c.description || 'Verified promo discount code.',
+              store: c.store || 'Amazon',
+              category: c.category || 'Electronics',
+              code: (c.code || 'AMAZON10').toUpperCase(),
+              couponType: (c.couponType || (String(c.discount || '').includes('%') ? 'percent' : String(c.discount || '').toLowerCase().includes('free') ? 'freebie' : 'flat')) as any,
+              discount: c.discount || '10% off',
+              discountValue: parseInt(String(c.discount || '0').replace(/[^0-9]/g, '')) || 10,
+              minOrder: c.minOrder || 'Min Order: 499',
+              maxDiscount: c.maxDiscount || 'Max ₹250',
+              affiliateLink: c.affiliateLink || `https://${String(c.store || 'store').toLowerCase().replace(/\s+/g, '')}.com/?tag=wouchify`,
+              status: (c.status || 'active') as any,
+              isExclusive: Boolean(c.isExclusive !== false),
+              isFeatured: Boolean(c.isFeatured !== false),
+              isVerified: true,
+              telegramAlert: Boolean(c.telegramAlert),
+              startDate: c.startDate || new Date().toISOString().slice(0, 10),
+              expiryDate: c.expiry || c.expiryDate || new Date(Date.now() + 86400000 * 30).toISOString().slice(0, 10),
+              usageCount: c.usageCount || 0,
+              totalUses: c.usageLimit || 5000,
+              addedOn: c.createdAt ? new Date(c.createdAt).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10)
+            }))
+        }
+      }
+    } catch {}
+    return MOCK_COUPONS
+  })
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState<'all' | CouponStatus>('all')
   const [filterType, setFilterType] = useState<'all' | CouponType>('all')
@@ -636,6 +682,9 @@ export const ExecutiveCouponsPage: React.FC = () => {
 
   useEffect(() => {
     fetchCoupons()
+    const handleUpdate = () => fetchCoupons()
+    window.addEventListener('wouchify_coupons_updated', handleUpdate)
+    return () => window.removeEventListener('wouchify_coupons_updated', handleUpdate)
   }, [])
   /* KPI stats */
   const kpi = useMemo(() => ({
@@ -720,10 +769,10 @@ export const ExecutiveCouponsPage: React.FC = () => {
     setIsFormOpen(false)
   }
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Delete this coupon permanently?')) {
-      adminApi.deleteCoupon(id).catch(console.warn)
-      setCoupons(prev => prev.filter(c => c.id !== id))
+  const handleDelete = async (coupon: Coupon) => {
+    if (window.confirm(`Delete coupon "${coupon.code}" permanently?`)) {
+      await adminApi.deleteCoupon(coupon._id || coupon.id, coupon.code).catch(console.warn)
+      setCoupons(prev => prev.filter(c => c.id !== coupon.id && c.code !== coupon.code && c._id !== coupon._id))
     }
   }
 
@@ -987,7 +1036,7 @@ export const ExecutiveCouponsPage: React.FC = () => {
                       <div style={{ display: 'flex', gap: 4 }}>
                         <button className="action-btn" onClick={() => setPreviewing(coupon)} title="Preview"><Eye size={15} /></button>
                         <button className="action-btn" onClick={() => openEdit(coupon)} title="Edit"><Edit2 size={15} /></button>
-                        <button className="action-btn delete" onClick={() => handleDelete(coupon.id)} title="Delete"><Trash2 size={15} /></button>
+                        <button className="action-btn delete" onClick={() => handleDelete(coupon)} title="Delete"><Trash2 size={15} /></button>
                       </div>
                     </td>
                   </tr>

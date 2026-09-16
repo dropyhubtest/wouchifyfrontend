@@ -2,6 +2,7 @@ import { MASTER_EXECUTIVE_DEALS, MASTER_EXECUTIVE_LOOT_DEALS } from '../data/dea
 import { FAVOURITE_STORES } from '../data/storesHero';
 import { MASTER_COUPONS } from '../data/couponsData';
 import { CREDIT_CARDS } from '../data/creditCardsData';
+import { CATEGORIES_DATA } from '../data/categories';
 
 export const MASTER_CREDIT_CARDS_DATA = CREDIT_CARDS.map((c, i) => ({
   id: c.id,
@@ -358,10 +359,23 @@ export const adminApi = {
   },
 
   // Coupons
-  getCoupons: async () => {
+  getCoupons: async (params?: { store?: string; category?: string; status?: string }) => {
+    let deletedSet = new Set<string>();
+    try {
+      const delStr = localStorage.getItem('wouchify_deleted_coupons');
+      if (delStr) {
+        deletedSet = new Set(JSON.parse(delStr).map((s: string) => String(s).trim().toLowerCase()));
+      }
+    } catch {}
+
     let backendCoupons: any[] = [];
     try {
-      const res = await fetch(`${API_BASE}/coupons`, {
+      const query = new URLSearchParams();
+      if (params?.store && params.store !== 'All') query.append('store', params.store);
+      if (params?.category && params.category !== 'All') query.append('category', params.category);
+      if (params?.status && params.status !== 'All') query.append('status', params.status);
+      const qs = query.toString() ? `?${query.toString()}` : '';
+      const res = await fetch(`${API_BASE}/coupons${qs}`, {
         headers: getAuthHeaders()
       });
       if (res.ok) {
@@ -369,36 +383,84 @@ export const adminApi = {
       }
     } catch {}
 
+    if (Array.isArray(backendCoupons) && backendCoupons.length > 0) {
+      const liveFiltered = backendCoupons.filter((c: any) => {
+        const cId = String(c._id || '').toLowerCase();
+        const cCustomId = String(c.id || '').toLowerCase();
+        const cCode = String(c.code || '').toLowerCase();
+        return !deletedSet.has(cId) && !deletedSet.has(cCustomId) && !deletedSet.has(cCode);
+      });
+      try {
+        localStorage.setItem('wouchify_coupons', JSON.stringify(liveFiltered));
+      } catch {}
+      return liveFiltered;
+    }
+
     try {
       const cached = localStorage.getItem('wouchify_coupons');
-      if (cached && (!cached.includes('AMAZON10') || cached.includes('AMZTECH1000') || cached.includes('WOUCH50'))) {
-        localStorage.removeItem('wouchify_coupons');
-      } else if (cached) {
+      if (cached) {
         const local = JSON.parse(cached);
-        if (Array.isArray(local) && local.length > 0 && backendCoupons.length === 0) {
-          return local;
+        if (Array.isArray(local)) {
+          const cachedFiltered = local.filter((c: any) => {
+            const cId = String(c._id || '').toLowerCase();
+            const cCustomId = String(c.id || '').toLowerCase();
+            const cCode = String(c.code || '').toLowerCase();
+            return !deletedSet.has(cId) && !deletedSet.has(cCustomId) && !deletedSet.has(cCode);
+          });
+          return cachedFiltered;
         }
       }
     } catch {}
 
-    if (backendCoupons.length > 0) {
-      try {
-        localStorage.setItem('wouchify_coupons', JSON.stringify(backendCoupons));
-      } catch {}
-      return backendCoupons;
-    }
+    const initial = MASTER_COUPONS.filter((c: any) => {
+      const cId = String(c._id || '').toLowerCase();
+      const cCustomId = String(c.id || '').toLowerCase();
+      const cCode = String(c.code || '').toLowerCase();
+      return !deletedSet.has(cId) && !deletedSet.has(cCustomId) && !deletedSet.has(cCode);
+    });
     try {
-      localStorage.setItem('wouchify_coupons', JSON.stringify(MASTER_COUPONS));
+      localStorage.setItem('wouchify_coupons', JSON.stringify(initial));
     } catch {}
-    return MASTER_COUPONS;
+    return initial;
+  },
+
+  getPublicCoupons: async () => {
+    return adminApi.getCoupons({ status: 'active' });
   },
 
   createCoupon: async (couponData: Record<string, any>) => {
-    const newEntry = { id: couponData.id || `coupon-${Date.now()}`, ...couponData };
+    const code = (couponData.code || '').toUpperCase().trim();
+    const newEntry = { 
+      id: couponData.id || `coupon-${code ? code.toLowerCase() : Date.now()}`,
+      _id: couponData._id || `coupon-${code ? code.toLowerCase() : Date.now()}`,
+      ...couponData,
+      code,
+      status: couponData.status || 'active'
+    };
+
+    // If previously deleted, remove from deletedSet
+    try {
+      const delStr = localStorage.getItem('wouchify_deleted_coupons');
+      if (delStr) {
+        const list = JSON.parse(delStr);
+        const filtered = list.filter((s: string) => 
+          s.toLowerCase() !== String(newEntry.id).toLowerCase() && 
+          s.toLowerCase() !== String(newEntry._id).toLowerCase() && 
+          s.toLowerCase() !== code.toLowerCase()
+        );
+        localStorage.setItem('wouchify_deleted_coupons', JSON.stringify(filtered));
+      }
+    } catch {}
+
     try {
       const cachedStr = localStorage.getItem('wouchify_coupons');
       const cachedList = cachedStr ? JSON.parse(cachedStr) : [...MASTER_COUPONS];
-      localStorage.setItem('wouchify_coupons', JSON.stringify([newEntry, ...cachedList]));
+      const updated = [newEntry, ...cachedList.filter((c: any) => 
+        String(c.id) !== String(newEntry.id) && 
+        String(c._id) !== String(newEntry._id) && 
+        String(c.code || '').toUpperCase() !== code
+      )];
+      localStorage.setItem('wouchify_coupons', JSON.stringify(updated));
       window.dispatchEvent(new CustomEvent('wouchify_coupons_updated', { detail: newEntry }));
     } catch {}
 
@@ -406,7 +468,7 @@ export const adminApi = {
       const res = await fetch(`${API_BASE}/coupons`, {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify(couponData)
+        body: JSON.stringify(newEntry)
       });
       return await handleResponse<any>(res);
     } catch {
@@ -415,10 +477,17 @@ export const adminApi = {
   },
 
   updateCoupon: async (id: string | number, couponData: Record<string, any>) => {
+    const target = String(id).trim().toLowerCase();
     try {
       const cachedStr = localStorage.getItem('wouchify_coupons');
       const cachedList = cachedStr ? JSON.parse(cachedStr) : [...MASTER_COUPONS];
-      const updated = cachedList.map((c: any) => String(c.id || c._id) === String(id) ? { ...c, ...couponData } : c);
+      const updated = cachedList.map((c: any) => {
+        const match = 
+          String(c.id || '').toLowerCase() === target || 
+          String(c._id || '').toLowerCase() === target || 
+          String(c.code || '').toLowerCase() === target;
+        return match ? { ...c, ...couponData } : c;
+      });
       localStorage.setItem('wouchify_coupons', JSON.stringify(updated));
       window.dispatchEvent(new CustomEvent('wouchify_coupons_updated', { detail: { id, ...couponData } }));
     } catch {}
@@ -435,19 +504,42 @@ export const adminApi = {
     }
   },
 
-  deleteCoupon: async (id: string | number) => {
+  deleteCoupon: async (id: string | number, code?: string) => {
+    const target = String(id).trim();
+    const codeTarget = code ? String(code).trim().toLowerCase() : '';
+
+    // 1. Record in persistent deleted blacklist
+    try {
+      const delStr = localStorage.getItem('wouchify_deleted_coupons');
+      const list = delStr ? JSON.parse(delStr) : [];
+      if (target) list.push(target.toLowerCase());
+      if (codeTarget) list.push(codeTarget);
+      localStorage.setItem('wouchify_deleted_coupons', JSON.stringify(Array.from(new Set(list))));
+    } catch {}
+
+    // 2. Filter out from localStorage immediately
     try {
       const cachedStr = localStorage.getItem('wouchify_coupons');
       if (cachedStr) {
         const cachedList = JSON.parse(cachedStr);
-        const updated = cachedList.filter((c: any) => String(c.id || c._id) !== String(id));
+        const updated = cachedList.filter((c: any) => {
+          const matchId = String(c.id || '').toLowerCase() === target.toLowerCase() || String(c._id || '').toLowerCase() === target.toLowerCase();
+          const matchCode = codeTarget && String(c.code || '').toLowerCase() === codeTarget;
+          const matchTargetAsCode = String(c.code || '').toLowerCase() === target.toLowerCase();
+          return !matchId && !matchCode && !matchTargetAsCode;
+        });
         localStorage.setItem('wouchify_coupons', JSON.stringify(updated));
-        window.dispatchEvent(new CustomEvent('wouchify_coupons_updated', { detail: { id } }));
       }
     } catch {}
 
+    // 3. Dispatch global sync event
     try {
-      const res = await fetch(`${API_BASE}/coupons/${id}`, {
+      window.dispatchEvent(new CustomEvent('wouchify_coupons_updated', { detail: { id: target, code } }));
+    } catch {}
+
+    // 4. Call backend delete by ID or code
+    try {
+      const res = await fetch(`${API_BASE}/coupons/${target}`, {
         method: 'DELETE',
         headers: getAuthHeaders()
       });
@@ -816,30 +908,110 @@ export const adminApi = {
 
   // Categories
   getCategories: async () => {
+    let backendCats: any[] = [];
     try {
       const res = await fetch(`${API_BASE}/categories`, {
         headers: getAuthHeaders()
       });
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          backendCats = data;
+        }
+      }
     } catch {}
-    return [];
+
+    let localCats: any[] = [];
+    try {
+      const cached = localStorage.getItem('wouchify_categories');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) localCats = parsed;
+      }
+    } catch {}
+
+    if (backendCats.length === 0) {
+      if (localCats.length > 0) return localCats;
+      return CATEGORIES_DATA;
+    }
+
+    try {
+      localStorage.setItem('wouchify_categories', JSON.stringify(backendCats));
+    } catch {}
+    return backendCats;
   },
 
   createCategory: async (categoryData: Record<string, any>) => {
-    const res = await fetch(`${API_BASE}/categories`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(categoryData)
-    });
-    return handleResponse<any>(res);
+    const newEntry = {
+      _id: categoryData._id || `cat-${Date.now()}`,
+      id: categoryData.id || categoryData.slug || `cat-${Date.now()}`,
+      ...categoryData,
+      createdAt: new Date().toISOString()
+    };
+
+    try {
+      const cached = localStorage.getItem('wouchify_categories');
+      const list = cached ? JSON.parse(cached) : [...CATEGORIES_DATA];
+      const updated = [newEntry, ...list.filter((c: any) => c.slug !== categoryData.slug && c._id !== newEntry._id)];
+      localStorage.setItem('wouchify_categories', JSON.stringify(updated));
+      window.dispatchEvent(new CustomEvent('wouchify_categories_updated', { detail: newEntry }));
+    } catch {}
+
+    try {
+      const res = await fetch(`${API_BASE}/categories`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(categoryData)
+      });
+      return await handleResponse<any>(res);
+    } catch {
+      return newEntry;
+    }
+  },
+
+  updateCategory: async (id: string, categoryData: Record<string, any>) => {
+    try {
+      const cached = localStorage.getItem('wouchify_categories');
+      const list = cached ? JSON.parse(cached) : [...CATEGORIES_DATA];
+      const updated = list.map((c: any) =>
+        c._id === id || c.id === id || c.slug === id ? { ...c, ...categoryData } : c
+      );
+      localStorage.setItem('wouchify_categories', JSON.stringify(updated));
+      window.dispatchEvent(new CustomEvent('wouchify_categories_updated', { detail: { id, ...categoryData } }));
+    } catch {}
+
+    try {
+      const res = await fetch(`${API_BASE}/categories/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(categoryData)
+      });
+      return await handleResponse<any>(res);
+    } catch {
+      return { id, ...categoryData };
+    }
   },
 
   deleteCategory: async (id: string) => {
-    const res = await fetch(`${API_BASE}/categories/${id}`, {
-      method: 'DELETE',
-      headers: getAuthHeaders()
-    });
-    return handleResponse<{ message: string }>(res);
+    try {
+      const cached = localStorage.getItem('wouchify_categories');
+      if (cached) {
+        const list = JSON.parse(cached);
+        const filtered = list.filter((c: any) => c._id !== id && c.id !== id && c.slug !== id);
+        localStorage.setItem('wouchify_categories', JSON.stringify(filtered));
+        window.dispatchEvent(new CustomEvent('wouchify_categories_updated'));
+      }
+    } catch {}
+
+    try {
+      const res = await fetch(`${API_BASE}/categories/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+      return await handleResponse<{ message: string }>(res);
+    } catch {
+      return { message: 'Category deleted' };
+    }
   },
 
   // Credit Cards

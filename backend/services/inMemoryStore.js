@@ -723,8 +723,374 @@ let coupons = [
 ];
 
 let lootDeals = [
-  { _id: 'flash-1', id: 'flash-1', title: 'Oval Up Down LED Wall Light 2W', storeName: 'Amazon', category: 'Electronics', discount: '91% OFF', currentPrice: '₹179', originalPrice: '₹1,899', dealType: 'flash', status: 'active', href: '/deals', submissionStatus: 'approved' },
-  { _id: 'excl-1', id: 'excl-1', title: 'Noise ColorFit Pulse Grand Smartwatch', storeName: 'Flipkart', category: 'Electronics', discount: '75% OFF', currentPrice: '₹999', originalPrice: '₹3,999', dealType: 'exclusive', status: 'active', href: '/deals', submissionStatus: 'approved' }
+  {
+    _id: 'loot-1',
+    id: 'loot-1',
+    title: 'Oval Up Down LED Wall Light 2 Watts | Warm White 2 Ray Outdoor Indoor Fixture',
+    name: 'Oval Up Down LED Wall Light 2 Watts | Warm White 2 Ray Outdoor Indoor Fixture',
+    store: 'Amazon',
+    storeName: 'Amazon',
+    brand: 'Wipro',
+    category: 'Electronics',
+    lootType: 'flash',
+    dealType: 'flash',
+    badge: '⚡ 91% FLASH LOOT',
+    status: 'active',
+    submissionStatus: 'approved',
+    priority: 'Critical',
+    code: 'LOOT91',
+    link: '/stores#amazon',
+    href: '/stores#amazon',
+    originalPrice: '₹1,899',
+    price: '₹179',
+    currentPrice: '₹179',
+    discount: '91% OFF',
+    discountLabel: '91% OFF',
+    discountValue: 91,
+    effectivePrice: '₹179',
+    cashback: '+ ₹20 Wouchify Cash',
+    stockClaimedPercent: 96,
+    quantityAlert: 'Hurry! Flash window open — 96% units claimed',
+    proofNote: 'Verified flash loot drop on Amazon India.',
+    trickSteps: '1. Click "Grab Loot" to go to Amazon product page.\n2. Apply the 91% coupon checkbox if shown.\n3. Complete checkout via UPI for instant dispatch.',
+    terms: 'Limited time lightning flash price. 1 unit per customer.',
+    asinOrSku: 'B0CHOVAL2W',
+    deliveryInfo: 'Prime 1-Day Free Delivery',
+    rating: '4.8 ★ (12k)',
+    postedAt: 'Today, 11:15 AM',
+    expiresAt: '2026-12-31T23:59:59.000Z',
+    image: '/src/assets/deals/deal1.png',
+    images: ['/src/assets/deals/deal1.png', '/src/assets/deals/deal2.png'],
+    telegramAlert: true,
+    pushNotification: true,
+    isFeatured: true,
+    isVerified: true,
+    isBestSelling: true,
+    sectionPlacement: 'both',
+    clicks: 7890
+  },
+  {
+    _id: 'loot-2',
+    id: 'loot-2',
+    title: 'Exclusive Oval Architectural LED Outdoor Fixture (Warm White Dual Ray)',
+    name: 'Exclusive Oval Architectural LED Outdoor Fixture (Warm White Dual Ray)',
+    store: 'Amazon',
+    storeName: 'Amazon',
+    brand: 'Philips',
+    category: 'Electronics',
+    lootType: 'steal',
+    dealType: 'flash',
+    badge: '💎 EXCLUSIVE STEAL',
+    status: 'active',
+    submissionStatus: 'approved',
+    priority: 'High',
+    code: 'STEAL91',
+    link: '/stores#amazon',
+    href: '/stores#amazon',
+    originalPrice: '₹1,899',
+    price: '₹179',
+    currentPrice: '₹179',
+    discount: '91% OFF',
+    discountLabel: '91% OFF',
+    discountValue: 91,
+    effectivePrice: '₹179',
+    cashback: '+ 5% Wouchify Cashback',
+    stockClaimedPercent: 89,
+    quantityAlert: 'Exclusive pricing locked for Wouchify members',
+    proofNote: 'Exclusive partner deal negotiated directly with manufacturer.',
+    trickSteps: '1. Click "Grab Loot" to activate exclusive pricing.\n2. Proceed to checkout on Amazon.\n3. Extra ₹20 cashback credited to Wouchify wallet.',
+    terms: 'Exclusive to registered Wouchify users.',
+    asinOrSku: 'B0CHEXCL2W',
+    deliveryInfo: 'Free Delivery with Prime',
+    rating: '4.7 ★ (8.5k)',
+    postedAt: 'Today, 10:45 AM',
+    expiresAt: '2026-12-31T23:59:59.000Z',
+    image: '/src/assets/deals/deal2.png',
+    images: ['/src/assets/deals/deal2.png', '/src/assets/deals/deal1.png'],
+    telegramAlert: true,
+    pushNotification: true,
+    isFeatured: true,
+    isVerified: true,
+    isBestSelling: true,
+    sectionPlacement: 'both',
+    clicks: 5410
+  },
+  {
+    _id: 'loot-3',
+    id: 'loot-3',
+    title: 'Milton Rapid Electric Kettle 1.8L Stainless Steel Fast Boil',
+    name: 'Milton Rapid Electric Kettle 1.8L Stainless Steel Fast Boil',
+    store: 'Amazon',
+    storeName: 'Amazon',
+    brand: 'Milton',
+    category: 'Home & Living',
+    lootType: 'glitch',
+    dealType: 'flash',
+    badge: '💥 68% PRICE GLITCH',
+    status: 'active',
+    submissionStatus: 'approved',
+    priority: 'Critical',
+    code: 'KETTLE604',
+    link: '/stores#amazon',
+    href: '/stores#amazon',
+    originalPrice: '₹1,899',
+    price: '₹604',
+    currentPrice: '₹604',
+    discount: '68% OFF',
+    discountLabel: '68% OFF',
+    discountValue: 68,
+    effectivePrice: '₹554',
+    cashback: '+ ₹50 Wouchify Cash',
+    stockClaimedPercent: 92,
+    quantityAlert: 'Price error live! May expire anytime',
+    proofNote: 'Seller algorithmic error discount confirmed active.',
+    trickSteps: '1. Click Grab Loot immediately.\n2. Add to cart & apply coupon checkbox on Amazon.\n3. Complete payment before seller rectifies price.',
+    terms: 'Price may change without prior notice.',
+    asinOrSku: 'B0CHMILT18',
+    deliveryInfo: 'Prime Same-Day / 1-Day Delivery',
+    rating: '4.5 ★ (34k)',
+    postedAt: 'Today, 09:30 AM',
+    expiresAt: '2026-12-31T23:59:59.000Z',
+    image: '/src/assets/deals/deal2.png',
+    images: ['/src/assets/deals/deal2.png'],
+    telegramAlert: true,
+    pushNotification: true,
+    isFeatured: true,
+    isVerified: true,
+    isBestSelling: true,
+    sectionPlacement: 'both',
+    clicks: 9200
+  },
+  {
+    _id: 'loot-4',
+    id: 'loot-4',
+    title: 'Xiaomi 55" 4K Ultra HD Smart Google TV with Dolby Vision & Atmos',
+    name: 'Xiaomi 55" 4K Ultra HD Smart Google TV with Dolby Vision & Atmos',
+    store: 'Flipkart',
+    storeName: 'Flipkart',
+    brand: 'Xiaomi',
+    category: 'Electronics',
+    lootType: 'flash',
+    dealType: 'flash',
+    badge: '⚡ 50% MEGA DROP',
+    status: 'active',
+    submissionStatus: 'approved',
+    priority: 'High',
+    code: 'TVSAVE',
+    link: '/stores#flipkart',
+    href: '/stores#flipkart',
+    originalPrice: '₹49,999',
+    price: '₹24,999',
+    currentPrice: '₹24,999',
+    discount: '50% OFF',
+    discountLabel: '50% OFF',
+    discountValue: 50,
+    effectivePrice: '₹23,499',
+    cashback: '+ ₹1,500 Bank Discount',
+    stockClaimedPercent: 85,
+    quantityAlert: 'Limited flash sale units remaining',
+    proofNote: 'Flipkart Big Billion Days preview drop.',
+    trickSteps: '1. Click Grab Loot to open Flipkart app/web.\n2. Use HDFC/SBI card for extra ₹1,500 discount.\n3. Free wall-mount installation included.',
+    terms: '1 unit per account. 1 Year comprehensive warranty.',
+    asinOrSku: 'FSNXIAOMI55',
+    deliveryInfo: 'Free Express Scheduled Delivery',
+    rating: '4.6 ★ (62k)',
+    postedAt: 'Today, 08:45 AM',
+    expiresAt: '2026-12-31T23:59:59.000Z',
+    image: '/src/assets/deals/deal1.png',
+    images: ['/src/assets/deals/deal1.png'],
+    telegramAlert: true,
+    pushNotification: true,
+    isFeatured: true,
+    isVerified: true,
+    isBestSelling: true,
+    sectionPlacement: 'both',
+    clicks: 11400
+  },
+  {
+    _id: 'loot-5',
+    id: 'loot-5',
+    title: 'Portronics 65W Fast USB-C Braided Cable (2 Metres)',
+    name: 'Portronics 65W Fast USB-C Braided Cable (2 Metres)',
+    store: 'Amazon',
+    storeName: 'Amazon',
+    brand: 'Portronics',
+    category: 'Electronics',
+    lootType: 'under99',
+    dealType: 'flash',
+    badge: '🏷️ UNDER ₹99 LOOT',
+    status: 'active',
+    submissionStatus: 'approved',
+    priority: 'High',
+    code: '',
+    link: '/stores#amazon',
+    href: '/stores#amazon',
+    originalPrice: '₹899',
+    price: '₹79',
+    currentPrice: '₹79',
+    discount: '91% OFF',
+    discountLabel: '91% OFF',
+    discountValue: 91,
+    effectivePrice: '₹79',
+    cashback: '+ 8% Wouchify Cashback',
+    stockClaimedPercent: 65,
+    quantityAlert: 'Fast charging supported on all USB-C devices',
+    proofNote: 'Amazon lightning loot deal.',
+    trickSteps: '1. Click Grab Loot.\n2. Add to cart & checkout.',
+    terms: 'Valid while supplies last.',
+    asinOrSku: 'B0PORT01',
+    deliveryInfo: 'Prime 1-Day Delivery',
+    rating: '4.4 ★ (18.6k)',
+    postedAt: 'Yesterday, 06:40 PM',
+    expiresAt: '2026-12-31T23:59:59.000Z',
+    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&auto=format&fit=crop',
+    images: ['https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&auto=format&fit=crop'],
+    telegramAlert: true,
+    pushNotification: false,
+    isFeatured: false,
+    isVerified: true,
+    isBestSelling: false,
+    sectionPlacement: 'favourite',
+    clicks: 1980
+  },
+  {
+    _id: 'loot-6',
+    id: 'loot-6',
+    title: 'The Man Company Charcoal Grooming Kit (5-Piece Gift Set)',
+    name: 'The Man Company Charcoal Grooming Kit (5-Piece Gift Set)',
+    store: 'Flipkart',
+    storeName: 'Flipkart',
+    brand: 'The Man Company',
+    category: 'Beauty & Wellness',
+    lootType: 'under199',
+    dealType: 'flash',
+    badge: '🏷️ UNDER ₹199',
+    status: 'active',
+    submissionStatus: 'approved',
+    priority: 'Normal',
+    code: 'GROOM100',
+    link: '/stores#flipkart',
+    href: '/stores#flipkart',
+    originalPrice: '₹1,899',
+    price: '₹189',
+    currentPrice: '₹189',
+    discount: '90% OFF',
+    discountLabel: '90% OFF',
+    discountValue: 90,
+    effectivePrice: '₹189',
+    cashback: '+ ₹25 Cashback',
+    stockClaimedPercent: 91,
+    quantityAlert: 'Lightning Deal (91% Claimed)',
+    proofNote: 'Flash kit sale verified on Flipkart seller portal.',
+    trickSteps: '1. Add 1 set to cart.\n2. Coupon GROOM100 auto-applies.\n3. Complete payment before flash sale expires.',
+    terms: 'Valid on single box per customer.',
+    asinOrSku: 'FSNTMC9018',
+    deliveryInfo: 'Free Delivery above ₹149',
+    rating: '4.5 ★ (9.1k)',
+    postedAt: 'Yesterday, 02:15 PM',
+    expiresAt: '2026-12-31T23:59:59.000Z',
+    image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&auto=format&fit=crop',
+    images: ['https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&auto=format&fit=crop'],
+    telegramAlert: false,
+    pushNotification: false,
+    isFeatured: false,
+    isVerified: true,
+    isBestSelling: false,
+    sectionPlacement: 'favourite',
+    clicks: 1420
+  },
+  {
+    _id: 'loot-7',
+    id: 'loot-7',
+    title: 'Free Sample Coffee Tasting Box (3 Exotic Flavours 150g)',
+    name: 'Free Sample Coffee Tasting Box (3 Exotic Flavours 150g)',
+    store: 'Tata CLiQ',
+    storeName: 'Tata CLiQ',
+    brand: 'Tata Coffee',
+    category: 'Food & Dining',
+    lootType: 'freebie',
+    dealType: 'exclusive',
+    badge: '🎁 100% FREE SAMPLE',
+    status: 'active',
+    submissionStatus: 'approved',
+    priority: 'High',
+    code: 'FREEBREW',
+    link: '/stores#tata-cliq',
+    href: '/stores#tata-cliq',
+    originalPrice: '₹499',
+    price: '₹0',
+    currentPrice: '₹0',
+    discount: '100% FREE',
+    discountLabel: '100% FREE',
+    discountValue: 100,
+    effectivePrice: '₹0',
+    cashback: 'Zero Shipping Fee',
+    stockClaimedPercent: 98,
+    quantityAlert: 'Almost gone! 98% claimed today',
+    proofNote: 'Sponsored official brand promotional sampler.',
+    trickSteps: '1. Click Grab Loot.\n2. Enter delivery address.\n3. Apply FREEBREW code at checkout.',
+    terms: '1 sample box per household address.',
+    asinOrSku: 'TATAFREE01',
+    deliveryInfo: 'Dispatched via India Post Express',
+    rating: '4.9 ★ (28k)',
+    postedAt: 'Today, 07:00 AM',
+    expiresAt: '2026-12-31T23:59:59.000Z',
+    image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&auto=format&fit=crop',
+    images: ['https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&auto=format&fit=crop'],
+    telegramAlert: true,
+    pushNotification: true,
+    isFeatured: false,
+    isVerified: true,
+    isBestSelling: false,
+    sectionPlacement: 'favourite',
+    clicks: 4320
+  },
+  {
+    _id: 'loot-8',
+    id: 'loot-8',
+    title: 'Boat Rockerz 255 Pro+ Wireless Neckband Earphones (40H Playback)',
+    name: 'Boat Rockerz 255 Pro+ Wireless Neckband Earphones (40H Playback)',
+    store: 'Amazon',
+    storeName: 'Amazon',
+    brand: 'Boat',
+    category: 'Electronics',
+    lootType: 'glitch',
+    dealType: 'flash',
+    badge: '💥 70% LOOT DROP',
+    status: 'active',
+    submissionStatus: 'approved',
+    priority: 'Critical',
+    code: 'BOAT999',
+    link: '/stores#amazon',
+    href: '/stores#amazon',
+    originalPrice: '₹3,490',
+    price: '₹999',
+    currentPrice: '₹999',
+    discount: '71% OFF',
+    discountLabel: '71% OFF',
+    discountValue: 71,
+    effectivePrice: '₹949',
+    cashback: '+ ₹50 Wouchify Cash',
+    stockClaimedPercent: 88,
+    quantityAlert: 'Hurry! Limited stock available at this flash price',
+    proofNote: 'Official boat flash sale verified on Amazon.',
+    trickSteps: '1. Click Grab Loot to open Amazon.\n2. Apply ₹100 instant coupon checkbox.\n3. Extra 5% cashback with Amazon Pay ICICI Card.',
+    terms: 'Limited period offer.',
+    asinOrSku: 'B08TV2P158',
+    deliveryInfo: 'Prime 1-Day Delivery',
+    rating: '4.3 ★ (78k)',
+    postedAt: 'Today, 06:15 AM',
+    expiresAt: '2026-12-31T23:59:59.000Z',
+    image: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500&auto=format&fit=crop',
+    images: ['https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500&auto=format&fit=crop'],
+    telegramAlert: true,
+    pushNotification: true,
+    isFeatured: true,
+    isVerified: true,
+    isBestSelling: true,
+    sectionPlacement: 'both',
+    clicks: 8650
+  }
 ];
 
 let stores = [
@@ -740,13 +1106,242 @@ let stores = [
 ];
 
 let categories = [
-  { _id: '1', name: 'Electronics', slug: 'electronics', description: 'Gadgets, phones, audio & computing', color: '#3B82F6', dealsCount: 142 },
-  { _id: '2', name: 'Fashion & Apparel', slug: 'fashion', description: 'Clothing, footwear & luxury accessories', color: '#EC4899', dealsCount: 238 },
-  { _id: '3', name: 'Food & Dining', slug: 'food-dining', description: 'Delivery apps, cloud kitchens & cafes', color: '#F59E0B', dealsCount: 89 },
-  { _id: '4', name: 'Quick Grocery', slug: 'grocery', description: '10-minute essentials & daily staples', color: '#10B981', dealsCount: 64 },
-  { _id: '5', name: 'Beauty & Wellness', slug: 'beauty', description: 'Cosmetics, skincare & grooming', color: '#8B5CF6', dealsCount: 112 },
-  { _id: '6', name: 'Home & Living', slug: 'home-living', description: 'Furniture, decor & smart appliances', color: '#6366F1', dealsCount: 76 },
-  { _id: '7', name: 'Travel & Mobility', slug: 'travel', description: 'Flight bookings, hotels & ride hailing', color: '#06B6D4', dealsCount: 45 }
+  {
+    _id: 'cat-fashion',
+    id: 'fashion',
+    name: 'Fashion & Apparel',
+    slug: 'fashion',
+    color: '#FF6B6B',
+    bgColor: '#FFE3E3',
+    textColor: '#D92626',
+    count: 240,
+    dealsCount: 240,
+    description: 'Explore top trending fashion, apparel, and clothing brands with verified discounts.',
+    status: 'active',
+    subcategories: [
+      { id: 'mens-wear', name: "Men's Wear", slug: 'mens-wear', itemCount: 85 },
+      { id: 'womens-wear', name: "Women's Wear", slug: 'womens-wear', itemCount: 95 },
+      { id: 'footwear', name: 'Footwear', slug: 'footwear', itemCount: 40 },
+      { id: 'accessories', name: 'Fashion Accessories', slug: 'accessories', itemCount: 20 }
+    ]
+  },
+  {
+    _id: 'cat-electronics',
+    id: 'electronics',
+    name: 'Electronics & Gadgets',
+    slug: 'electronics',
+    color: '#4DABF7',
+    bgColor: '#E7F5FF',
+    textColor: '#1971C2',
+    count: 180,
+    dealsCount: 180,
+    description: 'Laptops, mobile devices, audio gear, and smart home appliances on discount.',
+    status: 'active',
+    subcategories: [
+      { id: 'smartphones', name: 'Smartphones & Mobiles', slug: 'smartphones', itemCount: 60 },
+      { id: 'laptops', name: 'Laptops & Computers', slug: 'laptops', itemCount: 45 },
+      { id: 'audio', name: 'Headphones & Audio', slug: 'audio', itemCount: 35 },
+      { id: 'home-appliances', name: 'Home Appliances', slug: 'home-appliances', itemCount: 40 }
+    ]
+  },
+  {
+    _id: 'cat-grocery',
+    id: 'grocery',
+    name: 'Grocery & Essentials',
+    slug: 'grocery',
+    color: '#51CF66',
+    bgColor: '#EBFBEE',
+    textColor: '#2B8A3E',
+    count: 120,
+    dealsCount: 120,
+    description: 'Fresh daily groceries, supermarket items, and quick delivery staples.',
+    status: 'active',
+    subcategories: [
+      { id: 'daily-essentials', name: 'Daily Essentials', slug: 'daily-essentials', itemCount: 50 },
+      { id: 'packaged-foods', name: 'Packaged Foods', slug: 'packaged-foods', itemCount: 35 },
+      { id: 'beverages', name: 'Beverages & Dairy', slug: 'beverages', itemCount: 35 }
+    ]
+  },
+  {
+    _id: 'cat-beauty',
+    id: 'beauty',
+    name: 'Beauty & Personal Care',
+    slug: 'beauty',
+    color: '#FCC419',
+    bgColor: '#FFF9DB',
+    textColor: '#E67700',
+    count: 95,
+    dealsCount: 95,
+    description: 'Cosmetics, skincare, hair products, and luxury perfumes from authentic brands.',
+    status: 'active',
+    subcategories: [
+      { id: 'skincare', name: 'Skincare', slug: 'skincare', itemCount: 35 },
+      { id: 'makeup', name: 'Makeup & Cosmetics', slug: 'makeup', itemCount: 30 },
+      { id: 'haircare', name: 'Hair Care', slug: 'haircare', itemCount: 20 },
+      { id: 'fragrances', name: 'Fragrances & Perfumes', slug: 'fragrances', itemCount: 10 }
+    ]
+  },
+  {
+    _id: 'cat-home',
+    id: 'home',
+    name: 'Home & Furniture',
+    slug: 'home',
+    color: '#FF922B',
+    bgColor: '#FFF4E6',
+    textColor: '#D9480F',
+    count: 110,
+    dealsCount: 110,
+    description: 'Furniture, kitchenware, interior decor, and bedding collections.',
+    status: 'active',
+    subcategories: [
+      { id: 'furniture', name: 'Living Room Furniture', slug: 'furniture', itemCount: 45 },
+      { id: 'kitchenware', name: 'Cookware & Kitchenware', slug: 'kitchenware', itemCount: 35 },
+      { id: 'home-decor', name: 'Home Decor & Lighting', slug: 'home-decor', itemCount: 30 }
+    ]
+  },
+  {
+    _id: 'cat-food',
+    id: 'food',
+    name: 'Food & Dining',
+    slug: 'food',
+    color: '#FF8787',
+    bgColor: '#FFF5F5',
+    textColor: '#C92A2A',
+    count: 85,
+    dealsCount: 85,
+    description: 'Food delivery apps, gourmet snacks, dining out vouchers, and restaurant deals.',
+    status: 'active',
+    subcategories: [
+      { id: 'food-delivery', name: 'Food Delivery Apps', slug: 'food-delivery', itemCount: 40 },
+      { id: 'dining-offers', name: 'Restaurant Vouchers', slug: 'dining-offers', itemCount: 25 },
+      { id: 'gourmet', name: 'Gourmet & Snacks', slug: 'gourmet', itemCount: 20 }
+    ]
+  },
+  {
+    _id: 'cat-b2b',
+    id: 'b2b',
+    name: 'B2B & Wholesale',
+    slug: 'b2b',
+    color: '#845EF7',
+    bgColor: '#F3F0FF',
+    textColor: '#5F3DC4',
+    count: 50,
+    dealsCount: 50,
+    description: 'Bulk ordering, enterprise supplies, and trade wholesale platforms.',
+    status: 'active',
+    subcategories: [
+      { id: 'wholesale-trade', name: 'Wholesale Trade', slug: 'wholesale-trade', itemCount: 30 },
+      { id: 'office-supplies', name: 'Office Supplies', slug: 'office-supplies', itemCount: 20 }
+    ]
+  },
+  {
+    _id: 'cat-stores',
+    id: 'stores',
+    name: 'Stores',
+    slug: 'stores',
+    color: '#0EA5E9',
+    bgColor: '#D4F7F2',
+    textColor: '#0369A1',
+    count: 20,
+    dealsCount: 20,
+    description: 'Popular brand stores and merchant retail outlets.',
+    status: 'active',
+    href: '/categories/stores',
+    subcategories: [
+      { id: 'fashion-stores', name: 'Fashion Stores', slug: 'fashion-stores', itemCount: 10 },
+      { id: 'electronics-stores', name: 'Electronics Stores', slug: 'electronics-stores', itemCount: 8 }
+    ]
+  },
+  {
+    _id: 'cat-brands',
+    id: 'brands',
+    name: 'Brands',
+    slug: 'brands',
+    color: '#EC4899',
+    bgColor: '#FCE7F3',
+    textColor: '#BE185D',
+    count: 48,
+    dealsCount: 48,
+    description: 'Direct brand stores, flagship collections, and manufacturer discounts.',
+    status: 'active',
+    href: '/categories/brands',
+    subcategories: [
+      { id: 'top-brands', name: 'Top Brands', slug: 'top-brands', itemCount: 24 },
+      { id: 'premium-brands', name: 'Premium Brands', slug: 'premium-brands', itemCount: 18 }
+    ]
+  },
+  {
+    _id: 'cat-banks',
+    id: 'banks',
+    name: 'Banks',
+    slug: 'banks',
+    color: '#EAB308',
+    bgColor: '#FEF9C3',
+    textColor: '#A16207',
+    count: 16,
+    dealsCount: 16,
+    description: 'Leading Indian banks and card payment offers.',
+    status: 'active',
+    href: '/categories/banks',
+    subcategories: [
+      { id: 'credit-card-offers', name: 'Credit Card Offers', slug: 'credit-card-offers', itemCount: 10 },
+      { id: 'net-banking', name: 'Net Banking Offers', slug: 'net-banking', itemCount: 6 }
+    ]
+  },
+  {
+    _id: 'cat-festivals',
+    id: 'festivals',
+    name: 'Festivals',
+    slug: 'festivals',
+    color: '#EF4444',
+    bgColor: '#FEE2E2',
+    textColor: '#B91C1C',
+    count: 12,
+    dealsCount: 12,
+    description: 'Festive season mega promotions, Diwali, Holi, and Ramzan sales.',
+    status: 'active',
+    href: '/categories/festivals',
+    subcategories: [
+      { id: 'diwali-sales', name: 'Diwali Sales', slug: 'diwali-sales', itemCount: 6 },
+      { id: 'seasonal-fests', name: 'Seasonal Festivals', slug: 'seasonal-fests', itemCount: 6 }
+    ]
+  },
+  {
+    _id: 'cat-travelling',
+    id: 'travelling',
+    name: 'Travelling',
+    slug: 'travelling',
+    color: '#0284C7',
+    bgColor: '#E0F2FE',
+    textColor: '#0369A1',
+    count: 28,
+    dealsCount: 28,
+    description: 'Airlines, railway bookings, hotels, and holiday packages.',
+    status: 'active',
+    href: '/categories/travelling',
+    subcategories: [
+      { id: 'flights', name: 'Flights', slug: 'flights', itemCount: 14 },
+      { id: 'hotels', name: 'Hotels & Resorts', slug: 'hotels', itemCount: 14 }
+    ]
+  },
+  {
+    _id: 'cat-cities-deals',
+    id: 'cities-deals',
+    name: 'Cities Deals',
+    slug: 'cities-deals',
+    color: '#3B82F6',
+    bgColor: '#EBF5FF',
+    textColor: '#1D4ED8',
+    count: 32,
+    dealsCount: 32,
+    description: 'Hyperlocal discounts and city-specific retail shopping deals.',
+    status: 'active',
+    href: '/categories/cities-deals',
+    subcategories: [
+      { id: 'metro-cities', name: 'Metro Cities', slug: 'metro-cities', itemCount: 18 },
+      { id: 'tier2-cities', name: 'Tier 2 Cities', slug: 'tier2-cities', itemCount: 14 }
+    ]
+  }
 ];
 
 let users = [
@@ -1587,15 +2182,16 @@ module.exports = {
     return result;
   },
   addCoupon: (item) => {
-    const id = Date.now().toString();
+    const id = item.id ? String(item.id) : (item.code ? `coupon-${item.code.toLowerCase()}` : `coupon-${Date.now()}`);
     const created = { 
       _id: id, 
-      id: Date.now(), 
+      id: item.id || id, 
+      code: (item.code || '').toUpperCase().trim(),
       usageCount: 0, 
       usageLimit: 1000, 
-      status: 'pending', 
-      opsManagerApproval: 'Pending',
-      managerApproval: 'Pending',
+      status: 'active', 
+      opsManagerApproval: 'Approved',
+      managerApproval: 'Approved',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       ...item 
@@ -1605,21 +2201,38 @@ module.exports = {
     return created;
   },
   updateCoupon: (id, updates) => {
-    const idx = coupons.findIndex(c => c._id === id || String(c.id) === String(id));
+    const target = String(id).trim().toLowerCase();
+    const idx = coupons.findIndex(c => 
+      String(c._id).toLowerCase() === target || 
+      String(c.id).toLowerCase() === target || 
+      String(c.code).toLowerCase() === target
+    );
     if (idx === -1) return null;
     coupons[idx] = { ...coupons[idx], ...updates, updatedAt: new Date().toISOString() };
     saveToDisk();
     return coupons[idx];
   },
   deleteCoupon: (id) => {
-    const idx = coupons.findIndex(c => c._id === id || String(c.id) === String(id));
-    if (idx === -1) return false;
-    coupons.splice(idx, 1);
-    saveToDisk();
-    return true;
+    const target = String(id).trim().toLowerCase();
+    const initialLen = coupons.length;
+    coupons = coupons.filter(c => 
+      String(c._id).toLowerCase() !== target && 
+      String(c.id).toLowerCase() !== target && 
+      String(c.code).toLowerCase() !== target
+    );
+    if (coupons.length !== initialLen) {
+      saveToDisk();
+      return true;
+    }
+    return false;
   },
   approveCoupon: (id, role) => {
-    const coupon = coupons.find(c => c._id === id || String(c.id) === String(id));
+    const target = String(id).trim().toLowerCase();
+    const coupon = coupons.find(c => 
+      String(c._id).toLowerCase() === target || 
+      String(c.id).toLowerCase() === target || 
+      String(c.code).toLowerCase() === target
+    );
     if (!coupon) return null;
     if (role === 'opsManager') coupon.opsManagerApproval = 'Approved';
     if (role === 'manager') coupon.managerApproval = 'Approved';
@@ -1630,7 +2243,12 @@ module.exports = {
     return coupon;
   },
   rejectCoupon: (id, role) => {
-    const coupon = coupons.find(c => c._id === id || String(c.id) === String(id));
+    const target = String(id).trim().toLowerCase();
+    const coupon = coupons.find(c => 
+      String(c._id).toLowerCase() === target || 
+      String(c.id).toLowerCase() === target || 
+      String(c.code).toLowerCase() === target
+    );
     if (!coupon) return null;
     if (role === 'opsManager') coupon.opsManagerApproval = 'Rejected';
     if (role === 'manager') coupon.managerApproval = 'Rejected';
@@ -1739,22 +2357,34 @@ module.exports = {
 
   // Categories
   getCategories: () => [...categories],
+  getCategoryById: (id) => {
+    return categories.find(c => c._id === id || String(c.id) === String(id) || c.slug === id) || null;
+  },
   addCategory: (item) => {
-    const id = Date.now().toString();
-    const created = { _id: id, dealsCount: 0, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), ...item };
+    const id = item.slug ? `cat-${item.slug}` : `cat-${Date.now()}`;
+    const created = {
+      _id: id,
+      id: item.id || item.slug || id,
+      count: item.count || item.dealsCount || 0,
+      dealsCount: item.dealsCount || item.count || 0,
+      status: 'active',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      ...item
+    };
     categories.push(created);
     saveToDisk();
     return created;
   },
   updateCategory: (id, updates) => {
-    const idx = categories.findIndex(c => c._id === id);
+    const idx = categories.findIndex(c => c._id === id || String(c.id) === String(id) || c.slug === id);
     if (idx === -1) return null;
     categories[idx] = { ...categories[idx], ...updates, updatedAt: new Date().toISOString() };
     saveToDisk();
     return categories[idx];
   },
   deleteCategory: (id) => {
-    const idx = categories.findIndex(c => c._id === id);
+    const idx = categories.findIndex(c => c._id === id || String(c.id) === String(id) || c.slug === id);
     if (idx === -1) return false;
     categories.splice(idx, 1);
     saveToDisk();

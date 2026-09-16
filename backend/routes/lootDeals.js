@@ -26,8 +26,10 @@ router.post('/:id/click', async (req, res, next) => {
       const updated = store.incrementLootClicks(req.params.id);
       return res.json({ success: true, clicks: updated?.clicks || 1 });
     }
-    const loot = await LootDeal.findByIdAndUpdate(
-      req.params.id,
+    const isObjectId = mongoose.Types.ObjectId.isValid(req.params.id);
+    const query = isObjectId ? { $or: [{ _id: req.params.id }, { id: req.params.id }] } : { id: req.params.id };
+    const loot = await LootDeal.findOneAndUpdate(
+      query,
       { $inc: { clicks: 1 } },
       { new: true }
     );
@@ -60,7 +62,9 @@ router.put('/:id', async (req, res, next) => {
       if (!updated) return res.status(404).json({ message: 'Loot deal not found' });
       return res.json(updated);
     }
-    const lootDeal = await LootDeal.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const isObjectId = mongoose.Types.ObjectId.isValid(req.params.id);
+    const query = isObjectId ? { $or: [{ _id: req.params.id }, { id: req.params.id }] } : { id: req.params.id };
+    const lootDeal = await LootDeal.findOneAndUpdate(query, req.body, { new: true, runValidators: true });
     if (!lootDeal) return res.status(404).json({ message: 'Loot deal not found' });
     res.json(lootDeal);
   } catch (err) { next(err); }
@@ -74,7 +78,9 @@ router.delete('/:id', async (req, res, next) => {
       if (!ok) return res.status(404).json({ message: 'Loot deal not found' });
       return res.json({ message: 'Loot deal deleted' });
     }
-    const lootDeal = await LootDeal.findByIdAndDelete(req.params.id);
+    const isObjectId = mongoose.Types.ObjectId.isValid(req.params.id);
+    const query = isObjectId ? { $or: [{ _id: req.params.id }, { id: req.params.id }] } : { id: req.params.id };
+    const lootDeal = await LootDeal.findOneAndDelete(query);
     if (!lootDeal) return res.status(404).json({ message: 'Loot deal not found' });
     res.json({ message: 'Loot deal deleted' });
   } catch (err) { next(err); }
@@ -88,7 +94,9 @@ router.patch('/:id/status', async (req, res, next) => {
       if (!toggled) return res.status(404).json({ message: 'Loot deal not found' });
       return res.json(toggled);
     }
-    const lootDeal = await LootDeal.findById(req.params.id);
+    const isObjectId = mongoose.Types.ObjectId.isValid(req.params.id);
+    const query = isObjectId ? { $or: [{ _id: req.params.id }, { id: req.params.id }] } : { id: req.params.id };
+    const lootDeal = await LootDeal.findOne(query);
     if (!lootDeal) return res.status(404).json({ message: 'Loot deal not found' });
     lootDeal.status = lootDeal.status === 'active' ? 'inactive' : 'active';
     await lootDeal.save();

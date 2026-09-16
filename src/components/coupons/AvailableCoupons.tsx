@@ -1,25 +1,92 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
 import amazonLogo from '../../assets/coupons/amazon.png'
 import styles from './AvailableCoupons.module.css'
 import { getPublicCoupons } from '../../services/api'
+import { MASTER_COUPONS } from '../../data/couponsData'
 
 export const AvailableCoupons: React.FC = () => {
   const scale = useDesktopScale()
+  const canvasRef = useRef<HTMLDivElement>(null)
+  const [canvasHeight, setCanvasHeight] = useState<number>(600)
   const [copiedId, setCopiedId] = useState<number | null>(null)
-  const [coupons, setCoupons] = useState<any[]>([])
+  const [coupons, setCoupons] = useState<any[]>(() => {
+    try {
+      let deletedSet = new Set<string>()
+      const delStr = localStorage.getItem('wouchify_deleted_coupons')
+      if (delStr) {
+        deletedSet = new Set(JSON.parse(delStr).map((s: string) => String(s).trim().toLowerCase()))
+      }
+      const cached = localStorage.getItem('wouchify_coupons')
+      if (cached) {
+        const parsed = JSON.parse(cached)
+        if (Array.isArray(parsed)) {
+          return parsed.filter((c: any) => {
+            const cId = String(c._id || '').toLowerCase()
+            const cCustomId = String(c.id || '').toLowerCase()
+            const cCode = String(c.code || '').toLowerCase()
+            return !deletedSet.has(cId) && !deletedSet.has(cCustomId) && !deletedSet.has(cCode)
+          })
+        }
+      }
+      return MASTER_COUPONS.filter((c: any) => {
+        const cId = String(c._id || '').toLowerCase()
+        const cCustomId = String(c.id || '').toLowerCase()
+        const cCode = String(c.code || '').toLowerCase()
+        return !deletedSet.has(cId) && !deletedSet.has(cCustomId) && !deletedSet.has(cCode)
+      })
+    } catch {
+      return MASTER_COUPONS
+    }
+  })
 
   useEffect(() => {
     const fetchCoupons = () => {
       getPublicCoupons()
-        .then(data => setCoupons(data))
+        .then(data => {
+          if (Array.isArray(data)) {
+            setCoupons(data)
+          }
+        })
         .catch(err => console.error("Failed to auto-refresh coupons:", err))
     }
 
     fetchCoupons()
-    const intervalId = setInterval(fetchCoupons, 10000)
-    return () => clearInterval(intervalId)
+    window.addEventListener('wouchify_coupons_updated', fetchCoupons)
+    const intervalId = setInterval(fetchCoupons, 5000)
+    return () => {
+      window.removeEventListener('wouchify_coupons_updated', fetchCoupons)
+      clearInterval(intervalId)
+    }
   }, [])
+
+  useEffect(() => {
+    const updateHeight = () => {
+      if (canvasRef.current) {
+        const measured = Math.max(
+          canvasRef.current.scrollHeight,
+          canvasRef.current.offsetHeight,
+          canvasRef.current.getBoundingClientRect().height / (scale || 1)
+        )
+        setCanvasHeight(Math.ceil(measured) + 10)
+      }
+    }
+    updateHeight()
+    const timer = setTimeout(updateHeight, 100)
+    const observer = new ResizeObserver(updateHeight)
+    if (canvasRef.current) {
+      observer.observe(canvasRef.current)
+    }
+    window.addEventListener('resize', updateHeight)
+    window.addEventListener('load', updateHeight)
+
+    return () => {
+      clearTimeout(timer)
+      observer.disconnect()
+      window.removeEventListener('resize', updateHeight)
+      window.removeEventListener('load', updateHeight)
+    }
+  }, [scale, coupons])
 
   const handleCopyCode = (code: string, index: number) => {
     navigator.clipboard.writeText(code)
@@ -55,8 +122,10 @@ export const AvailableCoupons: React.FC = () => {
       className={styles.section}
       id="available-coupons"
       aria-label="Available Coupons"
+      style={{ height: `${canvasHeight * scale}px` }}
     >
       <div
+        ref={canvasRef}
         className={styles.canvas}
         style={
           {
@@ -76,7 +145,7 @@ export const AvailableCoupons: React.FC = () => {
         </div>
 
         {/* Scaled Coupon Tickets Container */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', marginTop: '40px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', marginTop: '24px', width: '100%', alignItems: 'center' }}>
           {coupons.map((coupon, index) => (
             <div key={coupon._id || index} className={styles.couponCard}>
               <svg

@@ -1,17 +1,33 @@
 const mongoose = require('mongoose');
 
 const couponSchema = new mongoose.Schema({
-  code: { type: String, required: true, uppercase: true },
+  id: { type: String },
+  title: { type: String },
+  description: { type: String, default: '' },
   store: { type: String, required: true },
-  discount: { type: String, required: true },
   category: { type: String, required: true },
-  usageCount: { type: Number, default: 0 },
-  usageLimit: { type: Number, default: 1000 },
-  status: { type: String, enum: ['active', 'expired', 'pending', 'rejected'], default: 'pending' },
-  opsManagerApproval: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
-  managerApproval: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
+  code: { type: String, required: true, uppercase: true },
+  couponType: { type: String, default: 'percent' },
+  discount: { type: String, required: true },
+  discountValue: { type: Number, default: 0 },
+  minOrder: { type: String, default: '' },
+  maxDiscount: { type: String, default: '' },
+  affiliateLink: { type: String, default: '' },
+  status: { type: String, default: 'active' },
+  submissionStatus: { type: String, default: 'approved' },
+  opsManagerApproval: { type: String, default: 'Approved' },
+  managerApproval: { type: String, default: 'Approved' },
   submittedBy: { type: String, default: '' },
-  expiry: { type: String, required: true }
+  isExclusive: { type: Boolean, default: false },
+  isFeatured: { type: Boolean, default: false },
+  isVerified: { type: Boolean, default: true },
+  telegramAlert: { type: Boolean, default: false },
+  startDate: { type: String, default: '' },
+  expiryDate: { type: String, default: '' },
+  expiry: { type: String, default: '' },
+  usageCount: { type: Number, default: 0 },
+  usageLimit: { type: Number, default: 5000 },
+  totalUses: { type: Number, default: 5000 }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Coupon', couponSchema);

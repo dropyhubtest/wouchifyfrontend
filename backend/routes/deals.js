@@ -61,8 +61,17 @@ router.put('/:id', async (req, res, next) => {
       if (!updated) return res.status(404).json({ message: 'Deal not found' });
       return res.json(updated);
     }
-    const deal = await Deal.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-    if (!deal) return res.status(404).json({ message: 'Deal not found' });
+    let query = {};
+    if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+      query = { _id: req.params.id };
+    } else {
+      query = { $or: [{ _id: req.params.id }, { name: req.body.name || req.body.title || req.params.id }] };
+    }
+    let deal = await Deal.findOneAndUpdate(query, req.body, { new: true });
+    if (!deal) {
+      const newDeal = new Deal({ ...req.body, name: req.body.name || req.body.title || 'Deal' });
+      deal = await newDeal.save();
+    }
     res.json(deal);
   } catch (err) { next(err); }
 });
@@ -75,7 +84,13 @@ router.delete('/:id', async (req, res, next) => {
       if (!ok) return res.status(404).json({ message: 'Deal not found' });
       return res.json({ message: 'Deal deleted' });
     }
-    const deal = await Deal.findByIdAndDelete(req.params.id);
+    let query = {};
+    if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+      query = { _id: req.params.id };
+    } else {
+      query = { name: req.params.id };
+    }
+    const deal = await Deal.findOneAndDelete(query);
     if (!deal) return res.status(404).json({ message: 'Deal not found' });
     res.json({ message: 'Deal deleted' });
   } catch (err) { next(err); }

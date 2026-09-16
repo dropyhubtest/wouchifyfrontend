@@ -31,8 +31,7 @@ import {
   Calendar,
   SendHorizontal,
   Bell,
-  TrendingDown,
-  Star
+  TrendingDown
 } from 'lucide-react'
 import './ExecutiveShared.css'
 import { MASTER_EXECUTIVE_LOOT_DEALS, DEAL_PRODUCT_PRESETS, getStoreLogo, convertGoogleDriveUrl, PLACEHOLDER_DEAL_IMAGE, PLACEHOLDER_STORE_LOGO } from '../../../data/dealsPage'
@@ -137,45 +136,48 @@ export const ExecutiveLootDealsPage: React.FC = () => {
       const cached = localStorage.getItem('wouchify_loot_deals')
       if (cached) {
         const parsed = JSON.parse(cached)
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map((d: any, index: number) => ({
-            id: String(d._id || d.id || `loot-${index + 1}`),
-            title: d.title || d.name || 'Untitled Loot Deal',
-            store: d.storeName || d.store || 'Amazon',
-            brand: d.brand || d.storeName || 'Generic',
-            category: d.category || 'Electronics',
-            lootType: d.lootType || (d.dealType === 'flash' ? 'flash' : 'steal'),
-            badge: d.badge || '⚡ HOT DROP',
-            status: d.submissionStatus === 'pending_approval' ? 'Pending Approval' : (d.status === 'active' || d.status === 'Approved' ? 'Approved' : 'Draft'),
-            priority: d.priority || 'High',
-            code: d.code || '',
-            link: d.href || d.link || 'https://amazon.in',
-            originalPrice: d.originalPrice || '₹999',
-            price: d.currentPrice || d.price || '₹199',
-            discountLabel: d.discount || d.discountLabel || '80% OFF',
-            discountValue: typeof d.discountValue === 'number' ? d.discountValue : 80,
-            effectivePrice: d.effectivePrice || d.currentPrice || d.price,
-            cashback: d.cashback || '+ 5% Wouchify Cashback',
-            stockClaimedPercent: d.stockClaimedPercent || 85,
-            quantityAlert: d.quantityAlert || 'Limited Flash Stock',
-            proofNote: d.proofNote || 'Verified via live automated checker',
-            trickSteps: d.trickSteps || '1. Click Grab Loot to open partner store.\n2. Proceed to checkout before stock runs out.',
-            terms: d.terms || 'Valid until stocks last.',
-            asinOrSku: d.asinOrSku || '',
-            deliveryInfo: d.deliveryInfo || 'Fast Delivery',
-            rating: d.rating || '4.5 ★ (10k)',
-            postedAt: d.postedAt || 'Today',
-            expiresAt: d.expiresAt || new Date(Date.now() + 86400000).toISOString().slice(0, 16),
-            image: d.image || d.productImage || DEAL_PRODUCT_PRESETS[0]?.image || '',
-            images: Array.isArray(d.images) && d.images.length > 0 ? d.images : [d.image || d.productImage || DEAL_PRODUCT_PRESETS[0]?.image || ''],
-            telegramAlert: Boolean(d.telegramAlert),
-            pushNotification: Boolean(d.pushNotification),
-            isFeatured: Boolean(d.isFeatured),
-            isVerified: Boolean(d.isVerified ?? true),
-            isBestSelling: Boolean(d.isBestSelling || d.sectionPlacement === 'best_selling' || d.sectionPlacement === 'both'),
-            sectionPlacement: d.sectionPlacement || (d.isBestSelling ? 'best_selling' : 'favourite'),
-            clicks: typeof d.clicks === 'number' ? d.clicks : (parseInt(d.clicks) || 0)
-          }))
+        if (Array.isArray(parsed) && parsed.length >= 6) {
+          return parsed.map((d: any, index: number) => {
+            const matchingMaster = MASTER_EXECUTIVE_LOOT_DEALS.find(m => m.id === String(d._id || d.id) || m.title.toLowerCase().trim() === String(d.title || d.name || '').toLowerCase().trim())
+            return {
+              id: String(d._id || d.id || matchingMaster?.id || `loot-${index + 1}`),
+              title: d.title || d.name || matchingMaster?.title || 'Loot Deal',
+              store: d.storeName || d.store || matchingMaster?.store || 'Amazon',
+              brand: d.brand || d.storeName || matchingMaster?.brand || 'Generic',
+              category: d.category || matchingMaster?.category || 'Electronics',
+              lootType: (d.lootType || (d.dealType === 'exclusive' ? 'steal' : 'flash') || matchingMaster?.lootType || 'flash') as any,
+              badge: d.badge || matchingMaster?.badge || '⚡ HOT DROP',
+              status: (d.submissionStatus === 'pending_approval' ? 'Pending Approval' : (d.status === 'active' || d.status === 'Approved' ? 'Approved' : 'Draft')) as any,
+              priority: (d.priority || matchingMaster?.priority || 'High') as any,
+              code: d.code ?? matchingMaster?.code ?? '',
+              link: d.href || d.link || matchingMaster?.link || '/deals',
+              originalPrice: d.originalPrice || matchingMaster?.originalPrice || '₹1,899',
+              price: d.currentPrice || d.price || matchingMaster?.price || '₹179',
+              discountLabel: d.discount || d.discountLabel || matchingMaster?.discountLabel || '91% OFF',
+              discountValue: typeof d.discountValue === 'number' ? d.discountValue : (matchingMaster?.discountValue || 90),
+              effectivePrice: d.effectivePrice || matchingMaster?.effectivePrice || d.currentPrice || d.price,
+              cashback: d.cashback || matchingMaster?.cashback || '+ 5% Wouchify Cashback',
+              stockClaimedPercent: d.stockClaimedPercent || matchingMaster?.stockClaimedPercent || 85,
+              quantityAlert: d.quantityAlert || matchingMaster?.quantityAlert || 'Limited Flash Stock',
+              proofNote: d.proofNote || matchingMaster?.proofNote || 'Verified via live automated checker',
+              trickSteps: d.trickSteps || matchingMaster?.trickSteps || '1. Click Grab Loot to open partner store.\n2. Proceed to checkout before stock runs out.',
+              terms: d.terms || matchingMaster?.terms || 'Valid until stocks last.',
+              asinOrSku: d.asinOrSku || matchingMaster?.asinOrSku || '',
+              deliveryInfo: d.deliveryInfo || matchingMaster?.deliveryInfo || 'Fast Delivery',
+              rating: d.rating || matchingMaster?.rating || '4.8 ★ (12k)',
+              postedAt: d.postedAt || matchingMaster?.postedAt || 'Today',
+              expiresAt: d.expiresAt || matchingMaster?.expiresAt || new Date(Date.now() + 86400000).toISOString().slice(0, 16),
+              image: d.image || d.productImage || matchingMaster?.image || DEAL_PRODUCT_PRESETS[0]?.image || '',
+              images: Array.isArray(d.images) && d.images.length > 0 ? d.images : (matchingMaster?.images || [d.image || d.productImage || DEAL_PRODUCT_PRESETS[0]?.image || '']),
+              telegramAlert: Boolean(d.telegramAlert ?? matchingMaster?.telegramAlert),
+              pushNotification: Boolean(d.pushNotification ?? matchingMaster?.pushNotification),
+              isFeatured: Boolean(d.isFeatured ?? matchingMaster?.isFeatured),
+              isVerified: Boolean(d.isVerified ?? matchingMaster?.isVerified ?? true),
+              isBestSelling: Boolean(d.isBestSelling || d.sectionPlacement === 'best_selling' || d.sectionPlacement === 'both' || matchingMaster?.isBestSelling),
+              sectionPlacement: (d.sectionPlacement || matchingMaster?.sectionPlacement || (d.isBestSelling ? 'best_selling' : 'both')) as any,
+              clicks: typeof d.clicks === 'number' ? d.clicks : (parseInt(d.clicks) || matchingMaster?.clicks || 0)
+            }
+          })
         }
       }
     } catch {}
@@ -199,50 +201,51 @@ export const ExecutiveLootDealsPage: React.FC = () => {
         .then((res: any[]) => {
           if (!isMounted) return
           if (Array.isArray(res) && res.length > 0) {
-            const mapped: LootDeal[] = res.map((d: any, index: number) => ({
-              id: String(d._id || d.id || `loot-${index + 1}`),
-              title: d.title || d.name || 'Untitled Loot Deal',
-              store: d.storeName || d.store || 'Amazon',
-              brand: d.brand || d.storeName || 'Generic',
-              category: d.category || 'Electronics',
-              lootType: d.lootType || (d.dealType === 'flash' ? 'flash' : 'steal'),
-              badge: d.badge || '⚡ HOT DROP',
-              status: d.submissionStatus === 'pending_approval' ? 'Pending Approval' : (d.status === 'active' || d.status === 'Approved' ? 'Approved' : 'Draft'),
-              priority: d.priority || 'High',
-              code: d.code || '',
-              link: d.href || d.link || 'https://amazon.in',
-              originalPrice: d.originalPrice || '₹999',
-              price: d.currentPrice || d.price || '₹199',
-              discountLabel: d.discount || d.discountLabel || '80% OFF',
-              discountValue: typeof d.discountValue === 'number' ? d.discountValue : 80,
-              effectivePrice: d.effectivePrice || d.currentPrice || d.price,
-              cashback: d.cashback || '+ 5% Wouchify Cashback',
-              stockClaimedPercent: d.stockClaimedPercent || 85,
-              quantityAlert: d.quantityAlert || 'Limited Flash Stock',
-              proofNote: d.proofNote || 'Verified via live automated checker',
-              trickSteps: d.trickSteps || '1. Click Grab Loot to open partner store.\n2. Proceed to checkout before stock runs out.',
-              terms: d.terms || 'Valid until stocks last.',
-              asinOrSku: d.asinOrSku || '',
-              deliveryInfo: d.deliveryInfo || 'Fast Delivery',
-              rating: d.rating || '4.5 ★ (10k)',
-              postedAt: d.postedAt || 'Today',
-              expiresAt: d.expiresAt || new Date(Date.now() + 86400000).toISOString().slice(0, 16),
-              image: d.image || d.productImage || DEAL_PRODUCT_PRESETS[0]?.image || '',
-              images: Array.isArray(d.images) && d.images.length > 0 ? d.images : [d.image || d.productImage || DEAL_PRODUCT_PRESETS[0]?.image || ''],
-              telegramAlert: Boolean(d.telegramAlert),
-              pushNotification: Boolean(d.pushNotification),
-              isFeatured: Boolean(d.isFeatured),
-              isVerified: Boolean(d.isVerified ?? true),
-              isBestSelling: Boolean(d.isBestSelling || d.sectionPlacement === 'best_selling' || d.sectionPlacement === 'both'),
-              sectionPlacement: d.sectionPlacement || (d.isBestSelling ? 'best_selling' : 'favourite'),
-              clicks: typeof d.clicks === 'number' ? d.clicks : (parseInt(d.clicks) || 0)
-            }))
+            const mapped: LootDeal[] = res.map((d: any, index: number) => {
+              const matchingMaster = MASTER_EXECUTIVE_LOOT_DEALS.find(m => m.id === String(d._id || d.id) || m.title.toLowerCase().trim() === String(d.title || d.name || '').toLowerCase().trim())
+              return {
+                id: String(d._id || d.id || matchingMaster?.id || `loot-${index + 1}`),
+                title: d.title || d.name || matchingMaster?.title || 'Loot Deal',
+                store: d.storeName || d.store || matchingMaster?.store || 'Amazon',
+                brand: d.brand || d.storeName || matchingMaster?.brand || 'Generic',
+                category: d.category || matchingMaster?.category || 'Electronics',
+                lootType: (d.lootType || (d.dealType === 'exclusive' ? 'steal' : 'flash') || matchingMaster?.lootType || 'flash') as any,
+                badge: d.badge || matchingMaster?.badge || '⚡ HOT DROP',
+                status: (d.submissionStatus === 'pending_approval' ? 'Pending Approval' : (d.status === 'active' || d.status === 'Approved' ? 'Approved' : 'Draft')) as any,
+                priority: (d.priority || matchingMaster?.priority || 'High') as any,
+                code: d.code ?? matchingMaster?.code ?? '',
+                link: d.href || d.link || matchingMaster?.link || '/deals',
+                originalPrice: d.originalPrice || matchingMaster?.originalPrice || '₹1,899',
+                price: d.currentPrice || d.price || matchingMaster?.price || '₹179',
+                discountLabel: d.discount || d.discountLabel || matchingMaster?.discountLabel || '91% OFF',
+                discountValue: typeof d.discountValue === 'number' ? d.discountValue : (matchingMaster?.discountValue || 90),
+                effectivePrice: d.effectivePrice || matchingMaster?.effectivePrice || d.currentPrice || d.price,
+                cashback: d.cashback || matchingMaster?.cashback || '+ 5% Wouchify Cashback',
+                stockClaimedPercent: d.stockClaimedPercent || matchingMaster?.stockClaimedPercent || 85,
+                quantityAlert: d.quantityAlert || matchingMaster?.quantityAlert || 'Limited Flash Stock',
+                proofNote: d.proofNote || matchingMaster?.proofNote || 'Verified via live automated checker',
+                trickSteps: d.trickSteps || matchingMaster?.trickSteps || '1. Click Grab Loot to open partner store.\n2. Proceed to checkout before stock runs out.',
+                terms: d.terms || matchingMaster?.terms || 'Valid until stocks last.',
+                asinOrSku: d.asinOrSku || matchingMaster?.asinOrSku || '',
+                deliveryInfo: d.deliveryInfo || matchingMaster?.deliveryInfo || 'Fast Delivery',
+                rating: d.rating || matchingMaster?.rating || '4.8 ★ (12k)',
+                postedAt: d.postedAt || matchingMaster?.postedAt || 'Today',
+                expiresAt: d.expiresAt || matchingMaster?.expiresAt || new Date(Date.now() + 86400000).toISOString().slice(0, 16),
+                image: d.image || d.productImage || matchingMaster?.image || DEAL_PRODUCT_PRESETS[0]?.image || '',
+                images: Array.isArray(d.images) && d.images.length > 0 ? d.images : (matchingMaster?.images || [d.image || d.productImage || DEAL_PRODUCT_PRESETS[0]?.image || '']),
+                telegramAlert: Boolean(d.telegramAlert ?? matchingMaster?.telegramAlert),
+                pushNotification: Boolean(d.pushNotification ?? matchingMaster?.pushNotification),
+                isFeatured: Boolean(d.isFeatured ?? matchingMaster?.isFeatured),
+                isVerified: Boolean(d.isVerified ?? matchingMaster?.isVerified ?? true),
+                isBestSelling: Boolean(d.isBestSelling || d.sectionPlacement === 'best_selling' || d.sectionPlacement === 'both' || matchingMaster?.isBestSelling),
+                sectionPlacement: (d.sectionPlacement || matchingMaster?.sectionPlacement || (d.isBestSelling ? 'best_selling' : 'both')) as any,
+                clicks: typeof d.clicks === 'number' ? d.clicks : (parseInt(d.clicks) || matchingMaster?.clicks || 0)
+              }
+            })
             setDeals(mapped)
           }
         })
-        .catch(err => {
-          console.warn('API error, using mock loot deals:', err)
-        })
+        .catch(console.warn)
     }
 
     fetchLoot()
@@ -503,18 +506,17 @@ export const ExecutiveLootDealsPage: React.FC = () => {
     }))
   }
 
-  const handleToggleBestSelling = (id: string) => {
+  const handleSectionPlacementChange = (id: string, placement: 'both' | 'favourite' | 'best_selling') => {
     const target = deals.find(d => d.id === id)
     if (!target) return
-    const nextVal = !target.isBestSelling
-    const nextPlacement: 'favourite' | 'best_selling' | 'both' = nextVal ? 'best_selling' : 'favourite'
+    const isBest = placement === 'best_selling' || placement === 'both'
 
     const updated = deals.map(d => {
       if (d.id === id) {
         return { 
           ...d, 
-          isBestSelling: nextVal,
-          sectionPlacement: nextPlacement
+          isBestSelling: isBest,
+          sectionPlacement: placement
         }
       }
       return d
@@ -525,14 +527,19 @@ export const ExecutiveLootDealsPage: React.FC = () => {
       localStorage.setItem('wouchify_loot_deals', JSON.stringify(updated))
     } catch {}
 
-    window.dispatchEvent(new CustomEvent('wouchify_loot_deals_updated', { detail: { id, isBestSelling: nextVal } }))
-    window.dispatchEvent(new CustomEvent('wouchify_deals_updated', { detail: { id, isBestSelling: nextVal } }))
+    const labelMap: Record<string, string> = {
+      favourite: 'Section 1 (Main Loot Deals Only)',
+      best_selling: 'Section 2 (Best Selling Loot Picks Only)',
+      both: 'Both Sections (Section 1 & Section 2)'
+    }
+    showToast(`Storefront Section updated to: ${labelMap[placement]}`)
 
-    showToast(nextVal ? '⭐ Marked as Best Seller (Loot Deals Section)' : 'Removed from Best Sellers')
+    window.dispatchEvent(new CustomEvent('wouchify_loot_deals_updated', { detail: { id, isBestSelling: isBest, sectionPlacement: placement } }))
+    window.dispatchEvent(new CustomEvent('wouchify_deals_updated', { detail: { id, isBestSelling: isBest, sectionPlacement: placement } }))
 
     adminApi.updateLootDeal(id, {
-      isBestSelling: nextVal,
-      sectionPlacement: nextPlacement
+      isBestSelling: isBest,
+      sectionPlacement: placement
     }).catch(console.warn)
   }
 
@@ -1067,6 +1074,7 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                     <th>Posted Date</th>
                     <th>Expiry Date</th>
                     <th>Channels</th>
+                    <th style={{ minWidth: '150px' }}>Storefront Section</th>
                     <th>Status</th>
                     <th>Actions</th>
                   </tr>
@@ -1099,25 +1107,25 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                             <span className={`loot-type-badge ${deal.lootType}`}>
                               {deal.badge || deal.lootType.toUpperCase()}
                             </span>
-                            <span 
-                              style={{ 
-                                fontSize: '0.68rem', 
-                                background: deal.isBestSelling ? '#fef3c7' : '#f8fafc', 
-                                color: deal.isBestSelling ? '#92400e' : '#64748b', 
-                                padding: '1px 6px', 
-                                borderRadius: '4px', 
-                                fontWeight: 700, 
-                                display: 'inline-flex', 
-                                alignItems: 'center', 
-                                gap: '2px',
-                                border: deal.isBestSelling ? '1px solid #fde68a' : '1px solid #e2e8f0',
-                                cursor: 'pointer'
-                              }}
-                              onClick={() => handleToggleBestSelling(deal.id)}
-                              title={deal.isBestSelling ? "Click to remove Best Seller status" : "Click to mark as Best Seller in Loot Deals page"}
-                            >
-                              ⭐ {deal.isBestSelling ? 'Best Seller' : 'Mark Star'}
-                            </span>
+                            {deal.isBestSelling && (
+                              <span 
+                                style={{ 
+                                  fontSize: '0.68rem', 
+                                  background: '#fef3c7', 
+                                  color: '#92400e', 
+                                  padding: '1px 6px', 
+                                  borderRadius: '4px', 
+                                  fontWeight: 700, 
+                                  display: 'inline-flex', 
+                                  alignItems: 'center', 
+                                  gap: '2px',
+                                  border: '1px solid #fde68a'
+                                }}
+                                title={deal.sectionPlacement === 'both' ? "Placed in Both Storefront Sections" : "Placed in Section 2 (Best Selling Picks)"}
+                              >
+                                ⭐ {deal.sectionPlacement === 'both' ? 'Sec 1 & 2' : 'Best Seller'}
+                              </span>
+                            )}
                             {deal.isVerified && (
                               <span className="verified-badge" title="Verified Loot">✓ Verified</span>
                             )}
@@ -1239,6 +1247,29 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                           </div>
                         </td>
                         <td>
+                          <select
+                            value={deal.sectionPlacement || (deal.isBestSelling ? 'best_selling' : 'both')}
+                            onChange={(e) => handleSectionPlacementChange(deal.id, e.target.value as any)}
+                            title="Choose which section on the storefront /loot-deals page this card appears in"
+                            style={{
+                              padding: '5px 8px',
+                              borderRadius: '6px',
+                              border: '1.5px solid #cbd5e1',
+                              fontSize: '0.78rem',
+                              fontWeight: 700,
+                              backgroundColor: deal.sectionPlacement === 'best_selling' ? '#fef3c7' : deal.sectionPlacement === 'both' ? '#eff6ff' : '#f8fafc',
+                              color: deal.sectionPlacement === 'best_selling' ? '#92400e' : deal.sectionPlacement === 'both' ? '#1e40af' : '#334155',
+                              cursor: 'pointer',
+                              minWidth: '135px',
+                              outline: 'none'
+                            }}
+                          >
+                            <option value="both">Both (Sec 1 &amp; 2)</option>
+                            <option value="favourite">Section 1 (Main)</option>
+                            <option value="best_selling">Section 2 (Best Seller)</option>
+                          </select>
+                        </td>
+                        <td>
                           <button 
                             onClick={() => handleToggleStatus(deal.id)}
                             style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex' }}
@@ -1251,24 +1282,6 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                         </td>
                         <td>
                           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                            <button 
-                              className={`action-btn star ${deal.isBestSelling ? 'starred' : ''}`}
-                              onClick={() => handleToggleBestSelling(deal.id)}
-                              title={deal.isBestSelling ? "Remove from Best Selling Loot" : "Star as Best Seller (Display in Best Selling Loot)"}
-                              style={{ 
-                                background: deal.isBestSelling ? '#fef3c7' : 'transparent',
-                                border: deal.isBestSelling ? '1px solid #f59e0b' : '1px solid #e2e8f0',
-                                color: deal.isBestSelling ? '#d97706' : '#94a3b8',
-                                padding: '6px',
-                                borderRadius: '6px',
-                                cursor: 'pointer',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                              }}
-                            >
-                              <Star size={16} fill={deal.isBestSelling ? '#d97706' : 'none'} />
-                            </button>
                             <button 
                               className="action-btn view" 
                               onClick={() => setPreviewDeal(deal)} 
@@ -1298,7 +1311,7 @@ export const ExecutiveLootDealsPage: React.FC = () => {
 
                   {paginatedDeals.length === 0 && (
                     <tr>
-                      <td colSpan={11} style={{ textAlign: 'center', padding: '48px', color: '#64748b' }}>
+                      <td colSpan={12} style={{ textAlign: 'center', padding: '48px', color: '#64748b' }}>
                         <AlertTriangle size={24} style={{ color: '#f59e0b', margin: '0 auto 8px auto', display: 'block' }} />
                         No loot deals found matching your selected filters.
                       </td>
@@ -1373,7 +1386,7 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                             gap: '3px',
                             boxShadow: '0 2px 4px rgba(0,0,0,0.15)'
                           }}>
-                            <Star size={10} fill="#ffffff" /> BEST SELLER
+                            ⭐ BEST SELLER
                           </span>
                         )}
                         <span className={`loot-type-badge ${deal.lootType}`}>
@@ -1457,34 +1470,37 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="deal-card-manage-actions">
-                      <button 
-                        className={`action-btn star ${deal.isBestSelling ? 'starred' : ''}`}
-                        onClick={() => handleToggleBestSelling(deal.id)}
-                        title={deal.isBestSelling ? "Remove from Best Selling Loot" : "Star as Best Seller (Display in Best Selling Loot)"}
-                        style={{ 
-                          background: deal.isBestSelling ? '#fef3c7' : 'transparent',
-                          border: deal.isBestSelling ? '1px solid #f59e0b' : '1px solid #e2e8f0',
-                          color: deal.isBestSelling ? '#d97706' : '#94a3b8',
-                          padding: '6px',
+                    <div className="deal-card-manage-actions" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <select
+                        value={deal.sectionPlacement || (deal.isBestSelling ? 'best_selling' : 'both')}
+                        onChange={(e) => handleSectionPlacementChange(deal.id, e.target.value as any)}
+                        title="Choose storefront section placement"
+                        style={{
+                          padding: '4px 6px',
                           borderRadius: '6px',
+                          border: '1.5px solid #cbd5e1',
+                          fontSize: '0.74rem',
+                          fontWeight: 700,
+                          backgroundColor: deal.sectionPlacement === 'best_selling' ? '#fef3c7' : deal.sectionPlacement === 'both' ? '#eff6ff' : '#f8fafc',
+                          color: deal.sectionPlacement === 'best_selling' ? '#92400e' : deal.sectionPlacement === 'both' ? '#1e40af' : '#334155',
                           cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
+                          maxWidth: '125px',
+                          outline: 'none'
                         }}
                       >
-                        <Star size={16} fill={deal.isBestSelling ? '#d97706' : 'none'} />
-                      </button>
-                      <button className="action-btn view" onClick={() => setPreviewDeal(deal)} title="Preview Deal">
-                        <Eye size={16} />
-                      </button>
-                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <option value="both">Both (Sec 1 &amp; 2)</option>
+                        <option value="favourite">Section 1 (Main)</option>
+                        <option value="best_selling">Section 2 (Best Seller)</option>
+                      </select>
+                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                        <button className="action-btn view" onClick={() => setPreviewDeal(deal)} title="Preview Deal">
+                          <Eye size={15} />
+                        </button>
                         <button className="action-btn edit" onClick={() => handleEditDeal(deal)} title="Edit Deal">
-                          <Edit2 size={16} />
+                          <Edit2 size={15} />
                         </button>
                         <button className="action-btn delete" onClick={() => handleDeleteDeal(deal.id)} title="Delete Deal">
-                          <Trash2 size={16} />
+                          <Trash2 size={15} />
                         </button>
                       </div>
                     </div>

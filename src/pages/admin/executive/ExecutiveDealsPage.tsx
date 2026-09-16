@@ -28,8 +28,7 @@ import {
   ChevronLeft, 
   ChevronRight, 
   Layers,
-  Calendar,
-  Star
+  Calendar
 } from 'lucide-react'
 import './ExecutiveShared.css'
 import { MASTER_EXECUTIVE_DEALS, DEAL_PRODUCT_PRESETS, getStoreLogo, convertGoogleDriveUrl, PLACEHOLDER_DEAL_IMAGE, PLACEHOLDER_STORE_LOGO } from '../../../data/dealsPage'
@@ -535,28 +534,33 @@ export const ExecutiveDealsPage: React.FC = () => {
     }).catch(console.warn)
   }
 
-  const handleToggleBestSelling = (id: string) => {
+  const handleSectionPlacementChange = (id: string, placement: 'both' | 'favourite' | 'best_selling') => {
     const target = deals.find(d => d.id === id)
     if (!target) return
-    const nextVal = !target.isBestSelling
-    const nextPlacement = nextVal ? 'best_selling' : 'favourite'
+    const isBest = placement === 'best_selling' || placement === 'both'
 
-    setDeals(deals.map(d => {
+    const updated = deals.map(d => {
       if (d.id === id) {
         return { 
           ...d, 
-          isBestSelling: nextVal,
-          sectionPlacement: nextPlacement
+          isBestSelling: isBest,
+          sectionPlacement: placement
         }
       }
       return d
-    }))
+    })
+    setDeals(updated)
 
-    showToast(nextVal ? '⭐ Marked as Best Seller (Main Section)' : 'Removed from Best Sellers')
+    const labelMap: Record<string, string> = {
+      favourite: 'Section 1 (Main Deals Only)',
+      best_selling: 'Section 2 (Best Selling Picks Only)',
+      both: 'Both Sections (Section 1 & Section 2)'
+    }
+    showToast(`Storefront Section updated to: ${labelMap[placement]}`)
 
     adminApi.updateDeal(id, {
-      isBestSelling: nextVal,
-      sectionPlacement: nextPlacement
+      isBestSelling: isBest,
+      sectionPlacement: placement
     }).catch(console.warn)
   }
 
@@ -1172,6 +1176,7 @@ export const ExecutiveDealsPage: React.FC = () => {
                   <th>Classification & Stock</th>
                   <th>Pricing</th>
                   <th style={{ minWidth: '220px' }}>Discount & Offers</th>
+                  <th style={{ minWidth: '150px' }}>Storefront Section</th>
                   <th>Deal Posted Date</th>
                   <th>Expiry Date</th>
                   <th>Status</th>
@@ -1259,27 +1264,6 @@ export const ExecutiveDealsPage: React.FC = () => {
                             )}
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
-                            {deal.isBestSelling && (
-                              <span 
-                                style={{ 
-                                  fontSize: '0.68rem', 
-                                  background: '#fef3c7', 
-                                  color: '#92400e', 
-                                  padding: '1px 6px', 
-                                  borderRadius: '4px', 
-                                  fontWeight: 700, 
-                                  display: 'inline-flex', 
-                                  alignItems: 'center', 
-                                  gap: '2px',
-                                  border: '1px solid #fde68a',
-                                  cursor: 'pointer'
-                                }}
-                                onClick={() => handleToggleBestSelling(deal.id)}
-                                title="Click to toggle Best Seller status"
-                              >
-                                ⭐ Best Seller
-                              </span>
-                            )}
                             {deal.badge && (
                               <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>
                                 {deal.badge}
@@ -1298,43 +1282,54 @@ export const ExecutiveDealsPage: React.FC = () => {
                             <span className="deal-table-mrp">{formatPriceWithRupee(deal.originalPrice)}</span>
                           )}
                         </div>
-                        {deal.effectivePrice && (
-                          <div style={{ marginTop: '2px' }}>
-                            <span className="effective-price-chip" title="Effective price after card/bank offers">
-                              Eff: {formatPriceWithRupee(deal.effectivePrice)}
-                            </span>
+                        {deal.effectivePrice && deal.effectivePrice !== deal.price && (
+                          <div style={{ fontSize: '0.74rem', color: '#16a34a', fontWeight: 600 }}>
+                            Eff: {formatPriceWithRupee(deal.effectivePrice)}
                           </div>
                         )}
                       </td>
-                      <td style={{ minWidth: '220px' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
-                            {deal.discountLabel ? (
-                              <span className="discount-pill">
-                                {deal.discountLabel}
-                              </span>
-                            ) : (
-                              <span style={{ color: '#94a3b8', fontSize: '0.72rem' }}>—</span>
-                            )}
-                            {deal.cashback && (
-                              <span className="cashback-chip" title={deal.cashback}>
-                                💰 {deal.cashback}
-                              </span>
-                            )}
-                          </div>
+                      <td>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                          <span className="deal-table-discount">{deal.discountLabel}</span>
                           {deal.bankOffer && (
-                            <span className="bank-offer-chip" title={deal.bankOffer}>
+                            <span style={{ fontSize: '0.72rem', color: '#4338ca', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '3px' }}>
                               💳 {deal.bankOffer}
+                            </span>
+                          )}
+                          {deal.cashback && (
+                            <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600 }}>
+                              💰 {deal.cashback}
                             </span>
                           )}
                         </div>
                       </td>
                       <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
-                          <Clock size={13} className="posted-clock-icon" />
-                          <span className="posted-date-text">
-                            {deal.postedAt || 'Today, 10:30 AM'}
-                          </span>
+                        <select
+                          value={deal.sectionPlacement || (deal.isBestSelling ? 'best_selling' : 'both')}
+                          onChange={(e) => handleSectionPlacementChange(deal.id, e.target.value as any)}
+                          title="Choose which section on the storefront /deals page this card appears in"
+                          style={{
+                            padding: '5px 8px',
+                            borderRadius: '6px',
+                            border: '1.5px solid #cbd5e1',
+                            fontSize: '0.78rem',
+                            fontWeight: 700,
+                            backgroundColor: deal.sectionPlacement === 'best_selling' ? '#fef3c7' : deal.sectionPlacement === 'both' ? '#eff6ff' : '#f8fafc',
+                            color: deal.sectionPlacement === 'best_selling' ? '#92400e' : deal.sectionPlacement === 'both' ? '#1e40af' : '#334155',
+                            cursor: 'pointer',
+                            minWidth: '135px',
+                            outline: 'none'
+                          }}
+                        >
+                          <option value="both">Both (Sec 1 &amp; 2)</option>
+                          <option value="favourite">Section 1 (Main)</option>
+                          <option value="best_selling">Section 2 (Best Seller)</option>
+                        </select>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', color: '#475569' }}>
+                          <Clock size={12} className="posted-clock-icon" />
+                          <span>{deal.postedAt}</span>
                         </div>
                       </td>
                       <td>
@@ -1370,14 +1365,6 @@ export const ExecutiveDealsPage: React.FC = () => {
                       </td>
                       <td>
                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                          <button 
-                            className="action-btn"
-                            style={{ color: deal.isBestSelling ? '#d97706' : '#94a3b8', background: deal.isBestSelling ? '#fef3c7' : '#f8fafc' }}
-                            onClick={() => handleToggleBestSelling(deal.id)}
-                            title={deal.isBestSelling ? "Remove from Best Selling" : "Mark as Best Selling (Featured in Main Section)"}
-                          >
-                            <Star size={16} fill={deal.isBestSelling ? '#d97706' : 'none'} />
-                          </button>
                           <button 
                             className="action-btn view" 
                             onClick={() => setPreviewDeal(deal)} 
@@ -1607,26 +1594,37 @@ export const ExecutiveDealsPage: React.FC = () => {
                     </div>
 
                     {/* Action footer */}
-                    <div className="deal-card-manage-actions">
+                    <div className="deal-card-manage-actions" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <select
+                        value={deal.sectionPlacement || (deal.isBestSelling ? 'best_selling' : 'both')}
+                        onChange={(e) => handleSectionPlacementChange(deal.id, e.target.value as any)}
+                        title="Choose storefront section placement"
+                        style={{
+                          padding: '4px 6px',
+                          borderRadius: '6px',
+                          border: '1.5px solid #cbd5e1',
+                          fontSize: '0.74rem',
+                          fontWeight: 700,
+                          backgroundColor: deal.sectionPlacement === 'best_selling' ? '#fef3c7' : deal.sectionPlacement === 'both' ? '#eff6ff' : '#f8fafc',
+                          color: deal.sectionPlacement === 'best_selling' ? '#92400e' : deal.sectionPlacement === 'both' ? '#1e40af' : '#334155',
+                          cursor: 'pointer',
+                          maxWidth: '125px',
+                          outline: 'none'
+                        }}
+                      >
+                        <option value="both">Both (Sec 1 &amp; 2)</option>
+                        <option value="favourite">Section 1 (Main)</option>
+                        <option value="best_selling">Section 2 (Best Seller)</option>
+                      </select>
                       <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                        <button 
-                          className="action-btn" 
-                          style={{ color: deal.isBestSelling ? '#d97706' : '#94a3b8', background: deal.isBestSelling ? '#fef3c7' : '#f8fafc' }}
-                          onClick={() => handleToggleBestSelling(deal.id)} 
-                          title={deal.isBestSelling ? "Remove from Best Selling" : "Mark as Best Selling"}
-                        >
-                          <Star size={15} fill={deal.isBestSelling ? '#d97706' : 'none'} />
-                        </button>
                         <button className="action-btn view" onClick={() => setPreviewDeal(deal)} title="Preview Deal">
-                          <Eye size={16} />
+                          <Eye size={15} />
                         </button>
-                      </div>
-                      <div style={{ display: 'flex', gap: '8px' }}>
                         <button className="action-btn edit" onClick={() => handleEditDeal(deal)} title="Edit Deal">
-                          <Edit2 size={16} />
+                          <Edit2 size={15} />
                         </button>
                         <button className="action-btn delete" onClick={() => handleDeleteDeal(deal.id)} title="Delete Deal">
-                          <Trash2 size={16} />
+                          <Trash2 size={15} />
                         </button>
                       </div>
                     </div>

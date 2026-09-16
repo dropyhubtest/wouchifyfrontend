@@ -70,7 +70,7 @@ import { ExecutiveLootDealsPage } from './pages/admin/executive/ExecutiveLootDea
 import { ExecutiveStoresPage } from './pages/admin/executive/ExecutiveStoresPage'
 import { ExecutiveCouponsPage } from './pages/admin/executive/ExecutiveCouponsPage'
 import { ExecutiveCreditCardsPage } from './pages/admin/executive/ExecutiveCreditCardsPage'
-import { ExecutiveBannersPage } from './pages/admin/executive/ExecutiveBannersPage'
+import { ExecutiveCategoriesPage } from './pages/admin/executive/ExecutiveCategoriesPage'
 import { ExecutiveAdvertisementsPage } from './pages/admin/executive/ExecutiveAdvertisementsPage'
 import { ExecutiveVerificationPage } from './pages/admin/executive/ExecutiveVerificationPage'
 import { ExecutiveTicketsPage } from './pages/admin/executive/ExecutiveTicketsPage'
@@ -568,7 +568,7 @@ export default function App() {
         if (currentPath === '/executive/stores') return <ExecutiveStoresPage />
         if (currentPath === '/executive/coupons') return <ExecutiveCouponsPage />
         if (currentPath === '/executive/credit-cards') return <ExecutiveCreditCardsPage />
-        if (currentPath === '/executive/banners') return <ExecutiveBannersPage />
+        if (currentPath === '/executive/categories') return <ExecutiveCategoriesPage />
         if (currentPath === '/executive/advertisements') return <ExecutiveAdvertisementsPage />
         if (currentPath === '/executive/verification') return <ExecutiveVerificationPage />
         if (currentPath === '/executive/tickets') return <ExecutiveTicketsPage />
@@ -695,7 +695,7 @@ export default function App() {
       if (currentPath === '/executive/stores') return <ExecutiveStoresPage />
       if (currentPath === '/executive/coupons') return <ExecutiveCouponsPage />
       if (currentPath === '/executive/credit-cards') return <ExecutiveCreditCardsPage />
-      if (currentPath === '/executive/banners') return <ExecutiveBannersPage />
+      if (currentPath === '/executive/categories') return <ExecutiveCategoriesPage />
       if (currentPath === '/executive/advertisements') return <ExecutiveAdvertisementsPage />
       if (currentPath === '/executive/verification') return <ExecutiveVerificationPage />
       if (currentPath === '/executive/tickets') return <ExecutiveTicketsPage />
