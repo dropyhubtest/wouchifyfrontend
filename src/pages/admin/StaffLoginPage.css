@@ -143,10 +143,14 @@
 }
 
 @media (max-width: 480px) {
+  .staff-login-page {
+    padding: 16px;
+  }
   .staff-login-container {
-    box-shadow: none;
-    border-radius: 0;
-    padding: 24px;
-    height: 100vh;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    padding: 28px 20px;
+    min-height: auto;
+    width: 100%;
   }
 }

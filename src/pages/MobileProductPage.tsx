@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { MobileHeader } from '../components/mobile/MobileHeader'
 import { MobileFooter } from '../components/mobile/MobileFooter'
 import { MobileDealCard } from '../components/mobile/MobileDealCard'
 import { DEALS_CARD_ITEMS, type DealCardItem } from '../data/dealsPage'
+import { adminApi } from '../services/adminApi'
 import amazonLogo from '../assets/brand-logos/amazon-logo.png'
 import deal1 from '../assets/deals/deal1.png'
 import deal2 from '../assets/deals/deal2.png'
@@ -12,9 +13,103 @@ export const MobileProductPage: React.FC = () => {
   const [copied, setCopied] = useState(false)
   const [applied, setApplied] = useState(false)
   const [activeDot, setActiveDot] = useState(0)
+  const [liveProduct, setLiveProduct] = useState<any>(null)
+  const [categoryDeals, setCategoryDeals] = useState<DealCardItem[]>([])
 
-  const product = {
+  const loadProductData = useCallback(async () => {
+    try {
+      const urlParams = new URLSearchParams(window.location.search)
+      const targetId = urlParams.get('id') || urlParams.get('product') || 'deal-1'
+
+      const [dealsRes, lootsRes] = await Promise.all([
+        adminApi.getDeals(),
+        adminApi.getLootDeals()
+      ])
+
+      const foundDeal = dealsRes.find((d: any) => String(d.id || d._id) === String(targetId))
+      const foundLoot = !foundDeal ? lootsRes.find((l: any) => String(l.id || l._id) === String(targetId)) : null
+
+      if (foundDeal) {
+        setLiveProduct({
+          id: foundDeal.id || foundDeal._id,
+          isLoot: false,
+          fullTitle: foundDeal.name || foundDeal.title,
+          category: foundDeal.category || 'ELECTRONICS',
+          store: foundDeal.store || 'Amazon',
+          storeLogo: amazonLogo,
+          productImage: foundDeal.image || foundDeal.productImage || deal1,
+          price: foundDeal.price ? `₹${foundDeal.price.toString().replace(/[^0-9]/g, '')}` : '37998',
+          originalPrice: foundDeal.originalPrice ? `₹${foundDeal.originalPrice.toString().replace(/[^0-9]/g, '')}` : '65000',
+          discount: foundDeal.discount || '40% off',
+          rewards: '10% Rewards',
+          rating: '4.2',
+          ratingCount: '1984 Ratings',
+          dealTag: 'Deal',
+          couponCode: (foundDeal.couponCode || `${(foundDeal.store || 'WOUCH').toUpperCase().replace(/[^A-Z0-9]/g, '')}10`).toUpperCase(),
+          ctaHref: foundDeal.ctaHref || foundDeal.href || 'https://www.amazon.in',
+          aboutParagraph: foundDeal.description || `Special offer on verified ${foundDeal.name || foundDeal.title} with high savings and guaranteed cashback through Wouchify.`,
+          specs: [
+            `Category: ${foundDeal.category || 'General'}`,
+            `Store: ${foundDeal.store || 'Amazon'}`,
+            `Status: ${foundDeal.status || 'Active'}`,
+            `Expiry: ${foundDeal.expiry || 'Limited time offer'}`
+          ],
+        })
+
+        const related = dealsRes
+          .filter((d: any) => d.id !== foundDeal.id && (d.category === foundDeal.category || d.store === foundDeal.store))
+          .map((d: any) => ({
+            id: d.id || d._id,
+            title: d.name || d.title,
+            category: d.category || 'DEALS',
+            store: d.store || 'Amazon',
+            storeLogo: amazonLogo,
+            productImage: d.image || d.productImage || deal2,
+            price: d.price ? `₹${d.price.toString().replace(/[^0-9]/g, '')}` : '604',
+            originalPrice: d.originalPrice ? `₹${d.originalPrice.toString().replace(/[^0-9]/g, '')}` : undefined,
+            discountPercentage: d.discount || '40% OFF',
+            ctaText: 'GRAB DEAL',
+            ctaHref: `/product?id=${d.id || d._id}`
+          }))
+        setCategoryDeals(related)
+      } else if (foundLoot) {
+        setLiveProduct({
+          id: foundLoot.id || foundLoot._id,
+          isLoot: true,
+          fullTitle: foundLoot.title,
+          category: foundLoot.category || 'LOOT DEALS',
+          store: foundLoot.storeName || 'Amazon',
+          storeLogo: amazonLogo,
+          productImage: foundLoot.image || foundLoot.productImage || deal1,
+          price: foundLoot.currentPrice ? `₹${foundLoot.currentPrice.toString().replace(/[^0-9]/g, '')}` : '499',
+          originalPrice: foundLoot.originalPrice ? `₹${foundLoot.originalPrice.toString().replace(/[^0-9]/g, '')}` : '1999',
+          discount: foundLoot.discount || '75% off',
+          rewards: '15% Rewards',
+          rating: '4.8',
+          ratingCount: '3450 Ratings',
+          dealTag: 'Loot Deal',
+          couponCode: 'LOOTNOW',
+          ctaHref: foundLoot.href || 'https://www.amazon.in',
+          aboutParagraph: `Exclusive flash loot deal on ${foundLoot.title}. Hurry before stocks run out!`,
+          specs: [
+            `Category: ${foundLoot.category || 'General'}`,
+            `Store: ${foundLoot.storeName || 'Partner Store'}`,
+            `Deal Type: ${foundLoot.dealType || 'Flash'}`
+          ],
+        })
+      }
+    } catch (err) {
+      console.warn('MobileProductPage load error:', err)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadProductData()
+  }, [loadProductData])
+
+  const defaultProduct = {
     id: 'deal-1',
+    isLoot: false,
     fullTitle: 'Xiaomi 138 cm (55 inch) FX Pro QLED Ultra HD 4K Smart Fire TV L55MB-FPIN',
     category: 'ELECTRONICS',
     store: 'Amazon',
@@ -45,43 +140,50 @@ export const MobileProductPage: React.FC = () => {
     ],
   }
 
-  const relatedDeals: DealCardItem[] = [
-    DEALS_CARD_ITEMS[0] || {
-      id: 'deal-1',
-      title: 'Xiaomi 138 cm (55 inch) FX Pro QLED Ultra HD 4K Smart Fire TV L55MB-FPIN',
-      category: 'ELECTRONICS',
-      store: 'Amazon',
-      storeLogo: amazonLogo,
-      productImage: deal1,
-      price: '37998',
-      originalPrice: '62999',
-      discountPercentage: '40% OFF',
-      ctaText: 'GRAB DEAL',
-      ctaHref: '/product?id=deal-1',
-    },
-    DEALS_CARD_ITEMS[1] || {
-      id: 'deal-2',
-      title: 'Milton Rapid Electric Kettle 1.8L | 1500 Watts | Stainless Steel Hot Water portable Electric..',
-      category: 'ELECTRONICS',
-      store: 'Amazon',
-      storeLogo: amazonLogo,
-      productImage: deal2,
-      price: '604',
-      originalPrice: '1499',
-      discountPercentage: '60% OFF',
-      ctaText: 'GRAB DEAL',
-      ctaHref: '/product?id=deal-2',
-    },
-  ]
+  const product = liveProduct || defaultProduct
+
+  const relatedDeals: DealCardItem[] = useMemo(() => {
+    if (categoryDeals.length > 0) return categoryDeals
+    return [
+      DEALS_CARD_ITEMS[0] || {
+        id: 'deal-1',
+        title: 'Xiaomi 138 cm (55 inch) FX Pro QLED Ultra HD 4K Smart Fire TV L55MB-FPIN',
+        category: 'ELECTRONICS',
+        store: 'Amazon',
+        storeLogo: amazonLogo,
+        productImage: deal1,
+        price: '37998',
+        originalPrice: '62999',
+        discountPercentage: '40% OFF',
+        ctaText: 'GRAB DEAL',
+        ctaHref: '/product?id=deal-1',
+      },
+      DEALS_CARD_ITEMS[1] || {
+        id: 'deal-2',
+        title: 'Milton Rapid Electric Kettle 1.8L | 1500 Watts | Stainless Steel Hot Water portable Electric..',
+        category: 'ELECTRONICS',
+        store: 'Amazon',
+        storeLogo: amazonLogo,
+        productImage: deal2,
+        price: '604',
+        originalPrice: '1499',
+        discountPercentage: '60% OFF',
+        ctaText: 'GRAB DEAL',
+        ctaHref: '/product?id=deal-2',
+      },
+    ]
+  }, [categoryDeals])
 
   const handleCopyCode = (code: string) => {
     navigator.clipboard?.writeText(code)
     setCopied(true)
+    adminApi.trackCouponClick(code)
     setTimeout(() => setCopied(false), 2500)
   }
 
   const handleApplyCoupon = () => {
     setApplied(true)
+    adminApi.trackCouponClick(product.couponCode)
     setTimeout(() => setApplied(false), 2500)
   }
 
@@ -236,7 +338,7 @@ export const MobileProductPage: React.FC = () => {
         <h2 className="mobile-product-about-heading">About the Product:</h2>
         <p className="mobile-product-about-paragraph">{product.aboutParagraph}</p>
         <ul className="mobile-product-specs-list">
-          {product.specs.map((spec, index) => (
+          {(product.specs || []).map((spec: string, index: number) => (
             <li key={index} className="mobile-product-spec-item">
               {spec}
             </li>

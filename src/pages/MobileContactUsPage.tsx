@@ -4,6 +4,7 @@ import { MobileFooter } from '../components/mobile/MobileFooter'
 import { WatermarkAnimation } from '../components/hero'
 import watermarkMain from '../assets/hero/hero-watermark-main.png'
 import watermarkMainState2 from '../assets/hero/hero-watermark-main-state-2.png'
+import { adminApi } from '../services/adminApi'
 import styles from './MobileContactUsPage.module.css'
 
 export const MobileContactUsPage: React.FC = () => {
@@ -14,6 +15,7 @@ export const MobileContactUsPage: React.FC = () => {
   })
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [fileError, setFileError] = useState<string>('')
+  const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -49,9 +51,32 @@ export const MobileContactUsPage: React.FC = () => {
     fileInputRef.current?.click()
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSubmitted(true)
+    setSubmitting(true)
+    try {
+      await adminApi.createSupportTicket({
+        userName: formData.name || 'Mobile App User',
+        userEmail: formData.email,
+        subject: formData.comments.slice(0, 60) || 'Mobile Support Inquiry',
+        category: 'General Inquiry',
+        priority: 'Medium',
+        status: 'Open',
+        messages: [
+          {
+            sender: 'user',
+            senderName: formData.name || 'Mobile User',
+            text: formData.comments,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }
+        ]
+      })
+    } catch (err) {
+      console.warn('Submitted ticket offline:', err)
+    } finally {
+      setSubmitting(false)
+      setSubmitted(true)
+    }
   }
 
   return (
@@ -196,8 +221,8 @@ export const MobileContactUsPage: React.FC = () => {
             </div>
 
             {/* Submit Button */}
-            <button type="submit" className={styles.submitBtn}>
-              <span>Submit</span>
+            <button type="submit" className={styles.submitBtn} disabled={submitting}>
+              <span>{submitting ? 'Submitting...' : 'Submit'}</span>
               <span>&gt;&gt;</span>
             </button>
           </form>

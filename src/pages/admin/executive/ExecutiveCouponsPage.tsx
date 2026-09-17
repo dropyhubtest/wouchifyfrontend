@@ -21,11 +21,13 @@ import {
   ExternalLink,
   Star,
   ShoppingBag,
-  Percent
+  Percent,
+  Clock
 } from 'lucide-react'
 import './ExecutiveShared.css'
 import { FAVOURITE_STORES } from '../../../data/storesHero'
 import { CATEGORIES_DATA } from '../../../data/categories'
+import { AdminConfirmDialog, AdminAlertDialog } from '../../../components/common/AdminDialog'
 
 /* ============================================================
    Types
@@ -99,34 +101,19 @@ function expiryPill(days: number) {
   return { label: `${days}d left`, bg: '#dcfce7', color: '#16a34a' }
 }
 
-import { MASTER_COUPONS } from '../../../data/couponsData'
+import { TableRowSkeleton, EmptyState } from '../../../components/common/Skeletons'
 
-const MOCK_COUPONS: Coupon[] = MASTER_COUPONS.map((c) => ({
-  id: c.id,
-  title: c.title,
-  description: c.description,
-  store: c.store,
-  category: c.category,
-  code: c.code,
-  couponType: c.couponType,
-  discount: c.discount,
-  discountValue: c.discountValue,
-  minOrder: c.minOrder,
-  maxDiscount: c.maxDiscount,
-  affiliateLink: c.affiliateLink,
-  status: c.status,
-  isExclusive: c.isExclusive,
-  isFeatured: c.isFeatured,
-  isVerified: c.isVerified,
-  telegramAlert: c.telegramAlert,
-  startDate: c.startDate,
-  expiryDate: c.expiryDate,
-  usageCount: c.usageCount,
-  totalUses: c.totalUses,
-  addedOn: c.addedOn,
-}))
-
-const CATEGORY_OPTIONS = ['All', ...Array.from(new Set(MOCK_COUPONS.map(c => c.category)))]
+const CATEGORY_OPTIONS = [
+  'All',
+  'Electronics',
+  'Fashion',
+  'Food & Dining',
+  'Grocery',
+  'Beauty & Personal Care',
+  'Home & Lifestyle',
+  'Travel',
+  'Recharge & Bills'
+]
 
 const EMPTY_FORM: Partial<Coupon> = {
   title: '', description: '', store: STORE_NAMES[0] ?? 'Amazon',
@@ -196,128 +183,8 @@ const CodeChip: React.FC<{ code: string }> = ({ code }) => {
 }
 
 /* ============================================================
-   Customer Preview Modal
+   Customer Preview Modal Removed (Replaced by Drawer)
    ============================================================ */
-
-const CouponPreviewModal: React.FC<{ coupon: Coupon; onClose: () => void }> = ({ coupon, onClose }) => {
-  const [copied, setCopied] = useState(false)
-  const days = daysLeft(coupon.expiryDate)
-  const pill = expiryPill(days)
-  const typeColor = couponTypeColor(coupon.couponType)
-
-  return (
-    <div className="crud-modal-overlay">
-      <div className="crud-modal" style={{ maxWidth: 460, width: '95vw' }}>
-        <div className="modal-header">
-          <h3 className="modal-title"><Eye size={18} style={{ marginRight: 8 }} />Customer View</h3>
-          <button className="modal-close" onClick={onClose}><X size={20} /></button>
-        </div>
-        <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-
-          {/* Coupon card */}
-          <div style={{
-            borderRadius: 18, overflow: 'hidden',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-          }}>
-            {/* Top colour band */}
-            <div style={{ background: typeColor, padding: '20px 24px', color: 'white' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 700, opacity: 0.85, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                    {couponTypeLabel(coupon.couponType)} · {coupon.store}
-                  </div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 900, lineHeight: 1.2 }}>{coupon.discount}</div>
-                  <div style={{ fontSize: '0.8rem', marginTop: 4, opacity: 0.9 }}>{coupon.title}</div>
-                </div>
-                <div style={{
-                  background: 'rgba(255,255,255,0.2)', borderRadius: 10,
-                  padding: '6px 12px', fontSize: '0.72rem', fontWeight: 700,
-                  backdropFilter: 'blur(4px)',
-                }}>
-                  {coupon.isExclusive ? '⭐ Exclusive' : '🏷 Coupon'}
-                </div>
-              </div>
-            </div>
-
-            {/* Dashed divider */}
-            <div style={{ display: 'flex', alignItems: 'center', background: '#f8fafc' }}>
-              <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'white', marginLeft: -10, flexShrink: 0 }} />
-              <div style={{ flex: 1, borderTop: '2px dashed #e2e8f0' }} />
-              <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'white', marginRight: -10, flexShrink: 0 }} />
-            </div>
-
-            {/* Bottom section */}
-            <div style={{ background: '#f8fafc', padding: '16px 24px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {/* Code + Copy */}
-              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                <div style={{
-                  flex: 1, background: 'white', border: '2px dashed #cbd5e1',
-                  borderRadius: 10, padding: '10px 16px',
-                  fontFamily: 'monospace', fontWeight: 800, fontSize: '1.1rem',
-                  letterSpacing: '3px', color: '#0f172a', textAlign: 'center',
-                }}>
-                  {coupon.code}
-                </div>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(coupon.code)
-                    setCopied(true)
-                    setTimeout(() => setCopied(false), 1600)
-                  }}
-                  style={{
-                    background: copied ? '#22c55e' : typeColor,
-                    color: 'white', border: 'none', borderRadius: 10,
-                    padding: '10px 18px', fontWeight: 700, cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.85rem',
-                    transition: 'background 0.2s',
-                  }}
-                >
-                  {copied ? <Check size={15} /> : <Copy size={15} />}
-                  {copied ? 'Copied!' : 'Copy'}
-                </button>
-              </div>
-
-              {/* Details row */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: '0.76rem', color: '#475569' }}>
-                {coupon.minOrder && <div>🛒 {coupon.minOrder}</div>}
-                {coupon.maxDiscount && <div>🔒 {coupon.maxDiscount}</div>}
-                <div style={{ color: pill.color, fontWeight: 600 }}>⏰ {pill.label}</div>
-                <div>👁 {coupon.usageCount.toLocaleString()} used</div>
-              </div>
-
-              {coupon.description && (
-                <div style={{ fontSize: '0.75rem', color: '#64748b', borderTop: '1px solid #e2e8f0', paddingTop: 8 }}>
-                  {coupon.description}
-                </div>
-              )}
-
-              <a href={coupon.affiliateLink} target="_blank" rel="noopener noreferrer"
-                style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                  background: '#0f172a', color: 'white', borderRadius: 10,
-                  padding: '10px', fontWeight: 700, textDecoration: 'none', fontSize: '0.9rem',
-                }}
-              >
-                <ExternalLink size={14} /> Shop Now at {coupon.store}
-              </a>
-            </div>
-          </div>
-
-          {/* Meta badges */}
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {coupon.isVerified && <span style={{ background: '#dcfce7', color: '#16a34a', borderRadius: 6, padding: '3px 10px', fontSize: '0.72rem', fontWeight: 700 }}>✓ Verified</span>}
-            {coupon.isExclusive && <span style={{ background: '#fef3c7', color: '#d97706', borderRadius: 6, padding: '3px 10px', fontSize: '0.72rem', fontWeight: 700 }}>⭐ Exclusive</span>}
-            {coupon.isFeatured && <span style={{ background: '#ede9fe', color: '#7c3aed', borderRadius: 6, padding: '3px 10px', fontSize: '0.72rem', fontWeight: 700 }}>🔥 Featured</span>}
-            {coupon.telegramAlert && <span style={{ background: '#e0f2fe', color: '#0284c7', borderRadius: 6, padding: '3px 10px', fontSize: '0.72rem', fontWeight: 700 }}>📨 Telegram</span>}
-          </div>
-        </div>
-        <div className="modal-footer">
-          <button className="btn-save" onClick={onClose}>Close</button>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 /* ============================================================
    Add / Edit Modal
@@ -332,12 +199,22 @@ interface CouponFormProps {
 const CouponFormModal: React.FC<CouponFormProps> = ({ editing, onClose, onSave }) => {
   const [formStep, setFormStep] = useState<1 | 2>(1)
   const [form, setForm] = useState<Partial<Coupon>>(editing ? { ...editing } : { ...EMPTY_FORM })
+  const [formAlert, setFormAlert] = useState<{ title: string; message: string } | null>(null)
   const set = (k: keyof Coupon, v: unknown) => setForm(f => ({ ...f, [k]: v }))
 
   const handleSave = () => {
-    if (!form.title?.trim()) return alert('Coupon title is required')
-    if (!form.code?.trim())  return alert('Coupon code is required')
-    if (!form.expiryDate)    return alert('Expiry date is required')
+    if (!form.title?.trim()) {
+      setFormAlert({ title: 'Missing Title', message: 'Coupon title is required.' })
+      return
+    }
+    if (!form.code?.trim()) {
+      setFormAlert({ title: 'Missing Code', message: 'Coupon code is required.' })
+      return
+    }
+    if (!form.expiryDate) {
+      setFormAlert({ title: 'Missing Expiry Date', message: 'Expiry date is required.' })
+      return
+    }
     const now = new Date().toISOString().split('T')[0]
     onSave({
       id: editing?.id ?? `coupon-${Date.now()}`,
@@ -557,11 +434,11 @@ const CouponFormModal: React.FC<CouponFormProps> = ({ editing, onClose, onSave }
                 className="btn-save"
                 onClick={() => {
                   if (!form.title?.trim()) {
-                    alert('Coupon title is required')
+                    setFormAlert({ title: 'Missing Title', message: 'Coupon title is required.' })
                     return
                   }
                   if (!form.code?.trim()) {
-                    alert('Coupon code is required')
+                    setFormAlert({ title: 'Missing Code', message: 'Coupon code is required.' })
                     return
                   }
                   setFormStep(2)
@@ -579,6 +456,17 @@ const CouponFormModal: React.FC<CouponFormProps> = ({ editing, onClose, onSave }
             </>
           )}
         </div>
+
+        {formAlert && (
+          <AdminAlertDialog
+            isOpen={!!formAlert}
+            title={formAlert.title}
+            message={formAlert.message}
+            variant="warning"
+            buttonLabel="Understood"
+            onClose={() => setFormAlert(null)}
+          />
+        )}
       </div>
     </div>
   )
@@ -589,53 +477,8 @@ const CouponFormModal: React.FC<CouponFormProps> = ({ editing, onClose, onSave }
    ============================================================ */
 
 export const ExecutiveCouponsPage: React.FC = () => {
-  const [coupons, setCoupons] = useState<Coupon[]>(() => {
-    try {
-      let deletedSet = new Set<string>()
-      const delStr = localStorage.getItem('wouchify_deleted_coupons')
-      if (delStr) {
-        deletedSet = new Set(JSON.parse(delStr).map((s: string) => String(s).trim().toLowerCase()))
-      }
-      const cached = localStorage.getItem('wouchify_coupons')
-      if (cached) {
-        const parsed = JSON.parse(cached)
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed
-            .filter((c: any) => {
-              const cId = String(c._id || '').toLowerCase()
-              const cCustomId = String(c.id || '').toLowerCase()
-              const cCode = String(c.code || '').toLowerCase()
-              return !deletedSet.has(cId) && !deletedSet.has(cCustomId) && !deletedSet.has(cCode)
-            })
-            .map((c: any, idx: number) => ({
-              id: String(c._id || c.id || `cpn-${idx}`),
-              title: c.title || `${c.discount || 'Special'} Discount at ${c.store || 'Store'}`,
-              description: c.description || 'Verified promo discount code.',
-              store: c.store || 'Amazon',
-              category: c.category || 'Electronics',
-              code: (c.code || 'AMAZON10').toUpperCase(),
-              couponType: (c.couponType || (String(c.discount || '').includes('%') ? 'percent' : String(c.discount || '').toLowerCase().includes('free') ? 'freebie' : 'flat')) as any,
-              discount: c.discount || '10% off',
-              discountValue: parseInt(String(c.discount || '0').replace(/[^0-9]/g, '')) || 10,
-              minOrder: c.minOrder || 'Min Order: 499',
-              maxDiscount: c.maxDiscount || 'Max ₹250',
-              affiliateLink: c.affiliateLink || `https://${String(c.store || 'store').toLowerCase().replace(/\s+/g, '')}.com/?tag=wouchify`,
-              status: (c.status || 'active') as any,
-              isExclusive: Boolean(c.isExclusive !== false),
-              isFeatured: Boolean(c.isFeatured !== false),
-              isVerified: true,
-              telegramAlert: Boolean(c.telegramAlert),
-              startDate: c.startDate || new Date().toISOString().slice(0, 10),
-              expiryDate: c.expiry || c.expiryDate || new Date(Date.now() + 86400000 * 30).toISOString().slice(0, 10),
-              usageCount: c.usageCount || 0,
-              totalUses: c.usageLimit || 5000,
-              addedOn: c.createdAt ? new Date(c.createdAt).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10)
-            }))
-        }
-      }
-    } catch {}
-    return MOCK_COUPONS
-  })
+  const [coupons, setCoupons] = useState<Coupon[]>([])
+  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState<'all' | CouponStatus>('all')
   const [filterType, setFilterType] = useState<'all' | CouponType>('all')
@@ -643,14 +486,27 @@ export const ExecutiveCouponsPage: React.FC = () => {
   const [sortBy, setSortBy] = useState<'expiry' | 'discount' | 'usage' | 'added'>('expiry')
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editing, setEditing] = useState<Coupon | null>(null)
-  const [previewing, setPreviewing] = useState<Coupon | null>(null)
+  const [inspectedCoupon, setInspectedCoupon] = useState<Coupon | null>(null)
+  const [drawerTab, setDrawerTab] = useState<string>('overview')
+  const [rawStores, setRawStores] = useState<any[]>([])
+  const [rawDeals, setRawDeals] = useState<any[]>([])
+  const [couponToDelete, setCouponToDelete] = useState<Coupon | null>(null)
+  const [couponAlert, setCouponAlert] = useState<{ title: string; message: string; variant?: 'warning' | 'danger' | 'info' | 'success' } | null>(null)
+  const [copiedCode, setCopiedCode] = useState(false)
 
-  const fetchCoupons = async () => {
+  const fetchAllData = async () => {
+    setLoading(true)
     try {
-      const live = await adminApi.getCoupons()
-      if (Array.isArray(live) && live.length > 0) {
-        const mapped: Coupon[] = live.map((c: any, idx: number) => ({
+      const [liveCoupons, liveStores, liveDeals] = await Promise.all([
+        adminApi.getCoupons(),
+        adminApi.getStores(),
+        adminApi.getDeals()
+      ])
+
+      if (Array.isArray(liveCoupons)) {
+        const mapped: Coupon[] = liveCoupons.map((c: any, idx: number) => ({
           id: String(c._id || c.id || `cpn-${idx}`),
+          _id: String(c._id || c.id || `cpn-${idx}`),
           title: c.title || `${c.discount || 'Special'} Discount at ${c.store || 'Store'}`,
           description: c.description || 'Verified promo discount code.',
           store: c.store || 'Amazon',
@@ -674,17 +530,32 @@ export const ExecutiveCouponsPage: React.FC = () => {
           addedOn: c.createdAt ? new Date(c.createdAt).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10)
         }))
         setCoupons(mapped)
+      } else {
+        setCoupons([])
       }
+
+      if (Array.isArray(liveStores)) setRawStores(liveStores)
+      if (Array.isArray(liveDeals)) setRawDeals(liveDeals)
+
     } catch (err) {
-      console.warn('Coupons fallback to local data:', err)
+      console.warn('Data fetch error:', err)
+      setCoupons([])
+    } finally {
+      setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchCoupons()
-    const handleUpdate = () => fetchCoupons()
+    fetchAllData()
+    const handleUpdate = () => fetchAllData()
     window.addEventListener('wouchify_coupons_updated', handleUpdate)
-    return () => window.removeEventListener('wouchify_coupons_updated', handleUpdate)
+    window.addEventListener('wouchify_stores_updated', handleUpdate)
+    window.addEventListener('wouchify_deals_updated', handleUpdate)
+    return () => {
+      window.removeEventListener('wouchify_coupons_updated', handleUpdate)
+      window.removeEventListener('wouchify_stores_updated', handleUpdate)
+      window.removeEventListener('wouchify_deals_updated', handleUpdate)
+    }
   }, [])
   /* KPI stats */
   const kpi = useMemo(() => ({
@@ -769,11 +640,16 @@ export const ExecutiveCouponsPage: React.FC = () => {
     setIsFormOpen(false)
   }
 
-  const handleDelete = async (coupon: Coupon) => {
-    if (window.confirm(`Delete coupon "${coupon.code}" permanently?`)) {
-      await adminApi.deleteCoupon(coupon._id || coupon.id, coupon.code).catch(console.warn)
-      setCoupons(prev => prev.filter(c => c.id !== coupon.id && c.code !== coupon.code && c._id !== coupon._id))
-    }
+  const handleDelete = (coupon: Coupon) => {
+    setCouponToDelete(coupon)
+  }
+
+  const confirmDeleteCoupon = async () => {
+    if (!couponToDelete) return
+    const coupon = couponToDelete
+    await adminApi.deleteCoupon(String(coupon._id || coupon.id)).catch(console.warn)
+    setCoupons(prev => prev.filter(c => c.id !== coupon.id && c.code !== coupon.code && c._id !== coupon._id))
+    setCouponToDelete(null)
   }
 
   const resetFilters = () => {
@@ -930,11 +806,17 @@ export const ExecutiveCouponsPage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filtered.length === 0 ? (
+              {loading ? (
+                <TableRowSkeleton cols={6} rows={6} />
+              ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={9} style={{ textAlign: 'center', padding: '48px', color: '#94a3b8' }}>
-                    <Ticket size={40} strokeWidth={1} style={{ opacity: 0.3, marginBottom: 8, display: 'block', margin: '0 auto 8px' }} />
-                    No coupons match your filters
+                  <td colSpan={9} style={{ padding: '32px 16px' }}>
+                    <EmptyState
+                      title="No Coupons Found"
+                      message="No active coupons found matching your criteria in the database."
+                      actionText="Add New Coupon"
+                      onAction={openAdd}
+                    />
                   </td>
                 </tr>
               ) : filtered.map(coupon => {
@@ -945,7 +827,11 @@ export const ExecutiveCouponsPage: React.FC = () => {
                 const sc = statusConfig(coupon.status)
 
                 return (
-                  <tr key={coupon.id}>
+                  <tr 
+                    key={coupon.id}
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => setInspectedCoupon(coupon)}
+                  >
                     {/* Coupon */}
                     <td style={{ minWidth: 200 }}>
                       <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
@@ -1032,9 +918,9 @@ export const ExecutiveCouponsPage: React.FC = () => {
                     </td>
 
                     {/* Actions */}
-                    <td>
+                    <td onClick={(e) => e.stopPropagation()}>
                       <div style={{ display: 'flex', gap: 4 }}>
-                        <button className="action-btn" onClick={() => setPreviewing(coupon)} title="Preview"><Eye size={15} /></button>
+                        <button className="action-btn" onClick={() => setInspectedCoupon(coupon)} title="Preview"><Eye size={15} /></button>
                         <button className="action-btn" onClick={() => openEdit(coupon)} title="Edit"><Edit2 size={15} /></button>
                         <button className="action-btn delete" onClick={() => handleDelete(coupon)} title="Delete"><Trash2 size={15} /></button>
                       </div>
@@ -1051,8 +937,283 @@ export const ExecutiveCouponsPage: React.FC = () => {
       {isFormOpen && (
         <CouponFormModal editing={editing} onClose={() => setIsFormOpen(false)} onSave={handleSave} />
       )}
-      {previewing && (
-        <CouponPreviewModal coupon={previewing} onClose={() => setPreviewing(null)} />
+      
+      {/* ── Deep Inspection Drawer ── */}
+      {inspectedCoupon && (
+        <div className="exec-drawer-overlay" onClick={() => setInspectedCoupon(null)}>
+          <div className="exec-drawer" onClick={e => e.stopPropagation()}>
+            <div className="exec-drawer__header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                <div className="exec-drawer__avatar" style={{ background: '#f1f5f9', width: 48, height: 48, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                   {(() => {
+                      const st = rawStores.find(s => s.name === inspectedCoupon.store)
+                      if (st?.logoUrl) return <img src={st.logoUrl} alt={st.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 4 }} />
+                      return <Tag size={24} style={{ color: couponTypeColor(inspectedCoupon.couponType) }} />
+                   })()}
+                </div>
+                <div>
+                  <h3 className="exec-drawer__title" style={{ fontSize: '1.1rem', marginBottom: 4, lineHeight: 1.2 }}>{inspectedCoupon.title}</h3>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                     <span style={{ fontSize: '0.72rem', fontWeight: 600, color: couponTypeColor(inspectedCoupon.couponType), background: `${couponTypeColor(inspectedCoupon.couponType)}15`, padding: '2px 8px', borderRadius: 12 }}>
+                        {couponTypeLabel(inspectedCoupon.couponType)}
+                     </span>
+                     <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 500 }}>• {inspectedCoupon.store}</span>
+                     <span style={{ fontSize: '0.72rem', color: statusConfig(inspectedCoupon.status).color, background: statusConfig(inspectedCoupon.status).bg, padding: '2px 8px', borderRadius: 12, fontWeight: 700 }}>
+                        {statusConfig(inspectedCoupon.status).label}
+                     </span>
+                  </div>
+                </div>
+              </div>
+              <button className="exec-drawer__close" onClick={() => setInspectedCoupon(null)}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="exec-drawer__stats">
+              <div className="exec-drawer__stat-card">
+                <div className="label">Discount</div>
+                <div className="value" style={{ color: couponTypeColor(inspectedCoupon.couponType), fontSize: '1.2rem' }}>{inspectedCoupon.discount}</div>
+              </div>
+              <div className="exec-drawer__stat-card">
+                <div className="label">Usage Count</div>
+                <div className="value" style={{ fontSize: '1.2rem' }}>{inspectedCoupon.usageCount.toLocaleString()}</div>
+              </div>
+              <div className="exec-drawer__stat-card">
+                <div className="label">Days Left</div>
+                <div className="value" style={{ fontSize: '1.2rem' }}>{(() => {
+                  const d = daysLeft(inspectedCoupon.expiryDate)
+                  return d < 0 ? 'Expired' : d
+                })()}</div>
+              </div>
+              <div className="exec-drawer__stat-card">
+                <div className="label">Total Uses</div>
+                <div className="value" style={{ fontSize: '1.2rem' }}>{inspectedCoupon.totalUses > 0 ? inspectedCoupon.totalUses : '∞'}</div>
+              </div>
+            </div>
+
+            <div className="exec-drawer__tabs">
+              <button className={`exec-drawer__tab ${drawerTab === 'overview' ? 'active' : ''}`} onClick={() => setDrawerTab('overview')}>Overview</button>
+              <button className={`exec-drawer__tab ${drawerTab === 'store' ? 'active' : ''}`} onClick={() => setDrawerTab('store')}>Store Context</button>
+              <button className={`exec-drawer__tab ${drawerTab === 'deals' ? 'active' : ''}`} onClick={() => setDrawerTab('deals')}>Related Deals</button>
+            </div>
+
+            <div className="exec-drawer__body">
+               {drawerTab === 'overview' && (
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    <div className="exec-drawer__item" style={{ background: '#f8fafc', padding: '20px', textAlign: 'center', border: '2px dashed #cbd5e1', borderRadius: 12 }}>
+                       <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: 12, fontWeight: 700, letterSpacing: '0.5px' }}>COUPON CODE</div>
+                       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12 }}>
+                          <span style={{ fontSize: '1.6rem', fontFamily: 'monospace', fontWeight: 900, letterSpacing: '3px', color: '#0f172a' }}>{inspectedCoupon.code}</span>
+                          <button onClick={() => {
+                             navigator.clipboard.writeText(inspectedCoupon.code)
+                             setCopiedCode(true)
+                             setTimeout(() => setCopiedCode(false), 2000)
+                          }} className="action-btn" title="Copy Code" style={{ background: 'white', padding: 8, borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                             {copiedCode ? <Check size={18} style={{ color: '#10b981' }} /> : <Copy size={18} style={{ color: '#3b82f6' }} />}
+                          </button>
+                       </div>
+                    </div>
+                    
+                    <div className="exec-drawer__item" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px 12px', padding: 16, borderRadius: 12 }}>
+                       <div>
+                          <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: 4 }}>Min Purchase</div>
+                          <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>{inspectedCoupon.minOrder || 'None'}</div>
+                       </div>
+                       <div>
+                          <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: 4 }}>Max Discount</div>
+                          <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>{inspectedCoupon.maxDiscount || 'None'}</div>
+                       </div>
+                       <div>
+                          <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: 4 }}>Created Date</div>
+                          <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#334155' }}>{inspectedCoupon.addedOn || inspectedCoupon.createdAt || 'N/A'}</div>
+                       </div>
+                       <div>
+                          <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                             <Clock size={12} /> Expiry Date
+                          </div>
+                          <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#ef4444' }}>{inspectedCoupon.expiryDate}</div>
+                       </div>
+                    </div>
+
+                    <div className="exec-drawer__item" style={{ padding: 16, borderRadius: 12 }}>
+                       <div style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: 8, color: '#334155' }}>Terms & Conditions / Description</div>
+                       <div style={{ fontSize: '0.9rem', color: '#475569', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                          {inspectedCoupon.description || 'No specific terms provided.'}
+                       </div>
+                    </div>
+
+                    <div className="exec-drawer__item" style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: 16, borderRadius: 12 }}>
+                       <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155' }}>Verification Status</div>
+                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          {inspectedCoupon.isVerified ? (
+                             <div style={{ background: '#dcfce7', padding: '6px 12px', borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                                <CheckCircle2 size={16} style={{ color: '#16a34a' }} /> 
+                                <span style={{ fontSize: '0.85rem', color: '#16a34a', fontWeight: 700 }}>Verified & Working</span>
+                             </div>
+                          ) : (
+                             <div style={{ background: '#fef3c7', padding: '6px 12px', borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                                <AlertTriangle size={16} style={{ color: '#d97706' }} /> 
+                                <span style={{ fontSize: '0.85rem', color: '#d97706', fontWeight: 700 }}>Unverified</span>
+                             </div>
+                          )}
+                       </div>
+                    </div>
+                 </div>
+               )}
+
+               {drawerTab === 'store' && (() => {
+                 const storeObj = rawStores.find(s => s.name === inspectedCoupon.store)
+                 const otherCoupons = coupons.filter(c => c.store === inspectedCoupon.store && c.id !== inspectedCoupon.id)
+                 return (
+                   <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                      {storeObj ? (
+                        <div className="exec-drawer__item" style={{ display: 'flex', gap: 16, alignItems: 'center', padding: 16, borderRadius: 12 }}>
+                           {storeObj.logoUrl ? (
+                              <img src={storeObj.logoUrl} alt={storeObj.name} style={{ width: 72, height: 72, borderRadius: 12, objectFit: 'contain', background: 'white', border: '1px solid #e2e8f0', padding: 4 }} />
+                           ) : (
+                              <div style={{ width: 72, height: 72, borderRadius: 12, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                 <ShoppingBag size={28} style={{ color: '#94a3b8' }} />
+                              </div>
+                           )}
+                           <div style={{ flex: 1 }}>
+                              <h4 style={{ margin: '0 0 6px', fontSize: '1.2rem', color: '#0f172a' }}>{storeObj.name}</h4>
+                              <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: 8, fontWeight: 500 }}>{storeObj.category || 'Various'}</div>
+                              {storeObj.cashbackRate && (
+                                 <div style={{ display: 'inline-block', background: '#dcfce7', color: '#16a34a', fontSize: '0.8rem', fontWeight: 700, padding: '4px 10px', borderRadius: 6, marginBottom: 8 }}>
+                                    Up to {storeObj.cashbackRate} Cashback
+                                 </div>
+                              )}
+                              <div>
+                                 <a href={inspectedCoupon.affiliateLink || storeObj.affiliateLink || '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.85rem', color: '#3b82f6', textDecoration: 'none', fontWeight: 700, background: '#eff6ff', padding: '6px 12px', borderRadius: 8 }}>
+                                    Visit Store <ExternalLink size={14} />
+                                 </a>
+                              </div>
+                           </div>
+                        </div>
+                      ) : (
+                        <div className="exec-drawer__item" style={{ textAlign: 'center', color: '#64748b', padding: '40px 20px', borderRadius: 12 }}>
+                           <ShoppingBag size={32} style={{ margin: '0 auto 12px', opacity: 0.5 }} />
+                           <div style={{ fontWeight: 600 }}>Store details not found</div>
+                           <div style={{ fontSize: '0.85rem', marginTop: 4 }}>No extra store information for "{inspectedCoupon.store}"</div>
+                        </div>
+                      )}
+                      
+                      <div>
+                         <h4 style={{ fontSize: '0.95rem', color: '#334155', margin: '8px 0 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Ticket size={16} /> Other Coupons from {inspectedCoupon.store}
+                         </h4>
+                         {otherCoupons.length > 0 ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                               {otherCoupons.slice(0, 5).map(c => (
+                                  <div key={c.id} className="exec-drawer__item" style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: 10, cursor: 'pointer', transition: 'all 0.2s' }} onClick={() => setInspectedCoupon(c)} title="View Coupon">
+                                     <div>
+                                        <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#0f172a', fontFamily: 'monospace', letterSpacing: '1px' }}>{c.code}</div>
+                                        <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: 4, fontWeight: 500 }}>{c.discount}</div>
+                                     </div>
+                                     <div style={{ fontSize: '0.75rem', color: c.status === 'active' ? '#16a34a' : '#ef4444', fontWeight: 700, background: c.status === 'active' ? '#dcfce7' : '#fee2e2', padding: '4px 10px', borderRadius: 8 }}>
+                                        {c.status.toUpperCase()}
+                                     </div>
+                                  </div>
+                               ))}
+                            </div>
+                         ) : (
+                            <div className="exec-drawer__item" style={{ fontSize: '0.85rem', color: '#94a3b8', padding: 20, textAlign: 'center', borderRadius: 12 }}>
+                               No other coupons found.
+                            </div>
+                         )}
+                      </div>
+                   </div>
+                 )
+               })()}
+
+               {drawerTab === 'deals' && (() => {
+                 const storeDeals = rawDeals.filter(d => d.store === inspectedCoupon.store && d.status === 'active')
+                 return (
+                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                      {storeDeals.length > 0 ? (
+                         storeDeals.map(d => (
+                           <div key={d._id || d.id} className="exec-drawer__item" style={{ display: 'flex', gap: 16, padding: 16, borderRadius: 12, alignItems: 'center' }}>
+                              <img src={d.imageUrl || 'https://via.placeholder.com/80'} alt="" style={{ width: 80, height: 80, borderRadius: 10, objectFit: 'cover', background: '#f1f5f9' }} />
+                              <div style={{ flex: 1 }}>
+                                 <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', lineHeight: 1.3, marginBottom: 8 }}>{d.title}</div>
+                                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                    <span style={{ fontWeight: 900, color: '#0f172a', fontSize: '1.1rem' }}>₹{d.dealPrice}</span>
+                                    {d.originalPrice && <span style={{ textDecoration: 'line-through', color: '#94a3b8', fontSize: '0.85rem', fontWeight: 500 }}>₹{d.originalPrice}</span>}
+                                    {d.discount && <span style={{ background: '#fee2e2', color: '#ef4444', fontSize: '0.75rem', padding: '2px 8px', borderRadius: 6, fontWeight: 800 }}>{d.discount} OFF</span>}
+                                 </div>
+                              </div>
+                           </div>
+                         ))
+                      ) : (
+                         <div className="exec-drawer__item" style={{ textAlign: 'center', color: '#64748b', padding: '40px 20px', borderRadius: 12 }}>
+                           <Tag size={32} style={{ margin: '0 auto 12px', opacity: 0.5 }} />
+                           <div style={{ fontWeight: 600 }}>No active deals</div>
+                           <div style={{ fontSize: '0.85rem', marginTop: 4 }}>No live deals found for {inspectedCoupon.store}</div>
+                         </div>
+                      )}
+                   </div>
+                 )
+               })()}
+            </div>
+
+            <div className="exec-drawer__actions">
+               <button className="btn-cancel" onClick={() => setInspectedCoupon(null)} style={{ background: '#f1f5f9', border: 'none', color: '#475569' }}>Close</button>
+               <div style={{ display: 'flex', gap: 12 }}>
+                 {!inspectedCoupon.isVerified && (
+                   <button className="action-btn" style={{ background: '#dcfce7', color: '#16a34a', borderColor: '#dcfce7', padding: '8px 16px', fontWeight: 700 }}
+                     onClick={() => {
+                        if ((adminApi as any).verifyCoupon) {
+                           (adminApi as any).verifyCoupon(inspectedCoupon.id).then(() => {
+                              fetchAllData()
+                              setInspectedCoupon({ ...inspectedCoupon, isVerified: true })
+                              setCouponAlert({ title: 'Coupon Verified', message: `Coupon ${inspectedCoupon.code} has been successfully validated.`, variant: 'success' })
+                           }).catch(console.warn)
+                        } else {
+                           setCouponAlert({ title: 'Verification Notice', message: 'Verification API is not configured.', variant: 'info' })
+                        }
+                     }}
+                   >
+                     <CheckCircle2 size={16} /> Verify
+                   </button>
+                 )}
+                 <button className="btn-save" style={{ display: 'flex', alignItems: 'center', gap: 6 }} onClick={() => { setInspectedCoupon(null); openEdit(inspectedCoupon) }}>
+                   <Edit2 size={16} /> Edit Coupon
+                 </button>
+                 <button className="action-btn" style={{ color: '#ef4444', borderColor: '#fee2e2', background: '#fef2f2' }} onClick={() => {
+                    handleDelete(inspectedCoupon)
+                    setInspectedCoupon(null)
+                 }}>
+                   <Trash2 size={16} />
+                 </button>
+               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── CUSTOM CONFIRM DIALOG ── */}
+      <AdminConfirmDialog
+        isOpen={!!couponToDelete}
+        title="Delete Coupon"
+        message={couponToDelete ? `Are you sure you want to permanently delete coupon "${couponToDelete.code}"?` : ''}
+        confirmLabel="Delete Coupon"
+        cancelLabel="Cancel"
+        variant="danger"
+        icon="trash"
+        onConfirm={confirmDeleteCoupon}
+        onCancel={() => setCouponToDelete(null)}
+      />
+
+      {/* ── CUSTOM ALERT DIALOG ── */}
+      {couponAlert && (
+        <AdminAlertDialog
+          isOpen={!!couponAlert}
+          title={couponAlert.title}
+          message={couponAlert.message}
+          variant={couponAlert.variant || 'warning'}
+          buttonLabel="Understood"
+          onClose={() => setCouponAlert(null)}
+        />
       )}
     </ExecutiveLayout>
   )

@@ -4,51 +4,69 @@ const mongoose = require('mongoose');
 const Store = require('../models/Store');
 const auth = require('../middleware/authMiddleware');
 const store = require('../services/inMemoryStore');
+const { handleEntityCreate, handleEntityUpdate, handleEntityDelete } = require('../middleware/approvalHelper');
 
+// 1. PUBLIC: Get all stores (with optional status filter)
+router.get('/', async (req, res, next) => {
+  const { status, public: isPublic, all } = req.query;
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      let memoryStores = store.getStores();
+      if (status && status !== 'all') {
+        memoryStores = memoryStores.filter(s => s.status === status);
+      }
+      if (all !== 'true') {
+        memoryStores = memoryStores.filter(s => s.submissionStatus !== 'pending_approval' && s.opsManagerApproval !== 'Rejected');
+      }
+      return res.json(memoryStores);
+    }
+
+    let query = {};
+    if (status && status !== 'all') query.status = status;
+
+    if (all !== 'true') {
+      query.status = { $ne: 'rejected', $ne: 'pending' };
+      query.opsManagerApproval = { $ne: 'Rejected' };
+      query.submissionStatus = { $ne: 'pending_approval' };
+    }
+
+    const stores = await Store.find(query).sort({ name: 1 });
+    res.json(stores);
+  } catch (err) { next(err); }
+});
+
+// 2. PUBLIC: Track Store Click
+router.post('/:id/click', async (req, res, next) => {
+  try {
+    const target = req.params.id;
+    if (mongoose.connection.readyState !== 1) {
+      const updated = store.incrementStoreClicks(target);
+      return res.json({ success: true, clicks: updated?.clicks || 1 });
+    }
+    const isObjectId = mongoose.Types.ObjectId.isValid(target);
+    const query = isObjectId 
+      ? { $or: [{ _id: target }, { id: target }, { slug: target }, { name: new RegExp(`^${target}$`, 'i') }] }
+      : { $or: [{ id: target }, { slug: target }, { name: new RegExp(`^${target}$`, 'i') }] };
+    
+    const updatedStore = await Store.findOneAndUpdate(
+      query,
+      { $inc: { clicks: 1 } },
+      { new: true }
+    );
+    res.json({ success: true, clicks: updatedStore?.clicks || 1 });
+  } catch (err) { next(err); }
+});
+
+// 3. PROTECTED: Administrative queues & mutations
 router.use(auth);
 
 // Get pending stores (Ops Manager queue)
 router.get('/pending', async (req, res, next) => {
   try {
     if (mongoose.connection.readyState !== 1) {
-      return res.json(store.getStores().filter(s => s.opsManagerApproval === 'Pending'));
+      return res.json(store.getStores().filter(s => s.opsManagerApproval === 'Pending' || s.submissionStatus === 'pending_approval'));
     }
-    const stores = await Store.find({ opsManagerApproval: 'Pending' }).sort({ createdAt: -1 });
-    res.json(stores);
-  } catch (err) { next(err); }
-});
-
-// Get manager pending stores (Manager queue)
-router.get('/manager-pending', async (req, res, next) => {
-  try {
-    if (mongoose.connection.readyState !== 1) {
-      return res.json(store.getStores().filter(s => s.opsManagerApproval === 'Approved' && s.managerApproval === 'Pending'));
-    }
-    const stores = await Store.find({ opsManagerApproval: 'Approved', managerApproval: 'Pending' }).sort({ createdAt: -1 });
-    res.json(stores);
-  } catch (err) { next(err); }
-});
-
-// Get all stores (with optional status filter)
-router.get('/', async (req, res, next) => {
-  const { status, public: isPublic } = req.query;
-  try {
-    if (mongoose.connection.readyState !== 1) {
-      let memoryStores = store.getStores();
-      if (status) {
-        memoryStores = memoryStores.filter(s => s.status === status);
-      }
-      if (isPublic === 'true') {
-        memoryStores = memoryStores.filter(s => s.opsManagerApproval === 'Approved' && s.managerApproval === 'Approved');
-      }
-      return res.json(memoryStores);
-    }
-    const query = status ? { status } : {};
-    if (isPublic === 'true') {
-      query.opsManagerApproval = 'Approved';
-      query.managerApproval = 'Approved';
-    }
-    const stores = await Store.find(query).sort({ name: 1 });
+    const stores = await Store.find({ $or: [{ opsManagerApproval: 'Pending' }, { submissionStatus: 'pending_approval' }] }).sort({ createdAt: -1 });
     res.json(stores);
   } catch (err) { next(err); }
 });
@@ -56,13 +74,18 @@ router.get('/', async (req, res, next) => {
 // Create store
 router.post('/', async (req, res, next) => {
   try {
-    if (mongoose.connection.readyState !== 1) {
-      const created = store.addStore(req.body);
-      return res.status(201).json(created);
-    }
-    const newStore = new Store(req.body);
-    await newStore.save();
-    res.status(201).json(newStore);
+    const result = await handleEntityCreate({
+      entityType: 'store',
+      title: req.body.name || 'New Store',
+      store: req.body.name,
+      category: req.body.category,
+      priority: req.body.priority || 'Normal',
+      data: req.body,
+      user: req.user,
+      Model: Store,
+      storeAddMethod: store.addStore
+    });
+    res.status(201).json(result.entity || result);
   } catch (err) {
     if (err.code === 11000) {
       return res.status(400).json({ message: 'A store with this exact name already exists. Please edit the existing store instead.' });
@@ -74,74 +97,37 @@ router.post('/', async (req, res, next) => {
 // Update store
 router.put('/:id', async (req, res, next) => {
   try {
-    if (mongoose.connection.readyState !== 1) {
-      const updated = store.updateStore(req.params.id, req.body);
-      if (!updated) return res.status(404).json({ message: 'Store not found' });
-      return res.json(updated);
-    }
-    const updated = await Store.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-    if (!updated) return res.status(404).json({ message: 'Store not found' });
-    res.json(updated);
-  } catch (err) { next(err); }
-});
-
-// Approve store
-router.patch('/:id/approve/:role', async (req, res, next) => {
-  const { role } = req.params;
-  try {
-    if (mongoose.connection.readyState !== 1) {
-      const approved = store.approveStore(req.params.id, role);
-      if (!approved) return res.status(404).json({ message: 'Store not found' });
-      return res.json(approved);
-    }
-    const storeDoc = await Store.findById(req.params.id);
-    if (!storeDoc) return res.status(404).json({ message: 'Store not found' });
-    
-    if (role === 'opsManager') storeDoc.opsManagerApproval = 'Approved';
-    if (role === 'manager') storeDoc.managerApproval = 'Approved';
-    
-    if (storeDoc.opsManagerApproval === 'Approved' && storeDoc.managerApproval === 'Approved') {
-      storeDoc.status = 'active';
-    }
-    
-    await storeDoc.save();
-    res.json(storeDoc);
-  } catch (err) { next(err); }
-});
-
-// Reject store
-router.patch('/:id/reject/:role', async (req, res, next) => {
-  const { role } = req.params;
-  try {
-    if (mongoose.connection.readyState !== 1) {
-      const rejected = store.rejectStore(req.params.id, role);
-      if (!rejected) return res.status(404).json({ message: 'Store not found' });
-      return res.json(rejected);
-    }
-    const storeDoc = await Store.findById(req.params.id);
-    if (!storeDoc) return res.status(404).json({ message: 'Store not found' });
-    
-    if (role === 'opsManager') storeDoc.opsManagerApproval = 'Rejected';
-    if (role === 'manager') storeDoc.managerApproval = 'Rejected';
-    
-    storeDoc.status = 'rejected';
-    
-    await storeDoc.save();
-    res.json(storeDoc);
+    const result = await handleEntityUpdate({
+      id: req.params.id,
+      entityType: 'store',
+      title: req.body.name,
+      store: req.body.name,
+      category: req.body.category,
+      priority: req.body.priority || 'Normal',
+      updates: req.body,
+      user: req.user,
+      Model: Store,
+      storeUpdateMethod: store.updateStore,
+      storeGetMethod: store.getStoreById
+    });
+    res.json(result.entity || result);
   } catch (err) { next(err); }
 });
 
 // Delete store
 router.delete('/:id', async (req, res, next) => {
   try {
-    if (mongoose.connection.readyState !== 1) {
-      const ok = store.deleteStore(req.params.id);
-      if (!ok) return res.status(404).json({ message: 'Store not found' });
-      return res.json({ message: 'Store deleted' });
-    }
-    const deleted = await Store.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ message: 'Store not found' });
-    res.json({ message: 'Store deleted' });
+    const result = await handleEntityDelete({
+      id: req.params.id,
+      entityType: 'store',
+      title: req.body?.name,
+      store: req.body?.name,
+      user: req.user,
+      Model: Store,
+      storeDeleteMethod: store.deleteStore,
+      storeGetMethod: store.getStoreById
+    });
+    res.json(result);
   } catch (err) { next(err); }
 });
 

@@ -27,14 +27,17 @@ import {
   CheckCircle2, 
   ChevronLeft, 
   ChevronRight, 
-  Layers,
-  Calendar
+  Layers, 
+  Calendar, 
+  ExternalLink 
 } from 'lucide-react'
 import './ExecutiveShared.css'
-import { MASTER_EXECUTIVE_DEALS, DEAL_PRODUCT_PRESETS, getStoreLogo, convertGoogleDriveUrl, PLACEHOLDER_DEAL_IMAGE, PLACEHOLDER_STORE_LOGO } from '../../../data/dealsPage'
+import { DEAL_PRODUCT_PRESETS, getStoreLogo, convertGoogleDriveUrl, PLACEHOLDER_DEAL_IMAGE, PLACEHOLDER_STORE_LOGO } from '../../../data/dealsPage'
 import { FAVOURITE_STORES } from '../../../data/storesHero'
 import { CATEGORIES_DATA } from '../../../data/categories'
 import { ImageUploadField } from './ImageUploadField'
+import { TableRowSkeleton, DealCardSkeleton, EmptyState } from '../../../components/common/Skeletons'
+import { AdminConfirmDialog, AdminAlertDialog } from '../../../components/common/AdminDialog'
 
 export interface Deal {
   id: string
@@ -129,64 +132,9 @@ export const getExpiryCountdown = (isoStr?: string): { text: string; status: 'ex
   }
 }
 
-const mapInitialDealsToFullSchema = (): Deal[] => {
-  try {
-    const cached = localStorage.getItem('wouchify_public_deals')
-    if (cached) {
-      const parsed = JSON.parse(cached)
-      if (Array.isArray(parsed) && parsed.length >= 12) {
-        return parsed.map((d: any, idx: number) => {
-          const matchingMaster = MASTER_EXECUTIVE_DEALS.find(m => m.id === String(d._id || d.id))
-          return {
-            id: String(d._id || d.id || `deal-${idx + 1}`),
-            title: d.name || d.title || matchingMaster?.title || 'Untitled Deal',
-            store: d.store || matchingMaster?.store || 'Amazon',
-            brand: d.brand || matchingMaster?.brand || '',
-            category: d.category || matchingMaster?.category || 'Electronics',
-            subCategory: d.subCategory || matchingMaster?.subCategory || '',
-            asinOrSku: d.asinOrSku || matchingMaster?.asinOrSku || '',
-            type: (d.type || matchingMaster?.type || 'deal') as any,
-            status: (d.status === 'expired' || d.status === 'Expired' ? 'Expired' : d.status === 'pending' || d.status === 'Pending Approval' || d.submissionStatus === 'pending_approval' ? 'Pending Approval' : d.status === 'draft' || d.status === 'Draft' ? 'Draft' : 'Approved') as any,
-            priority: (d.priority || matchingMaster?.priority || 'Normal') as any,
-            badge: d.dealTag || d.badge || matchingMaster?.badge || 'Deal',
-            code: d.code || matchingMaster?.code || '',
-            link: d.ctaHref || d.link || matchingMaster?.link || '',
-            originalPrice: d.originalPrice || matchingMaster?.originalPrice || '',
-            price: d.price || matchingMaster?.price || '₹0',
-            discountLabel: d.discount || d.discountLabel || matchingMaster?.discountLabel || '',
-            discountValue: parseInt(String(d.discount || d.discountLabel || matchingMaster?.discountValue || '0').replace(/[^0-9]/g, '')) || 0,
-            bankOffer: d.bankOffer || matchingMaster?.bankOffer || '',
-            effectivePrice: d.effectivePrice || matchingMaster?.effectivePrice || d.price || '',
-            cashback: d.cashback || matchingMaster?.cashback || '',
-            stockStatus: d.stockStatus || matchingMaster?.stockStatus || 'In Stock',
-            rating: d.rating || matchingMaster?.rating || '4.8',
-            deliveryInfo: d.deliveryInfo || matchingMaster?.deliveryInfo || 'Free Express Delivery',
-            warranty: d.warranty || matchingMaster?.warranty || '1 Year Brand Warranty',
-            variantNote: d.variantNote || matchingMaster?.variantNote || '',
-            howToClaim: d.howToClaim || matchingMaster?.howToClaim || '',
-            highlights: d.highlights || matchingMaster?.highlights || ['100% Verified Deal'],
-            isBestSelling: Boolean(d.isBestSelling || d.sectionPlacement === 'best_selling' || d.sectionPlacement === 'both'),
-            sectionPlacement: (d.sectionPlacement || (d.isBestSelling ? 'best_selling' : 'favourite')) as any,
-            isFeatured: Boolean(d.isFeatured ?? matchingMaster?.isFeatured),
-            isVerified: Boolean(d.isVerified ?? matchingMaster?.isVerified ?? true),
-            postedAt: d.createdAt ? new Date(d.createdAt).toLocaleDateString('en-IN') : (d.postedAt || matchingMaster?.postedAt || 'Recently'),
-            expiresAt: d.expiry || d.expiresAt || matchingMaster?.expiresAt || '',
-            description: d.description || matchingMaster?.description || 'Handpicked verified e-commerce deal.',
-            terms: d.terms || matchingMaster?.terms || '',
-            image: convertGoogleDriveUrl(d.productImage || d.image || matchingMaster?.image || ''),
-            images: d.images?.length ? d.images.map(convertGoogleDriveUrl) : [convertGoogleDriveUrl(d.productImage || d.image || matchingMaster?.image || '')],
-            clicks: typeof d.clicks === 'number' ? d.clicks : (parseInt(d.clicks) || matchingMaster?.clicks || 0)
-          }
-        })
-      }
-    }
-  } catch {}
-
-  return [...MASTER_EXECUTIVE_DEALS]
-}
-
 export const ExecutiveDealsPage: React.FC = () => {
-  const [deals, setDeals] = useState<Deal[]>(mapInitialDealsToFullSchema())
+  const [deals, setDeals] = useState<Deal[]>([])
+  const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table')
   const [dealsTab, setDealsTab] = useState<'active' | 'expired'>('active')
   const [selectedDealIds, setSelectedDealIds] = useState<string[]>([])
@@ -195,63 +143,81 @@ export const ExecutiveDealsPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [formStep, setFormStep] = useState<1 | 2>(1)
   const [editingDeal, setEditingDeal] = useState<Deal | null>(null)
-  const [previewDeal, setPreviewDeal] = useState<Deal | null>(null)
+  const [inspectedDeal, setInspectedDeal] = useState<Deal | null>(null)
+  const [drawerTab, setDrawerTab] = useState<string>('overview')
+  const [rawStores, setRawStores] = useState<any[]>([])
+  const [rawCoupons, setRawCoupons] = useState<any[]>([])
   const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const [dealToDelete, setDealToDelete] = useState<string | null>(null)
+  const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false)
+  const [dealAlert, setDealAlert] = useState<{ title: string; message: string; variant?: 'warning' | 'danger' | 'info' | 'success' } | null>(null)
 
   useEffect(() => {
     let isMounted = true
     const fetchLiveDeals = async () => {
+      setLoading(true)
       try {
-        const liveDeals = await adminApi.getDeals()
+        const [liveDeals, stores, coupons] = await Promise.all([
+          adminApi.getDeals(),
+          adminApi.getStores().catch(() => []),
+          adminApi.getCoupons().catch(() => [])
+        ])
+        if (isMounted) {
+          setRawStores(Array.isArray(stores) ? stores : [])
+          setRawCoupons(Array.isArray(coupons) ? coupons : [])
+        }
         if (!isMounted) return
-        if (Array.isArray(liveDeals) && liveDeals.length > 0) {
-          const mapped: Deal[] = liveDeals.map((d: any, idx: number) => {
-            const matchingMaster = MASTER_EXECUTIVE_DEALS.find(m => m.id === String(d._id || d.id))
-            return {
-              id: String(d._id || d.id || `deal-${idx + 1}`),
-              title: d.name || d.title || matchingMaster?.title || 'Untitled Deal',
-              store: d.store || matchingMaster?.store || 'Amazon',
-              brand: d.brand || matchingMaster?.brand || '',
-              category: d.category || matchingMaster?.category || 'Electronics',
-              subCategory: d.subCategory || matchingMaster?.subCategory || '',
-              asinOrSku: d.asinOrSku || matchingMaster?.asinOrSku || '',
-              type: (d.type || matchingMaster?.type || 'deal') as any,
-              status: (d.status === 'expired' || d.status === 'Expired' ? 'Expired' : d.status === 'pending' || d.status === 'Pending Approval' || d.submissionStatus === 'pending_approval' ? 'Pending Approval' : d.status === 'draft' || d.status === 'Draft' ? 'Draft' : 'Approved') as any,
-              priority: (d.priority || matchingMaster?.priority || 'Normal') as any,
-              badge: d.dealTag || d.badge || matchingMaster?.badge || 'Deal',
-              code: d.code || matchingMaster?.code || '',
-              link: d.ctaHref || d.link || matchingMaster?.link || '',
-              originalPrice: d.originalPrice || matchingMaster?.originalPrice || '',
-              price: d.price || matchingMaster?.price || '₹0',
-              discountLabel: d.discount || d.discountLabel || matchingMaster?.discountLabel || '',
-              discountValue: parseInt(String(d.discount || d.discountLabel || matchingMaster?.discountValue || '0').replace(/[^0-9]/g, '')) || 0,
-              bankOffer: d.bankOffer || matchingMaster?.bankOffer || '',
-              effectivePrice: d.effectivePrice || matchingMaster?.effectivePrice || d.price || '',
-              cashback: d.cashback || matchingMaster?.cashback || '',
-              stockStatus: d.stockStatus || matchingMaster?.stockStatus || 'In Stock',
-              rating: d.rating || matchingMaster?.rating || '4.8',
-              deliveryInfo: d.deliveryInfo || matchingMaster?.deliveryInfo || 'Free Express Delivery',
-              warranty: d.warranty || matchingMaster?.warranty || '1 Year Brand Warranty',
-              variantNote: d.variantNote || matchingMaster?.variantNote || '',
-              howToClaim: d.howToClaim || matchingMaster?.howToClaim || '',
-              highlights: d.highlights || matchingMaster?.highlights || ['100% Verified Deal'],
-              isBestSelling: Boolean(d.isBestSelling || d.sectionPlacement === 'best_selling' || d.sectionPlacement === 'both'),
-              sectionPlacement: (d.sectionPlacement || (d.isBestSelling ? 'best_selling' : 'favourite')) as any,
-              isFeatured: Boolean(d.isFeatured ?? matchingMaster?.isFeatured),
-              isVerified: Boolean(d.isVerified ?? matchingMaster?.isVerified ?? true),
-              postedAt: d.createdAt ? new Date(d.createdAt).toLocaleDateString('en-IN') : (d.postedAt || matchingMaster?.postedAt || 'Recently'),
-              expiresAt: d.expiry || d.expiresAt || matchingMaster?.expiresAt || '',
-              description: d.description || matchingMaster?.description || 'Handpicked verified e-commerce deal.',
-              terms: d.terms || matchingMaster?.terms || '',
-              image: convertGoogleDriveUrl(d.productImage || d.image || matchingMaster?.image || ''),
-              images: d.images?.length ? d.images.map(convertGoogleDriveUrl) : [convertGoogleDriveUrl(d.productImage || d.image || matchingMaster?.image || '')],
-              clicks: typeof d.clicks === 'number' ? d.clicks : (parseInt(d.clicks) || matchingMaster?.clicks || 0)
-            }
-          })
+        if (Array.isArray(liveDeals)) {
+          const mapped: Deal[] = liveDeals.map((d: any, idx: number) => ({
+            id: String(d._id || d.id || `deal-${idx + 1}`),
+            _id: String(d._id || d.id || `deal-${idx + 1}`),
+            title: d.name || d.title || 'Untitled Deal',
+            store: d.store || 'Amazon',
+            brand: d.brand || '',
+            category: d.category || 'Electronics',
+            subCategory: d.subCategory || '',
+            asinOrSku: d.asinOrSku || '',
+            type: (d.type || 'deal') as any,
+            status: (d.status === 'expired' || d.status === 'Expired' ? 'Expired' : d.status === 'pending' || d.status === 'Pending Approval' || d.submissionStatus === 'pending_approval' ? 'Pending Approval' : d.status === 'draft' || d.status === 'Draft' ? 'Draft' : 'Approved') as any,
+            priority: (d.priority || 'Normal') as any,
+            badge: d.dealTag || d.badge || 'Deal',
+            code: d.code || '',
+            link: d.ctaHref || d.link || '',
+            originalPrice: d.originalPrice || '',
+            price: d.price || '₹0',
+            discountLabel: d.discount || d.discountLabel || '',
+            discountValue: parseInt(String(d.discount || d.discountLabel || '0').replace(/[^0-9]/g, '')) || 0,
+            bankOffer: d.bankOffer || '',
+            effectivePrice: d.effectivePrice || d.price || '',
+            cashback: d.cashback || '',
+            stockStatus: d.stockStatus || 'In Stock',
+            rating: d.rating || '4.8',
+            deliveryInfo: d.deliveryInfo || 'Free Express Delivery',
+            warranty: d.warranty || '1 Year Brand Warranty',
+            variantNote: d.variantNote || '',
+            howToClaim: d.howToClaim || '',
+            highlights: d.highlights || ['100% Verified Deal'],
+            isBestSelling: Boolean(d.isBestSelling || d.sectionPlacement === 'best_selling' || d.sectionPlacement === 'both'),
+            sectionPlacement: (d.sectionPlacement || (d.isBestSelling ? 'best_selling' : 'favourite')) as any,
+            isFeatured: Boolean(d.isFeatured),
+            isVerified: Boolean(d.isVerified ?? true),
+            postedAt: d.createdAt ? new Date(d.createdAt).toLocaleDateString('en-IN') : (d.postedAt || 'Recently'),
+            expiresAt: d.expiry || d.expiresAt || '',
+            description: d.description || 'Handpicked verified e-commerce deal.',
+            terms: d.terms || '',
+            image: convertGoogleDriveUrl(d.productImage || d.image || ''),
+            images: d.images?.length ? d.images.map(convertGoogleDriveUrl) : [convertGoogleDriveUrl(d.productImage || d.image || '')],
+            clicks: typeof d.clicks === 'number' ? d.clicks : (parseInt(d.clicks) || 0)
+          }))
           setDeals(mapped)
+        } else {
+          setDeals([])
         }
       } catch (err) {
-        console.warn('Deals fallback to local store:', err)
+        console.warn('Deals fetch error:', err)
+        if (isMounted) setDeals([])
+      } finally {
+        if (isMounted) setLoading(false)
       }
     }
 
@@ -505,12 +471,17 @@ export const ExecutiveDealsPage: React.FC = () => {
   }
 
   const handleDeleteDeal = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this deal?')) {
-      setDeals(deals.filter(d => d.id !== id))
-      setSelectedDealIds(selectedDealIds.filter(selId => selId !== id))
-      showToast('Deal removed successfully')
-      adminApi.deleteDeal(id).catch(console.warn)
-    }
+    setDealToDelete(id)
+  }
+
+  const confirmDeleteDeal = async () => {
+    if (!dealToDelete) return
+    const id = dealToDelete
+    setDeals(deals.filter(d => d.id !== id))
+    setSelectedDealIds(selectedDealIds.filter(selId => selId !== id))
+    showToast('Deal removed successfully')
+    adminApi.deleteDeal(id).catch(console.warn)
+    setDealToDelete(null)
   }
 
   const handleToggleStatus = (id: string) => {
@@ -603,15 +574,18 @@ export const ExecutiveDealsPage: React.FC = () => {
   }
 
   const handleBulkDelete = () => {
-    if (window.confirm(`Delete ${selectedDealIds.length} selected deals permanently?`)) {
-      const idsToDelete = [...selectedDealIds]
-      setDeals(deals.filter(d => !idsToDelete.includes(d.id)))
-      idsToDelete.forEach(id => {
-        adminApi.deleteDeal(id).catch(console.warn)
-      })
-      showToast(`Deleted ${idsToDelete.length} deals`)
-      setSelectedDealIds([])
-    }
+    setIsBulkDeleteOpen(true)
+  }
+
+  const confirmBulkDelete = () => {
+    const idsToDelete = [...selectedDealIds]
+    setDeals(deals.filter(d => !idsToDelete.includes(d.id)))
+    idsToDelete.forEach(id => {
+      adminApi.deleteDeal(id).catch(console.warn)
+    })
+    showToast(`Deleted ${idsToDelete.length} deals`)
+    setSelectedDealIds([])
+    setIsBulkDeleteOpen(false)
   }
 
   // Export to CSV
@@ -699,11 +673,11 @@ export const ExecutiveDealsPage: React.FC = () => {
 
   const handleSave = (statusToSet: 'Draft' | 'Pending Approval') => {
     if (!form.title.trim()) {
-      alert('Please enter a Deal Title')
+      setDealAlert({ title: 'Validation Required', message: 'Please enter a Deal Title before proceeding.' })
       return
     }
     if (!form.price.trim()) {
-      alert('Please enter an Offer Price')
+      setDealAlert({ title: 'Validation Required', message: 'Please enter an Offer Price before proceeding.' })
       return
     }
 
@@ -922,18 +896,17 @@ export const ExecutiveDealsPage: React.FC = () => {
         </div>
 
         {/* Active / Expired Tab Switcher */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0', borderBottom: '2px solid #e2e8f0', margin: '0 0 20px 0' }}>
+        <div className="deals-tab-bar">
           <button
+            className="deals-tab-btn"
             onClick={() => { setDealsTab('active'); setCurrentPage(1); }}
             style={{
               background: 'none',
               border: 'none',
               borderBottom: dealsTab === 'active' ? '3px solid var(--color-red, #E31E25)' : '3px solid transparent',
               marginBottom: '-2px',
-              padding: '12px 24px',
               fontWeight: dealsTab === 'active' ? 700 : 500,
               color: dealsTab === 'active' ? 'var(--color-red, #E31E25)' : '#64748b',
-              fontSize: '0.92rem',
               cursor: 'pointer',
               transition: 'all 0.15s ease',
               display: 'inline-flex',
@@ -948,16 +921,15 @@ export const ExecutiveDealsPage: React.FC = () => {
             </span>
           </button>
           <button
+            className="deals-tab-btn"
             onClick={() => { setDealsTab('expired'); setCurrentPage(1); }}
             style={{
               background: 'none',
               border: 'none',
               borderBottom: dealsTab === 'expired' ? '3px solid #ef4444' : '3px solid transparent',
               marginBottom: '-2px',
-              padding: '12px 24px',
               fontWeight: dealsTab === 'expired' ? 700 : 500,
               color: dealsTab === 'expired' ? '#ef4444' : '#64748b',
-              fontSize: '0.92rem',
               cursor: 'pointer',
               transition: 'all 0.15s ease',
               display: 'inline-flex',
@@ -973,11 +945,6 @@ export const ExecutiveDealsPage: React.FC = () => {
               </span>
             )}
           </button>
-          {dealsTab === 'expired' && (
-            <span style={{ marginLeft: 'auto', fontSize: '0.8rem', color: '#ef4444', fontStyle: 'italic', padding: '0 16px', fontWeight: 500 }}>
-              ⚠️ These deals are no longer live. Review or remove them.
-            </span>
-          )}
         </div>
 
         {/* Advanced Filter Toolbar */}
@@ -1184,11 +1151,28 @@ export const ExecutiveDealsPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {paginatedDeals.map((deal) => {
+                {loading ? (
+                  <TableRowSkeleton cols={6} rows={6} />
+                ) : paginatedDeals.length === 0 ? (
+                  <tr>
+                    <td colSpan={12} style={{ padding: '32px 16px' }}>
+                      <EmptyState
+                        title="No Deals Found"
+                        message="No promotional deals match your selected filters in the database."
+                        actionText="Add New Deal"
+                        onAction={handleAddDeal}
+                      />
+                    </td>
+                  </tr>
+                ) : paginatedDeals.map((deal) => {
                   const isSelected = selectedDealIds.includes(deal.id)
                   return (
-                    <tr key={deal.id} style={{ backgroundColor: isSelected ? '#fef2f2' : undefined }}>
-                      <td style={{ textAlign: 'center' }}>
+                    <tr 
+                      key={deal.id} 
+                      style={{ backgroundColor: isSelected ? '#fef2f2' : undefined, cursor: 'pointer' }}
+                      onClick={() => setInspectedDeal(deal)}
+                    >
+                      <td style={{ textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
                         <input 
                           type="checkbox" 
                           checked={isSelected}
@@ -1363,11 +1347,11 @@ export const ExecutiveDealsPage: React.FC = () => {
                           </span>
                         </button>
                       </td>
-                      <td>
+                      <td onClick={(e) => e.stopPropagation()}>
                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                           <button 
                             className="action-btn view" 
-                            onClick={() => setPreviewDeal(deal)} 
+                            onClick={() => setInspectedDeal(deal)} 
                             title="Preview Customer Deal Page"
                           >
                             <Eye size={16} />
@@ -1469,16 +1453,34 @@ export const ExecutiveDealsPage: React.FC = () => {
           /* ── VIEW 2: GRID / CARD VIEW ── */
           <div>
             <div className="deals-grid-container">
-              {paginatedDeals.map((deal) => {
+              {loading ? (
+                [...Array(8)].map((_, i) => <DealCardSkeleton key={`skel-card-${i}`} />)
+              ) : paginatedDeals.length === 0 ? (
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <EmptyState
+                    title="No Deals Found"
+                    message="No promotional deals match your selected filters in the database."
+                    actionText="Add New Deal"
+                    onAction={handleAddDeal}
+                  />
+                </div>
+              ) : (
+                paginatedDeals.map((deal) => {
                 const isSelected = selectedDealIds.includes(deal.id)
                 return (
-                  <div key={deal.id} className="deal-card-manage" style={{ borderColor: isSelected ? 'var(--color-red, #E31E25)' : undefined }}>
+                  <div 
+                    key={deal.id} 
+                    className="deal-card-manage" 
+                    style={{ borderColor: isSelected ? 'var(--color-red, #E31E25)' : undefined, cursor: 'pointer' }}
+                    onClick={() => setInspectedDeal(deal)}
+                  >
                     {/* Checkbox */}
                     <input 
                       type="checkbox" 
                       className="deal-card-checkbox"
                       checked={isSelected}
                       onChange={() => handleToggleSelectDeal(deal.id)}
+                      onClick={(e) => e.stopPropagation()}
                     />
 
                     {/* Image Thumbnail */}
@@ -1594,7 +1596,11 @@ export const ExecutiveDealsPage: React.FC = () => {
                     </div>
 
                     {/* Action footer */}
-                    <div className="deal-card-manage-actions" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div 
+                      className="deal-card-manage-actions" 
+                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <select
                         value={deal.sectionPlacement || (deal.isBestSelling ? 'best_selling' : 'both')}
                         onChange={(e) => handleSectionPlacementChange(deal.id, e.target.value as any)}
@@ -1617,7 +1623,7 @@ export const ExecutiveDealsPage: React.FC = () => {
                         <option value="best_selling">Section 2 (Best Seller)</option>
                       </select>
                       <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                        <button className="action-btn view" onClick={() => setPreviewDeal(deal)} title="Preview Deal">
+                        <button className="action-btn view" onClick={() => setInspectedDeal(deal)} title="Preview Deal">
                           <Eye size={15} />
                         </button>
                         <button className="action-btn edit" onClick={() => handleEditDeal(deal)} title="Edit Deal">
@@ -1630,7 +1636,7 @@ export const ExecutiveDealsPage: React.FC = () => {
                     </div>
                   </div>
                 )
-              })}
+              }))}
             </div>
 
             {/* Pagination Controls */}
@@ -2387,340 +2393,437 @@ export const ExecutiveDealsPage: React.FC = () => {
               )}
             </div>
           </div>
-            </div>
-          </div>
-        )}
+        </div>
+      </div>
+    )}
 
-        {/* ── MODAL 2: E-COMMERCE DEAL PAGE PRODUCT CONTENT MODAL ── */}
-        {previewDeal && (
-          <div className="crud-modal-overlay" onClick={() => setPreviewDeal(null)}>
-            <div className="deal-product-modal" onClick={(e) => e.stopPropagation()}>
-              
-              {/* Top Navigation & Breadcrumb Bar */}
-              <div className="deal-product-top-bar">
-                <div className="deal-product-breadcrumb">
-                  <span>Home</span>
-                  <span>/</span>
-                  <span>Deals</span>
-                  <span>/</span>
-                  <span>{previewDeal.category}</span>
-                  <span>/</span>
-                  <strong style={{ color: '#0f172a' }}>{previewDeal.brand || previewDeal.store}</strong>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  {/* Store logo only chip - no text */}
-                  <div 
-                    style={{ 
-                      display: 'inline-flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center', 
-                      background: '#ffffff', 
-                      border: '1px solid #e2e8f0', 
-                      borderRadius: '6px', 
-                      padding: '3px 8px', 
-                      height: '28px',
-                      boxShadow: '0 1px 2px rgba(0,0,0,0.04)' 
-                    }}
-                    title={previewDeal.store}
-                  >
+{/* ── MODAL 2: E-COMMERCE DEAL PAGE PRODUCT CONTENT MODAL ── */}
+        {/* ── DEEP INSPECTION DRAWER ── */}
+        {inspectedDeal && (
+          <div className="exec-drawer-overlay" onClick={() => setInspectedDeal(null)}>
+            <div className="exec-drawer" onClick={(e) => e.stopPropagation()}>
+              {/* Drawer Header */}
+              <div className="exec-drawer__header">
+                <div className="exec-drawer__header-left">
+                  <div className="exec-drawer__avatar" style={{ background: '#ffffff', border: '1px solid #e2e8f0' }}>
                     <img 
-                      src={getStoreLogo(previewDeal.store)} 
-                      alt={previewDeal.store} 
-                      style={{ maxHeight: '18px', maxWidth: '56px', objectFit: 'contain' }} 
-                      onError={(e) => { (e.target as any).src = PLACEHOLDER_STORE_LOGO }}
+                      src={inspectedDeal.image || (inspectedDeal.images && inspectedDeal.images[0]) || PLACEHOLDER_DEAL_IMAGE} 
+                      alt={inspectedDeal.title}
+                      onError={(e) => { (e.target as any).src = PLACEHOLDER_DEAL_IMAGE }}
                     />
                   </div>
+                  <div className="exec-drawer__header-info">
+                    <h3 className="exec-drawer__title">{inspectedDeal.title}</h3>
+                    <p className="exec-drawer__subtitle">
+                      {inspectedDeal.store} · {inspectedDeal.category}{inspectedDeal.subCategory ? ` / ${inspectedDeal.subCategory}` : ''}
+                    </p>
+                  </div>
+                </div>
+                <button className="exec-drawer__close" onClick={() => setInspectedDeal(null)} aria-label="Close">
+                  <X size={18} />
+                </button>
+              </div>
 
-                  <span className={`type-badge ${previewDeal.type}`}>
-                    {previewDeal.type === 'loot' ? '⚡ LOOT DEAL' : previewDeal.type === 'flash' ? '⚡ FLASH DEAL' : previewDeal.type === 'daily' ? '🌟 DEAL OF THE DAY' : '• SPECIAL DEAL'}
-                  </span>
-
-                  {previewDeal.isVerified && (
-                    <span style={{ color: '#0284c7', fontSize: '0.8rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '3px' }}>
-                      <CheckCircle2 size={14} /> Verified
-                    </span>
-                  )}
-
-                  <button className="modal-close" onClick={() => setPreviewDeal(null)} title="Close">
-                    <X size={18} />
-                  </button>
+              {/* Quick Stats Strip */}
+              <div className="exec-drawer__stats">
+                <div className="exec-drawer__stat">
+                  <div className="exec-drawer__stat-value" style={{ color: '#059669' }}>{inspectedDeal.price}</div>
+                  <div className="exec-drawer__stat-label">Deal Price</div>
+                </div>
+                <div className="exec-drawer__stat">
+                  <div className="exec-drawer__stat-value" style={{ color: '#E31E25' }}>{inspectedDeal.discountLabel || 'Sale'}</div>
+                  <div className="exec-drawer__stat-label">Discount</div>
+                </div>
+                <div className="exec-drawer__stat">
+                  <div className="exec-drawer__stat-value" style={{ color: '#2F368C' }}>{(inspectedDeal.clicks || 0).toLocaleString()}</div>
+                  <div className="exec-drawer__stat-label">Total Clicks</div>
+                </div>
+                <div className="exec-drawer__stat">
+                  <div className="exec-drawer__stat-value" style={{ color: '#475569' }}>
+                    {getExpiryCountdown(inspectedDeal.expiresAt).text}
+                  </div>
+                  <div className="exec-drawer__stat-label">Expiry</div>
                 </div>
               </div>
 
-              {/* Main Product Content Body */}
-              <div className="deal-product-modal-body">
-                <div className="deal-product-main-grid">
-                  
-                  {/* Left Column: Product Media & Trust Badges */}
-                  <div className="deal-product-media-col">
-                    <div className="deal-product-main-img-card">
-                      <img 
-                        src={previewDeal.image || previewDeal.images[0] || PLACEHOLDER_DEAL_IMAGE} 
-                        alt={previewDeal.title} 
-                        onError={(e) => { (e.target as any).src = PLACEHOLDER_DEAL_IMAGE }}
-                      />
-                      {previewDeal.discountLabel && (
-                        <div style={{ position: 'absolute', top: '12px', left: '12px' }}>
-                          <span className="deal-save-badge">{previewDeal.discountLabel}</span>
-                        </div>
-                      )}
-                    </div>
+              {/* Drawer Tabs */}
+              <div className="exec-drawer__tabs">
+                <button 
+                  className={`exec-drawer__tab ${drawerTab === 'overview' ? 'active' : ''}`}
+                  onClick={() => setDrawerTab('overview')}
+                >
+                  Overview & Pricing
+                </button>
+                <button 
+                  className={`exec-drawer__tab ${drawerTab === 'store_profile' ? 'active' : ''}`}
+                  onClick={() => setDrawerTab('store_profile')}
+                >
+                  Store & Coupons
+                </button>
+                <button 
+                  className={`exec-drawer__tab ${drawerTab === 'similar_deals' ? 'active' : ''}`}
+                  onClick={() => setDrawerTab('similar_deals')}
+                >
+                  Category Deals ({deals.filter(d => d.id !== inspectedDeal.id && d.category.toLowerCase() === inspectedDeal.category.toLowerCase()).length})
+                </button>
+                <button 
+                  className={`exec-drawer__tab ${drawerTab === 'analytics_terms' ? 'active' : ''}`}
+                  onClick={() => setDrawerTab('analytics_terms')}
+                >
+                  Audit & Meta
+                </button>
+              </div>
 
-                    {/* Gallery Thumbnails if available */}
-                    {previewDeal.images && previewDeal.images.length > 1 && (
-                      <div className="deal-product-thumbs">
-                        {previewDeal.images.map((imgUrl, i) => (
-                          <div key={i} className="deal-product-thumb active">
-                            <img src={imgUrl} alt={`Thumb ${i+1}`} />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Stock Urgency Meter */}
-                    {previewDeal.stockStatus && (
-                      <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '10px 12px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', fontWeight: 700, color: '#991b1b', marginBottom: '6px' }}>
-                          <span>⚡ {previewDeal.stockStatus}</span>
-                          <span style={{ fontSize: '0.72rem', color: '#b91c1c' }}>Hurry! Selling Fast</span>
-                        </div>
-                        <div style={{ height: '6px', background: '#fee2e2', borderRadius: '999px', overflow: 'hidden' }}>
-                          <div style={{ width: previewDeal.stockStatus.includes('Lightning') ? '85%' : previewDeal.stockStatus.includes('Limited') ? '65%' : '40%', height: '100%', background: 'linear-gradient(90deg, #f87171, #dc2626)', borderRadius: '999px' }} />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Trust Badges Strip */}
-                    <div className="deal-trust-badges-strip">
-                      <div className="deal-trust-item">
-                        <span>🚚</span>
-                        <span>{previewDeal.deliveryInfo || 'Free Fast Delivery'}</span>
-                      </div>
-                      <div className="deal-trust-item">
-                        <span>🛡️</span>
-                        <span>{previewDeal.warranty || '1 Year Brand Warranty'}</span>
-                      </div>
-                      <div className="deal-trust-item">
-                        <span>🔄</span>
-                        <span>7 Days Replacement</span>
-                      </div>
-                      <div className="deal-trust-item">
-                        <span>🔒</span>
-                        <span>100% Genuine Product</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right Column: Buying Content & Pricing Math */}
-                  <div className="deal-product-info-col">
-                    <div className="deal-product-brand-row">
-                      {previewDeal.brand && (
-                        <span className="deal-brand-tag">{previewDeal.brand}</span>
-                      )}
-                      {previewDeal.asinOrSku && (
-                        <span className="deal-asin-badge">ASIN/SKU: {previewDeal.asinOrSku}</span>
-                      )}
-                    </div>
-
-                    <h2 className="deal-product-title-large">{previewDeal.title}</h2>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                      <span className="deal-rating-badge">
-                        {previewDeal.rating || '4.4 ★ (12,500 reviews)'}
+              {/* Drawer Body */}
+              <div className="exec-drawer__body">
+                {drawerTab === 'overview' && (
+                  <div>
+                    {/* Status and Type Tags */}
+                    <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+                      <span className={`type-badge ${inspectedDeal.type}`}>
+                        {inspectedDeal.type === 'loot' ? '⚡ LOOT DEAL' : inspectedDeal.type === 'flash' ? '⚡ FLASH DEAL' : inspectedDeal.type === 'daily' ? '🌟 DAILY DEAL' : '• DEAL'}
                       </span>
-                      {previewDeal.badge && (
-                        <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#4338ca', background: '#e0e7ff', padding: '2px 8px', borderRadius: '4px' }}>
-                          {previewDeal.badge}
+                      <span className={`status-badge ${inspectedDeal.status.toLowerCase().replace(/\s+/g, '-')}`}>
+                        {inspectedDeal.status}
+                      </span>
+                      <span className={`priority-pill ${inspectedDeal.priority.toLowerCase()}`}>
+                        {inspectedDeal.priority} Priority
+                      </span>
+                      {inspectedDeal.isVerified && (
+                        <span className="status-badge active">
+                          ✓ Verified Deal
+                        </span>
+                      )}
+                      {inspectedDeal.isBestSelling && (
+                        <span className="status-badge" style={{ background: '#fef3c7', color: '#b45309', borderColor: '#fde68a' }}>
+                          ★ Best Seller
                         </span>
                       )}
                     </div>
 
-                    {/* Pricing Breakdown Card */}
-                    <div className="deal-price-card">
-                      <div className="deal-price-numbers">
-                        <span className="deal-huge-price">{previewDeal.price}</span>
-                        {previewDeal.originalPrice && (
-                          <span className="deal-strikethrough-mrp">M.R.P.: {previewDeal.originalPrice}</span>
+                    {/* Price Math Card */}
+                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+                      <div className="exec-drawer__section-title" style={{ marginTop: 0 }}>Pricing Breakdown</div>
+                      <div className="exec-drawer__price-row" style={{ marginTop: 8 }}>
+                        <span className="exec-drawer__price-current">{inspectedDeal.price}</span>
+                        {inspectedDeal.originalPrice && (
+                          <span className="exec-drawer__price-original">{inspectedDeal.originalPrice}</span>
                         )}
-                        {previewDeal.discountLabel && (
-                          <span className="deal-save-badge">{previewDeal.discountLabel}</span>
+                        {inspectedDeal.discountLabel && (
+                          <span className="exec-drawer__price-discount">{inspectedDeal.discountLabel}</span>
                         )}
                       </div>
 
-                      {/* Bank / Card Offer */}
-                      {previewDeal.bankOffer && (
-                        <div style={{ fontSize: '0.8rem', color: '#1d4ed8', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '6px', padding: '6px 10px', fontWeight: 600 }}>
-                          💳 <strong>Bank Offer:</strong> {previewDeal.bankOffer}
+                      {inspectedDeal.bankOffer && (
+                        <div style={{ marginTop: 10, padding: '8px 12px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 6, fontSize: '0.82rem', color: '#1d4ed8' }}>
+                          💳 <strong>Bank Offer:</strong> {inspectedDeal.bankOffer}
                         </div>
                       )}
 
-                      {/* Effective Price Banner */}
-                      {previewDeal.effectivePrice && (
-                        <div className="deal-effective-banner">
-                          <span>🔥 <strong>Effective Final Price:</strong> {previewDeal.effectivePrice}</span>
-                          <span style={{ fontSize: '0.74rem', background: '#dbeafe', padding: '2px 6px', borderRadius: '4px' }}>After Bank Discount</span>
+                      {inspectedDeal.effectivePrice && (
+                        <div style={{ marginTop: 8, padding: '8px 12px', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 6, fontSize: '0.82rem', color: '#047857' }}>
+                          🔥 <strong>Effective Final Price:</strong> {inspectedDeal.effectivePrice}
                         </div>
                       )}
 
-                      {/* Cashback Pill */}
-                      {previewDeal.cashback && (
-                        <div style={{ fontSize: '0.8rem', color: '#b45309', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '6px', padding: '6px 10px', fontWeight: 700 }}>
-                          💰 <strong>Extra Wouchify Rewards:</strong> {previewDeal.cashback}
+                      {inspectedDeal.cashback && (
+                        <div style={{ marginTop: 8, padding: '8px 12px', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 6, fontSize: '0.82rem', color: '#b45309' }}>
+                          💰 <strong>Wouchify Cashback:</strong> {inspectedDeal.cashback}
                         </div>
                       )}
                     </div>
 
-                    {/* Coupon Code Clip Box */}
-                    {previewDeal.code && (
-                      <div className="deal-voucher-coupon-box">
-                        <div>
-                          <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 700 }}>
-                            Applicable Coupon Code
-                          </div>
-                          <div className="deal-coupon-code-text">{previewDeal.code}</div>
+                    {/* Coupon Code if exists */}
+                    {inspectedDeal.code && (
+                      <div style={{ background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 10, padding: 14, marginBottom: 16 }}>
+                        <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#6d28d9', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Promo Coupon Code</div>
+                        <div className="exec-drawer__coupon-row" style={{ marginTop: 6 }}>
+                          <span className="exec-drawer__coupon-code">{inspectedDeal.code}</span>
+                          <button
+                            className="exec-drawer__copy-btn"
+                            onClick={() => {
+                              navigator.clipboard.writeText(inspectedDeal.code)
+                              showToast(`Copied coupon code ${inspectedDeal.code}`)
+                            }}
+                            title="Copy Code"
+                          >
+                            <Copy size={14} />
+                          </button>
                         </div>
-                        <button 
-                          type="button" 
-                          className="deal-copy-coupon-btn"
-                          onClick={() => {
-                            navigator.clipboard.writeText(previewDeal.code)
-                            showToast(`Copied coupon code ${previewDeal.code}!`)
-                          }}
-                        >
-                          <Copy size={13} /> Copy Code
-                        </button>
                       </div>
                     )}
 
-                    {/* Variant Note */}
-                    {previewDeal.variantNote && (
-                      <div style={{ fontSize: '0.78rem', color: '#475569', background: '#f1f5f9', borderLeft: '3px solid #64748b', padding: '6px 10px', borderRadius: '0 4px 4px 0' }}>
-                        ℹ️ <strong>Variant Info:</strong> {previewDeal.variantNote}
+                    {/* Media Gallery */}
+                    {inspectedDeal.images && inspectedDeal.images.length > 0 && (
+                      <div style={{ marginBottom: 16 }}>
+                        <div className="exec-drawer__section-title">Product Images ({inspectedDeal.images.length})</div>
+                        <div className="exec-drawer__gallery">
+                          {inspectedDeal.images.map((img, idx) => (
+                            <img key={idx} src={img} alt={`Media ${idx + 1}`} onError={(e) => { (e.target as any).src = PLACEHOLDER_DEAL_IMAGE }} />
+                          ))}
+                        </div>
                       </div>
                     )}
 
-                    {/* Deal Timing & Expiry Banner */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 12px', flexWrap: 'wrap', gap: '8px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', color: '#64748b' }}>
-                        <Clock size={13} style={{ color: previewDeal.postedAt?.startsWith('Today') ? 'var(--color-red, #E31E25)' : '#94a3b8' }} />
-                        <span>Posted: <strong style={{ color: '#1e293b' }}>{previewDeal.postedAt}</strong></span>
+                    {/* Product Specifications Grid */}
+                    <div className="exec-drawer__section-title">Product Details</div>
+                    <div className="exec-drawer__detail-grid">
+                      <div className="exec-drawer__detail-cell">
+                        <div className="exec-drawer__detail-label">Store</div>
+                        <div className="exec-drawer__detail-value">{inspectedDeal.store}</div>
                       </div>
-                      {(() => {
-                        const countdown = getExpiryCountdown(previewDeal.expiresAt)
+                      <div className="exec-drawer__detail-cell">
+                        <div className="exec-drawer__detail-label">Brand</div>
+                        <div className="exec-drawer__detail-value">{inspectedDeal.brand || 'Generic'}</div>
+                      </div>
+                      <div className="exec-drawer__detail-cell">
+                        <div className="exec-drawer__detail-label">Category</div>
+                        <div className="exec-drawer__detail-value">{inspectedDeal.category}</div>
+                      </div>
+                      <div className="exec-drawer__detail-cell">
+                        <div className="exec-drawer__detail-label">ASIN / SKU</div>
+                        <div className="exec-drawer__detail-value">{inspectedDeal.asinOrSku || '—'}</div>
+                      </div>
+                      <div className="exec-drawer__detail-cell">
+                        <div className="exec-drawer__detail-label">Delivery Info</div>
+                        <div className="exec-drawer__detail-value">{inspectedDeal.deliveryInfo || 'Standard Delivery'}</div>
+                      </div>
+                      <div className="exec-drawer__detail-cell">
+                        <div className="exec-drawer__detail-label">Warranty</div>
+                        <div className="exec-drawer__detail-value">{inspectedDeal.warranty || 'Brand Warranty'}</div>
+                      </div>
+                    </div>
+
+                    {/* Highlights */}
+                    {inspectedDeal.highlights && inspectedDeal.highlights.length > 0 && (
+                      <div style={{ marginTop: 16 }}>
+                        <div className="exec-drawer__section-title">Key Highlights</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {inspectedDeal.highlights.map((h, i) => (
+                            <div key={i} style={{ display: 'flex', gap: 8, fontSize: '0.84rem', color: '#0f172a' }}>
+                              <span style={{ color: '#16a34a', fontWeight: 700 }}>✓</span>
+                              <span>{h}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* How to claim */}
+                    {inspectedDeal.howToClaim && (
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 10, padding: 14, marginTop: 14 }}>
+                        <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.04em' }}>How to Claim</div>
+                        <p style={{ margin: '6px 0 0', fontSize: '0.84rem', color: '#475569', lineHeight: 1.5, whiteSpace: 'pre-line' }}>{inspectedDeal.howToClaim}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {drawerTab === 'store_profile' && (
+                  <div>
+                    {(() => {
+                      const matchedStore = rawStores.find(s => (s.name || '').toLowerCase() === inspectedDeal.store.toLowerCase())
+                      const storeCoupons = rawCoupons.filter(c => (c.store || '').toLowerCase() === inspectedDeal.store.toLowerCase())
+
+                      return (
+                        <div>
+                          <div style={{ background: matchedStore?.cardBg || '#ffffff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                              <img 
+                                src={matchedStore?.logoUrl || getStoreLogo(inspectedDeal.store)} 
+                                alt={inspectedDeal.store} 
+                                style={{ width: 48, height: 48, objectFit: 'contain', background: '#ffffff', borderRadius: 8, padding: 4, border: '1px solid #e2e8f0' }}
+                                onError={(e) => { (e.target as any).src = PLACEHOLDER_STORE_LOGO }}
+                              />
+                              <div>
+                                <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#0f172a' }}>{inspectedDeal.store}</h4>
+                                <span style={{ fontSize: '0.78rem', color: '#64748b' }}>{matchedStore?.category || inspectedDeal.category}</span>
+                              </div>
+                            </div>
+                            {matchedStore?.reward && (
+                              <div style={{ marginTop: 12, padding: '6px 10px', background: matchedStore?.badgeBg || '#eff6ff', borderRadius: 6, fontSize: '0.78rem', fontWeight: 700, color: '#1e40af' }}>
+                                🎁 Store Rewards: {matchedStore.reward}
+                              </div>
+                            )}
+                            {matchedStore?.affiliateLink && (
+                              <a href={matchedStore.affiliateLink} target="_blank" rel="noopener noreferrer" className="exec-drawer__link-btn" style={{ marginTop: 10 }}>
+                                <ExternalLink size={13} /> Visit {inspectedDeal.store} Portal
+                              </a>
+                            )}
+                          </div>
+
+                          <div className="exec-drawer__section-title">Active Coupons for {inspectedDeal.store} ({storeCoupons.length})</div>
+                          {storeCoupons.length > 0 ? (
+                            storeCoupons.map((c: any, idx: number) => (
+                              <div key={c._id || c.id || idx} className="exec-drawer__item">
+                                <div className="exec-drawer__item-row">
+                                  <div className="exec-drawer__item-info">
+                                    <h4 className="exec-drawer__item-title">{c.title || c.description || 'Store Promo'}</h4>
+                                    <div className="exec-drawer__coupon-row">
+                                      <span className="exec-drawer__coupon-code">{c.code}</span>
+                                      <button
+                                        className="exec-drawer__copy-btn"
+                                        onClick={() => {
+                                          navigator.clipboard.writeText(c.code)
+                                          showToast(`Copied code ${c.code}`)
+                                        }}
+                                        title="Copy Code"
+                                      >
+                                        <Copy size={14} />
+                                      </button>
+                                      <span className="exec-drawer__item-badge discount">{c.discount || 'Special'}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="exec-drawer__empty">
+                              <p>No separate coupons active for {inspectedDeal.store}.</p>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })()}
+                  </div>
+                )}
+
+                {drawerTab === 'similar_deals' && (
+                  <div>
+                    <div className="exec-drawer__section-title">Other Deals in {inspectedDeal.category}</div>
+                    {(() => {
+                      const similar = deals.filter(d => d.id !== inspectedDeal.id && d.category.toLowerCase() === inspectedDeal.category.toLowerCase())
+                      if (similar.length === 0) {
                         return (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Expires:</span>
-                            <span className={`expiry-pill ${countdown.status}`}>
-                              {countdown.status === 'expired' && '⛔ '}
-                              {countdown.status === 'urgent' && '🔥 '}
-                              {countdown.status === 'warning' && '⏳ '}
-                              {countdown.status === 'normal' && '📅 '}
-                              {countdown.text} ({formatExpiryDate(previewDeal.expiresAt)})
-                            </span>
+                          <div className="exec-drawer__empty">
+                            <p>No other deals found in this category.</p>
                           </div>
                         )
-                      })()}
-                    </div>
-
-                    {/* Primary Grab Deal Action Button */}
-                    <a 
-                      href={previewDeal.link || '#'} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="deal-grab-primary-btn"
-                    >
-                      GRAB DEAL ON {previewDeal.store.toUpperCase()} ↗
-                    </a>
+                      }
+                      return (
+                        <div>
+                          {similar.map(d => (
+                            <div key={d.id} className="exec-drawer__item" style={{ cursor: 'pointer' }} onClick={() => setInspectedDeal(d)}>
+                              <div className="exec-drawer__item-row">
+                                <img src={d.image || PLACEHOLDER_DEAL_IMAGE} alt={d.title} className="exec-drawer__item-img" onError={(e) => { (e.target as any).src = PLACEHOLDER_DEAL_IMAGE }} />
+                                <div className="exec-drawer__item-info">
+                                  <h4 className="exec-drawer__item-title">{d.title}</h4>
+                                  <div className="exec-drawer__item-meta">
+                                    <span className="exec-drawer__item-badge store">{d.store}</span>
+                                    <span className="exec-drawer__item-badge discount">{d.discountLabel || 'Sale'}</span>
+                                    <span className="exec-drawer__item-badge price">{d.price}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )
+                    })()}
                   </div>
-                </div>
+                )}
 
-                {/* Lower Product Content Tabs / Sections */}
-                <div className="deal-content-tabs-section">
-                  
-                  {/* Highlights */}
-                  {previewDeal.highlights && previewDeal.highlights.length > 0 && (
-                    <div className="deal-section-block">
-                      <h4 className="deal-section-block-title">
-                        <Sparkles size={16} style={{ color: 'var(--color-red, #E31E25)' }} /> Key Product Highlights & Features
-                      </h4>
-                      <ul className="deal-highlights-list">
-                        {previewDeal.highlights.map((h, i) => (
-                          <li key={i}>
-                            <span className="deal-highlight-check">✓</span>
-                            <span>{h}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Step-by-step How to Claim */}
-                  {previewDeal.howToClaim && (
-                    <div className="deal-section-block">
-                      <h4 className="deal-section-block-title">
-                        <Layers size={16} style={{ color: '#2563eb' }} /> How to Avail / Claim this Deal
-                      </h4>
-                      <div className="deal-steps-grid">
-                        {previewDeal.howToClaim.split('\n').filter(s => s.trim().length > 0).map((step, idx) => (
-                          <div key={idx} className="deal-step-card">
-                            <span className="deal-step-number">{idx + 1}</span>
-                            <span className="deal-step-text">{step.replace(/^[0-9]+[.)]\s*/, '')}</span>
-                          </div>
-                        ))}
+                {drawerTab === 'analytics_terms' && (
+                  <div>
+                    <div className="exec-drawer__section-title">Traffic & Engagement Analytics</div>
+                    <div className="exec-drawer__detail-grid">
+                      <div className="exec-drawer__detail-cell">
+                        <div className="exec-drawer__detail-label">Total Link Clicks</div>
+                        <div className="exec-drawer__detail-value">{(inspectedDeal.clicks || 0).toLocaleString()}</div>
+                      </div>
+                      <div className="exec-drawer__detail-cell">
+                        <div className="exec-drawer__detail-label">Posted Date</div>
+                        <div className="exec-drawer__detail-value">{formatExpiryDate(inspectedDeal.postedAt)}</div>
+                      </div>
+                      <div className="exec-drawer__detail-cell">
+                        <div className="exec-drawer__detail-label">Expiration Date</div>
+                        <div className="exec-drawer__detail-value">{formatExpiryDate(inspectedDeal.expiresAt)}</div>
+                      </div>
+                      <div className="exec-drawer__detail-cell">
+                        <div className="exec-drawer__detail-label">Placement</div>
+                        <div className="exec-drawer__detail-value">{inspectedDeal.sectionPlacement || 'Default'}</div>
                       </div>
                     </div>
-                  )}
 
-                  {/* Executive Review / Description */}
-                  {previewDeal.description && (
-                    <div className="deal-section-block">
-                      <h4 className="deal-section-block-title">
-                        <FileText size={16} style={{ color: '#059669' }} /> Executive Deal Review & Details
-                      </h4>
-                      <p style={{ margin: 0, fontSize: '0.84rem', color: '#334155', lineHeight: 1.55, whiteSpace: 'pre-line' }}>
-                        {previewDeal.description}
-                      </p>
-                    </div>
-                  )}
+                    {inspectedDeal.description && (
+                      <div style={{ marginTop: 16, background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: 12 }}>
+                        <div className="exec-drawer__detail-label" style={{ marginBottom: 4 }}>Description / Notes</div>
+                        <p style={{ margin: 0, fontSize: '0.84rem', color: '#334155', lineHeight: 1.5, whiteSpace: 'pre-line' }}>{inspectedDeal.description}</p>
+                      </div>
+                    )}
 
-                  {/* Terms & Conditions */}
-                  {previewDeal.terms && (
-                    <div className="deal-section-block" style={{ background: '#ffffff', borderColor: '#cbd5e1' }}>
-                      <h4 className="deal-section-block-title" style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                        Terms & Conditions / Disclaimer
-                      </h4>
-                      <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b', lineHeight: 1.45 }}>
-                        {previewDeal.terms}
-                      </p>
-                    </div>
-                  )}
+                    {inspectedDeal.terms && (
+                      <div style={{ marginTop: 12, background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: 12 }}>
+                        <div className="exec-drawer__detail-label" style={{ marginBottom: 4 }}>Terms & Conditions</div>
+                        <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b', lineHeight: 1.45 }}>{inspectedDeal.terms}</p>
+                      </div>
+                    )}
 
-                </div>
+                    <div className="exec-drawer__section-title" style={{ marginTop: 20 }}>Raw Data Payload</div>
+                    <pre
+                      style={{
+                        background: '#0f172a',
+                        color: '#94a3b8',
+                        padding: 14,
+                        borderRadius: 10,
+                        fontSize: '0.74rem',
+                        overflowX: 'auto',
+                      }}
+                    >
+                      {JSON.stringify(inspectedDeal, null, 2)}
+                    </pre>
+                  </div>
+                )}
               </div>
 
-              {/* Modal Footer */}
-              <div className="modal-footer" style={{ justifyContent: 'space-between', padding: '12px 24px' }}>
-                <div style={{ fontSize: '0.82rem', color: '#64748b' }}>
-                  Deal ID: <strong style={{ fontFamily: 'monospace' }}>#{previewDeal.id}</strong> • Priority: <strong>{previewDeal.priority}</strong>
-                </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button className="btn-cancel" onClick={() => setPreviewDeal(null)}>
-                    Close
-                  </button>
-                  <button 
-                    className="btn-save" 
-                    onClick={() => {
-                      const d = previewDeal
-                      setPreviewDeal(null)
-                      handleEditDeal(d)
-                    }}
+              {/* Action Footer */}
+              <div className="exec-drawer__actions">
+                <button 
+                  className="exec-drawer__action-btn secondary" 
+                  onClick={() => {
+                    const d = inspectedDeal
+                    setInspectedDeal(null)
+                    handleEditDeal(d)
+                  }}
+                >
+                  <Edit2 size={14} /> Edit Deal
+                </button>
+                <button 
+                  className="exec-drawer__action-btn secondary" 
+                  onClick={async () => {
+                    try {
+                      await adminApi.toggleDealStatus(inspectedDeal.id)
+                      setInspectedDeal(null)
+                      showToast(`Toggled status for ${inspectedDeal.title}`)
+                    } catch (err) {
+                      console.error(err)
+                    }
+                  }}
+                >
+                  <RotateCcw size={14} /> Toggle Status
+                </button>
+                {inspectedDeal.link && (
+                  <a
+                    href={inspectedDeal.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="exec-drawer__action-btn primary"
+                    style={{ textDecoration: 'none' }}
                   >
-                    <Edit2 size={14} /> Edit Deal
-                  </button>
-                </div>
+                    <ExternalLink size={14} /> Live Deal
+                  </a>
+                )}
+                <button 
+                  className="exec-drawer__action-btn danger" 
+                  onClick={() => {
+                    const id = inspectedDeal.id
+                    setInspectedDeal(null)
+                    handleDeleteDeal(id)
+                  }}
+                >
+                  <Trash2 size={14} /> Delete
+                </button>
               </div>
-
             </div>
           </div>
         )}
@@ -2731,6 +2834,44 @@ export const ExecutiveDealsPage: React.FC = () => {
             <CheckCircle2 size={18} style={{ color: '#10b981' }} />
             <span>{toastMessage}</span>
           </div>
+        )}
+
+        {/* ── CUSTOM CONFIRM DIALOG (SINGLE DELETE) ── */}
+        <AdminConfirmDialog
+          isOpen={!!dealToDelete}
+          title="Delete Deal"
+          message="Are you sure you want to delete this promotional deal permanently? This cannot be undone."
+          confirmLabel="Delete Deal"
+          cancelLabel="Cancel"
+          variant="danger"
+          icon="trash"
+          onConfirm={confirmDeleteDeal}
+          onCancel={() => setDealToDelete(null)}
+        />
+
+        {/* ── CUSTOM CONFIRM DIALOG (BULK DELETE) ── */}
+        <AdminConfirmDialog
+          isOpen={isBulkDeleteOpen}
+          title="Delete Selected Deals"
+          message={`Are you sure you want to permanently delete ${selectedDealIds.length} selected deals?`}
+          confirmLabel={`Delete ${selectedDealIds.length} Deals`}
+          cancelLabel="Cancel"
+          variant="danger"
+          icon="trash"
+          onConfirm={confirmBulkDelete}
+          onCancel={() => setIsBulkDeleteOpen(false)}
+        />
+
+        {/* ── CUSTOM ALERT DIALOG ── */}
+        {dealAlert && (
+          <AdminAlertDialog
+            isOpen={!!dealAlert}
+            title={dealAlert.title}
+            message={dealAlert.message}
+            variant={dealAlert.variant || 'warning'}
+            buttonLabel="Understood"
+            onClose={() => setDealAlert(null)}
+          />
         )}
 
       </div>

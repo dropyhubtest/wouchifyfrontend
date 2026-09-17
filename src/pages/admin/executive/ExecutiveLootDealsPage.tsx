@@ -10,11 +10,9 @@ import {
   Zap, 
   Image as ImageIcon, 
   FileText, 
-  Sparkles, 
   Save, 
   Send, 
   Clock, 
-  Copy, 
   Eye, 
   Check, 
   Download, 
@@ -34,10 +32,12 @@ import {
   TrendingDown
 } from 'lucide-react'
 import './ExecutiveShared.css'
-import { MASTER_EXECUTIVE_LOOT_DEALS, DEAL_PRODUCT_PRESETS, getStoreLogo, convertGoogleDriveUrl, PLACEHOLDER_DEAL_IMAGE, PLACEHOLDER_STORE_LOGO } from '../../../data/dealsPage'
+import { DEAL_PRODUCT_PRESETS, getStoreLogo, convertGoogleDriveUrl, PLACEHOLDER_DEAL_IMAGE, PLACEHOLDER_STORE_LOGO } from '../../../data/dealsPage'
 import { FAVOURITE_STORES } from '../../../data/storesHero'
 import { CATEGORIES_DATA } from '../../../data/categories'
 import { ImageUploadField } from './ImageUploadField'
+import { TableRowSkeleton, DealCardSkeleton, EmptyState } from '../../../components/common/Skeletons'
+import { AdminConfirmDialog, AdminAlertDialog } from '../../../components/common/AdminDialog'
 
 export interface LootDeal {
   id: string
@@ -131,58 +131,8 @@ export const getExpiryCountdown = (isoStr?: string): { text: string; status: 'ex
 }
 
 export const ExecutiveLootDealsPage: React.FC = () => {
-  const [deals, setDeals] = useState<LootDeal[]>(() => {
-    try {
-      const cached = localStorage.getItem('wouchify_loot_deals')
-      if (cached) {
-        const parsed = JSON.parse(cached)
-        if (Array.isArray(parsed) && parsed.length >= 6) {
-          return parsed.map((d: any, index: number) => {
-            const matchingMaster = MASTER_EXECUTIVE_LOOT_DEALS.find(m => m.id === String(d._id || d.id) || m.title.toLowerCase().trim() === String(d.title || d.name || '').toLowerCase().trim())
-            return {
-              id: String(d._id || d.id || matchingMaster?.id || `loot-${index + 1}`),
-              title: d.title || d.name || matchingMaster?.title || 'Loot Deal',
-              store: d.storeName || d.store || matchingMaster?.store || 'Amazon',
-              brand: d.brand || d.storeName || matchingMaster?.brand || 'Generic',
-              category: d.category || matchingMaster?.category || 'Electronics',
-              lootType: (d.lootType || (d.dealType === 'exclusive' ? 'steal' : 'flash') || matchingMaster?.lootType || 'flash') as any,
-              badge: d.badge || matchingMaster?.badge || '⚡ HOT DROP',
-              status: (d.submissionStatus === 'pending_approval' ? 'Pending Approval' : (d.status === 'active' || d.status === 'Approved' ? 'Approved' : 'Draft')) as any,
-              priority: (d.priority || matchingMaster?.priority || 'High') as any,
-              code: d.code ?? matchingMaster?.code ?? '',
-              link: d.href || d.link || matchingMaster?.link || '/deals',
-              originalPrice: d.originalPrice || matchingMaster?.originalPrice || '₹1,899',
-              price: d.currentPrice || d.price || matchingMaster?.price || '₹179',
-              discountLabel: d.discount || d.discountLabel || matchingMaster?.discountLabel || '91% OFF',
-              discountValue: typeof d.discountValue === 'number' ? d.discountValue : (matchingMaster?.discountValue || 90),
-              effectivePrice: d.effectivePrice || matchingMaster?.effectivePrice || d.currentPrice || d.price,
-              cashback: d.cashback || matchingMaster?.cashback || '+ 5% Wouchify Cashback',
-              stockClaimedPercent: d.stockClaimedPercent || matchingMaster?.stockClaimedPercent || 85,
-              quantityAlert: d.quantityAlert || matchingMaster?.quantityAlert || 'Limited Flash Stock',
-              proofNote: d.proofNote || matchingMaster?.proofNote || 'Verified via live automated checker',
-              trickSteps: d.trickSteps || matchingMaster?.trickSteps || '1. Click Grab Loot to open partner store.\n2. Proceed to checkout before stock runs out.',
-              terms: d.terms || matchingMaster?.terms || 'Valid until stocks last.',
-              asinOrSku: d.asinOrSku || matchingMaster?.asinOrSku || '',
-              deliveryInfo: d.deliveryInfo || matchingMaster?.deliveryInfo || 'Fast Delivery',
-              rating: d.rating || matchingMaster?.rating || '4.8 ★ (12k)',
-              postedAt: d.postedAt || matchingMaster?.postedAt || 'Today',
-              expiresAt: d.expiresAt || matchingMaster?.expiresAt || new Date(Date.now() + 86400000).toISOString().slice(0, 16),
-              image: d.image || d.productImage || matchingMaster?.image || DEAL_PRODUCT_PRESETS[0]?.image || '',
-              images: Array.isArray(d.images) && d.images.length > 0 ? d.images : (matchingMaster?.images || [d.image || d.productImage || DEAL_PRODUCT_PRESETS[0]?.image || '']),
-              telegramAlert: Boolean(d.telegramAlert ?? matchingMaster?.telegramAlert),
-              pushNotification: Boolean(d.pushNotification ?? matchingMaster?.pushNotification),
-              isFeatured: Boolean(d.isFeatured ?? matchingMaster?.isFeatured),
-              isVerified: Boolean(d.isVerified ?? matchingMaster?.isVerified ?? true),
-              isBestSelling: Boolean(d.isBestSelling || d.sectionPlacement === 'best_selling' || d.sectionPlacement === 'both' || matchingMaster?.isBestSelling),
-              sectionPlacement: (d.sectionPlacement || matchingMaster?.sectionPlacement || (d.isBestSelling ? 'best_selling' : 'both')) as any,
-              clicks: typeof d.clicks === 'number' ? d.clicks : (parseInt(d.clicks) || matchingMaster?.clicks || 0)
-            }
-          })
-        }
-      }
-    } catch {}
-    return MASTER_EXECUTIVE_LOOT_DEALS as any
-  })
+  const [deals, setDeals] = useState<LootDeal[]>([])
+  const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table')
   const [dealsTab, setDealsTab] = useState<'active' | 'expired'>('active')
   const [selectedDealIds, setSelectedDealIds] = useState<string[]>([])
@@ -190,68 +140,92 @@ export const ExecutiveLootDealsPage: React.FC = () => {
   // Modals & Previews
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingDeal, setEditingDeal] = useState<LootDeal | null>(null)
-  const [previewDeal, setPreviewDeal] = useState<LootDeal | null>(null)
+  const [inspectedDeal, setInspectedDeal] = useState<LootDeal | null>(null)
+  const [drawerTab, setDrawerTab] = useState('overview')
+  const [rawStores, setRawStores] = useState<any[]>([])
   const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const [lootToDelete, setLootToDelete] = useState<string | null>(null)
+  const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false)
+  const [lootAlert, setLootAlert] = useState<{ title: string; message: string; variant?: 'warning' | 'danger' | 'info' | 'success' } | null>(null)
 
   // Load from backend API
   useEffect(() => {
     let isMounted = true
-    const fetchLoot = () => {
-      adminApi.getLootDeals()
-        .then((res: any[]) => {
-          if (!isMounted) return
-          if (Array.isArray(res) && res.length > 0) {
-            const mapped: LootDeal[] = res.map((d: any, index: number) => {
-              const matchingMaster = MASTER_EXECUTIVE_LOOT_DEALS.find(m => m.id === String(d._id || d.id) || m.title.toLowerCase().trim() === String(d.title || d.name || '').toLowerCase().trim())
-              return {
-                id: String(d._id || d.id || matchingMaster?.id || `loot-${index + 1}`),
-                title: d.title || d.name || matchingMaster?.title || 'Loot Deal',
-                store: d.storeName || d.store || matchingMaster?.store || 'Amazon',
-                brand: d.brand || d.storeName || matchingMaster?.brand || 'Generic',
-                category: d.category || matchingMaster?.category || 'Electronics',
-                lootType: (d.lootType || (d.dealType === 'exclusive' ? 'steal' : 'flash') || matchingMaster?.lootType || 'flash') as any,
-                badge: d.badge || matchingMaster?.badge || '⚡ HOT DROP',
-                status: (d.submissionStatus === 'pending_approval' ? 'Pending Approval' : (d.status === 'active' || d.status === 'Approved' ? 'Approved' : 'Draft')) as any,
-                priority: (d.priority || matchingMaster?.priority || 'High') as any,
-                code: d.code ?? matchingMaster?.code ?? '',
-                link: d.href || d.link || matchingMaster?.link || '/deals',
-                originalPrice: d.originalPrice || matchingMaster?.originalPrice || '₹1,899',
-                price: d.currentPrice || d.price || matchingMaster?.price || '₹179',
-                discountLabel: d.discount || d.discountLabel || matchingMaster?.discountLabel || '91% OFF',
-                discountValue: typeof d.discountValue === 'number' ? d.discountValue : (matchingMaster?.discountValue || 90),
-                effectivePrice: d.effectivePrice || matchingMaster?.effectivePrice || d.currentPrice || d.price,
-                cashback: d.cashback || matchingMaster?.cashback || '+ 5% Wouchify Cashback',
-                stockClaimedPercent: d.stockClaimedPercent || matchingMaster?.stockClaimedPercent || 85,
-                quantityAlert: d.quantityAlert || matchingMaster?.quantityAlert || 'Limited Flash Stock',
-                proofNote: d.proofNote || matchingMaster?.proofNote || 'Verified via live automated checker',
-                trickSteps: d.trickSteps || matchingMaster?.trickSteps || '1. Click Grab Loot to open partner store.\n2. Proceed to checkout before stock runs out.',
-                terms: d.terms || matchingMaster?.terms || 'Valid until stocks last.',
-                asinOrSku: d.asinOrSku || matchingMaster?.asinOrSku || '',
-                deliveryInfo: d.deliveryInfo || matchingMaster?.deliveryInfo || 'Fast Delivery',
-                rating: d.rating || matchingMaster?.rating || '4.8 ★ (12k)',
-                postedAt: d.postedAt || matchingMaster?.postedAt || 'Today',
-                expiresAt: d.expiresAt || matchingMaster?.expiresAt || new Date(Date.now() + 86400000).toISOString().slice(0, 16),
-                image: d.image || d.productImage || matchingMaster?.image || DEAL_PRODUCT_PRESETS[0]?.image || '',
-                images: Array.isArray(d.images) && d.images.length > 0 ? d.images : (matchingMaster?.images || [d.image || d.productImage || DEAL_PRODUCT_PRESETS[0]?.image || '']),
-                telegramAlert: Boolean(d.telegramAlert ?? matchingMaster?.telegramAlert),
-                pushNotification: Boolean(d.pushNotification ?? matchingMaster?.pushNotification),
-                isFeatured: Boolean(d.isFeatured ?? matchingMaster?.isFeatured),
-                isVerified: Boolean(d.isVerified ?? matchingMaster?.isVerified ?? true),
-                isBestSelling: Boolean(d.isBestSelling || d.sectionPlacement === 'best_selling' || d.sectionPlacement === 'both' || matchingMaster?.isBestSelling),
-                sectionPlacement: (d.sectionPlacement || matchingMaster?.sectionPlacement || (d.isBestSelling ? 'best_selling' : 'both')) as any,
-                clicks: typeof d.clicks === 'number' ? d.clicks : (parseInt(d.clicks) || matchingMaster?.clicks || 0)
-              }
-            })
-            setDeals(mapped)
-          }
-        })
-        .catch(console.warn)
+    const fetchLoot = async () => {
+      setLoading(true)
+      try {
+        const res = await adminApi.getLootDeals()
+        if (!isMounted) return
+        if (Array.isArray(res)) {
+          const mapped: LootDeal[] = res.map((d: any, index: number) => ({
+            id: String(d._id || d.id || `loot-${index + 1}`),
+            _id: String(d._id || d.id || `loot-${index + 1}`),
+            title: d.title || d.name || 'Loot Deal',
+            store: d.storeName || d.store || 'Amazon',
+            brand: d.brand || d.storeName || 'Generic',
+            category: d.category || 'Electronics',
+            lootType: (d.lootType || (d.dealType === 'exclusive' ? 'steal' : 'flash') || 'flash') as any,
+            badge: d.badge || '⚡ HOT DROP',
+            status: (d.submissionStatus === 'pending_approval' ? 'Pending Approval' : (d.status === 'active' || d.status === 'Approved' ? 'Approved' : 'Draft')) as any,
+            priority: (d.priority || 'High') as any,
+            code: d.code ?? '',
+            link: d.href || d.link || '/deals',
+            originalPrice: d.originalPrice || '₹1,899',
+            price: d.currentPrice || d.price || '₹179',
+            discountLabel: d.discount || d.discountLabel || '91% OFF',
+            discountValue: typeof d.discountValue === 'number' ? d.discountValue : 90,
+            effectivePrice: d.effectivePrice || d.currentPrice || d.price,
+            cashback: d.cashback || '+ 5% Wouchify Cashback',
+            stockClaimedPercent: d.stockClaimedPercent || 85,
+            quantityAlert: d.quantityAlert || 'Limited Flash Stock',
+            proofNote: d.proofNote || 'Verified via live automated checker',
+            trickSteps: d.trickSteps || '1. Click Grab Loot to open partner store.\n2. Proceed to checkout before stock runs out.',
+            terms: d.terms || 'Valid until stocks last.',
+            asinOrSku: d.asinOrSku || '',
+            deliveryInfo: d.deliveryInfo || 'Fast Delivery',
+            rating: d.rating || '4.8 ★ (12k)',
+            postedAt: d.postedAt || 'Today',
+            expiresAt: d.expiresAt || new Date(Date.now() + 86400000).toISOString().slice(0, 16),
+            image: d.image || d.productImage || DEAL_PRODUCT_PRESETS[0]?.image || '',
+            images: Array.isArray(d.images) && d.images.length > 0 ? d.images : [d.image || d.productImage || DEAL_PRODUCT_PRESETS[0]?.image || ''],
+            telegramAlert: Boolean(d.telegramAlert),
+            pushNotification: Boolean(d.pushNotification),
+            isFeatured: Boolean(d.isFeatured),
+            isVerified: Boolean(d.isVerified ?? true),
+            isBestSelling: Boolean(d.isBestSelling || d.sectionPlacement === 'best_selling' || d.sectionPlacement === 'both'),
+            sectionPlacement: (d.sectionPlacement || (d.isBestSelling ? 'best_selling' : 'both')) as any,
+            clicks: typeof d.clicks === 'number' ? d.clicks : (parseInt(d.clicks) || 0)
+          }))
+          setDeals(mapped)
+        } else {
+          setDeals([])
+        }
+      } catch (err) {
+        console.warn('Loot deals fetch error:', err)
+        if (isMounted) setDeals([])
+      } finally {
+        if (isMounted) setLoading(false)
+      }
+    }
+
+    const fetchStores = async () => {
+      try {
+        const res = await adminApi.getStores()
+        if (!isMounted) return
+        if (Array.isArray(res)) setRawStores(res)
+      } catch (err) {
+        console.warn('Stores fetch error:', err)
+      }
     }
 
     fetchLoot()
+    fetchStores()
 
     const handleSync = () => {
       fetchLoot()
+    }
+    const handleStoresSync = () => {
+      fetchStores()
     }
 
     const handleDealClicked = (e: Event) => {
@@ -270,11 +244,13 @@ export const ExecutiveLootDealsPage: React.FC = () => {
     }
 
     window.addEventListener('wouchify_loot_deals_updated', handleSync)
+    window.addEventListener('wouchify_stores_updated', handleStoresSync)
     window.addEventListener('wouchify_deal_clicked', handleDealClicked)
     window.addEventListener('storage', handleSync)
     return () => {
       isMounted = false
       window.removeEventListener('wouchify_loot_deals_updated', handleSync)
+      window.removeEventListener('wouchify_stores_updated', handleStoresSync)
       window.removeEventListener('wouchify_deal_clicked', handleDealClicked)
       window.removeEventListener('storage', handleSync)
     }
@@ -487,12 +463,17 @@ export const ExecutiveLootDealsPage: React.FC = () => {
   }
 
   const handleDeleteDeal = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this loot deal?')) {
-      adminApi.deleteLootDeal(id).catch(console.warn)
-      setDeals(deals.filter(d => d.id !== id))
-      setSelectedDealIds(selectedDealIds.filter(selId => selId !== id))
-      showToast('Loot deal removed')
-    }
+    setLootToDelete(id)
+  }
+
+  const confirmDeleteLoot = async () => {
+    if (!lootToDelete) return
+    const id = lootToDelete
+    setDeals(deals.filter(d => d.id !== id))
+    setSelectedDealIds(selectedDealIds.filter(selId => selId !== id))
+    showToast('Loot deal removed')
+    adminApi.deleteLootDeal(id).catch(console.warn)
+    setLootToDelete(null)
   }
 
   const handleToggleStatus = (id: string) => {
@@ -575,11 +556,17 @@ export const ExecutiveLootDealsPage: React.FC = () => {
   }
 
   const handleBulkDelete = () => {
-    if (window.confirm(`Delete ${selectedDealIds.length} selected loot deals permanently?`)) {
-      setDeals(deals.filter(d => !selectedDealIds.includes(d.id)))
-      showToast(`Deleted ${selectedDealIds.length} loot deals`)
-      setSelectedDealIds([])
-    }
+    if (selectedDealIds.length === 0) return
+    setIsBulkDeleteOpen(true)
+  }
+
+  const confirmBulkDelete = async () => {
+    const idsToDelete = [...selectedDealIds]
+    setDeals(deals.filter(d => !idsToDelete.includes(d.id)))
+    showToast(`Deleted ${idsToDelete.length} loot deals`)
+    setSelectedDealIds([])
+    setIsBulkDeleteOpen(false)
+    idsToDelete.forEach(id => adminApi.deleteLootDeal(id).catch(console.warn))
   }
 
   // Export to CSV
@@ -660,11 +647,11 @@ export const ExecutiveLootDealsPage: React.FC = () => {
 
   const handleSave = (statusToSet: 'Draft' | 'Pending Approval' | 'Approved') => {
     if (!form.title.trim()) {
-      alert('Please enter a Loot Deal Title')
+      setLootAlert({ title: 'Validation Error', message: 'Please enter a Loot Deal Title.', variant: 'warning' })
       return
     }
     if (!form.price.trim()) {
-      alert('Please enter an Offer Price')
+      setLootAlert({ title: 'Validation Error', message: 'Please enter an Offer Price.', variant: 'warning' })
       return
     }
 
@@ -828,18 +815,17 @@ export const ExecutiveLootDealsPage: React.FC = () => {
         </div>
 
         {/* Active / Expired Tab Switcher */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0', borderBottom: '2px solid #e2e8f0', margin: '0 0 20px 0' }}>
+        <div className="deals-tab-bar">
           <button
+            className="deals-tab-btn"
             onClick={() => { setDealsTab('active'); setCurrentPage(1); }}
             style={{
               background: 'none',
               border: 'none',
               borderBottom: dealsTab === 'active' ? '3px solid var(--color-red, #E31E25)' : '3px solid transparent',
               marginBottom: '-2px',
-              padding: '12px 24px',
               fontWeight: dealsTab === 'active' ? 700 : 500,
               color: dealsTab === 'active' ? 'var(--color-red, #E31E25)' : '#64748b',
-              fontSize: '0.92rem',
               cursor: 'pointer',
               transition: 'all 0.15s ease',
               display: 'inline-flex',
@@ -854,16 +840,15 @@ export const ExecutiveLootDealsPage: React.FC = () => {
             </span>
           </button>
           <button
+            className="deals-tab-btn"
             onClick={() => { setDealsTab('expired'); setCurrentPage(1); }}
             style={{
               background: 'none',
               border: 'none',
               borderBottom: dealsTab === 'expired' ? '3px solid #ef4444' : '3px solid transparent',
               marginBottom: '-2px',
-              padding: '12px 24px',
               fontWeight: dealsTab === 'expired' ? 700 : 500,
               color: dealsTab === 'expired' ? '#ef4444' : '#64748b',
-              fontSize: '0.92rem',
               cursor: 'pointer',
               transition: 'all 0.15s ease',
               display: 'inline-flex',
@@ -879,11 +864,6 @@ export const ExecutiveLootDealsPage: React.FC = () => {
               </span>
             )}
           </button>
-          {dealsTab === 'expired' && (
-            <span style={{ marginLeft: 'auto', fontSize: '0.8rem', color: '#ef4444', fontStyle: 'italic', padding: '0 16px', fontWeight: 500 }}>
-              ⚠️ These flash drops & price glitches have ended.
-            </span>
-          )}
         </div>
 
         {/* Advanced Filter Toolbar */}
@@ -1080,13 +1060,30 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {paginatedDeals.map((deal) => {
+                  {loading ? (
+                    <TableRowSkeleton cols={6} rows={6} />
+                  ) : paginatedDeals.length === 0 ? (
+                    <tr>
+                      <td colSpan={12} style={{ padding: '32px 16px' }}>
+                        <EmptyState
+                          title="No Loot Deals Found"
+                          message="No loot deals match your selected filters in the database."
+                          actionText="Add New Loot Deal"
+                          onAction={handleAddDeal}
+                        />
+                      </td>
+                    </tr>
+                  ) : paginatedDeals.map((deal) => {
                     const isSelected = selectedDealIds.includes(deal.id)
                     const countdown = getExpiryCountdown(deal.expiresAt)
                     const isUrgentClaim = deal.stockClaimedPercent >= 85
                     return (
-                      <tr key={deal.id} style={{ backgroundColor: isSelected ? '#fef2f2' : undefined }}>
-                        <td style={{ textAlign: 'center' }}>
+                      <tr 
+                        key={deal.id} 
+                        style={{ backgroundColor: isSelected ? '#fef2f2' : undefined, cursor: 'pointer' }}
+                        onClick={() => setInspectedDeal(deal)}
+                      >
+                        <td style={{ textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
                           <input 
                             type="checkbox" 
                             checked={isSelected}
@@ -1280,11 +1277,11 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                             </span>
                           </button>
                         </td>
-                        <td>
+                        <td onClick={(e) => e.stopPropagation()}>
                           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                             <button 
                               className="action-btn view" 
-                              onClick={() => setPreviewDeal(deal)} 
+                              onClick={() => setInspectedDeal(deal)} 
                               title="Preview Customer Loot Page"
                             >
                               <Eye size={16} />
@@ -1354,46 +1351,63 @@ export const ExecutiveLootDealsPage: React.FC = () => {
           /* ── VIEW 2: GRID / CARD VIEW ── */
           <div>
             <div className="deals-grid-container">
-              {paginatedDeals.map((deal) => {
-                const isSelected = selectedDealIds.includes(deal.id)
-                const countdown = getExpiryCountdown(deal.expiresAt)
-                return (
-                  <div key={deal.id} className="deal-card-manage" style={{ borderColor: isSelected ? 'var(--color-red, #E31E25)' : undefined }}>
-                    <input 
-                      type="checkbox" 
-                      className="deal-card-checkbox"
-                      checked={isSelected}
-                      onChange={() => handleToggleSelectDeal(deal.id)}
-                    />
-
-                    <div className="deal-card-manage-thumb">
-                      <img 
-                        src={deal.image || deal.images[0] || PLACEHOLDER_DEAL_IMAGE} 
-                        alt={deal.title} 
-                        onError={(e) => { (e.target as any).src = PLACEHOLDER_DEAL_IMAGE }}
+              {loading ? (
+                [...Array(8)].map((_, i) => <DealCardSkeleton key={`skel-loot-card-${i}`} />)
+              ) : paginatedDeals.length === 0 ? (
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <EmptyState
+                    title="No Loot Deals Found"
+                    message="No loot deals match your selected filters in the database."
+                    actionText="Add New Loot Deal"
+                    onAction={handleAddDeal}
+                  />
+                </div>
+              ) : (
+                paginatedDeals.map((deal) => {
+                  const isSelected = selectedDealIds.includes(deal.id)
+                  const countdown = getExpiryCountdown(deal.expiresAt)
+                  return (
+                    <div 
+                      key={deal.id} 
+                      className="deal-card-manage" 
+                      style={{ borderColor: isSelected ? 'var(--color-red, #E31E25)' : undefined, cursor: 'pointer' }}
+                      onClick={() => setInspectedDeal(deal)}
+                    >
+                      <input 
+                        type="checkbox" 
+                        className="deal-card-checkbox"
+                        checked={isSelected}
+                        onChange={() => handleToggleSelectDeal(deal.id)}
+                        onClick={(e) => e.stopPropagation()}
                       />
-                      <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 4, display: 'flex', gap: '4px', alignItems: 'center' }}>
-                        {deal.isBestSelling && (
-                          <span style={{ 
-                            background: '#d97706', 
-                            color: '#ffffff', 
-                            padding: '3px 8px', 
-                            borderRadius: '999px', 
-                            fontSize: '0.68rem', 
-                            fontWeight: 800, 
-                            display: 'inline-flex', 
-                            alignItems: 'center', 
-                            gap: '3px',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.15)'
-                          }}>
-                            ⭐ BEST SELLER
+                      <div className="deal-card-manage-thumb">
+                        <img 
+                          src={deal.image || '/src/assets/deals/deal1.png'} 
+                          alt={deal.title} 
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/src/assets/deals/deal1.png' }}
+                        />
+                        <div className="deal-card-badges-top">
+                          {deal.isBestSelling && (
+                            <span style={{
+                              background: '#f59e0b',
+                              color: '#ffffff',
+                              padding: '2px 8px',
+                              borderRadius: '999px', 
+                              fontSize: '0.68rem', 
+                              fontWeight: 800, 
+                              display: 'inline-flex', 
+                              alignItems: 'center', 
+                              gap: '3px',
+                              boxShadow: '0 2px 4px rgba(0,0,0,0.15)'
+                            }}>
+                              ⭐ BEST SELLER
+                            </span>
+                          )}
+                          <span className={`loot-type-badge ${deal.lootType}`}>
+                            {deal.badge || deal.lootType.toUpperCase()}
                           </span>
-                        )}
-                        <span className={`loot-type-badge ${deal.lootType}`}>
-                          {deal.badge || deal.lootType.toUpperCase()}
-                        </span>
+                        </div>
                       </div>
-                    </div>
 
                     <div className="deal-card-manage-body">
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1470,7 +1484,12 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="deal-card-manage-actions" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    {/* Action footer */}
+                    <div 
+                      className="deal-card-manage-actions" 
+                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <select
                         value={deal.sectionPlacement || (deal.isBestSelling ? 'best_selling' : 'both')}
                         onChange={(e) => handleSectionPlacementChange(deal.id, e.target.value as any)}
@@ -1493,7 +1512,7 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                         <option value="best_selling">Section 2 (Best Seller)</option>
                       </select>
                       <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                        <button className="action-btn view" onClick={() => setPreviewDeal(deal)} title="Preview Deal">
+                        <button className="action-btn view" onClick={() => setInspectedDeal(deal)} title="Preview Deal">
                           <Eye size={15} />
                         </button>
                         <button className="action-btn edit" onClick={() => handleEditDeal(deal)} title="Edit Deal">
@@ -1506,7 +1525,8 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                     </div>
                   </div>
                 )
-              })}
+              })
+            )}
             </div>
 
             <div className="pagination-wrap" style={{ borderRadius: '12px' }}>
@@ -1565,11 +1585,11 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                     className={`step-tab-btn ${formStep === 2 ? 'active' : ''}`}
                     onClick={() => {
                       if (!form.title.trim()) {
-                        alert('Please enter a Loot Deal Title in Step 1 first.')
+                        setLootAlert({ title: 'Required Fields', message: 'Please enter a Loot Deal Title in Step 1 first.', variant: 'warning' })
                         return
                       }
                       if (!form.price.trim()) {
-                        alert('Please enter a Loot Selling Price in Step 1 first.')
+                        setLootAlert({ title: 'Required Fields', message: 'Please enter a Loot Selling Price in Step 1 first.', variant: 'warning' })
                         return
                       }
                       setFormStep(2)
@@ -2110,11 +2130,11 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                         className="btn-save" 
                         onClick={() => {
                           if (!form.title.trim()) {
-                            alert('Please enter a Loot Deal Title')
+                            setLootAlert({ title: 'Required Fields', message: 'Please enter a Loot Deal Title in Step 1 first.', variant: 'warning' })
                             return
                           }
                           if (!form.price.trim()) {
-                            alert('Please enter an Offer Price')
+                            setLootAlert({ title: 'Required Fields', message: 'Please enter an Offer Price in Step 1 first.', variant: 'warning' })
                             return
                           }
                           setFormStep(2)
@@ -2142,255 +2162,171 @@ export const ExecutiveLootDealsPage: React.FC = () => {
           </div>
         )}
 
-        {/* ── MODAL 2: CUSTOMER LOOT PAGE PREVIEW MODAL ── */}
-        {previewDeal && (
-          <div className="crud-modal-overlay" onClick={() => setPreviewDeal(null)}>
-            <div className="deal-product-modal" onClick={(e) => e.stopPropagation()}>
-              <div className="deal-product-top-bar">
-                <div className="deal-product-breadcrumb">
-                  <span>Home</span>
-                  <span>/</span>
-                  <span>Loot Deals</span>
-                  <span>/</span>
-                  <span>{previewDeal.category}</span>
-                  <span>/</span>
-                  <strong style={{ color: '#0f172a' }}>{previewDeal.brand || previewDeal.store}</strong>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div 
-                    style={{ 
-                      display: 'inline-flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center', 
-                      background: '#ffffff', 
-                      border: '1px solid #e2e8f0', 
-                      borderRadius: '6px', 
-                      padding: '3px 8px', 
-                      height: '28px',
-                      boxShadow: '0 1px 2px rgba(0,0,0,0.04)' 
-                    }} 
-                    title={previewDeal.store}
-                  >
-                    <img 
-                      src={getStoreLogo(previewDeal.store)} 
-                      alt={previewDeal.store} 
-                      style={{ maxHeight: '18px', maxWidth: '56px', objectFit: 'contain' }} 
-                      onError={(e) => { (e.target as any).src = PLACEHOLDER_STORE_LOGO }}
-                    />
+        {/* ── DRAWER: DEEP INSPECTION DRAWER ── */}
+        {inspectedDeal && (
+          <div className="exec-drawer-overlay" onClick={() => setInspectedDeal(null)}>
+            <div className="exec-drawer" onClick={(e) => e.stopPropagation()}>
+              <div className="exec-drawer__header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <img src={inspectedDeal.image || inspectedDeal.images[0] || PLACEHOLDER_DEAL_IMAGE} alt="Loot" className="exec-drawer__avatar" style={{ borderRadius: '8px' }} />
+                  <div>
+                    <h3 className="exec-drawer__title">{inspectedDeal.title}</h3>
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginTop: '4px', flexWrap: 'wrap' }}>
+                      <span className={`loot-type-badge ${inspectedDeal.lootType}`}>{inspectedDeal.badge || inspectedDeal.lootType.toUpperCase()}</span>
+                      <span className={`status-badge ${inspectedDeal.status === 'Approved' ? 'active' : 'draft'}`}>{inspectedDeal.status}</span>
+                      <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>{inspectedDeal.store}</span>
+                    </div>
                   </div>
+                </div>
+                <button className="exec-drawer__close" onClick={() => setInspectedDeal(null)}>
+                  <X size={18} />
+                </button>
+              </div>
 
-                  <span className={`loot-type-badge ${previewDeal.lootType}`}>
-                    {previewDeal.badge || '🔥 LOOT DEAL'}
-                  </span>
-
-                  {previewDeal.isVerified && (
-                    <span style={{ color: '#0284c7', fontSize: '0.8rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '3px' }}>
-                      <CheckCircle2 size={14} /> Verified
-                    </span>
-                  )}
-
-                  <button className="modal-close" onClick={() => setPreviewDeal(null)} title="Close">
-                    <X size={18} />
-                  </button>
+              <div className="exec-drawer__stats">
+                <div className="exec-drawer__stat-box">
+                  <span className="label">Loot Price</span>
+                  <span className="value" style={{ color: 'var(--color-red, #E31E25)' }}>{formatPriceWithRupee(inspectedDeal.price)}</span>
+                </div>
+                <div className="exec-drawer__stat-box">
+                  <span className="label">Discount</span>
+                  <span className="value">{inspectedDeal.discountLabel}</span>
+                </div>
+                <div className="exec-drawer__stat-box">
+                  <span className="label">Claimed</span>
+                  <span className="value">{inspectedDeal.stockClaimedPercent}%</span>
+                </div>
+                <div className="exec-drawer__stat-box">
+                  <span className="label">Clicks</span>
+                  <span className="value">{inspectedDeal.clicks}</span>
                 </div>
               </div>
 
-              <div className="deal-product-modal-body">
-                <div className="deal-product-main-grid">
-                  
-                  {/* Left Column: Media & Urgency Meter */}
-                  <div className="deal-product-media-col">
-                    <div className="deal-product-main-img-card">
-                      <img 
-                        src={previewDeal.image || previewDeal.images[0] || PLACEHOLDER_DEAL_IMAGE} 
-                        alt={previewDeal.title} 
-                        onError={(e) => { (e.target as any).src = PLACEHOLDER_DEAL_IMAGE }}
-                      />
-                      {previewDeal.discountLabel && (
-                        <div style={{ position: 'absolute', top: '12px', left: '12px' }}>
-                          <span className="deal-save-badge" style={{ background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' }}>
-                            {previewDeal.discountLabel}
-                          </span>
-                        </div>
-                      )}
-                    </div>
+              <div className="exec-drawer__tabs">
+                <button className={`exec-drawer__tab ${drawerTab === 'overview' ? 'active' : ''}`} onClick={() => setDrawerTab('overview')}>Overview</button>
+                <button className={`exec-drawer__tab ${drawerTab === 'urgency' ? 'active' : ''}`} onClick={() => setDrawerTab('urgency')}>Urgency & Proof</button>
+                <button className={`exec-drawer__tab ${drawerTab === 'store' ? 'active' : ''}`} onClick={() => setDrawerTab('store')}>Store Context</button>
+                <button className={`exec-drawer__tab ${drawerTab === 'analytics' ? 'active' : ''}`} onClick={() => setDrawerTab('analytics')}>Analytics</button>
+              </div>
 
-                    {/* Stock Urgency Meter */}
-                    <div style={{ background: '#fef2f2', border: '1.5px solid #fecaca', borderRadius: '10px', padding: '12px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.82rem', fontWeight: 800, color: '#991b1b', marginBottom: '6px' }}>
-                        <span>⚡ {previewDeal.stockClaimedPercent}% Claimed</span>
-                        <span style={{ fontSize: '0.74rem', color: '#dc2626' }}>{previewDeal.quantityAlert || 'Hurry! Limited stock'}</span>
-                      </div>
-                      <div style={{ height: '8px', background: '#fee2e2', borderRadius: '999px', overflow: 'hidden' }}>
-                        <div style={{ width: `${previewDeal.stockClaimedPercent}%`, height: '100%', background: 'linear-gradient(90deg, #f87171, #dc2626)', borderRadius: '999px' }} />
-                      </div>
+              <div className="exec-drawer__body">
+                {drawerTab === 'overview' && (
+                  <div className="exec-drawer__section">
+                    <h4>Loot Details</h4>
+                    <div className="exec-drawer__grid">
+                      <div className="exec-drawer__grid-item"><strong>Store:</strong> {inspectedDeal.store}</div>
+                      <div className="exec-drawer__grid-item"><strong>Category:</strong> {inspectedDeal.category}</div>
+                      <div className="exec-drawer__grid-item"><strong>Loot Type:</strong> {inspectedDeal.lootType}</div>
+                      <div className="exec-drawer__grid-item"><strong>SKU:</strong> {inspectedDeal.asinOrSku || 'N/A'}</div>
+                      <div className="exec-drawer__grid-item"><strong>Status:</strong> {inspectedDeal.status}</div>
+                      <div className="exec-drawer__grid-item"><strong>Alert:</strong> {inspectedDeal.quantityAlert || 'N/A'}</div>
                     </div>
-
-                    {/* Proof note if available */}
-                    {previewDeal.proofNote && (
-                      <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '8px 12px', fontSize: '0.76rem', color: '#166534', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span>🛡️</span>
-                        <span>{previewDeal.proofNote}</span>
-                      </div>
-                    )}
+                    
+                    <h4 style={{ marginTop: '16px' }}>Price Breakdown</h4>
+                    <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                      <span style={{ textDecoration: 'line-through', color: '#64748b' }}>{formatPriceWithRupee(inspectedDeal.originalPrice)}</span>
+                      <span>→</span>
+                      <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--color-red, #E31E25)' }}>{formatPriceWithRupee(inspectedDeal.price)}</span>
+                      <span className="discount-pill" style={{ background: '#fef2f2', color: 'var(--color-red, #E31E25)' }}>{inspectedDeal.discountLabel}</span>
+                    </div>
+                    
+                    <h4 style={{ marginTop: '16px' }}>Gallery</h4>
+                    <div style={{ display: 'flex', gap: '8px', overflowX: 'auto' }}>
+                      {inspectedDeal.images.map((img, idx) => (
+                        <img key={idx} src={img || PLACEHOLDER_DEAL_IMAGE} alt="Gallery" style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '6px' }} />
+                      ))}
+                    </div>
                   </div>
-
-                  {/* Right Column: Buying Content & Pricing */}
-                  <div className="deal-product-info-col">
-                    <div className="deal-product-brand-row">
-                      {previewDeal.brand && (
-                        <span className="deal-brand-tag">{previewDeal.brand}</span>
-                      )}
-                      {previewDeal.asinOrSku && (
-                        <span className="deal-asin-badge">SKU: {previewDeal.asinOrSku}</span>
-                      )}
+                )}
+                {drawerTab === 'urgency' && (
+                  <div className="exec-drawer__section">
+                    <h4>Urgency & Proof</h4>
+                    <p><strong>Claimed:</strong> {inspectedDeal.stockClaimedPercent}%</p>
+                    <div style={{ width: '100%', height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden', marginBottom: '12px' }}>
+                        <div style={{ width: `${inspectedDeal.stockClaimedPercent}%`, height: '100%', background: 'var(--color-red, #E31E25)' }} />
                     </div>
-
-                    <h2 className="deal-product-title-large">{previewDeal.title}</h2>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                      <span className="deal-rating-badge">
-                        {previewDeal.rating || '4.5 ★ (15,200 reviews)'}
-                      </span>
-                      <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#db2777', background: '#fdf2f8', padding: '2px 8px', borderRadius: '4px' }}>
-                        {previewDeal.badge || '💥 PRICE ERROR'}
-                      </span>
-                    </div>
-
-                    {/* Pricing Breakdown Card */}
-                    <div className="deal-price-card">
-                      <div className="deal-price-numbers">
-                        <span className="deal-huge-price" style={{ color: 'var(--color-red, #E31E25)' }}>{previewDeal.price}</span>
-                        {previewDeal.originalPrice && (
-                          <span className="deal-strikethrough-mrp">M.R.P.: {previewDeal.originalPrice}</span>
-                        )}
-                        {previewDeal.discountLabel && (
-                          <span className="deal-save-badge">{previewDeal.discountLabel}</span>
-                        )}
-                      </div>
-
-                      {previewDeal.effectivePrice && (
-                        <div className="deal-effective-banner">
-                          <span>🔥 <strong>Effective Final Price:</strong> {previewDeal.effectivePrice}</span>
-                        </div>
-                      )}
-
-                      {previewDeal.cashback && (
-                        <div style={{ fontSize: '0.8rem', color: '#b45309', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '6px', padding: '6px 10px', fontWeight: 700 }}>
-                          💰 <strong>Extra Wouchify Rewards:</strong> {previewDeal.cashback}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Coupon Code Clip Box */}
-                    {previewDeal.code && (
-                      <div className="deal-voucher-coupon-box">
-                        <div>
-                          <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 700 }}>
-                            Applicable Loot Coupon
-                          </div>
-                          <div className="deal-coupon-code-text">{previewDeal.code}</div>
-                        </div>
-                        <button 
-                          type="button" 
-                          className="deal-copy-coupon-btn"
-                          onClick={() => {
-                            navigator.clipboard.writeText(previewDeal.code)
-                            showToast(`Copied coupon code ${previewDeal.code}!`)
-                          }}
-                        >
-                          <Copy size={13} /> Copy Code
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Timing & Expiry Banner */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px 12px', flexWrap: 'wrap', gap: '8px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', color: '#64748b' }}>
-                        <Clock size={13} style={{ color: 'var(--color-red, #E31E25)' }} />
-                        <span>Posted: <strong style={{ color: '#1e293b' }}>{previewDeal.postedAt}</strong></span>
-                      </div>
-                      {(() => {
-                        const countdown = getExpiryCountdown(previewDeal.expiresAt)
-                        return (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Expires:</span>
-                            <span className={`expiry-pill ${countdown.status}`}>
-                              {countdown.status === 'expired' && '⛔ '}
-                              {countdown.status === 'urgent' && '🔥 '}
-                              {countdown.status === 'warning' && '⏳ '}
-                              {countdown.status === 'normal' && '📅 '}
-                              {countdown.text} ({formatExpiryDate(previewDeal.expiresAt)})
-                            </span>
-                          </div>
-                        )
-                      })()}
-                    </div>
-
-                    {/* Primary Grab Deal Action Button */}
-                    <a 
-                      href={previewDeal.link || '#'} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="deal-grab-primary-btn"
-                      style={{ background: 'linear-gradient(135deg, #e31e25 0%, #b91c1c 100%)' }}
-                    >
-                      GRAB LOOT ON {previewDeal.store.toUpperCase()} ↗
-                    </a>
+                    
+                    <p><strong>Expiry:</strong> {getExpiryCountdown(inspectedDeal.expiresAt).text}</p>
+                    
+                    <h4 style={{ marginTop: '16px' }}>Proof Note</h4>
+                    <p style={{ background: '#f8fafc', padding: '8px', borderRadius: '4px' }}>{inspectedDeal.proofNote || 'No proof provided'}</p>
+                    
+                    <h4 style={{ marginTop: '16px' }}>How to Claim</h4>
+                    <ol style={{ paddingLeft: '20px' }}>
+                        {inspectedDeal.trickSteps?.split('\n').map((step, idx) => <li key={idx} style={{ marginBottom: '4px' }}>{step.replace(/^[0-9]+[.)]\s*/, '')}</li>)}
+                    </ol>
                   </div>
-                </div>
-
-                {/* Trick to grab step-by-step */}
-                {previewDeal.trickSteps && (
-                  <div className="deal-content-tabs-section" style={{ marginTop: '20px' }}>
-                    <div className="deal-section-block">
-                      <h4 className="deal-section-block-title" style={{ color: 'var(--color-red, #E31E25)' }}>
-                        <Sparkles size={16} /> How to Avail / Grab this Loot Price
-                      </h4>
-                      <div className="deal-steps-grid">
-                        {previewDeal.trickSteps.split('\n').filter(s => s.trim().length > 0).map((step, idx) => (
-                          <div key={idx} className="deal-step-card">
-                            <span className="deal-step-number">{idx + 1}</span>
-                            <span className="deal-step-text">{step.replace(/^[0-9]+[.)]\s*/, '')}</span>
+                )}
+                {drawerTab === 'store' && (
+                  <div className="exec-drawer__section">
+                    {/* Find matched store and other loots */}
+                    {(() => {
+                      const matchedStore = rawStores.find(s => s.name.toLowerCase() === inspectedDeal.store.toLowerCase());
+                      const otherLoots = deals.filter(d => d.store.toLowerCase() === inspectedDeal.store.toLowerCase() && d.id !== inspectedDeal.id).slice(0, 5);
+                      return (
+                        <>
+                          <div className="exec-drawer__item" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                            <img src={matchedStore?.logo || getStoreLogo(inspectedDeal.store)} style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+                            <div>
+                              <h4 style={{ margin: '0 0 4px 0' }}>{matchedStore?.name || inspectedDeal.store}</h4>
+                              <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>Category: {matchedStore?.category || 'N/A'} | Cashback: {matchedStore?.cashbackRate || 'N/A'}</p>
+                            </div>
                           </div>
-                        ))}
-                      </div>
+                          <h4 style={{ marginTop: '16px' }}>Other Loots from {inspectedDeal.store}</h4>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {otherLoots.length === 0 ? <p style={{ fontSize: '0.85rem', color: '#64748b' }}>No other active loots.</p> : otherLoots.map(d => (
+                              <div key={d.id} className="exec-drawer__item" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                <img src={d.image} style={{ width: '32px', height: '32px', borderRadius: '4px' }} />
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <div style={{ fontSize: '0.85rem', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.title}</div>
+                                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{d.price}</div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      )
+                    })()}
+                  </div>
+                )}
+                {drawerTab === 'analytics' && (
+                  <div className="exec-drawer__section">
+                    <h4>Analytics & Logs</h4>
+                    <div className="exec-drawer__grid">
+                      <div className="exec-drawer__grid-item"><strong>Clicks:</strong> {inspectedDeal.clicks}</div>
+                      <div className="exec-drawer__grid-item"><strong>Posted At:</strong> {inspectedDeal.postedAt}</div>
+                      <div className="exec-drawer__grid-item"><strong>Expires At:</strong> {formatExpiryDate(inspectedDeal.expiresAt)}</div>
+                      <div className="exec-drawer__grid-item"><strong>Featured:</strong> {inspectedDeal.isFeatured ? 'Yes' : 'No'}</div>
                     </div>
-
-                    {previewDeal.terms && (
-                      <div className="deal-section-block" style={{ background: '#fef2f2', borderColor: '#fecaca' }}>
-                        <h4 className="deal-section-block-title" style={{ fontSize: '0.8rem', color: '#991b1b' }}>
-                          ⚠️ Loot Disclaimer & Important Notice
-                        </h4>
-                        <p style={{ margin: 0, fontSize: '0.78rem', color: '#991b1b', lineHeight: 1.45 }}>
-                          {previewDeal.terms}
-                        </p>
-                      </div>
-                    )}
+                    
+                    <h4 style={{ marginTop: '16px' }}>Terms & Conditions</h4>
+                    <p style={{ background: '#f8fafc', padding: '8px', borderRadius: '4px', fontSize: '0.8rem', whiteSpace: 'pre-wrap' }}>{inspectedDeal.terms || 'N/A'}</p>
                   </div>
                 )}
               </div>
 
-              <div className="modal-footer" style={{ justifyContent: 'space-between', padding: '12px 24px' }}>
-                <div style={{ fontSize: '0.82rem', color: '#64748b' }}>
-                  Loot ID: <strong style={{ fontFamily: 'monospace' }}>#{previewDeal.id}</strong> • Priority: <strong>{previewDeal.priority}</strong>
-                </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button className="btn-cancel" onClick={() => setPreviewDeal(null)}>
-                    Close
-                  </button>
-                  <button 
-                    className="btn-save" 
-                    onClick={() => {
-                      const d = previewDeal
-                      setPreviewDeal(null)
-                      handleEditDeal(d)
-                    }}
-                  >
-                    <Edit2 size={14} /> Edit Loot Deal
-                  </button>
-                </div>
+              <div className="exec-drawer__actions">
+                <button className="btn-cancel" onClick={() => { 
+                  handleEditDeal(inspectedDeal)
+                  setInspectedDeal(null)
+                }}>
+                  <Edit2 size={16} /> Edit
+                </button>
+                <button className="btn-save" onClick={() => {
+                  handleToggleStatus(inspectedDeal.id)
+                  setInspectedDeal(prev => prev ? { ...prev, status: prev.status === 'Approved' ? 'Draft' : 'Approved' } : null)
+                }} style={{ background: '#64748b' }}>
+                  <Zap size={16} /> Toggle Status
+                </button>
+                <button className="btn-save" onClick={() => window.open(inspectedDeal.link, '_blank')} style={{ background: '#3b82f6' }}>
+                  <Send size={16} /> Open Link
+                </button>
+                <button className="btn-cancel" onClick={() => {
+                  handleDeleteDeal(inspectedDeal.id)
+                  setInspectedDeal(null)
+                }} style={{ color: '#ef4444', borderColor: '#ef4444' }}>
+                  <Trash2 size={16} /> Delete
+                </button>
               </div>
             </div>
           </div>
@@ -2402,6 +2338,44 @@ export const ExecutiveLootDealsPage: React.FC = () => {
             <CheckCircle2 size={18} style={{ color: '#10b981' }} />
             <span>{toastMessage}</span>
           </div>
+        )}
+
+        {/* ── CUSTOM CONFIRM DIALOG (SINGLE DELETE) ── */}
+        <AdminConfirmDialog
+          isOpen={!!lootToDelete}
+          title="Delete Loot Deal"
+          message="Are you sure you want to delete this loot deal permanently? This cannot be undone."
+          confirmLabel="Delete Loot Deal"
+          cancelLabel="Cancel"
+          variant="danger"
+          icon="trash"
+          onConfirm={confirmDeleteLoot}
+          onCancel={() => setLootToDelete(null)}
+        />
+
+        {/* ── CUSTOM CONFIRM DIALOG (BULK DELETE) ── */}
+        <AdminConfirmDialog
+          isOpen={isBulkDeleteOpen}
+          title="Delete Selected Loot Deals"
+          message={`Are you sure you want to permanently delete ${selectedDealIds.length} selected loot deals?`}
+          confirmLabel={`Delete ${selectedDealIds.length} Deals`}
+          cancelLabel="Cancel"
+          variant="danger"
+          icon="trash"
+          onConfirm={confirmBulkDelete}
+          onCancel={() => setIsBulkDeleteOpen(false)}
+        />
+
+        {/* ── CUSTOM ALERT DIALOG ── */}
+        {lootAlert && (
+          <AdminAlertDialog
+            isOpen={!!lootAlert}
+            title={lootAlert.title}
+            message={lootAlert.message}
+            variant={lootAlert.variant || 'warning'}
+            buttonLabel="Understood"
+            onClose={() => setLootAlert(null)}
+          />
         )}
 
       </div>

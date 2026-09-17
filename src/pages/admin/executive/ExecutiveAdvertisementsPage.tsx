@@ -21,18 +21,15 @@ import {
 import './ExecutiveShared.css'
 
 import advertisementImage from '../../../assets/advertisement/image-7.png'
-import advertiseHero from '../../../assets/advertise/advertise_hero.png'
-import advertiseBg from '../../../assets/advertise/advertise_bg.png'
-import iciciPlatinumCard from '../../../assets/credit-cards/icici-platinum-card.png'
-import swiggyLogo from '../../../assets/brand-logos/swiggy-logo.png'
-import myntraLogo from '../../../assets/brand-logos/myntra-logo.png'
 import { PLACEHOLDER_DEAL_IMAGE } from '../../../data/dealsPage'
+import { AdminConfirmDialog, AdminAlertDialog } from '../../../components/common/AdminDialog'
 
 /* ============================================================
    Types & Config
    ============================================================ */
 
 export type AdPlacementType =
+  | 'homepage-banner-1713x685'
   | 'sidebar-300x250'
   | 'leaderboard-728x90'
   | 'billboard-300x600'
@@ -71,6 +68,13 @@ export interface AdPlacementConfig {
 }
 
 export const AD_PLACEMENTS: AdPlacementConfig[] = [
+  {
+    value: 'homepage-banner-1713x685',
+    label: 'Home Advertisement Section (1713 × 685)',
+    slotName: 'Home Page Hero / Primary Banner',
+    recommendedSize: '1713 × 685 px',
+    aspectRatio: '5:2'
+  },
   {
     value: 'sidebar-300x250',
     label: 'Home & Deals Sidebar (300 × 250)',
@@ -157,114 +161,7 @@ function statusConfig(status: AdStatus) {
   }
 }
 
-/* ============================================================
-   Mock Seed Data
-   ============================================================ */
-
-const MOCK_ADS: Advertisement[] = [
-  {
-    id: 'ad-1',
-    title: 'Wouchify Mega Cashback Festival Sale',
-    advertiser: 'Wouchify Official',
-    placement: 'sidebar-300x250',
-    imageUrl: advertisementImage,
-    targetLink: '/offers/sale',
-    ctaText: 'Claim Bonus Cashback',
-    badgeText: 'OFFICIAL PARTNER',
-    pricingModel: 'Flat Monthly',
-    budgetOrRate: 'Internal Campaign',
-    status: 'active',
-    expiryDate: '2026-12-31',
-    impressions: 64200,
-    clicks: 5890,
-    createdAt: '2026-09-01'
-  },
-  {
-    id: 'ad-2',
-    title: 'Amazon Great Indian Festival Early Prime Access',
-    advertiser: 'Amazon India',
-    placement: 'leaderboard-728x90',
-    imageUrl: advertiseHero,
-    targetLink: 'https://amazon.in',
-    ctaText: 'Shop Prime Deals',
-    badgeText: 'FEATURED PARTNER',
-    pricingModel: 'CPM',
-    budgetOrRate: '₹120 / CPM',
-    status: 'active',
-    expiryDate: '2026-11-15',
-    impressions: 98000,
-    clicks: 8120,
-    createdAt: '2026-09-02'
-  },
-  {
-    id: 'ad-3',
-    title: 'ICICI Platinum Chip Credit Card 5% Cashback',
-    advertiser: 'ICICI Bank Cards',
-    placement: 'billboard-300x600',
-    imageUrl: iciciPlatinumCard,
-    targetLink: '/credit-cards',
-    ctaText: 'Apply in 2 Mins',
-    badgeText: 'BANK SPONSOR',
-    pricingModel: 'CPC',
-    budgetOrRate: '₹22 / click',
-    status: 'active',
-    expiryDate: '2026-10-31',
-    impressions: 42000,
-    clicks: 3900,
-    createdAt: '2026-09-03'
-  },
-  {
-    id: 'ad-4',
-    title: 'Swiggy Gourmet Flat ₹150 OFF Voucher',
-    advertiser: 'Swiggy Gourmet',
-    placement: 'coupon-box-250x250',
-    imageUrl: swiggyLogo,
-    targetLink: 'https://swiggy.com',
-    ctaText: 'Order Gourmet Food',
-    badgeText: 'FOOD DEAL',
-    pricingModel: 'Affiliate',
-    budgetOrRate: '8% RevShare',
-    status: 'active',
-    expiryDate: '2026-10-20',
-    impressions: 21500,
-    clicks: 2840,
-    createdAt: '2026-09-04'
-  },
-  {
-    id: 'ad-5',
-    title: 'Myntra Big Fashion Festival 50-80% Off',
-    advertiser: 'Myntra Fashion',
-    placement: 'store-card-360x180',
-    imageUrl: myntraLogo,
-    targetLink: 'https://myntra.com',
-    ctaText: 'Shop Fashion Trends',
-    badgeText: 'TRENDING STORE',
-    pricingModel: 'CPM',
-    budgetOrRate: '₹150 / CPM',
-    status: 'active',
-    expiryDate: '2026-11-30',
-    impressions: 76000,
-    clicks: 6540,
-    createdAt: '2026-09-05'
-  },
-  {
-    id: 'ad-6',
-    title: 'Wouchify Partner Brand Network Showcase',
-    advertiser: 'Wouchify Media',
-    placement: 'bottom-strip-full',
-    imageUrl: advertiseBg,
-    targetLink: '/stores',
-    ctaText: 'Explore 100+ Brands',
-    badgeText: 'PLATFORM HIGHLIGHT',
-    pricingModel: 'Flat Monthly',
-    budgetOrRate: 'Internal Promo',
-    status: 'active',
-    expiryDate: '2026-12-31',
-    impressions: 89000,
-    clicks: 7420,
-    createdAt: '2026-09-06'
-  }
-]
+import { TableRowSkeleton, EmptyState } from '../../../components/common/Skeletons'
 
 /* ============================================================
    Dynamic Live Ad Slot Preview Component
@@ -275,6 +172,56 @@ export const AdSlotPreview: React.FC<{ ad: Partial<Advertisement> }> = ({ ad }) 
   const img = ad.imageUrl || advertisementImage || PLACEHOLDER_DEAL_IMAGE
   const badge = ad.badgeText || 'SPONSORED'
   const cta = ad.ctaText || 'Learn More'
+
+  // 0. Homepage Hero Banner (1713 x 685)
+  if (placement === 'homepage-banner-1713x685') {
+    return (
+      <div style={{
+        background: '#1E2460',
+        borderRadius: '12px',
+        border: '1px solid #334155',
+        overflow: 'hidden',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+        width: '100%',
+        position: 'relative'
+      }}>
+        <div style={{ position: 'relative', width: '100%', aspectRatio: '1713 / 685', maxHeight: '180px', overflow: 'hidden' }}>
+          <img src={img} alt="Home Ad Creative" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <span style={{
+            position: 'absolute',
+            top: '8px',
+            left: '8px',
+            fontSize: '0.65rem',
+            fontWeight: 800,
+            background: '#E31E25',
+            color: 'white',
+            padding: '3px 8px',
+            borderRadius: '4px',
+            letterSpacing: '0.5px'
+          }}>
+            {badge}
+          </span>
+        </div>
+        <div style={{ padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'white' }}>
+          <div>
+            <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>{ad.advertiser || 'Wouchify Partner'}</div>
+            <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#0f172a' }}>{ad.title || 'Featured Homepage Promotion'}</div>
+          </div>
+          <div style={{
+            background: '#E31E25',
+            color: 'white',
+            padding: '6px 12px',
+            borderRadius: '6px',
+            fontSize: '0.78rem',
+            fontWeight: 700,
+            whiteSpace: 'nowrap'
+          }}>
+            {cta} →
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   // 1. Sidebar Rectangle (300 x 250)
   if (placement === 'sidebar-300x250') {
@@ -472,7 +419,8 @@ export const AdSlotPreview: React.FC<{ ad: Partial<Advertisement> }> = ({ ad }) 
    ============================================================ */
 
 export const ExecutiveAdvertisementsPage: React.FC = () => {
-  const [ads, setAds] = useState<Advertisement[]>(MOCK_ADS)
+  const [ads, setAds] = useState<Advertisement[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterPlacement, setFilterPlacement] = useState<string>('all')
   const [filterStatus, setFilterStatus] = useState<string>('all')
@@ -482,35 +430,53 @@ export const ExecutiveAdvertisementsPage: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [formStep, setFormStep] = useState<1 | 2>(1)
   const [editingAd, setEditingAd] = useState<Advertisement | null>(null)
-  const [previewingAd, setPreviewingAd] = useState<Advertisement | null>(null)
+  const [inspectedAd, setInspectedAd] = useState<Advertisement | null>(null)
+  const [drawerTab, setDrawerTab] = useState<string>('preview')
+  const [adToDelete, setAdToDelete] = useState<Advertisement | null>(null)
+  const [alertInfo, setAlertInfo] = useState<{ title: string; message: string; variant?: 'danger' | 'warning' | 'info' | 'success' } | null>(null)
+
+  const fetchLiveAds = async () => {
+    setLoading(true)
+    try {
+      const res = await adminApi.getAdvertisements()
+      if (Array.isArray(res)) {
+        const mapped: Advertisement[] = res.map((a: any, i: number) => ({
+          id: a._id || a.id || `ad-${i + 1}`,
+          title: a.title || 'Ad Campaign',
+          advertiser: a.advertiser || 'Brand Partner',
+          placement: a.placement || 'sidebar-300x250',
+          imageUrl: a.imageUrl || '',
+          targetLink: a.targetLink || 'https://wouchify.com',
+          ctaText: a.ctaText || 'Shop Now',
+          badgeText: a.badgeText || 'SPONSORED',
+          pricingModel: a.pricingModel || 'CPC',
+          budgetOrRate: a.budgetOrRate || '₹15 / click',
+          status: a.status || 'active',
+          expiryDate: a.expiryDate || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+          impressions: a.impressions || 0,
+          clicks: a.clicks || 0,
+          createdAt: a.createdAt ? new Date(a.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+        }))
+        setAds(mapped)
+      }
+    } catch (err) {
+      console.error('Failed to load advertisements:', err)
+      setAds([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    adminApi.getAdvertisements()
-      .then((res: any[]) => {
-        if (Array.isArray(res) && res.length > 0) {
-          const mapped: Advertisement[] = res.map((a: any, i: number) => ({
-            id: a._id || a.id || `ad-${i + 1}`,
-            title: a.title,
-            advertiser: a.advertiser || 'Brand Partner',
-            placement: a.placement || 'sidebar-300x250',
-            imageUrl: a.imageUrl || '',
-            targetLink: a.targetLink || 'https://wouchify.com',
-            ctaText: a.ctaText || 'Shop Now',
-            badgeText: a.badgeText || 'SPONSORED',
-            pricingModel: a.pricingModel || 'CPC',
-            budgetOrRate: a.budgetOrRate || '₹15 / click',
-            status: a.status || 'active',
-            expiryDate: a.expiryDate || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
-            impressions: a.impressions || 0,
-            clicks: a.clicks || 0,
-            createdAt: a.createdAt ? new Date(a.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
-          }))
-          setAds(mapped)
-        }
-      })
-      .catch(err => {
-        console.warn('API error, using mock ads:', err)
-      })
+    fetchLiveAds()
+
+    const handleSync = () => { fetchLiveAds() }
+    window.addEventListener('wouchify_ads_updated', handleSync)
+    window.addEventListener('storage', handleSync)
+    return () => {
+      window.removeEventListener('wouchify_ads_updated', handleSync)
+      window.removeEventListener('storage', handleSync)
+    }
   }, [])
 
   // Form State
@@ -604,10 +570,20 @@ export const ExecutiveAdvertisementsPage: React.FC = () => {
     setIsFormOpen(true)
   }
 
-  const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this ad campaign?')) {
-      adminApi.deleteAdvertisement(id).catch(console.warn)
-      setAds(prev => prev.filter(a => a.id !== id))
+  const handleDelete = (ad: Advertisement) => {
+    setAdToDelete(ad)
+  }
+
+  const confirmDelete = async () => {
+    if (!adToDelete) return
+    try {
+      await adminApi.deleteAdvertisement(adToDelete.id)
+      setAds(prev => prev.filter(a => a.id !== adToDelete.id))
+      setAdToDelete(null)
+    } catch (err) {
+      console.warn('Failed to delete ad:', err)
+      setAds(prev => prev.filter(a => a.id !== adToDelete.id))
+      setAdToDelete(null)
     }
   }
 
@@ -626,17 +602,17 @@ export const ExecutiveAdvertisementsPage: React.FC = () => {
     e.preventDefault()
 
     if (!formData.title?.trim()) {
-      alert('Campaign Title is required.')
+      setAlertInfo({ title: 'Validation Required', message: 'Campaign Title is required before saving.', variant: 'warning' })
       return
     }
 
     if (!formData.advertiser?.trim()) {
-      alert('Advertiser / Brand Name is required.')
+      setAlertInfo({ title: 'Validation Required', message: 'Advertiser / Brand Name is required before saving.', variant: 'warning' })
       return
     }
 
     if (!formData.expiryDate) {
-      alert('Advertisement Campaign Expiry Date is mandatory.')
+      setAlertInfo({ title: 'Validation Required', message: 'Advertisement Campaign Expiry Date is mandatory.', variant: 'warning' })
       return
     }
 
@@ -861,14 +837,32 @@ export const ExecutiveAdvertisementsPage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredAds.map(ad => {
+              {loading ? (
+                <TableRowSkeleton columns={8} rows={5} />
+              ) : filteredAds.length === 0 ? (
+                <tr>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '48px 16px' }}>
+                    <EmptyState
+                      icon="📢"
+                      title="No advertisement campaigns found"
+                      description={searchTerm || filterPlacement !== 'all' || filterStatus !== 'all' ? "Try adjusting your filters." : "No advertisement campaigns currently configured."}
+                      actionLabel="+ Add New Ad"
+                      onAction={handleOpenAdd}
+                    />
+                  </td>
+                </tr>
+              ) : filteredAds.map(ad => {
                 const days = daysLeft(ad.expiryDate)
                 const pill = expiryPill(days)
                 const stat = statusConfig(ad.status)
                 const placeCfg = getPlacementConfig(ad.placement)
 
                 return (
-                  <tr key={ad.id}>
+                  <tr 
+                    key={ad.id}
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => { setInspectedAd(ad); setDrawerTab('preview'); }}
+                  >
                     <td>
                       <div style={{
                         width: '80px',
@@ -902,38 +896,31 @@ export const ExecutiveAdvertisementsPage: React.FC = () => {
                         display: 'inline-block',
                         background: '#f8fafc',
                         border: '1px solid #e2e8f0',
-                        padding: '4px 8px',
-                        borderRadius: '6px',
-                        fontSize: '0.82rem',
+                        color: '#334155',
+                        fontSize: '0.8rem',
                         fontWeight: 600,
-                        color: '#334155'
+                        padding: '3px 8px',
+                        borderRadius: '6px'
                       }}>
-                        {placeCfg.slotName}
+                        {placeCfg.label}
                       </span>
-                      <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>
-                        {placeCfg.recommendedSize}
-                      </div>
                     </td>
 
                     <td>
-                      <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.82rem' }}>
-                        CTA: {ad.ctaText}
+                      <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.88rem' }}>
+                        {ad.ctaText}
                       </div>
                       <a
                         href={ad.targetLink}
                         target="_blank"
                         rel="noreferrer"
                         style={{
-                          fontSize: '0.76rem',
+                          fontSize: '0.78rem',
                           color: '#3b82f6',
                           display: 'inline-flex',
                           alignItems: 'center',
                           gap: '3px',
-                          textDecoration: 'none',
-                          maxWidth: '180px',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap'
+                          textDecoration: 'none'
                         }}
                       >
                         {ad.targetLink} <ExternalLink size={11} />
@@ -980,12 +967,15 @@ export const ExecutiveAdvertisementsPage: React.FC = () => {
                       </span>
                     </td>
 
-                    <td style={{ textAlign: 'right' }}>
+                    <td style={{ textAlign: 'right' }} onClick={(e) => e.stopPropagation()}>
                       <div style={{ display: 'inline-flex', gap: '6px' }}>
                         <button
                           className="action-btn"
-                          title="Preview Ad"
-                          onClick={() => setPreviewingAd(ad)}
+                          title="Inspect Ad"
+                          onClick={() => {
+                            setInspectedAd(ad)
+                            setDrawerTab('preview')
+                          }}
                         >
                           <Eye size={16} />
                         </button>
@@ -999,7 +989,7 @@ export const ExecutiveAdvertisementsPage: React.FC = () => {
                         <button
                           className="action-btn delete"
                           title="Delete"
-                          onClick={() => handleDelete(ad.id)}
+                          onClick={() => handleDelete(ad)}
                         >
                           <Trash2 size={16} />
                         </button>
@@ -1008,16 +998,6 @@ export const ExecutiveAdvertisementsPage: React.FC = () => {
                   </tr>
                 )
               })}
-
-              {filteredAds.length === 0 && (
-                <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', padding: '48px 16px', color: '#94a3b8' }}>
-                    <div style={{ fontSize: '2rem', marginBottom: '8px' }}>📢</div>
-                    <div style={{ fontWeight: 600, color: '#475569' }}>No advertisement campaigns found</div>
-                    <div style={{ fontSize: '0.85rem' }}>Try adjusting your filters or click "+ Add New Ad"</div>
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         </div>
@@ -1308,11 +1288,11 @@ export const ExecutiveAdvertisementsPage: React.FC = () => {
                         className="btn-save"
                         onClick={() => {
                           if (!formData.title?.trim()) {
-                            alert('Please enter a Campaign Title before proceeding.')
+                            setAlertInfo({ title: 'Validation Required', message: 'Please enter a Campaign Title before proceeding.', variant: 'warning' })
                             return
                           }
                           if (!formData.advertiser?.trim()) {
-                            alert('Please enter Advertiser / Brand Name before proceeding.')
+                            setAlertInfo({ title: 'Validation Required', message: 'Please enter Advertiser / Brand Name before proceeding.', variant: 'warning' })
                             return
                           }
                           setFormStep(2)
@@ -1338,78 +1318,314 @@ export const ExecutiveAdvertisementsPage: React.FC = () => {
         )}
 
         {/* ============================================================
-            PREVIEW MODAL
+            DEEP INSPECTION DRAWER
             ============================================================ */}
-        {previewingAd && (
-          <div className="crud-modal-overlay">
-            <div className="crud-modal" style={{ maxWidth: '650px', width: '90%' }}>
-              <div className="modal-header">
-                <div>
-                  <h3 className="modal-title">{previewingAd.title}</h3>
-                  <div style={{ fontSize: '0.82rem', color: '#64748b' }}>
-                    Advertiser: <strong>{previewingAd.advertiser}</strong> · {getPlacementConfig(previewingAd.placement).slotName}
+        {inspectedAd && (
+          <>
+            <div className="exec-drawer-overlay" onClick={() => setInspectedAd(null)} />
+            <div className="exec-drawer">
+              {/* HEADER */}
+              <div className="exec-drawer__header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div className="exec-drawer__avatar" style={{ background: '#e0f2fe', color: '#0284c7' }}>
+                    <Megaphone size={24} />
+                  </div>
+                  <div>
+                    <h3 className="exec-drawer__title">{inspectedAd.title}</h3>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', display: 'flex', gap: '8px', alignItems: 'center', marginTop: '4px' }}>
+                      <span>{inspectedAd.advertiser}</span>
+                      <span>•</span>
+                      <span style={{
+                        background: '#f1f5f9',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        fontSize: '0.75rem',
+                        fontWeight: 600
+                      }}>{getPlacementConfig(inspectedAd.placement).label}</span>
+                      <span style={{
+                        background: statusConfig(inspectedAd.status).bg,
+                        color: statusConfig(inspectedAd.status).color,
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        fontSize: '0.75rem',
+                        fontWeight: 600
+                      }}>{statusConfig(inspectedAd.status).label}</span>
+                    </div>
                   </div>
                 </div>
-                <button className="modal-close" onClick={() => setPreviewingAd(null)}>
+                <button className="exec-drawer__close" onClick={() => setInspectedAd(null)}>
                   <X size={20} />
                 </button>
               </div>
 
-              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569', marginBottom: '8px' }}>
-                    AD PLACEMENT PREVIEW
-                  </div>
-                  <AdSlotPreview ad={previewingAd} />
+              {/* QUICK STATS */}
+              <div className="exec-drawer__stats">
+                <div className="exec-drawer__stat-box">
+                  <div className="label">Impressions</div>
+                  <div className="value">{inspectedAd.impressions.toLocaleString()}</div>
                 </div>
-
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(3, 1fr)',
-                  gap: '12px',
-                  background: '#f8fafc',
-                  padding: '14px',
-                  borderRadius: '10px',
-                  border: '1px solid #e2e8f0'
-                }}>
-                  <div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748b' }}>EXPIRY DATE</div>
-                    <div style={{ fontWeight: 700, color: '#dc2626' }}>
-                      {previewingAd.expiryDate} ({daysLeft(previewingAd.expiryDate)}d left)
-                    </div>
+                <div className="exec-drawer__stat-box">
+                  <div className="label">Clicks</div>
+                  <div className="value">{inspectedAd.clicks.toLocaleString()}</div>
+                </div>
+                <div className="exec-drawer__stat-box">
+                  <div className="label">CTR</div>
+                  <div className="value">
+                    {inspectedAd.impressions > 0 ? (inspectedAd.clicks / inspectedAd.impressions * 100).toFixed(1) + '%' : '0%'}
                   </div>
-                  <div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748b' }}>IMPRESSIONS</div>
-                    <div style={{ fontWeight: 700, color: '#0f172a' }}>
-                      {previewingAd.impressions.toLocaleString()}
-                    </div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748b' }}>TOTAL CLICKS</div>
-                    <div style={{ fontWeight: 700, color: '#0f172a' }}>
-                      {previewingAd.clicks.toLocaleString()}
-                    </div>
+                </div>
+                <div className="exec-drawer__stat-box">
+                  <div className="label">Est. Revenue</div>
+                  <div className="value" style={{ color: '#16a34a' }}>
+                    ₹{(() => {
+                      const bid = parseFloat(inspectedAd.budgetOrRate.replace(/[^\d.]/g, '')) || 0;
+                      if (inspectedAd.pricingModel === 'CPC') return (inspectedAd.clicks * bid).toLocaleString();
+                      if (inspectedAd.pricingModel === 'CPM') return ((inspectedAd.impressions / 1000) * bid).toLocaleString();
+                      return '0';
+                    })()}
                   </div>
                 </div>
               </div>
 
-              <div className="modal-footer">
-                <button className="btn-cancel" onClick={() => setPreviewingAd(null)}>
-                  Close
+              {/* TABS */}
+              <div className="exec-drawer__tabs">
+                <button
+                  className={`exec-drawer__tab ${drawerTab === 'preview' ? 'active' : ''}`}
+                  onClick={() => setDrawerTab('preview')}
+                >
+                  Ad Preview
+                </button>
+                <button
+                  className={`exec-drawer__tab ${drawerTab === 'details' ? 'active' : ''}`}
+                  onClick={() => setDrawerTab('details')}
+                >
+                  Campaign Details
+                </button>
+                <button
+                  className={`exec-drawer__tab ${drawerTab === 'competitors' ? 'active' : ''}`}
+                  onClick={() => setDrawerTab('competitors')}
+                >
+                  Slot Competitors
+                </button>
+                <button
+                  className={`exec-drawer__tab ${drawerTab === 'performance' ? 'active' : ''}`}
+                  onClick={() => setDrawerTab('performance')}
+                >
+                  Performance
+                </button>
+              </div>
+
+              {/* BODY */}
+              <div className="exec-drawer__body">
+                {drawerTab === 'preview' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>
+                      Live Slot Render
+                    </div>
+                    <AdSlotPreview ad={inspectedAd} />
+                    
+                    <div style={{ marginTop: '16px' }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>
+                        Creative Image Original
+                      </div>
+                      <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px', background: '#f8fafc' }}>
+                        <img src={inspectedAd.imageUrl || advertisementImage} alt={inspectedAd.title} style={{ maxWidth: '100%', borderRadius: '4px' }} />
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop: '16px' }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>
+                        Destination URL
+                      </div>
+                      <a href={inspectedAd.targetLink} target="_blank" rel="noreferrer" style={{ color: '#3b82f6', textDecoration: 'none', wordBreak: 'break-all' }}>
+                        {inspectedAd.targetLink}
+                      </a>
+                    </div>
+                  </div>
+                )}
+
+                {drawerTab === 'details' && (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div className="exec-drawer__item" style={{ gridColumn: '1 / -1' }}>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>ADVERTISER</div>
+                      <div style={{ fontWeight: 600, color: '#0f172a' }}>{inspectedAd.advertiser}</div>
+                    </div>
+                    <div className="exec-drawer__item">
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>PLACEMENT SLOT</div>
+                      <div style={{ fontWeight: 600, color: '#0f172a' }}>{getPlacementConfig(inspectedAd.placement).slotName}</div>
+                    </div>
+                    <div className="exec-drawer__item">
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>PRICING MODEL</div>
+                      <div style={{ fontWeight: 600, color: '#0f172a' }}>{inspectedAd.pricingModel}</div>
+                    </div>
+                    <div className="exec-drawer__item">
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>BUDGET / RATE</div>
+                      <div style={{ fontWeight: 600, color: '#16a34a' }}>{inspectedAd.budgetOrRate}</div>
+                    </div>
+                    <div className="exec-drawer__item">
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>STATUS</div>
+                      <div style={{ fontWeight: 600, color: '#0f172a', textTransform: 'capitalize' }}>{inspectedAd.status}</div>
+                    </div>
+                    <div className="exec-drawer__item">
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>SCHEDULE (EXPIRY)</div>
+                      <div style={{ fontWeight: 600, color: '#dc2626' }}>{inspectedAd.expiryDate}</div>
+                    </div>
+                    <div className="exec-drawer__item" style={{ gridColumn: '1 / -1' }}>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>CREATED AT</div>
+                      <div style={{ fontWeight: 600, color: '#0f172a' }}>{inspectedAd.createdAt}</div>
+                    </div>
+                  </div>
+                )}
+
+                {drawerTab === 'competitors' && (
+                  <div>
+                    <div style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '16px' }}>
+                      Other active ads currently targeting the <strong>{getPlacementConfig(inspectedAd.placement).slotName}</strong> slot:
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {ads.filter(a => a.placement === inspectedAd.placement && a.id !== inspectedAd.id).length > 0 ? (
+                        ads.filter(a => a.placement === inspectedAd.placement && a.id !== inspectedAd.id).map(comp => (
+                          <div key={comp.id} className="exec-drawer__item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                              <div style={{ fontWeight: 600, color: '#0f172a' }}>{comp.title}</div>
+                              <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{comp.advertiser}</div>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#16a34a' }}>{comp.clicks} clicks</div>
+                              <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{comp.impressions} imps</div>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div style={{ textAlign: 'center', padding: '24px', background: '#f8fafc', borderRadius: '8px', color: '#64748b' }}>
+                          No competitors found for this placement slot.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {drawerTab === 'performance' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <div className="exec-drawer__item">
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>EXPIRY COUNTDOWN</div>
+                      <div style={{ fontWeight: 600, color: '#dc2626' }}>
+                        {daysLeft(inspectedAd.expiryDate)} days remaining
+                      </div>
+                    </div>
+                    <div className="exec-drawer__item">
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>IMPRESSIONS DELIVERED</div>
+                      <div style={{ fontWeight: 600, color: '#0f172a' }}>{inspectedAd.impressions.toLocaleString()} views</div>
+                    </div>
+                    <div className="exec-drawer__item">
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>CLICKS GENERATED</div>
+                      <div style={{ fontWeight: 600, color: '#0f172a' }}>{inspectedAd.clicks.toLocaleString()} clicks</div>
+                    </div>
+                    <div className="exec-drawer__item">
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>CLICK-THROUGH RATE (CTR)</div>
+                      <div style={{ fontWeight: 600, color: '#0f172a' }}>
+                        {inspectedAd.impressions > 0 ? (inspectedAd.clicks / inspectedAd.impressions * 100).toFixed(2) + '%' : '0.00%'}
+                      </div>
+                    </div>
+                    <div className="exec-drawer__item">
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>ESTIMATED REVENUE / TOTAL SPEND</div>
+                      <div style={{ fontWeight: 600, color: '#16a34a' }}>
+                        ₹{(() => {
+                          const bid = parseFloat(inspectedAd.budgetOrRate.replace(/[^\d.]/g, '')) || 0;
+                          if (inspectedAd.pricingModel === 'CPC') return (inspectedAd.clicks * bid).toLocaleString();
+                          if (inspectedAd.pricingModel === 'CPM') return ((inspectedAd.impressions / 1000) * bid).toLocaleString();
+                          return '0';
+                        })()}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* BOTTOM ACTIONS */}
+              <div className="exec-drawer__actions">
+                <button
+                  className="btn-cancel"
+                  style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                  onClick={() => {
+                    const toggledStatus = inspectedAd.status === 'active' ? 'paused' : 'active'
+                    adminApi.updateAdvertisement(inspectedAd.id, { ...inspectedAd, status: toggledStatus })
+                      .then(() => {
+                        setAds(prev => prev.map(a => a.id === inspectedAd.id ? { ...a, status: toggledStatus } : a))
+                        setInspectedAd({ ...inspectedAd, status: toggledStatus })
+                      })
+                      .catch(console.warn)
+                  }}
+                >
+                  {inspectedAd.status === 'active' ? 'Pause Campaign' : 'Activate Campaign'}
                 </button>
                 <button
                   className="btn-save"
+                  style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                   onClick={() => {
-                    const a = previewingAd
-                    setPreviewingAd(null)
+                    const a = inspectedAd
+                    setInspectedAd(null)
                     handleOpenEdit(a)
                   }}
                 >
-                  <Edit2 size={16} /> Edit Campaign
+                  <Edit2 size={16} /> Edit
                 </button>
+                <button
+                  className="btn-cancel"
+                  style={{ background: '#fee2e2', color: '#dc2626', borderColor: '#fca5a5' }}
+                  title="Delete"
+                  onClick={() => {
+                    const a = inspectedAd
+                    setInspectedAd(null)
+                    handleDelete(a)
+                  }}
+                >
+                  <Trash2 size={16} />
+                </button>
+                <a
+                  href={inspectedAd.targetLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn-save"
+                  style={{ background: '#f1f5f9', color: '#334155', border: '1px solid #cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  title="Open Destination URL"
+                >
+                  <ExternalLink size={16} />
+                </a>
               </div>
             </div>
-          </div>
+          </>
+        )}
+
+        {/* ── Custom Confirmation Dialog ── */}
+        <AdminConfirmDialog
+          isOpen={!!adToDelete}
+          title="Delete Advertisement Campaign"
+          message={
+            adToDelete ? (
+              <div>
+                Are you sure you want to permanently delete <strong>&ldquo;{adToDelete.title}&rdquo;</strong> sponsored by <strong>{adToDelete.advertiser}</strong>? This action cannot be undone.
+              </div>
+            ) : ''
+          }
+          confirmLabel="Delete Campaign"
+          cancelLabel="Keep Campaign"
+          variant="danger"
+          icon="trash"
+          onConfirm={confirmDelete}
+          onCancel={() => setAdToDelete(null)}
+        />
+
+        {/* ── Custom Alert Dialog ── */}
+        {alertInfo && (
+          <AdminAlertDialog
+            isOpen={!!alertInfo}
+            title={alertInfo.title}
+            message={alertInfo.message}
+            variant={alertInfo.variant || 'warning'}
+            buttonLabel="Understood"
+            onClose={() => setAlertInfo(null)}
+          />
         )}
       </div>
     </ExecutiveLayout>

@@ -4,8 +4,80 @@ import { CreditCardsHero } from '../components/credit-cards'
 import { FooterSection } from '../components/footer'
 import { useDesktopScale } from '../hooks/useDesktopScale'
 import { PREMIUM_CARDS, LIFETIME_FREE_CARDS, type CreditCardItem } from '../data/creditCardsData'
+import { adminApi } from '../services/adminApi'
+
+import indusindLogo from '../assets/creditcardpage/indusind_bank.png'
+import iciciLogo from '../assets/creditcardpage/ICICI_bank.png'
+import idfcLogo from '../assets/creditcardpage/IDFC_back.png'
+import tataNeuLogo from '../assets/creditcardpage/Tata_neu.svg'
+import axisLogo from '../assets/creditcardpage/Axis_Bank.png'
+import bajajLogo from '../assets/creditcardpage/Bajaj-Finsery.png'
 
 import './CreditCardsPage.css'
+
+function resolveBankLogo(bank: string, id: string, logoUrl?: string) {
+  if (logoUrl && typeof logoUrl === 'string' && (logoUrl.startsWith('data:') || logoUrl.startsWith('blob:') || logoUrl.startsWith('http') || logoUrl.startsWith('/src/'))) {
+    return logoUrl
+  }
+  const b = (bank || '').toLowerCase()
+  const i = (id || '').toLowerCase()
+  if (b.includes('indusind') || i.includes('indusind')) return indusindLogo
+  if (b.includes('icici') || i.includes('icici')) return iciciLogo
+  if (b.includes('idfc') || i.includes('idfc')) return idfcLogo
+  if (b.includes('tata') || i.includes('tata')) return tataNeuLogo
+  if (b.includes('axis') || i.includes('axis')) return axisLogo
+  if (b.includes('bajaj') || i.includes('bajaj')) return bajajLogo
+  return logoUrl || indusindLogo
+}
+
+function transformApiCardToItem(card: any, idx: number): CreditCardItem {
+  const bank = card.bank || 'Banking Partner'
+  
+  // Section determination: explicit choice first, then fallback to fee heuristic
+  const section: 'premium' | 'lifetime-free' = card.section
+    ? card.section
+    : (
+        card.annualFee === '₹0' || 
+        card.annualFee === '0' ||
+        String(card.annualFee || '').toLowerCase().includes('free') ||
+        String(card.annualFee || '').toLowerCase().includes('lifetime') ||
+        String(card.feeWaiver || '').toLowerCase().includes('lifetime')
+      )
+      ? 'lifetime-free'
+      : 'premium'
+
+  // Theme determination: explicit choice first, then appropriate section defaults
+  let cardTheme: 'white-blue' | 'white-red' | 'navy-card' | 'red-card' = card.cardTheme
+  if (!cardTheme) {
+    if (section === 'lifetime-free') {
+      cardTheme = idx % 2 === 0 ? 'red-card' : 'navy-card'
+    } else {
+      cardTheme = idx % 2 === 0 ? 'white-blue' : 'white-red'
+    }
+  }
+
+  const suitedFor = Array.isArray(card.partnerBrands) && card.partnerBrands.length > 0 
+    ? card.partnerBrands 
+    : (Array.isArray(card.keyBenefits) && card.keyBenefits.length > 0 
+      ? card.keyBenefits.slice(0, 3) 
+      : (Array.isArray(card.suitedFor) && card.suitedFor.length > 0 ? card.suitedFor : ['Shopping', 'Travel', 'Dining']))
+
+  return {
+    id: String(card._id || card.id || `card-${idx}`),
+    name: card.cardName || card.name || 'Credit Card',
+    logo: resolveBankLogo(bank, String(card._id || card.id || ''), card.bankLogoUrl || card.logo),
+    section,
+    cardTheme,
+    tagText: card.tagText || bank,
+    keyBenefitLabel: card.keyBenefitLabel || 'TOP BENEFIT',
+    keyBenefitValue: card.welcomeOffer || card.keyBenefitValue || 'Upto 5% Cashback',
+    rewardsLabel: card.rewardsLabel || 'REWARDS',
+    rewardsValue: card.rewardRate || card.rewardsValue || (section === 'lifetime-free' ? 'Lifetime Free Offers' : 'Exclusive Rewards'),
+    suitedFor,
+    userCount: card.userCount || (card.applyCount ? `+${(card.applyCount / 1000).toFixed(1)}k` : '+2.4k'),
+    applyHref: card.affiliateLink || card.applyHref || '#'
+  }
+}
 
 /* ── Single Credit Card Tile Component matching media_1789038793890.png ── */
 const CreditCardTile: React.FC<{ card: CreditCardItem }> = ({ card }) => {
@@ -79,30 +151,60 @@ export const CreditCardsPage: React.FC = () => {
   const [canvasHeight, setCanvasHeight] = useState<number>(0)
   const canvasRef = useRef<HTMLDivElement | null>(null)
 
+  const [liveCards, setLiveCards] = useState<CreditCardItem[]>(() => {
+    return [...PREMIUM_CARDS, ...LIFETIME_FREE_CARDS]
+  })
+
+  const fetchLive = async () => {
+    try {
+      const res = await adminApi.getCreditCards()
+      if (Array.isArray(res) && res.length > 0) {
+        const mapped = res.map(transformApiCardToItem)
+        setLiveCards(mapped)
+      }
+    } catch (err) {
+      console.warn('Failed to fetch public credit cards:', err)
+    }
+  }
+
+  useEffect(() => {
+    fetchLive()
+    const handleSync = () => fetchLive()
+    window.addEventListener('wouchify_credit_cards_updated', handleSync)
+    window.addEventListener('storage', handleSync)
+    return () => {
+      window.removeEventListener('wouchify_credit_cards_updated', handleSync)
+      window.removeEventListener('storage', handleSync)
+    }
+  }, [])
+
+  const premiumCards = useMemo(() => liveCards.filter(c => c.section === 'premium'), [liveCards])
+  const lifetimeFreeCards = useMemo(() => liveCards.filter(c => c.section === 'lifetime-free'), [liveCards])
+
   // Filter cards by search
   const filteredPremium = useMemo(() => {
-    if (!searchQuery.trim()) return PREMIUM_CARDS
+    if (!searchQuery.trim()) return premiumCards
     const q = searchQuery.toLowerCase()
-    return PREMIUM_CARDS.filter(
+    return premiumCards.filter(
       (c) =>
         c.name.toLowerCase().includes(q) ||
         c.keyBenefitValue.toLowerCase().includes(q) ||
         c.rewardsValue.toLowerCase().includes(q) ||
         c.suitedFor.some((s) => s.toLowerCase().includes(q))
     )
-  }, [searchQuery])
+  }, [searchQuery, premiumCards])
 
   const filteredLifetimeFree = useMemo(() => {
-    if (!searchQuery.trim()) return LIFETIME_FREE_CARDS
+    if (!searchQuery.trim()) return lifetimeFreeCards
     const q = searchQuery.toLowerCase()
-    return LIFETIME_FREE_CARDS.filter(
+    return lifetimeFreeCards.filter(
       (c) =>
         c.name.toLowerCase().includes(q) ||
         c.keyBenefitValue.toLowerCase().includes(q) ||
         c.rewardsValue.toLowerCase().includes(q) ||
         c.suitedFor.some((s) => s.toLowerCase().includes(q))
     )
-  }, [searchQuery])
+  }, [searchQuery, lifetimeFreeCards])
 
   // Dynamic layout height observer
   useEffect(() => {

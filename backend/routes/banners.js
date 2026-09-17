@@ -4,20 +4,30 @@ const mongoose = require('mongoose');
 const Banner = require('../models/Banner');
 const auth = require('../middleware/authMiddleware');
 const store = require('../services/inMemoryStore');
+const { handleEntityCreate, handleEntityUpdate, handleEntityDelete } = require('../middleware/approvalHelper');
 
 // GET /api/banners - Public read access
 router.get('/', async (req, res, next) => {
   try {
+    const { targetPage, status, submissionStatus, all } = req.query;
     if (mongoose.connection.readyState !== 1) {
-      return res.json(store.getBanners(req.query));
+      let memoryBanners = store.getBanners(req.query);
+      if (all !== 'true') {
+        memoryBanners = memoryBanners.filter(b => b.submissionStatus !== 'pending_approval' && (b.status || 'active') === 'active');
+      }
+      return res.json(memoryBanners);
     }
 
-    const { targetPage, status, submissionStatus } = req.query;
     let query = {};
-
     if (targetPage && targetPage !== 'All') query.targetPage = targetPage;
-    if (status && status !== 'All') query.status = status;
-    if (submissionStatus && submissionStatus !== 'All') query.submissionStatus = submissionStatus;
+
+    if (all === 'true') {
+      if (status && status !== 'All') query.status = status;
+      if (submissionStatus && submissionStatus !== 'All') query.submissionStatus = submissionStatus;
+    } else {
+      query.submissionStatus = submissionStatus || 'approved';
+      query.status = status || 'active';
+    }
 
     const banners = await Banner.find(query).sort({ priority: 1, createdAt: -1 });
     res.json(banners);
@@ -38,33 +48,71 @@ router.get('/:id', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// POST /api/banners/:id/click - Public click tracking
+router.post('/:id/click', async (req, res, next) => {
+  try {
+    const target = req.params.id;
+    const memoryBanner = store.incrementBannerClicks(target);
+    if (mongoose.connection.readyState !== 1) {
+      if (!memoryBanner) return res.status(404).json({ message: 'Banner not found' });
+      return res.json({ success: true, clicks: memoryBanner.clicks });
+    }
+
+    const query = mongoose.Types.ObjectId.isValid(target)
+      ? { _id: target }
+      : { $or: [{ id: target }, { title: new RegExp(`^${target}$`, 'i') }] };
+
+    const banner = await Banner.findOneAndUpdate(
+      query,
+      { $inc: { clicks: 1 } },
+      { new: true }
+    );
+    if (!banner) {
+      if (memoryBanner) return res.json({ success: true, clicks: memoryBanner.clicks });
+      return res.status(404).json({ message: 'Banner not found' });
+    }
+    res.json({ success: true, clicks: banner.clicks });
+  } catch (err) { next(err); }
+});
+
 // Protected administrative mutation routes
 router.use(auth);
 
 // POST /api/banners - Create
 router.post('/', async (req, res, next) => {
   try {
-    if (mongoose.connection.readyState !== 1) {
-      const created = store.addBanner(req.body);
-      return res.status(201).json(created);
-    }
-    const banner = new Banner(req.body);
-    await banner.save();
-    res.status(201).json(banner);
+    const result = await handleEntityCreate({
+      entityType: 'banner',
+      title: req.body.title || 'New Banner',
+      store: req.body.targetPage || 'home',
+      category: 'Marketing',
+      priority: req.body.priority || 'Normal',
+      data: req.body,
+      user: req.user,
+      Model: Banner,
+      storeAddMethod: store.addBanner
+    });
+    res.status(201).json(result.entity || result);
   } catch (err) { next(err); }
 });
 
 // PUT /api/banners/:id - Update
 router.put('/:id', async (req, res, next) => {
   try {
-    if (mongoose.connection.readyState !== 1) {
-      const updated = store.updateBanner(req.params.id, req.body);
-      if (!updated) return res.status(404).json({ message: 'Banner not found' });
-      return res.json(updated);
-    }
-    const updated = await Banner.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-    if (!updated) return res.status(404).json({ message: 'Banner not found' });
-    res.json(updated);
+    const result = await handleEntityUpdate({
+      id: req.params.id,
+      entityType: 'banner',
+      title: req.body.title,
+      store: req.body.targetPage,
+      category: 'Marketing',
+      priority: req.body.priority || 'Normal',
+      updates: req.body,
+      user: req.user,
+      Model: Banner,
+      storeUpdateMethod: store.updateBanner,
+      storeGetMethod: store.getBannerById
+    });
+    res.json(result.entity || result);
   } catch (err) { next(err); }
 });
 
@@ -89,14 +137,17 @@ router.patch('/:id/status', async (req, res, next) => {
 // DELETE /api/banners/:id - Delete
 router.delete('/:id', async (req, res, next) => {
   try {
-    if (mongoose.connection.readyState !== 1) {
-      const ok = store.deleteBanner(req.params.id);
-      if (!ok) return res.status(404).json({ message: 'Banner not found' });
-      return res.json({ message: 'Banner deleted' });
-    }
-    const deleted = await Banner.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ message: 'Banner not found' });
-    res.json({ message: 'Banner deleted' });
+    const result = await handleEntityDelete({
+      id: req.params.id,
+      entityType: 'banner',
+      title: req.body?.title,
+      store: req.body?.targetPage,
+      user: req.user,
+      Model: Banner,
+      storeDeleteMethod: store.deleteBanner,
+      storeGetMethod: store.getBannerById
+    });
+    res.json(result);
   } catch (err) { next(err); }
 });
 

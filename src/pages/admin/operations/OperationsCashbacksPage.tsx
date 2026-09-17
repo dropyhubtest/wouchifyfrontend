@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import './OperationsShared.css'
 import { getStoreLogo } from '../../../data/dealsPage'
+import { AdminPromptDialog } from '../../../components/common/AdminDialog'
 
 export interface CashbackClaim {
   id: string
@@ -133,6 +134,7 @@ export const OperationsCashbacksPage: React.FC = () => {
   const [modalStep, setModalStep] = useState<1 | 2>(1)
   const [editedCashback, setEditedCashback] = useState<number>(0)
   const [verificationNote, setVerificationNote] = useState('')
+  const [rejectingClaimId, setRejectingClaimId] = useState<string | null>(null)
 
   const showToast = (msg: string) => {
     setToastMessage(msg)
@@ -212,13 +214,17 @@ export const OperationsCashbacksPage: React.FC = () => {
   }
 
   const handleRejectClaim = (id: string) => {
-    const reason = prompt('Please enter rejection reason (e.g. Order returned or cancelled):', 'Order returned on merchant store')
-    if (reason) {
-      adminApi.updateCashbackClaimStatus(id, 'Rejected', reason).catch(console.warn)
-      setClaims(prev => prev.map(c => c.id === id ? { ...c, status: 'Rejected', notes: reason } : c))
-      showToast(`Rejected cashback claim #${id}`)
-      setReviewClaim(null)
-    }
+    setRejectingClaimId(id)
+  }
+
+  const handleConfirmRejectClaim = (reason: string) => {
+    if (!rejectingClaimId) return
+    const id = rejectingClaimId
+    adminApi.updateCashbackClaimStatus(id, 'Rejected', reason).catch(console.warn)
+    setClaims(prev => prev.map(c => c.id === id ? { ...c, status: 'Rejected', notes: reason } : c))
+    showToast(`Rejected cashback claim #${id}`)
+    setReviewClaim(null)
+    setRejectingClaimId(null)
   }
 
   const handleExportBankBatchCSV = () => {
@@ -636,6 +642,21 @@ export const OperationsCashbacksPage: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* ── CUSTOM REJECT CLAIM PROMPT DIALOG ── */}
+        <AdminPromptDialog
+          isOpen={!!rejectingClaimId}
+          title="Reject Cashback Claim"
+          message={`Please specify the reason for rejecting claim #${rejectingClaimId}:`}
+          label="Rejection Reason"
+          placeholder="e.g. Order returned, cancelled, or duplicate claim..."
+          defaultValue="Order returned on merchant store"
+          confirmLabel="Reject Claim"
+          variant="danger"
+          required={true}
+          onConfirm={handleConfirmRejectClaim}
+          onCancel={() => setRejectingClaimId(null)}
+        />
 
       </div>
     </OperationsLayout>

@@ -26,9 +26,22 @@ const creditCardSchema = new mongoose.Schema({
   offerStartDate: { type: String, default: '' },
   offerExpiryDate: { type: String, default: '' },
   lastUpdated: { type: String, default: '' },
+  section: {
+    type: String,
+    enum: ['premium', 'lifetime-free'],
+    default: 'premium'
+  },
+  cardTheme: {
+    type: String,
+    enum: ['white-blue', 'white-red', 'red-card', 'navy-card'],
+    default: 'white-blue'
+  },
+  tagText: { type: String, default: '' },
+  keyBenefitLabel: { type: String, default: 'TOP BENEFIT' },
+  rewardsLabel: { type: String, default: 'REWARDS' },
   status: { 
     type: String, 
-    enum: ['active', 'inactive', 'featured', 'discontinued'], 
+    enum: ['active', 'inactive', 'featured', 'discontinued', 'pending'], 
     default: 'active' 
   },
   isFeatured: { type: Boolean, default: false },

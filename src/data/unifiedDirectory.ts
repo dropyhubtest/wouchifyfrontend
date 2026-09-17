@@ -44,12 +44,13 @@ export function buildUnifiedDirectory(): UnifiedDirectoryItem[] {
 
   // 1. Stores (61 items)
   STORES_DIRECTORY_DATA.forEach((s) => {
+    const isAmazon = s.slug === 'amazon' || s.name.toLowerCase() === 'amazon'
     allItems.push({
       id: `store-${s.id}`,
       name: s.name,
       slug: s.slug,
       logo: s.logo,
-      href: s.destinationHref || `/stores#${s.slug}`,
+      href: isAmazon ? '/brands/amazon' : (s.destinationHref || `/stores#${s.slug}`),
       letter: (s.letter || s.name.charAt(0)).toUpperCase(),
       type: 'stores',
     })
@@ -57,12 +58,13 @@ export function buildUnifiedDirectory(): UnifiedDirectoryItem[] {
 
   // 2. Brands (88 items)
   BRANDS_DIRECTORY_DATA.forEach((b) => {
+    const isAmazon = b.slug === 'amazon' || b.name.toLowerCase() === 'amazon'
     allItems.push({
       id: `brand-${b.id}`,
       name: b.name,
       slug: b.slug,
       logo: b.logo,
-      href: b.destinationHref || `/categories/brands#${b.slug}`,
+      href: isAmazon ? '/brands/amazon' : (b.destinationHref || `/categories/brands#${b.slug}`),
       letter: (b.letter || b.name.charAt(0)).toUpperCase(),
       type: 'brands',
     })

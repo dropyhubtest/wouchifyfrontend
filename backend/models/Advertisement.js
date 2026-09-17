@@ -16,7 +16,7 @@ const advertisementSchema = new mongoose.Schema({
   budgetOrRate: { type: String, default: '' },
   status: { 
     type: String, 
-    enum: ['active', 'inactive', 'paused', 'scheduled'], 
+    enum: ['active', 'inactive', 'paused', 'scheduled', 'pending'], 
     default: 'active' 
   },
   expiryDate: { type: String, default: '' },

@@ -27,7 +27,8 @@ const couponSchema = new mongoose.Schema({
   expiry: { type: String, default: '' },
   usageCount: { type: Number, default: 0 },
   usageLimit: { type: Number, default: 5000 },
-  totalUses: { type: Number, default: 5000 }
+  totalUses: { type: Number, default: 5000 },
+  clicks: { type: Number, default: 0 }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Coupon', couponSchema);

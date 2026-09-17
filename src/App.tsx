@@ -275,11 +275,16 @@ function resolveCurrentPath(): string {
     return '/credit-cards'
   }
 
-  // Brand pages (/brands/:slug or /amazon or /stores/amazon)
-  if (pathname === '/amazon' || page === 'amazon') {
-    return '/brands/amazon'
-  }
-  if (pathname === '/stores/amazon' || (page === 'stores' && searchParams.get('store') === 'amazon')) {
+  // Brand pages (/brands/:slug or /amazon or /stores/amazon or /categories/amazon)
+  if (
+    pathname === '/amazon' ||
+    page === 'amazon' ||
+    pathname === '/categories/amazon' ||
+    pathname === '/stores/amazon' ||
+    pathname === '/directory/amazon' ||
+    (page === 'stores' && searchParams.get('store') === 'amazon') ||
+    (page === 'categories' && searchParams.get('category') === 'amazon')
+  ) {
     return '/brands/amazon'
   }
   if (pathname.startsWith('/brands/')) {

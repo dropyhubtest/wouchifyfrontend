@@ -31,7 +31,6 @@ export const MobileSignUpPage: React.FC = () => {
       if (data.token) {
         localStorage.setItem('token', data.token)
       }
-      alert(`Account created for ${data.email}! Please login.`)
       window.location.href = '/login'
     } catch (err: any) {
       setError(err.response?.data?.message || 'Something went wrong')

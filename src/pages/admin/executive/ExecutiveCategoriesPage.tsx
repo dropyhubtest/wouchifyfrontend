@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { ExecutiveLayout } from './ExecutiveLayout'
 import { adminApi } from '../../../services/adminApi'
-import { CATEGORIES_DATA, type Category, type Subcategory } from '../../../data/categories'
+import { SUBCATEGORIES_DATA } from '../../../data/subcategoriesData'
+import { STORES_DIRECTORY_DATA, TRENDING_STORES } from '../../../data/storesDirectoryData'
+import { BRANDS_DIRECTORY_DATA, TRENDING_BRANDS } from '../../../data/brandsDirectoryData'
+import { BANKS_DIRECTORY_DATA, TRENDING_BANKS } from '../../../data/banksDirectoryData'
+import { FESTIVALS_DIRECTORY_DATA, TRENDING_FESTIVALS } from '../../../data/festivalsDirectoryData'
+import { TRAVELLING_DIRECTORY_DATA, TRENDING_TRAVELLING } from '../../../data/travellingDirectoryData'
+import { CITIES_DEALS_DIRECTORY_DATA, TRENDING_CITIES } from '../../../data/citiesDealsDirectoryData'
 import {
   Plus,
   Search,
@@ -15,24 +21,74 @@ import {
   Sparkles,
   LayoutGrid,
   Table as TableIcon,
-  Palette,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  Eye,
+  Store,
+  Zap,
+  Flame,
+  Ticket,
+  Plane,
+  MapPin,
+  Calendar,
+  CreditCard,
+  RefreshCw,
+  Copy,
+  Check
 } from 'lucide-react'
 import './ExecutiveShared.css'
 import './ExecutiveCategoriesPage.css'
 
+export type DirectoryPillar =
+  | 'all'
+  | 'subcategories'
+  | 'stores'
+  | 'brands'
+  | 'banks'
+  | 'festivals'
+  | 'travelling'
+  | 'cities-deals'
+
+export interface TaxonomyItem {
+  id: string
+  name: string
+  slug: string
+  letter: string
+  pillar: DirectoryPillar
+  pillarLabel: string
+  pillarColor: string
+  logo?: string
+  image?: string
+  href: string
+  description?: string
+  status: 'active' | 'inactive' | 'featured'
+  parentCategory?: string
+  isTrending?: boolean
+}
+
 export const ExecutiveCategoriesPage: React.FC = () => {
-  const [categories, setCategories] = useState<Category[]>([])
+  const [activePillar, setActivePillar] = useState<DirectoryPillar>('all')
+  const [dbCategories, setDbCategories] = useState<any[]>([])
+  const [rawDeals, setRawDeals] = useState<any[]>([])
+  const [rawLoots, setRawLoots] = useState<any[]>([])
+  const [rawCoupons, setRawCoupons] = useState<any[]>([])
+  const [rawStores, setRawStores] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const [letterFilter, setLetterFilter] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table')
+
+  // Deep Inspection Drawer State
+  const [inspectedItem, setInspectedItem] = useState<TaxonomyItem | null>(null)
+  const [drawerTab, setDrawerTab] = useState<'all' | 'deals' | 'loot' | 'coupons' | 'stores'>('all')
+  const [drawerSearch, setDrawerSearch] = useState('')
+  const [copiedCode, setCopiedCode] = useState<string | null>(null)
 
   // Modals state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
+  const [selectedItem, setSelectedItem] = useState<TaxonomyItem | null>(null)
 
   // Notification / Toast
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
@@ -41,686 +97,1271 @@ export const ExecutiveCategoriesPage: React.FC = () => {
   const [formData, setFormData] = useState<{
     name: string
     slug: string
+    pillar: DirectoryPillar
     description: string
-    color: string
-    bgColor: string
-    textColor: string
-    count: number
-    subcategories: { id: string; name: string; slug: string; itemCount?: number }[]
+    status: 'active' | 'inactive' | 'featured'
+    logo: string
+    href: string
   }>({
     name: '',
     slug: '',
+    pillar: 'subcategories',
     description: '',
-    color: '#FF6B6B',
-    bgColor: '#FFE3E3',
-    textColor: '#D92626',
-    count: 0,
-    subcategories: []
+    status: 'active',
+    logo: '',
+    href: ''
   })
-
-  // Subcategory input inside form
-  const [newSubcatName, setNewSubcatName] = useState('')
 
   const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
     setNotification({ message, type })
     setTimeout(() => setNotification(null), 3500)
   }
 
-  const loadCategories = async () => {
+  const loadAllData = async () => {
     setLoading(true)
     try {
-      const data = await adminApi.getCategories()
-      if (Array.isArray(data) && data.length > 0) {
-        setCategories(data)
-      } else {
-        setCategories(CATEGORIES_DATA)
-      }
+      const [catsRes, dealsRes, lootsRes, couponsRes, storesRes] = await Promise.all([
+        adminApi.getCategories().catch(() => []),
+        adminApi.getDeals().catch(() => []),
+        adminApi.getLootDeals().catch(() => []),
+        adminApi.getCoupons().catch(() => []),
+        adminApi.getStores().catch(() => [])
+      ])
+
+      setDbCategories(Array.isArray(catsRes) ? catsRes : [])
+      setRawDeals(Array.isArray(dealsRes) ? dealsRes : [])
+      setRawLoots(Array.isArray(lootsRes) ? lootsRes : [])
+      setRawCoupons(Array.isArray(couponsRes) ? couponsRes : [])
+      setRawStores(Array.isArray(storesRes) ? storesRes : [])
     } catch (err) {
-      console.warn('Failed to load categories:', err)
-      setCategories(CATEGORIES_DATA)
+      console.warn('Failed to load categories inventory:', err)
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    loadCategories()
+    loadAllData()
 
     const handleUpdate = () => {
-      loadCategories()
+      loadAllData()
     }
     window.addEventListener('wouchify_categories_updated', handleUpdate)
-    return () => window.removeEventListener('wouchify_categories_updated', handleUpdate)
+    window.addEventListener('wouchify_deals_updated', handleUpdate)
+    window.addEventListener('wouchify_loot_deals_updated', handleUpdate)
+    window.addEventListener('wouchify_coupons_updated', handleUpdate)
+    window.addEventListener('wouchify_stores_updated', handleUpdate)
+    return () => {
+      window.removeEventListener('wouchify_categories_updated', handleUpdate)
+      window.removeEventListener('wouchify_deals_updated', handleUpdate)
+      window.removeEventListener('wouchify_loot_deals_updated', handleUpdate)
+      window.removeEventListener('wouchify_coupons_updated', handleUpdate)
+      window.removeEventListener('wouchify_stores_updated', handleUpdate)
+    }
   }, [])
 
-  // Auto-generate slug from name
-  const handleNameChange = (name: string) => {
-    const slug = name
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-    setFormData((prev) => ({ ...prev, name, slug: prev.slug && !selectedCategory ? slug : prev.slug || slug }))
-  }
+  // Build the complete 7-pillar taxonomy catalog
+  const allTaxonomyItems = useMemo<TaxonomyItem[]>(() => {
+    const list: TaxonomyItem[] = []
 
-  // Subcategory management
-  const handleAddSubcategory = () => {
-    if (!newSubcatName.trim()) return
-    const subcatSlug = newSubcatName
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-    const newSubcat: Subcategory = {
-      id: `sub-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-      name: newSubcatName.trim(),
-      slug: subcatSlug,
-      itemCount: 0
+    // 1. Subcategories (114+ catalog subcategories & parent categories)
+    SUBCATEGORIES_DATA.forEach((s) => {
+      list.push({
+        id: `subcat-${s.id}`,
+        name: s.name,
+        slug: s.slug,
+        letter: (s.letter || s.name.charAt(0)).toUpperCase(),
+        pillar: 'subcategories',
+        pillarLabel: 'Catalog Subcategory',
+        pillarColor: '#4DABF7',
+        logo: s.image,
+        href: `/categories/${s.slug}`,
+        description: `Explore trending ${s.name} discounts, verified promo codes, and merchant cashbacks.`,
+        status: s.active ? 'active' : 'inactive',
+        isTrending: s.sortOrder <= 6
+      })
+    })
+
+    // Include DB dynamic categories if any
+    dbCategories.forEach((c) => {
+      if (!list.some((it) => it.slug.toLowerCase() === (c.slug || '').toLowerCase())) {
+        list.push({
+          id: `dbcat-${c.id || c._id || c.slug}`,
+          name: c.name,
+          slug: c.slug,
+          letter: (c.name?.charAt(0) || 'A').toUpperCase(),
+          pillar: 'subcategories',
+          pillarLabel: 'Custom Category',
+          pillarColor: c.color || '#2F368C',
+          href: `/categories/${c.slug}`,
+          description: c.description || `Catalog category: ${c.name}`,
+          status: (c.status || 'active').toLowerCase() as any
+        })
+      }
+    })
+
+    // 2. Stores Directory (61 stores)
+    STORES_DIRECTORY_DATA.forEach((s) => {
+      const isAmazon = s.slug === 'amazon' || s.name.toLowerCase() === 'amazon'
+      list.push({
+        id: `store-${s.id}`,
+        name: s.name,
+        slug: s.slug,
+        letter: (s.letter || s.name.charAt(0)).toUpperCase(),
+        pillar: 'stores',
+        pillarLabel: 'Store Directory',
+        pillarColor: '#FF6B6B',
+        logo: s.logo,
+        href: isAmazon ? '/brands/amazon' : (s.destinationHref || `/stores#${s.slug}`),
+        description: `Official store offers, cashback rates, and coupons for ${s.name}.`,
+        status: s.active ? 'active' : 'inactive',
+        isTrending: TRENDING_STORES.some((t) => t.slug === s.slug)
+      })
+    })
+
+    // 3. Brands Directory (88 brands)
+    BRANDS_DIRECTORY_DATA.forEach((b) => {
+      const isAmazon = b.slug === 'amazon' || b.name.toLowerCase() === 'amazon'
+      list.push({
+        id: `brand-${b.id}`,
+        name: b.name,
+        slug: b.slug,
+        letter: (b.letter || b.name.charAt(0)).toUpperCase(),
+        pillar: 'brands',
+        pillarLabel: 'Brand Partner',
+        pillarColor: '#9C36B5',
+        logo: b.logo,
+        href: isAmazon ? '/brands/amazon' : (b.destinationHref || `/categories/brands#${b.slug}`),
+        description: `Top brand collection, seasonal discounts, and deals for ${b.name}.`,
+        status: b.active ? 'active' : 'inactive',
+        isTrending: TRENDING_BRANDS.some((t) => t.slug === b.slug)
+      })
+    })
+
+    // 4. Banks & Payment Cards (28 banks)
+    BANKS_DIRECTORY_DATA.forEach((bk) => {
+      list.push({
+        id: `bank-${bk.id}`,
+        name: bk.name,
+        slug: bk.slug,
+        letter: (bk.letter || bk.name.charAt(0)).toUpperCase(),
+        pillar: 'banks',
+        pillarLabel: 'Bank & Cards',
+        pillarColor: '#F59E0B',
+        logo: bk.logo,
+        href: bk.destinationHref || `/categories/banks#${bk.slug}`,
+        description: `Credit card cashback rewards, EMI offers, and instant discounts with ${bk.name}.`,
+        status: bk.active ? 'active' : 'inactive',
+        isTrending: TRENDING_BANKS.some((t) => t.slug === bk.slug)
+      })
+    })
+
+    // 5. Festivals & Seasonal Campaigns (29 festivals)
+    FESTIVALS_DIRECTORY_DATA.forEach((f) => {
+      list.push({
+        id: `fest-${f.id}`,
+        name: f.name,
+        slug: f.slug,
+        letter: (f.letter || f.name.charAt(0)).toUpperCase(),
+        pillar: 'festivals',
+        pillarLabel: 'Festival Campaign',
+        pillarColor: '#EC4899',
+        logo: f.image,
+        href: f.destinationHref || `/categories/festivals#${f.slug}`,
+        description: `Special festive sale deals, limited-time flash offers, and gift promos for ${f.name}.`,
+        status: f.active ? 'active' : 'inactive',
+        isTrending: TRENDING_FESTIVALS.some((t) => t.slug === f.slug)
+      })
+    })
+
+    // 6. Travelling & Flights (43 travel items)
+    TRAVELLING_DIRECTORY_DATA.forEach((t) => {
+      list.push({
+        id: `travel-${t.id}`,
+        name: t.name,
+        slug: t.slug,
+        letter: (t.letter || t.name.charAt(0)).toUpperCase(),
+        pillar: 'travelling',
+        pillarLabel: 'Travel & Flights',
+        pillarColor: '#06B6D4',
+        logo: t.logo,
+        href: t.destinationHref || `/categories/travelling#${t.slug}`,
+        description: `Flight bookings, hotel stays, holidays, and commute promo codes for ${t.name}.`,
+        status: t.active ? 'active' : 'inactive',
+        isTrending: TRENDING_TRAVELLING.some((tr) => tr.slug === t.slug)
+      })
+    })
+
+    // 7. Cities Deals (7 top metro cities)
+    CITIES_DEALS_DIRECTORY_DATA.forEach((c) => {
+      list.push({
+        id: `city-${c.id}`,
+        name: c.name,
+        slug: c.slug,
+        letter: (c.letter || c.name.charAt(0)).toUpperCase(),
+        pillar: 'cities-deals',
+        pillarLabel: 'City Deals Hub',
+        pillarColor: '#10B981',
+        logo: c.image,
+        href: c.destinationHref || `/categories/cities-deals#${c.slug}`,
+        description: `Local city dining discounts, supermarket vouchers, and events in ${c.name}.`,
+        status: c.active ? 'active' : 'inactive',
+        isTrending: TRENDING_CITIES.some((tc) => tc.slug === c.slug)
+      })
+    })
+
+    return list
+  }, [dbCategories])
+
+  // Cross-referencing matching function for any item
+  const getItemMetrics = (item: TaxonomyItem) => {
+    const itemName = item.name.toLowerCase()
+    const itemSlug = item.slug.toLowerCase()
+
+    const isMatch = (cat?: string, subCat?: string, store?: string, title?: string) => {
+      const c = (cat || '').toLowerCase()
+      const sc = (subCat || '').toLowerCase()
+      const st = (store || '').toLowerCase()
+      const t = (title || '').toLowerCase()
+
+      if (!c && !sc && !st && !t) return false
+
+      if (c === itemSlug || c === itemName || c.includes(itemSlug) || (itemSlug && itemSlug.includes(c))) return true
+      if (sc === itemSlug || sc === itemName || sc.includes(itemSlug) || (itemSlug && itemSlug.includes(sc))) return true
+      if (st === itemSlug || st === itemName || st.includes(itemSlug) || (itemSlug && itemSlug.includes(st))) return true
+      if (t.includes(itemName) || (itemSlug.length > 3 && t.includes(itemSlug))) return true
+      return false
     }
-    setFormData((prev) => ({
-      ...prev,
-      subcategories: [...prev.subcategories, newSubcat]
-    }))
-    setNewSubcatName('')
+
+    const deals = rawDeals.filter((d) => isMatch(d.category, d.subCategory, d.store, d.name || d.title))
+    const loots = rawLoots.filter((l) => isMatch(l.category, l.subCategory, l.storeName || l.store, l.title))
+    const coupons = rawCoupons.filter((c) => isMatch(c.category, c.subCategory, c.store, c.code || c.description))
+    const stores = rawStores.filter((s) => isMatch(s.category, undefined, s.name, s.name))
+
+    return {
+      deals,
+      loots,
+      coupons,
+      stores,
+      totalCount: deals.length + loots.length + coupons.length + stores.length
+    }
   }
 
-  const handleRemoveSubcategory = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      subcategories: prev.subcategories.filter((_, i) => i !== index)
-    }))
-  }
+  // Filter items by active pillar, search, and letter
+  const filteredItems = useMemo(() => {
+    return allTaxonomyItems.filter((item) => {
+      // Pillar filter
+      if (activePillar !== 'all' && item.pillar !== activePillar) {
+        return false
+      }
 
+      // Letter filter
+      if (letterFilter && item.letter !== letterFilter) {
+        return false
+      }
+
+      // Search query
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim()
+        const matchesName = item.name.toLowerCase().includes(q)
+        const matchesSlug = item.slug.toLowerCase().includes(q)
+        const matchesPillar = item.pillarLabel.toLowerCase().includes(q)
+        return matchesName || matchesSlug || matchesPillar
+      }
+
+      return true
+    })
+  }, [allTaxonomyItems, activePillar, letterFilter, searchQuery])
+
+  // Aggregate overview stats
+  const stats = useMemo(() => {
+    return {
+      totalEntities: allTaxonomyItems.length,
+      subcategoriesCount: allTaxonomyItems.filter((i) => i.pillar === 'subcategories').length,
+      storesCount: allTaxonomyItems.filter((i) => i.pillar === 'stores').length,
+      brandsCount: allTaxonomyItems.filter((i) => i.pillar === 'brands').length,
+      banksCount: allTaxonomyItems.filter((i) => i.pillar === 'banks').length,
+      festivalsCount: allTaxonomyItems.filter((i) => i.pillar === 'festivals').length,
+      travellingCount: allTaxonomyItems.filter((i) => i.pillar === 'travelling').length,
+      citiesCount: allTaxonomyItems.filter((i) => i.pillar === 'cities-deals').length,
+      liveDealsCount: rawDeals.length,
+      liveLootCount: rawLoots.length,
+      liveCouponsCount: rawCoupons.length,
+      liveStoresCount: rawStores.length
+    }
+  }, [allTaxonomyItems, rawDeals.length, rawLoots.length, rawCoupons.length, rawStores.length])
+
+  // Inspected Item Linked Data
+  const inspectedData = useMemo(() => {
+    if (!inspectedItem) return null
+    const metrics = getItemMetrics(inspectedItem)
+
+    let filteredDeals = metrics.deals
+    let filteredLoots = metrics.loots
+    let filteredCoupons = metrics.coupons
+    let filteredStores = metrics.stores
+
+    if (drawerSearch.trim()) {
+      const q = drawerSearch.toLowerCase().trim()
+      filteredDeals = filteredDeals.filter((d) => (d.name || d.title || '').toLowerCase().includes(q) || (d.store || '').toLowerCase().includes(q))
+      filteredLoots = filteredLoots.filter((l) => (l.title || '').toLowerCase().includes(q) || (l.storeName || '').toLowerCase().includes(q))
+      filteredCoupons = filteredCoupons.filter((c) => (c.code || '').toLowerCase().includes(q) || (c.store || '').toLowerCase().includes(q))
+      filteredStores = filteredStores.filter((s) => (s.name || '').toLowerCase().includes(q))
+    }
+
+    return {
+      deals: filteredDeals,
+      loots: filteredLoots,
+      coupons: filteredCoupons,
+      stores: filteredStores,
+      totalCount: metrics.totalCount
+    }
+  }, [inspectedItem, rawDeals, rawLoots, rawCoupons, rawStores, drawerSearch])
+
+  // Form Handlers
   const handleOpenCreateModal = () => {
     setFormData({
       name: '',
       slug: '',
+      pillar: activePillar === 'all' ? 'subcategories' : activePillar,
       description: '',
-      color: '#FF6B6B',
-      bgColor: '#FFE3E3',
-      textColor: '#D92626',
-      count: 0,
-      subcategories: []
+      status: 'active',
+      logo: '',
+      href: ''
     })
-    setNewSubcatName('')
     setIsCreateModalOpen(true)
   }
 
-  const handleOpenEditModal = (cat: Category) => {
-    setSelectedCategory(cat)
+  const handleOpenEditModal = (item: TaxonomyItem) => {
+    setSelectedItem(item)
     setFormData({
-      name: cat.name,
-      slug: cat.slug,
-      description: cat.description || '',
-      color: cat.color || '#FF6B6B',
-      bgColor: cat.bgColor || '#FFE3E3',
-      textColor: cat.textColor || '#D92626',
-      count: cat.count || 0,
-      subcategories: Array.isArray(cat.subcategories) ? [...cat.subcategories] : []
+      name: item.name,
+      slug: item.slug,
+      pillar: item.pillar,
+      description: item.description || '',
+      status: item.status,
+      logo: item.logo || '',
+      href: item.href
     })
-    setNewSubcatName('')
     setIsEditModalOpen(true)
   }
 
-  const handleOpenDeleteModal = (cat: Category) => {
-    setSelectedCategory(cat)
-    setIsDeleteModalOpen(true)
-  }
-
-  // Submit create
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.name.trim() || !formData.slug.trim()) {
-      showNotification('Category name and slug are required', 'error')
+      showNotification('Item name and slug are required', 'error')
       return
     }
 
     try {
-      const newCategory: Category = {
-        id: formData.slug,
+      await adminApi.createCategory({
         name: formData.name.trim(),
         slug: formData.slug.trim(),
-        color: formData.color,
-        bgColor: formData.bgColor,
-        textColor: formData.textColor,
-        count: Number(formData.count) || 0,
         description: formData.description.trim(),
-        subcategories: formData.subcategories
-      }
-
-      await adminApi.createCategory(newCategory)
-      showNotification(`Category "${newCategory.name}" created successfully!`)
+        status: formData.status,
+        color: '#2F368C',
+        bgColor: '#E5E7FF',
+        textColor: '#2F368C',
+        count: 0
+      })
+      showNotification(`"${formData.name}" added to catalog successfully!`)
       setIsCreateModalOpen(false)
-      loadCategories()
+      loadAllData()
     } catch (err: any) {
-      showNotification(err?.message || 'Failed to create category', 'error')
+      showNotification(err?.message || 'Failed to create taxonomy item', 'error')
     }
   }
 
-  // Submit edit
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedCategory) return
-    if (!formData.name.trim() || !formData.slug.trim()) {
-      showNotification('Category name and slug are required', 'error')
-      return
-    }
+    if (!selectedItem) return
 
     try {
-      const updatedCategory: Category = {
-        ...selectedCategory,
+      await adminApi.updateCategory(selectedItem.slug, {
         name: formData.name.trim(),
         slug: formData.slug.trim(),
-        color: formData.color,
-        bgColor: formData.bgColor,
-        textColor: formData.textColor,
-        count: Number(formData.count) || 0,
         description: formData.description.trim(),
-        subcategories: formData.subcategories
-      }
-
-      await adminApi.updateCategory(selectedCategory.id || selectedCategory.slug, updatedCategory)
-      showNotification(`Category "${updatedCategory.name}" updated successfully!`)
+        status: formData.status
+      })
+      showNotification(`"${formData.name}" updated successfully!`)
       setIsEditModalOpen(false)
-      loadCategories()
+      loadAllData()
     } catch (err: any) {
-      showNotification(err?.message || 'Failed to update category', 'error')
+      showNotification(err?.message || 'Failed to update taxonomy item', 'error')
     }
   }
 
-  // Confirm delete
   const handleDeleteConfirm = async () => {
-    if (!selectedCategory) return
+    if (!selectedItem) return
     try {
-      await adminApi.deleteCategory(selectedCategory.id || selectedCategory.slug)
-      showNotification(`Category "${selectedCategory.name}" deleted successfully!`)
+      await adminApi.deleteCategory(selectedItem.slug)
+      showNotification(`"${selectedItem.name}" deleted successfully!`)
       setIsDeleteModalOpen(false)
-      setSelectedCategory(null)
-      loadCategories()
+      setSelectedItem(null)
+      loadAllData()
     } catch (err: any) {
-      showNotification(err?.message || 'Failed to delete category', 'error')
+      showNotification(err?.message || 'Failed to delete taxonomy item', 'error')
     }
   }
 
-  // Filtered categories
-  const filteredCategories = useMemo(() => {
-    const q = searchQuery.toLowerCase().trim()
-    if (!q) return categories
+  const handleCopyCode = (code: string) => {
+    navigator.clipboard.writeText(code).catch(() => {})
+    setCopiedCode(code)
+    setTimeout(() => setCopiedCode(null), 2000)
+  }
 
-    return categories.filter((cat) => {
-      const matchName = cat.name.toLowerCase().includes(q)
-      const matchSlug = cat.slug.toLowerCase().includes(q)
-      const matchDesc = (cat.description || '').toLowerCase().includes(q)
-      const matchSubcats = (cat.subcategories || []).some((s) => s.name.toLowerCase().includes(q))
-      return matchName || matchSlug || matchDesc || matchSubcats
-    })
-  }, [categories, searchQuery])
-
-  // Stats calculation
-  const totalSubcategoriesCount = useMemo(() => {
-    return categories.reduce((acc, cat) => acc + (cat.subcategories ? cat.subcategories.length : 0), 0)
-  }, [categories])
-
-  const totalDealsCount = useMemo(() => {
-    return categories.reduce((acc, cat) => acc + (cat.count || 0), 0)
-  }, [categories])
-
-  const COLOR_PALETTES = [
-    { name: 'Red / Coral', color: '#FF6B6B', bgColor: '#FFE3E3', textColor: '#D92626' },
-    { name: 'Blue / Ocean', color: '#4DABF7', bgColor: '#E7F5FF', textColor: '#1971C2' },
-    { name: 'Green / Fresh', color: '#51CF66', bgColor: '#EBFBEE', textColor: '#2B8A3E' },
-    { name: 'Yellow / Sun', color: '#FCC419', bgColor: '#FFF9DB', textColor: '#E67700' },
-    { name: 'Orange / Warm', color: '#FF922B', bgColor: '#FFF4E6', textColor: '#D9480F' },
-    { name: 'Purple / Violet', color: '#845EF7', bgColor: '#F3F0FF', textColor: '#5F3DC4' },
-    { name: 'Pink / Rose', color: '#F06595', bgColor: '#FFF0F6', textColor: '#C2255C' },
-    { name: 'Cyan / Teal', color: '#20C997', bgColor: '#E6FCF5', textColor: '#0CA678' }
-  ]
+  const alphabetList = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
 
   return (
     <ExecutiveLayout activeMenu="categories">
-      <div className="exec-content-page">
-        {/* Toast Notification */}
+      <div className="exec-cat-hub">
+        {/* Notification Toast */}
         {notification && (
-          <div className={`exec-toast ${notification.type}`}>
-            <CheckCircle2 size={16} />
+          <div className={`exec-cat-hub__toast exec-cat-hub__toast--${notification.type}`}>
+            {notification.type === 'success' ? <CheckCircle2 size={18} /> : <X size={18} />}
             <span>{notification.message}</span>
           </div>
         )}
 
-        {/* Header section */}
-        <div className="exec-page-header">
-          <div>
-            <h1 className="exec-page-title">Categories & Subcategories Management</h1>
-            <p className="exec-page-subtitle">
-              Configure store categories, tag taxonomies, color themes, and linked subcategories.
+        {/* Page Header */}
+        <div className="exec-cat-hub__header">
+          <div className="exec-cat-hub__header-left">
+            <div className="exec-cat-hub__header-badge">
+              <Sparkles size={14} />
+              <span>Taxonomy & Storefront Ecosystem Hub</span>
+            </div>
+            <h1 className="exec-cat-hub__title">Categories & 7 Directory Taxonomy</h1>
+            <p className="exec-cat-hub__subtitle">
+              Deep inspection, cross-referencing, and real-time synchronization for all 7 storefront directories and catalog items.
             </p>
           </div>
-          <button className="exec-btn-primary" onClick={handleOpenCreateModal}>
-            <Plus size={16} />
-            <span>Add New Category</span>
+
+          <div className="exec-cat-hub__header-actions">
+            <button
+              type="button"
+              className="exec-cat-hub__btn exec-cat-hub__btn--secondary"
+              onClick={loadAllData}
+              title="Refresh Live Data"
+            >
+              <RefreshCw size={16} className={loading ? 'exec-cat-hub__spin' : ''} />
+              <span>Sync Live</span>
+            </button>
+            <button
+              type="button"
+              className="exec-cat-hub__btn exec-cat-hub__btn--primary"
+              onClick={handleOpenCreateModal}
+            >
+              <Plus size={16} />
+              <span>Add New Taxonomy Item</span>
+            </button>
+          </div>
+        </div>
+
+        {/* KPI Spotlight Grid */}
+        <div className="exec-cat-hub__kpi-grid">
+          <div className="exec-cat-hub__kpi-card exec-cat-hub__kpi-card--navy">
+            <div className="exec-cat-hub__kpi-icon">
+              <FolderTree size={22} />
+            </div>
+            <div className="exec-cat-hub__kpi-content">
+              <span className="exec-cat-hub__kpi-label">7 Storefront Directories</span>
+              <span className="exec-cat-hub__kpi-value">{stats.totalEntities} Total Items</span>
+              <span className="exec-cat-hub__kpi-sub">Subcategories, Stores, Brands, Banks, Festivals, Travel, Cities</span>
+            </div>
+          </div>
+
+          <div className="exec-cat-hub__kpi-card exec-cat-hub__kpi-card--blue">
+            <div className="exec-cat-hub__kpi-icon">
+              <Zap size={22} />
+            </div>
+            <div className="exec-cat-hub__kpi-content">
+              <span className="exec-cat-hub__kpi-label">Active Deals Categorized</span>
+              <span className="exec-cat-hub__kpi-value">{stats.liveDealsCount} Deals</span>
+              <span className="exec-cat-hub__kpi-sub">Live mapped across all catalog items</span>
+            </div>
+          </div>
+
+          <div className="exec-cat-hub__kpi-card exec-cat-hub__kpi-card--orange">
+            <div className="exec-cat-hub__kpi-icon">
+              <Flame size={22} />
+            </div>
+            <div className="exec-cat-hub__kpi-content">
+              <span className="exec-cat-hub__kpi-label">Flash & Loot Offers</span>
+              <span className="exec-cat-hub__kpi-value">{stats.liveLootCount} Loot Deals</span>
+              <span className="exec-cat-hub__kpi-sub">Active discounts up to 90%</span>
+            </div>
+          </div>
+
+          <div className="exec-cat-hub__kpi-card exec-cat-hub__kpi-card--purple">
+            <div className="exec-cat-hub__kpi-icon">
+              <Ticket size={22} />
+            </div>
+            <div className="exec-cat-hub__kpi-content">
+              <span className="exec-cat-hub__kpi-label">Promo Codes & Coupons</span>
+              <span className="exec-cat-hub__kpi-value">{stats.liveCouponsCount} Coupons</span>
+              <span className="exec-cat-hub__kpi-sub">Verified store promo codes</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 7 Directory Pillar Filter Tabs */}
+        <div className="exec-cat-hub__pillars-strip" role="tablist">
+          <button
+            type="button"
+            className={`exec-cat-hub__pillar-pill ${activePillar === 'all' ? 'exec-cat-hub__pillar-pill--active' : ''}`}
+            onClick={() => { setActivePillar('all'); setLetterFilter(null); }}
+          >
+            <Layers size={16} />
+            <span>All Categories & Directories ({stats.totalEntities})</span>
+          </button>
+
+          <button
+            type="button"
+            className={`exec-cat-hub__pillar-pill ${activePillar === 'subcategories' ? 'exec-cat-hub__pillar-pill--active' : ''}`}
+            onClick={() => { setActivePillar('subcategories'); setLetterFilter(null); }}
+          >
+            <Tag size={16} />
+            <span>1. Subcategories Catalog ({stats.subcategoriesCount})</span>
+          </button>
+
+          <button
+            type="button"
+            className={`exec-cat-hub__pillar-pill ${activePillar === 'stores' ? 'exec-cat-hub__pillar-pill--active' : ''}`}
+            onClick={() => { setActivePillar('stores'); setLetterFilter(null); }}
+          >
+            <Store size={16} />
+            <span>2. Stores Directory ({stats.storesCount})</span>
+          </button>
+
+          <button
+            type="button"
+            className={`exec-cat-hub__pillar-pill ${activePillar === 'brands' ? 'exec-cat-hub__pillar-pill--active' : ''}`}
+            onClick={() => { setActivePillar('brands'); setLetterFilter(null); }}
+          >
+            <Sparkles size={16} />
+            <span>3. Brands Directory ({stats.brandsCount})</span>
+          </button>
+
+          <button
+            type="button"
+            className={`exec-cat-hub__pillar-pill ${activePillar === 'banks' ? 'exec-cat-hub__pillar-pill--active' : ''}`}
+            onClick={() => { setActivePillar('banks'); setLetterFilter(null); }}
+          >
+            <CreditCard size={16} />
+            <span>4. Banks & Cards ({stats.banksCount})</span>
+          </button>
+
+          <button
+            type="button"
+            className={`exec-cat-hub__pillar-pill ${activePillar === 'festivals' ? 'exec-cat-hub__pillar-pill--active' : ''}`}
+            onClick={() => { setActivePillar('festivals'); setLetterFilter(null); }}
+          >
+            <Calendar size={16} />
+            <span>5. Festivals & Sales ({stats.festivalsCount})</span>
+          </button>
+
+          <button
+            type="button"
+            className={`exec-cat-hub__pillar-pill ${activePillar === 'travelling' ? 'exec-cat-hub__pillar-pill--active' : ''}`}
+            onClick={() => { setActivePillar('travelling'); setLetterFilter(null); }}
+          >
+            <Plane size={16} />
+            <span>6. Travelling & Flights ({stats.travellingCount})</span>
+          </button>
+
+          <button
+            type="button"
+            className={`exec-cat-hub__pillar-pill ${activePillar === 'cities-deals' ? 'exec-cat-hub__pillar-pill--active' : ''}`}
+            onClick={() => { setActivePillar('cities-deals'); setLetterFilter(null); }}
+          >
+            <MapPin size={16} />
+            <span>7. Cities Deals Hub ({stats.citiesCount})</span>
           </button>
         </div>
 
-        {/* Stats Row */}
-        <div className="exec-stats-grid">
-          <div className="exec-stat-card">
-            <div className="stat-card-icon" style={{ background: '#EEF2FF', color: '#2F368C' }}>
-              <Layers size={20} />
-            </div>
-            <div className="stat-card-content">
-              <span className="stat-card-label">Total Categories</span>
-              <span className="stat-card-value">{categories.length}</span>
-            </div>
-          </div>
-
-          <div className="exec-stat-card">
-            <div className="stat-card-icon" style={{ background: '#EBFBEE', color: '#2B8A3E' }}>
-              <FolderTree size={20} />
-            </div>
-            <div className="stat-card-content">
-              <span className="stat-card-label">Subcategories</span>
-              <span className="stat-card-value">{totalSubcategoriesCount}</span>
-            </div>
-          </div>
-
-          <div className="exec-stat-card">
-            <div className="stat-card-icon" style={{ background: '#FFF4E6', color: '#D9480F' }}>
-              <Tag size={20} />
-            </div>
-            <div className="stat-card-content">
-              <span className="stat-card-label">Catalogued Deals</span>
-              <span className="stat-card-value">{totalDealsCount}+</span>
-            </div>
-          </div>
-
-          <div className="exec-stat-card">
-            <div className="stat-card-icon" style={{ background: '#F3F0FF', color: '#5F3DC4' }}>
-              <Sparkles size={20} />
-            </div>
-            <div className="stat-card-content">
-              <span className="stat-card-label">Live Sync Status</span>
-              <span className="stat-card-value" style={{ fontSize: '15px', color: '#16a34a' }}>Active & Synced</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Toolbar */}
-        <div className="exec-toolbar">
-          <div className="exec-search-box">
-            <Search size={16} className="search-icon" />
+        {/* Toolbar & Controls */}
+        <div className="exec-cat-hub__toolbar">
+          <div className="exec-cat-hub__search-box">
+            <Search size={18} className="exec-cat-hub__search-icon" />
             <input
               type="text"
-              placeholder="Search by category, slug, description, or subcategory..."
+              placeholder={`Search ${activePillar === 'all' ? 'all 350+ taxonomy items' : activePillar} by name or slug...`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              className="exec-cat-hub__search-input"
             />
             {searchQuery && (
-              <button className="search-clear-btn" onClick={() => setSearchQuery('')}>
+              <button
+                type="button"
+                className="exec-cat-hub__search-clear"
+                onClick={() => setSearchQuery('')}
+              >
                 <X size={14} />
               </button>
             )}
           </div>
 
-          <div className="exec-toolbar-actions">
-            <div className="exec-view-toggle">
-              <button
-                className={`toggle-btn ${viewMode === 'table' ? 'active' : ''}`}
-                onClick={() => setViewMode('table')}
-                title="Table View"
-              >
-                <TableIcon size={16} />
-              </button>
-              <button
-                className={`toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
-                onClick={() => setViewMode('grid')}
-                title="Card Grid View"
-              >
-                <LayoutGrid size={16} />
-              </button>
-            </div>
+          <div className="exec-cat-hub__view-switch">
+            <button
+              type="button"
+              className={`exec-cat-hub__view-btn ${viewMode === 'table' ? 'exec-cat-hub__view-btn--active' : ''}`}
+              onClick={() => setViewMode('table')}
+              title="Table View"
+            >
+              <TableIcon size={16} />
+            </button>
+            <button
+              type="button"
+              className={`exec-cat-hub__view-btn ${viewMode === 'grid' ? 'exec-cat-hub__view-btn--active' : ''}`}
+              onClick={() => setViewMode('grid')}
+              title="Grid Cards View"
+            >
+              <LayoutGrid size={16} />
+            </button>
           </div>
         </div>
 
+        {/* Alphabet Quick Filter Strip */}
+        <div className="exec-cat-hub__alphabet-strip">
+          <button
+            type="button"
+            className={`exec-cat-hub__alpha-btn ${letterFilter === null ? 'exec-cat-hub__alpha-btn--active' : ''}`}
+            onClick={() => setLetterFilter(null)}
+          >
+            ALL
+          </button>
+          {alphabetList.map((letter) => {
+            const hasMatches = allTaxonomyItems.some((i) => i.letter === letter && (activePillar === 'all' || i.pillar === activePillar))
+            return (
+              <button
+                key={letter}
+                type="button"
+                className={`exec-cat-hub__alpha-btn ${letterFilter === letter ? 'exec-cat-hub__alpha-btn--active' : ''} ${!hasMatches ? 'exec-cat-hub__alpha-btn--disabled' : ''}`}
+                onClick={() => hasMatches && setLetterFilter(letter === letterFilter ? null : letter)}
+                disabled={!hasMatches}
+              >
+                {letter}
+              </button>
+            )
+          })}
+        </div>
+
         {/* Content Table / Grid */}
-        {loading ? (
-          <div className="exec-loading-state">
-            <div className="spinner"></div>
-            <p>Loading categories and taxonomies...</p>
-          </div>
-        ) : filteredCategories.length === 0 ? (
-          <div className="exec-empty-state">
-            <Layers size={48} className="empty-icon" />
-            <h3>No Categories Found</h3>
-            <p>Try refining your search query or create a new category.</p>
-            <button className="exec-btn-primary" onClick={handleOpenCreateModal} style={{ marginTop: '14px' }}>
-              <Plus size={16} />
-              <span>Create Category</span>
+        {filteredItems.length === 0 ? (
+          <div className="exec-cat-hub__empty">
+            <div className="exec-cat-hub__empty-icon">
+              <FolderTree size={40} />
+            </div>
+            <h3>No Taxonomy Items Found</h3>
+            <p>No items matched "{searchQuery}" under the selected directory pillar.</p>
+            <button
+              type="button"
+              className="exec-cat-hub__btn exec-cat-hub__btn--primary"
+              onClick={() => { setSearchQuery(''); setLetterFilter(null); }}
+            >
+              Clear Filters
             </button>
           </div>
         ) : viewMode === 'table' ? (
-          <div className="exec-table-card">
-            <table className="exec-table">
+          <div className="exec-cat-hub__table-wrapper">
+            <table className="exec-cat-hub__table">
               <thead>
                 <tr>
-                  <th>Category Name</th>
-                  <th>Slug</th>
-                  <th>Theme Color</th>
-                  <th>Subcategories</th>
-                  <th>Deals Count</th>
-                  <th>Public Route</th>
+                  <th>Item & Directory Pillar</th>
+                  <th>Directory Type</th>
+                  <th>Identifier / Slug</th>
+                  <th>Live Linked Inventory</th>
+                  <th>Storefront Route</th>
+                  <th>Status</th>
                   <th style={{ textAlign: 'right' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredCategories.map((cat) => (
-                  <tr key={cat.id || cat.slug}>
-                    <td>
-                      <div className="category-cell-name">
-                        <span
-                          className="category-color-dot"
-                          style={{ backgroundColor: cat.color || '#2F368C' }}
-                        ></span>
-                        <div>
-                          <strong className="cat-title">{cat.name}</strong>
-                          {cat.description && (
-                            <p className="cat-desc-line">{cat.description}</p>
-                          )}
+                {filteredItems.map((item) => {
+                  const m = getItemMetrics(item)
+                  const isAmazon = item.slug === 'amazon' || item.name.toLowerCase() === 'amazon'
+
+                  return (
+                    <tr key={item.id} className="exec-cat-hub__row" onClick={() => setInspectedItem(item)}>
+                      <td>
+                        <div className="exec-cat-hub__item-cell">
+                          <div className="exec-cat-hub__item-avatar">
+                            {item.logo ? (
+                              <img src={item.logo} alt={item.name} loading="lazy" />
+                            ) : (
+                              <span>{item.letter}</span>
+                            )}
+                          </div>
+                          <div className="exec-cat-hub__item-meta">
+                            <span className="exec-cat-hub__item-name">{item.name}</span>
+                            <span className="exec-cat-hub__item-letter">Group Letter: {item.letter}</span>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="exec-code-badge">/{cat.slug}</span>
-                    </td>
-                    <td>
-                      <div className="cat-palette-preview">
+                      </td>
+
+                      <td>
                         <span
-                          className="cat-preview-pill"
+                          className="exec-cat-hub__pillar-tag"
                           style={{
-                            backgroundColor: cat.bgColor || '#F1ECEC',
-                            color: cat.textColor || '#2F368C',
-                            border: `1px solid ${cat.color || '#CCCCCC'}`
+                            backgroundColor: `${item.pillarColor}15`,
+                            color: item.pillarColor,
+                            borderColor: `${item.pillarColor}40`
                           }}
                         >
-                          Sample Tag
+                          {item.pillarLabel}
                         </span>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="subcat-chips-list">
-                        {Array.isArray(cat.subcategories) && cat.subcategories.length > 0 ? (
-                          cat.subcategories.slice(0, 3).map((sub) => (
-                            <span key={sub.id || sub.slug} className="subcat-chip">
-                              {sub.name}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="text-muted" style={{ fontSize: '12px' }}>None</span>
-                        )}
-                        {cat.subcategories && cat.subcategories.length > 3 && (
-                          <span className="subcat-chip more">+{cat.subcategories.length - 3}</span>
-                        )}
-                      </div>
-                    </td>
-                    <td>
-                      <span className="count-pill">{cat.count || 0}</span>
-                    </td>
-                    <td>
-                      <a
-                        href={`/categories/${cat.slug}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="exec-link-preview"
-                        title="View category page"
-                      >
-                        <span>View</span>
-                        <ExternalLink size={12} />
-                      </a>
-                    </td>
-                    <td style={{ textAlign: 'right' }}>
-                      <div className="exec-action-buttons">
-                        <button
-                          className="exec-icon-btn edit"
-                          onClick={() => handleOpenEditModal(cat)}
-                          title="Edit category"
+                      </td>
+
+                      <td>
+                        <code className="exec-cat-hub__slug-code">{item.slug}</code>
+                      </td>
+
+                      <td>
+                        <div className="exec-cat-hub__inventory-pills" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            type="button"
+                            className="exec-cat-hub__count-pill exec-cat-hub__count-pill--deals"
+                            title="View Linked Standard Deals"
+                            onClick={() => { setInspectedItem(item); setDrawerTab('deals'); }}
+                          >
+                            <Zap size={12} />
+                            <span>{m.deals.length} Deals</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            className="exec-cat-hub__count-pill exec-cat-hub__count-pill--loot"
+                            title="View Linked Loot Deals"
+                            onClick={() => { setInspectedItem(item); setDrawerTab('loot'); }}
+                          >
+                            <Flame size={12} />
+                            <span>{m.loots.length} Loot</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            className="exec-cat-hub__count-pill exec-cat-hub__count-pill--coupons"
+                            title="View Linked Coupons"
+                            onClick={() => { setInspectedItem(item); setDrawerTab('coupons'); }}
+                          >
+                            <Ticket size={12} />
+                            <span>{m.coupons.length} Coupons</span>
+                          </button>
+
+                          {m.stores.length > 0 && (
+                            <button
+                              type="button"
+                              className="exec-cat-hub__count-pill exec-cat-hub__count-pill--stores"
+                              title="View Linked Stores"
+                              onClick={() => { setInspectedItem(item); setDrawerTab('stores'); }}
+                            >
+                              <Store size={12} />
+                              <span>{m.stores.length} Stores</span>
+                            </button>
+                          )}
+                        </div>
+                      </td>
+
+                      <td>
+                        <a
+                          href={item.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="exec-cat-hub__live-link"
+                          onClick={(e) => e.stopPropagation()}
+                          title={`Open ${item.name} in live storefront`}
                         >
-                          <Edit2 size={15} />
-                        </button>
-                        <button
-                          className="exec-icon-btn delete"
-                          onClick={() => handleOpenDeleteModal(cat)}
-                          title="Delete category"
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                          <span>{isAmazon ? '/brands/amazon' : item.href}</span>
+                          <ExternalLink size={13} />
+                        </a>
+                      </td>
+
+                      <td>
+                        <span className={`exec-cat-hub__status-tag exec-cat-hub__status-tag--${item.status}`}>
+                          {item.status === 'active' ? '● Active' : item.status === 'featured' ? '★ Featured' : '○ Draft'}
+                        </span>
+                      </td>
+
+                      <td style={{ textAlign: 'right' }}>
+                        <div className="exec-cat-hub__actions" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            type="button"
+                            className="exec-cat-hub__action-btn exec-cat-hub__action-btn--inspect"
+                            title="Deep Inspect All Categorized Deals"
+                            onClick={() => { setInspectedItem(item); setDrawerTab('all'); }}
+                          >
+                            <Eye size={15} />
+                            <span>Inspect</span>
+                          </button>
+                          <button
+                            type="button"
+                            className="exec-cat-hub__action-btn"
+                            title="Edit Taxonomy Item"
+                            onClick={() => handleOpenEditModal(item)}
+                          >
+                            <Edit2 size={15} />
+                          </button>
+                          <button
+                            type="button"
+                            className="exec-cat-hub__action-btn exec-cat-hub__action-btn--delete"
+                            title="Delete Item"
+                            onClick={() => { setSelectedItem(item); setIsDeleteModalOpen(true); }}
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
         ) : (
-          <div className="exec-categories-grid">
-            {filteredCategories.map((cat) => (
-              <div
-                key={cat.id || cat.slug}
-                className="category-card"
-                style={{
-                  borderTop: `4px solid ${cat.color || '#2F368C'}`
-                }}
-              >
-                <div className="category-card-header">
-                  <div className="category-card-title-wrap">
+          <div className="exec-cat-hub__grid">
+            {filteredItems.map((item) => {
+              const m = getItemMetrics(item)
+
+              return (
+                <div key={item.id} className="exec-cat-hub__card" onClick={() => setInspectedItem(item)}>
+                  <div className="exec-cat-hub__card-header">
+                    <div className="exec-cat-hub__card-avatar">
+                      {item.logo ? (
+                        <img src={item.logo} alt={item.name} loading="lazy" />
+                      ) : (
+                        <span>{item.letter}</span>
+                      )}
+                    </div>
                     <span
-                      className="cat-badge"
+                      className="exec-cat-hub__pillar-tag"
                       style={{
-                        backgroundColor: cat.bgColor || '#F1ECEC',
-                        color: cat.textColor || '#2F368C'
+                        backgroundColor: `${item.pillarColor}15`,
+                        color: item.pillarColor,
+                        borderColor: `${item.pillarColor}40`
                       }}
                     >
-                      {cat.name}
+                      {item.pillarLabel}
                     </span>
-                    <span className="cat-slug-sub">/{cat.slug}</span>
                   </div>
-                  <div className="category-card-actions">
-                    <button
-                      className="exec-icon-btn edit"
-                      onClick={() => handleOpenEditModal(cat)}
-                      title="Edit Category"
+
+                  <h3 className="exec-cat-hub__card-name">{item.name}</h3>
+                  <code className="exec-cat-hub__slug-code">{item.slug}</code>
+                  <p className="exec-cat-hub__card-desc">{item.description}</p>
+
+                  <div className="exec-cat-hub__card-stats">
+                    <div className="exec-cat-hub__card-stat">
+                      <span className="exec-cat-hub__stat-num">{m.deals.length}</span>
+                      <span className="exec-cat-hub__stat-lbl">Deals</span>
+                    </div>
+                    <div className="exec-cat-hub__card-stat">
+                      <span className="exec-cat-hub__stat-num">{m.loots.length}</span>
+                      <span className="exec-cat-hub__stat-lbl">Loot</span>
+                    </div>
+                    <div className="exec-cat-hub__card-stat">
+                      <span className="exec-cat-hub__stat-num">{m.coupons.length}</span>
+                      <span className="exec-cat-hub__stat-lbl">Coupons</span>
+                    </div>
+                  </div>
+
+                  <div className="exec-cat-hub__card-footer" onClick={(e) => e.stopPropagation()}>
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="exec-cat-hub__live-link"
                     >
-                      <Edit2 size={14} />
-                    </button>
+                      <span>Preview</span>
+                      <ExternalLink size={12} />
+                    </a>
+
                     <button
-                      className="exec-icon-btn delete"
-                      onClick={() => handleOpenDeleteModal(cat)}
-                      title="Delete Category"
+                      type="button"
+                      className="exec-cat-hub__inspect-link"
+                      onClick={() => setInspectedItem(item)}
                     >
-                      <Trash2 size={14} />
+                      <span>View All {m.totalCount} Offers</span>
+                      <ChevronRight size={14} />
                     </button>
                   </div>
                 </div>
-
-                <p className="category-card-desc">
-                  {cat.description || 'No description provided for this category.'}
-                </p>
-
-                <div className="category-card-subcats">
-                  <span className="subcats-label">
-                    Subcategories ({cat.subcategories ? cat.subcategories.length : 0}):
-                  </span>
-                  <div className="subcats-tags-wrap">
-                    {Array.isArray(cat.subcategories) && cat.subcategories.length > 0 ? (
-                      cat.subcategories.map((sub) => (
-                        <span key={sub.id || sub.slug} className="subcat-tag-pill">
-                          {sub.name}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-muted" style={{ fontSize: '12px' }}>No subcategories</span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="category-card-footer">
-                  <span className="footer-deals-count">
-                    <strong>{cat.count || 0}</strong> Deals & Brands
-                  </span>
-                  <a
-                    href={`/categories/${cat.slug}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="view-page-btn"
-                  >
-                    <span>Storefront</span>
-                    <ChevronRight size={13} />
-                  </a>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
 
-        {/* ============================================================
-            CREATE CATEGORY MODAL
-           ============================================================ */}
-        {isCreateModalOpen && (
-          <div className="exec-modal-backdrop" onClick={() => setIsCreateModalOpen(false)}>
-            <div className="exec-modal-content" onClick={(e) => e.stopPropagation()}>
-              <div className="exec-modal-header">
-                <div className="modal-header-title">
-                  <Layers size={20} className="modal-title-icon" />
-                  <h3>Add New Category</h3>
+        {/* Deep Inspection Drawer / Modal */}
+        {inspectedItem && inspectedData && (
+          <div className="exec-cat-hub__drawer-overlay" onClick={() => setInspectedItem(null)}>
+            <div className="exec-cat-hub__drawer" onClick={(e) => e.stopPropagation()}>
+              {/* Drawer Header */}
+              <div className="exec-cat-hub__drawer-header">
+                <div className="exec-cat-hub__drawer-title-row">
+                  <div className="exec-cat-hub__drawer-avatar">
+                    {inspectedItem.logo ? (
+                      <img src={inspectedItem.logo} alt={inspectedItem.name} />
+                    ) : (
+                      <span>{inspectedItem.letter}</span>
+                    )}
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                      <h2 className="exec-cat-hub__drawer-name">{inspectedItem.name}</h2>
+                      <span
+                        className="exec-cat-hub__pillar-tag"
+                        style={{
+                          backgroundColor: `${inspectedItem.pillarColor}15`,
+                          color: inspectedItem.pillarColor,
+                          borderColor: `${inspectedItem.pillarColor}40`
+                        }}
+                      >
+                        {inspectedItem.pillarLabel}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <code className="exec-cat-hub__slug-code">slug: {inspectedItem.slug}</code>
+                      <a
+                        href={inspectedItem.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="exec-cat-hub__live-link"
+                      >
+                        <span>Open Live Page</span>
+                        <ExternalLink size={13} />
+                      </a>
+                    </div>
+                  </div>
                 </div>
-                <button className="exec-modal-close" onClick={() => setIsCreateModalOpen(false)}>
-                  <X size={18} />
+
+                <button
+                  type="button"
+                  className="exec-cat-hub__drawer-close"
+                  onClick={() => setInspectedItem(null)}
+                >
+                  <X size={20} />
                 </button>
               </div>
 
-              <form onSubmit={handleCreateSubmit} className="exec-modal-form">
-                <div className="exec-form-group">
-                  <label>Category Name <span className="req">*</span></label>
+              {/* Drawer Description */}
+              <div className="exec-cat-hub__drawer-desc-bar">
+                <p>{inspectedItem.description}</p>
+              </div>
+
+              {/* Drawer Filter Tabs */}
+              <div className="exec-cat-hub__drawer-tabs">
+                <button
+                  type="button"
+                  className={`exec-cat-hub__dtab ${drawerTab === 'all' ? 'exec-cat-hub__dtab--active' : ''}`}
+                  onClick={() => setDrawerTab('all')}
+                >
+                  All Mapped Items ({inspectedData.totalCount})
+                </button>
+                <button
+                  type="button"
+                  className={`exec-cat-hub__dtab ${drawerTab === 'deals' ? 'exec-cat-hub__dtab--active' : ''}`}
+                  onClick={() => setDrawerTab('deals')}
+                >
+                  <Zap size={14} />
+                  <span>Standard Deals ({inspectedData.deals.length})</span>
+                </button>
+                <button
+                  type="button"
+                  className={`exec-cat-hub__dtab ${drawerTab === 'loot' ? 'exec-cat-hub__dtab--active' : ''}`}
+                  onClick={() => setDrawerTab('loot')}
+                >
+                  <Flame size={14} />
+                  <span>Loot & Flash ({inspectedData.loots.length})</span>
+                </button>
+                <button
+                  type="button"
+                  className={`exec-cat-hub__dtab ${drawerTab === 'coupons' ? 'exec-cat-hub__dtab--active' : ''}`}
+                  onClick={() => setDrawerTab('coupons')}
+                >
+                  <Ticket size={14} />
+                  <span>Coupons ({inspectedData.coupons.length})</span>
+                </button>
+                <button
+                  type="button"
+                  className={`exec-cat-hub__dtab ${drawerTab === 'stores' ? 'exec-cat-hub__dtab--active' : ''}`}
+                  onClick={() => setDrawerTab('stores')}
+                >
+                  <Store size={14} />
+                  <span>Stores ({inspectedData.stores.length})</span>
+                </button>
+              </div>
+
+              {/* Drawer Search Filter */}
+              <div className="exec-cat-hub__drawer-search">
+                <Search size={16} />
+                <input
+                  type="text"
+                  placeholder={`Search deals, coupons, or stores inside ${inspectedItem.name}...`}
+                  value={drawerSearch}
+                  onChange={(e) => setDrawerSearch(e.target.value)}
+                />
+                {drawerSearch && (
+                  <button type="button" onClick={() => setDrawerSearch('')}>
+                    <X size={13} />
+                  </button>
+                )}
+              </div>
+
+              {/* Drawer Inventory Content */}
+              <div className="exec-cat-hub__drawer-body">
+                {/* 1. Deals Section */}
+                {(drawerTab === 'all' || drawerTab === 'deals') && (
+                  <div className="exec-cat-hub__drawer-section">
+                    <div className="exec-cat-hub__drawer-sec-header">
+                      <h4>
+                        <Zap size={16} style={{ color: '#2F368C' }} />
+                        <span>Standard Deals Categorized ({inspectedData.deals.length})</span>
+                      </h4>
+                    </div>
+
+                    {inspectedData.deals.length === 0 ? (
+                      <p className="exec-cat-hub__empty-hint">No standard deals currently mapped under this item.</p>
+                    ) : (
+                      <div className="exec-cat-hub__deals-list">
+                        {inspectedData.deals.map((deal: any) => (
+                          <div key={deal.id || deal._id} className="exec-cat-hub__deal-row">
+                            <div className="exec-cat-hub__deal-img">
+                              <img
+                                src={deal.image || deal.productImage || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200'}
+                                alt={deal.name || deal.title}
+                              />
+                            </div>
+                            <div className="exec-cat-hub__deal-info">
+                              <span className="exec-cat-hub__deal-title">{deal.name || deal.title}</span>
+                              <div className="exec-cat-hub__deal-meta">
+                                <span className="exec-cat-hub__deal-store">{deal.store || 'Store'}</span>
+                                <span className="exec-cat-hub__deal-cat">{deal.category || inspectedItem.name}</span>
+                                {deal.subCategory && <span className="exec-cat-hub__deal-subcat">{deal.subCategory}</span>}
+                              </div>
+                            </div>
+                            <div className="exec-cat-hub__deal-pricing">
+                              <span className="exec-cat-hub__deal-price">{deal.price?.toString().startsWith('₹') ? deal.price : `₹${deal.price}`}</span>
+                              {deal.discount && <span className="exec-cat-hub__deal-disc">{deal.discount}</span>}
+                            </div>
+                            <div className="exec-cat-hub__deal-actions">
+                              <a
+                                href={deal.store?.toLowerCase() === 'amazon' ? '/brands/amazon' : `/product?id=${deal.id || deal._id}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="exec-cat-hub__btn-sm"
+                              >
+                                <span>Preview</span>
+                                <ExternalLink size={12} />
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 2. Loot Deals Section */}
+                {(drawerTab === 'all' || drawerTab === 'loot') && (
+                  <div className="exec-cat-hub__drawer-section">
+                    <div className="exec-cat-hub__drawer-sec-header">
+                      <h4>
+                        <Flame size={16} style={{ color: '#E31E25' }} />
+                        <span>Flash & Loot Deals ({inspectedData.loots.length})</span>
+                      </h4>
+                    </div>
+
+                    {inspectedData.loots.length === 0 ? (
+                      <p className="exec-cat-hub__empty-hint">No loot deals currently mapped under this item.</p>
+                    ) : (
+                      <div className="exec-cat-hub__deals-list">
+                        {inspectedData.loots.map((loot: any) => (
+                          <div key={loot.id || loot._id} className="exec-cat-hub__deal-row">
+                            <div className="exec-cat-hub__deal-img">
+                              <img
+                                src={loot.image || loot.productImage || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200'}
+                                alt={loot.title}
+                              />
+                            </div>
+                            <div className="exec-cat-hub__deal-info">
+                              <span className="exec-cat-hub__deal-title">{loot.title}</span>
+                              <div className="exec-cat-hub__deal-meta">
+                                <span className="exec-cat-hub__deal-store">{loot.storeName || loot.store || 'Store'}</span>
+                                <span className="exec-cat-hub__loot-badge">⚡ {loot.dealType || 'Flash Loot'}</span>
+                              </div>
+                            </div>
+                            <div className="exec-cat-hub__deal-pricing">
+                              <span className="exec-cat-hub__deal-price">{loot.currentPrice?.toString().startsWith('₹') ? loot.currentPrice : `₹${loot.currentPrice}`}</span>
+                              {loot.discount && <span className="exec-cat-hub__deal-disc exec-cat-hub__deal-disc--loot">{loot.discount}</span>}
+                            </div>
+                            <div className="exec-cat-hub__deal-actions">
+                              <a
+                                href={loot.href || `/product?id=${loot.id || loot._id}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="exec-cat-hub__btn-sm"
+                              >
+                                <span>Preview</span>
+                                <ExternalLink size={12} />
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 3. Coupons Section */}
+                {(drawerTab === 'all' || drawerTab === 'coupons') && (
+                  <div className="exec-cat-hub__drawer-section">
+                    <div className="exec-cat-hub__drawer-sec-header">
+                      <h4>
+                        <Ticket size={16} style={{ color: '#8B5CF6' }} />
+                        <span>Active Promo Codes & Coupons ({inspectedData.coupons.length})</span>
+                      </h4>
+                    </div>
+
+                    {inspectedData.coupons.length === 0 ? (
+                      <p className="exec-cat-hub__empty-hint">No promo codes currently mapped under this item.</p>
+                    ) : (
+                      <div className="exec-cat-hub__coupons-grid">
+                        {inspectedData.coupons.map((coupon: any) => (
+                          <div key={coupon.id || coupon._id || coupon.code} className="exec-cat-hub__coupon-box">
+                            <div className="exec-cat-hub__coupon-head">
+                              <span className="exec-cat-hub__coupon-store">{coupon.store || inspectedItem.name}</span>
+                              <span className="exec-cat-hub__coupon-disc">{coupon.discount || 'Discount Code'}</span>
+                            </div>
+                            <div className="exec-cat-hub__coupon-code-wrap">
+                              <code className="exec-cat-hub__coupon-code">{coupon.code}</code>
+                              <button
+                                type="button"
+                                className="exec-cat-hub__coupon-copy"
+                                onClick={() => handleCopyCode(coupon.code)}
+                                title="Copy Code"
+                              >
+                                {copiedCode === coupon.code ? <Check size={14} /> : <Copy size={14} />}
+                              </button>
+                            </div>
+                            <div className="exec-cat-hub__coupon-foot">
+                              <span>Expires: {coupon.expiry || 'Limited Period'}</span>
+                              <span>Usage: {coupon.usageCount || 0} clicks</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 4. Stores Section */}
+                {(drawerTab === 'all' || drawerTab === 'stores') && (
+                  <div className="exec-cat-hub__drawer-section">
+                    <div className="exec-cat-hub__drawer-sec-header">
+                      <h4>
+                        <Store size={16} style={{ color: '#10B981' }} />
+                        <span>Partner Merchant Stores ({inspectedData.stores.length})</span>
+                      </h4>
+                    </div>
+
+                    {inspectedData.stores.length === 0 ? (
+                      <p className="exec-cat-hub__empty-hint">No specific stores mapped directly to this item.</p>
+                    ) : (
+                      <div className="exec-cat-hub__stores-grid">
+                        {inspectedData.stores.map((s: any) => (
+                          <div key={s.id || s._id || s.name} className="exec-cat-hub__store-box">
+                            <span className="exec-cat-hub__store-name">{s.name}</span>
+                            <span className="exec-cat-hub__store-cat">{s.category || 'Retail'}</span>
+                            {s.reward && <span className="exec-cat-hub__store-reward">{s.reward}</span>}
+                            <a
+                              href={s.name.toLowerCase() === 'amazon' ? '/brands/amazon' : (s.href || `/stores#${s.slug || s.name.toLowerCase()}`)}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="exec-cat-hub__btn-sm"
+                              style={{ marginTop: 8 }}
+                            >
+                              <span>View Store</span>
+                              <ExternalLink size={12} />
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal: Create Item */}
+        {isCreateModalOpen && (
+          <div className="exec-cat-modal-overlay">
+            <div className="exec-cat-modal">
+              <div className="exec-cat-modal__header">
+                <h2>Add New Taxonomy Item</h2>
+                <button type="button" onClick={() => setIsCreateModalOpen(false)}>
+                  <X size={20} />
+                </button>
+              </div>
+
+              <form onSubmit={handleCreateSubmit} className="exec-cat-modal__body">
+                <div className="exec-cat-form-group">
+                  <label>Directory Pillar</label>
+                  <select
+                    value={formData.pillar}
+                    onChange={(e) => setFormData({ ...formData, pillar: e.target.value as any })}
+                  >
+                    <option value="subcategories">1. Catalog Subcategories</option>
+                    <option value="stores">2. Stores Directory</option>
+                    <option value="brands">3. Brands Directory</option>
+                    <option value="banks">4. Banks & Payment Cards</option>
+                    <option value="festivals">5. Festivals & Seasonal Sales</option>
+                    <option value="travelling">6. Travelling & Flights</option>
+                    <option value="cities-deals">7. Cities Deals Hub</option>
+                  </select>
+                </div>
+
+                <div className="exec-cat-form-group">
+                  <label>Item Name *</label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Health & Wellness"
+                    placeholder="e.g. Gaming Laptops, Crocs, Diwali Sale"
                     value={formData.name}
-                    onChange={(e) => handleNameChange(e.target.value)}
+                    onChange={(e) => {
+                      const name = e.target.value
+                      const slug = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+                      setFormData({ ...formData, name, slug: formData.slug ? formData.slug : slug })
+                    }}
                   />
                 </div>
 
-                <div className="exec-form-row">
-                  <div className="exec-form-group">
-                    <label>Slug Identifier <span className="req">*</span></label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. health-wellness"
-                      value={formData.slug}
-                      onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().trim() })}
-                    />
-                  </div>
-
-                  <div className="exec-form-group">
-                    <label>Deals / Brands Count</label>
-                    <input
-                      type="number"
-                      min="0"
-                      placeholder="e.g. 80"
-                      value={formData.count}
-                      onChange={(e) => setFormData({ ...formData, count: Number(e.target.value) })}
-                    />
-                  </div>
+                <div className="exec-cat-form-group">
+                  <label>Slug / URL Identifier *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. gaming-laptops"
+                    value={formData.slug}
+                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                  />
                 </div>
 
-                <div className="exec-form-group">
+                <div className="exec-cat-form-group">
                   <label>Description</label>
                   <textarea
-                    rows={2}
-                    placeholder="Brief description of this category for users and SEO..."
+                    rows={3}
+                    placeholder="Brief description of this directory category..."
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   />
                 </div>
 
-                {/* Color Palette Theme Presets */}
-                <div className="exec-form-group">
-                  <label><Palette size={14} style={{ display: 'inline', marginRight: '4px' }} /> Color Palette Presets</label>
-                  <div className="color-preset-picker">
-                    {COLOR_PALETTES.map((pal) => (
-                      <button
-                        type="button"
-                        key={pal.name}
-                        className={`color-preset-btn ${formData.color === pal.color ? 'selected' : ''}`}
-                        style={{ backgroundColor: pal.color }}
-                        onClick={() =>
-                          setFormData({
-                            ...formData,
-                            color: pal.color,
-                            bgColor: pal.bgColor,
-                            textColor: pal.textColor
-                          })
-                        }
-                        title={pal.name}
-                      ></button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Subcategories Management */}
-                <div className="exec-form-group">
-                  <label>Subcategories Taxonomy</label>
-                  <div className="subcat-input-row">
-                    <input
-                      type="text"
-                      placeholder="Enter subcategory name (e.g. Fitness Equipment)"
-                      value={newSubcatName}
-                      onChange={(e) => setNewSubcatName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault()
-                          handleAddSubcategory()
-                        }
-                      }}
-                    />
-                    <button
-                      type="button"
-                      className="subcat-add-btn"
-                      onClick={handleAddSubcategory}
-                    >
-                      <Plus size={15} />
-                      <span>Add</span>
-                    </button>
-                  </div>
-
-                  <div className="subcats-modal-list">
-                    {formData.subcategories.map((sub, idx) => (
-                      <span key={sub.id || idx} className="subcat-modal-tag">
-                        <span>{sub.name}</span>
-                        <button
-                          type="button"
-                          className="tag-del-btn"
-                          onClick={() => handleRemoveSubcategory(idx)}
-                        >
-                          <X size={12} />
-                        </button>
-                      </span>
-                    ))}
-                    {formData.subcategories.length === 0 && (
-                      <p className="no-subcats-hint">No subcategories added yet. Type a name and click Add.</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="exec-modal-actions">
-                  <button
-                    type="button"
-                    className="exec-btn-secondary"
-                    onClick={() => setIsCreateModalOpen(false)}
-                  >
+                <div className="exec-cat-modal__footer">
+                  <button type="button" className="exec-cat-hub__btn exec-cat-hub__btn--secondary" onClick={() => setIsCreateModalOpen(false)}>
                     Cancel
                   </button>
-                  <button type="submit" className="exec-btn-primary">
-                    Create Category
+                  <button type="submit" className="exec-cat-hub__btn exec-cat-hub__btn--primary">
+                    Create Item
                   </button>
                 </div>
               </form>
@@ -728,25 +1369,20 @@ export const ExecutiveCategoriesPage: React.FC = () => {
           </div>
         )}
 
-        {/* ============================================================
-            EDIT CATEGORY MODAL
-           ============================================================ */}
-        {isEditModalOpen && selectedCategory && (
-          <div className="exec-modal-backdrop" onClick={() => setIsEditModalOpen(false)}>
-            <div className="exec-modal-content" onClick={(e) => e.stopPropagation()}>
-              <div className="exec-modal-header">
-                <div className="modal-header-title">
-                  <Edit2 size={20} className="modal-title-icon" />
-                  <h3>Edit Category: {selectedCategory.name}</h3>
-                </div>
-                <button className="exec-modal-close" onClick={() => setIsEditModalOpen(false)}>
-                  <X size={18} />
+        {/* Modal: Edit Item */}
+        {isEditModalOpen && selectedItem && (
+          <div className="exec-cat-modal-overlay">
+            <div className="exec-cat-modal">
+              <div className="exec-cat-modal__header">
+                <h2>Edit Taxonomy Item</h2>
+                <button type="button" onClick={() => setIsEditModalOpen(false)}>
+                  <X size={20} />
                 </button>
               </div>
 
-              <form onSubmit={handleEditSubmit} className="exec-modal-form">
-                <div className="exec-form-group">
-                  <label>Category Name <span className="req">*</span></label>
+              <form onSubmit={handleEditSubmit} className="exec-cat-modal__body">
+                <div className="exec-cat-form-group">
+                  <label>Item Name *</label>
                   <input
                     type="text"
                     required
@@ -755,112 +1391,30 @@ export const ExecutiveCategoriesPage: React.FC = () => {
                   />
                 </div>
 
-                <div className="exec-form-row">
-                  <div className="exec-form-group">
-                    <label>Slug Identifier <span className="req">*</span></label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.slug}
-                      onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().trim() })}
-                    />
-                  </div>
-
-                  <div className="exec-form-group">
-                    <label>Deals / Brands Count</label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={formData.count}
-                      onChange={(e) => setFormData({ ...formData, count: Number(e.target.value) })}
-                    />
-                  </div>
+                <div className="exec-cat-form-group">
+                  <label>Slug / URL Identifier</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.slug}
+                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                  />
                 </div>
 
-                <div className="exec-form-group">
+                <div className="exec-cat-form-group">
                   <label>Description</label>
                   <textarea
-                    rows={2}
+                    rows={3}
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   />
                 </div>
 
-                {/* Color Palette Theme Presets */}
-                <div className="exec-form-group">
-                  <label><Palette size={14} style={{ display: 'inline', marginRight: '4px' }} /> Color Palette Presets</label>
-                  <div className="color-preset-picker">
-                    {COLOR_PALETTES.map((pal) => (
-                      <button
-                        type="button"
-                        key={pal.name}
-                        className={`color-preset-btn ${formData.color === pal.color ? 'selected' : ''}`}
-                        style={{ backgroundColor: pal.color }}
-                        onClick={() =>
-                          setFormData({
-                            ...formData,
-                            color: pal.color,
-                            bgColor: pal.bgColor,
-                            textColor: pal.textColor
-                          })
-                        }
-                        title={pal.name}
-                      ></button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Subcategories Management */}
-                <div className="exec-form-group">
-                  <label>Subcategories Taxonomy</label>
-                  <div className="subcat-input-row">
-                    <input
-                      type="text"
-                      placeholder="Enter subcategory name (e.g. Fitness Equipment)"
-                      value={newSubcatName}
-                      onChange={(e) => setNewSubcatName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault()
-                          handleAddSubcategory()
-                        }
-                      }}
-                    />
-                    <button
-                      type="button"
-                      className="subcat-add-btn"
-                      onClick={handleAddSubcategory}
-                    >
-                      <Plus size={15} />
-                      <span>Add</span>
-                    </button>
-                  </div>
-
-                  <div className="subcats-modal-list">
-                    {formData.subcategories.map((sub, idx) => (
-                      <span key={sub.id || idx} className="subcat-modal-tag">
-                        <span>{sub.name}</span>
-                        <button
-                          type="button"
-                          className="tag-del-btn"
-                          onClick={() => handleRemoveSubcategory(idx)}
-                        >
-                          <X size={12} />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="exec-modal-actions">
-                  <button
-                    type="button"
-                    className="exec-btn-secondary"
-                    onClick={() => setIsEditModalOpen(false)}
-                  >
+                <div className="exec-cat-modal__footer">
+                  <button type="button" className="exec-cat-hub__btn exec-cat-hub__btn--secondary" onClick={() => setIsEditModalOpen(false)}>
                     Cancel
                   </button>
-                  <button type="submit" className="exec-btn-primary">
+                  <button type="submit" className="exec-cat-hub__btn exec-cat-hub__btn--primary">
                     Save Changes
                   </button>
                 </div>
@@ -869,45 +1423,25 @@ export const ExecutiveCategoriesPage: React.FC = () => {
           </div>
         )}
 
-        {/* ============================================================
-            DELETE CONFIRMATION MODAL
-           ============================================================ */}
-        {isDeleteModalOpen && selectedCategory && (
-          <div className="exec-modal-backdrop" onClick={() => setIsDeleteModalOpen(false)}>
-            <div className="exec-modal-content small" onClick={(e) => e.stopPropagation()}>
-              <div className="exec-modal-header">
-                <div className="modal-header-title">
-                  <Trash2 size={20} className="modal-title-icon text-danger" />
-                  <h3>Delete Category</h3>
-                </div>
-                <button className="exec-modal-close" onClick={() => setIsDeleteModalOpen(false)}>
-                  <X size={18} />
+        {/* Modal: Delete Confirmation */}
+        {isDeleteModalOpen && selectedItem && (
+          <div className="exec-cat-modal-overlay">
+            <div className="exec-cat-modal exec-cat-modal--delete">
+              <div className="exec-cat-modal__header">
+                <h2>Confirm Deletion</h2>
+                <button type="button" onClick={() => setIsDeleteModalOpen(false)}>
+                  <X size={20} />
                 </button>
               </div>
-
-              <div className="exec-delete-body">
-                <p>
-                  Are you sure you want to delete the category <strong>"{selectedCategory.name}"</strong> (/{selectedCategory.slug})?
-                </p>
-                <p className="text-warning-sub">
-                  This will remove its taxonomy and associated subcategories from the store navigation.
-                </p>
+              <div className="exec-cat-modal__body">
+                <p>Are you sure you want to delete <strong>"{selectedItem.name}"</strong> from the taxonomy directory?</p>
               </div>
-
-              <div className="exec-modal-actions">
-                <button
-                  type="button"
-                  className="exec-btn-secondary"
-                  onClick={() => setIsDeleteModalOpen(false)}
-                >
+              <div className="exec-cat-modal__footer">
+                <button type="button" className="exec-cat-hub__btn exec-cat-hub__btn--secondary" onClick={() => setIsDeleteModalOpen(false)}>
                   Cancel
                 </button>
-                <button
-                  type="button"
-                  className="exec-btn-danger"
-                  onClick={handleDeleteConfirm}
-                >
-                  Confirm Delete
+                <button type="button" className="exec-cat-hub__btn exec-cat-hub__btn--delete" onClick={handleDeleteConfirm}>
+                  Delete Permanently
                 </button>
               </div>
             </div>
@@ -917,3 +1451,5 @@ export const ExecutiveCategoriesPage: React.FC = () => {
     </ExecutiveLayout>
   )
 }
+
+export default ExecutiveCategoriesPage

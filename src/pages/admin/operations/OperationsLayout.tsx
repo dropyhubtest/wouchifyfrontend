@@ -148,12 +148,17 @@ export const OperationsLayout: React.FC<OperationsLayoutProps> = ({
         </button>
 
         <div className="sidebar-header">
-          <img 
-            src={logo} 
-            alt="Wouchify" 
-            className="operations-logo" 
-            onClick={() => navigate('/operational-manager/dashboard')} 
-          />
+          <div className="sidebar-header-top-row">
+            <img 
+              src={logo} 
+              alt="Wouchify" 
+              className="operations-logo" 
+              onClick={() => navigate('/operational-manager/dashboard')} 
+            />
+            <button className="sidebar-mobile-close-btn" onClick={() => setIsSidebarOpen(false)} aria-label="Close sidebar">
+              <span style={{ fontSize: '20px', lineHeight: 1 }}>✕</span>
+            </button>
+          </div>
           <div className="operations-badge">
             <ShieldCheck size={12} /> Ops Manager
           </div>

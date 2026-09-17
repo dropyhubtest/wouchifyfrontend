@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import { ExecutiveLayout } from './ExecutiveLayout'
-import { FAVOURITE_STORES } from '../../../data/storesHero'
-import { DEALS_CARD_ITEMS, MASTER_EXECUTIVE_DEALS, MASTER_EXECUTIVE_LOOT_DEALS, getStoreLogo, PLACEHOLDER_STORE_LOGO } from '../../../data/dealsPage'
+import { getStoreLogo, PLACEHOLDER_STORE_LOGO } from '../../../data/dealsPage'
 import { 
   Search, 
   ArrowUpDown, 
@@ -16,6 +15,7 @@ import {
   Eye
 } from 'lucide-react'
 import { adminApi } from '../../../services/adminApi'
+import { TableRowSkeleton, EmptyState } from '../../../components/common/Skeletons'
 import './ExecutiveDashboardPage.css'
 
 type TimeframeType = 'today' | 'yesterday' | 'week' | 'month' | 'all'
@@ -39,241 +39,17 @@ interface SubmissionItem {
   link: string
 }
 
-// Comprehensive realistic executive submission records
-const MOCK_SUBMISSIONS: SubmissionItem[] = [
-  {
-    id: 'sub-1',
-    title: 'Apple iPhone 15 Pro Max (256GB, Natural Titanium)',
-    type: 'deal',
-    store: 'Amazon',
-    category: 'Electronics',
-    price: '₹1,34,900',
-    originalPrice: '₹1,59,900',
-    discount: '16% OFF',
-    postedAt: 'Today, 11:30 AM',
-    timeframe: 'today',
-    status: 'Approved',
-    clicks: 1420,
-    link: '/executive/deals'
-  },
-  {
-    id: 'sub-2',
-    title: 'Sony PlayStation 5 Slim Console Disk Edition',
-    type: 'loot',
-    store: 'Flipkart',
-    category: 'Electronics',
-    price: '₹44,990',
-    originalPrice: '₹54,990',
-    discount: 'Flat ₹10,000 OFF',
-    postedAt: 'Today, 10:45 AM',
-    timeframe: 'today',
-    status: 'Approved',
-    clicks: 2890,
-    link: '/executive/loot-deals'
-  },
-  {
-    id: 'sub-3',
-    title: 'Flat 50% Off First Order + Free Delivery',
-    type: 'coupon',
-    store: 'Swiggy',
-    category: 'Food',
-    discount: '50% OFF',
-    postedAt: 'Today, 09:20 AM',
-    timeframe: 'today',
-    status: 'Approved',
-    clicks: 3410,
-    link: '/executive/coupons'
-  },
-  {
-    id: 'sub-4',
-    title: 'Nike Air Max Running Shoes (Men & Women)',
-    type: 'deal',
-    store: 'Myntra',
-    category: 'Fashion',
-    price: '₹4,999',
-    originalPrice: '₹9,995',
-    discount: '50% OFF',
-    postedAt: 'Today, 08:50 AM',
-    timeframe: 'today',
-    status: 'Pending Review',
-    clicks: 870,
-    link: '/executive/deals'
-  },
-  {
-    id: 'sub-5',
-    title: 'Samsung 55" Crystal 4K Vivid Pro Smart TV',
-    type: 'loot',
-    store: 'Amazon',
-    category: 'Electronics',
-    price: '₹37,990',
-    originalPrice: '₹64,900',
-    discount: '41% OFF',
-    postedAt: 'Today, 08:15 AM',
-    timeframe: 'today',
-    status: 'Approved',
-    clicks: 1950,
-    link: '/executive/loot-deals'
-  },
-  {
-    id: 'sub-6',
-    title: 'Extra ₹500 Instant Discount with HDFC Credit Cards',
-    type: 'coupon',
-    store: 'Reliance Digital',
-    category: 'Electronics',
-    discount: '₹500 OFF',
-    postedAt: 'Today, 07:30 AM',
-    timeframe: 'today',
-    status: 'Approved',
-    clicks: 980,
-    link: '/executive/coupons'
-  },
-  {
-    id: 'sub-7',
-    title: 'Milton 1.8L Electric Kettle Stainless Steel',
-    type: 'deal',
-    store: 'Amazon',
-    category: 'Home',
-    price: '₹699',
-    originalPrice: '₹1,299',
-    discount: '46% OFF',
-    postedAt: 'Today, 06:40 AM',
-    timeframe: 'today',
-    status: 'Draft',
-    clicks: 210,
-    link: '/executive/deals'
-  },
-  {
-    id: 'sub-8',
-    title: 'Buy 2 Get 1 Free on Autumn Beauty Essentials',
-    type: 'coupon',
-    store: 'Nykaa',
-    category: 'Beauty',
-    discount: 'B2G1 FREE',
-    postedAt: 'Today, 06:10 AM',
-    timeframe: 'today',
-    status: 'Approved',
-    clicks: 1540,
-    link: '/executive/coupons'
-  },
-  // Yesterday items
-  {
-    id: 'sub-9',
-    title: 'Boat Airdopes 141 ANC Wireless Earbuds',
-    type: 'deal',
-    store: 'Flipkart',
-    category: 'Electronics',
-    price: '₹1,299',
-    originalPrice: '₹4,490',
-    discount: '71% OFF',
-    postedAt: 'Yesterday, 06:30 PM',
-    timeframe: 'yesterday',
-    status: 'Approved',
-    clicks: 4210,
-    link: '/executive/deals'
-  },
-  {
-    id: 'sub-10',
-    title: 'Fastrack Reflex Beat Smartwatch Full Touch',
-    type: 'loot',
-    store: 'Myntra',
-    category: 'Fashion',
-    price: '₹999',
-    originalPrice: '₹3,995',
-    discount: '75% OFF',
-    postedAt: 'Yesterday, 04:15 PM',
-    timeframe: 'yesterday',
-    status: 'Approved',
-    clicks: 3120,
-    link: '/executive/loot-deals'
-  },
-  {
-    id: 'sub-11',
-    title: 'Flat 60% Off End of Season Clearance Code',
-    type: 'coupon',
-    store: 'Ajio',
-    category: 'Fashion',
-    discount: '60% OFF',
-    postedAt: 'Yesterday, 02:40 PM',
-    timeframe: 'yesterday',
-    status: 'Approved',
-    clicks: 2890,
-    link: '/executive/coupons'
-  },
-  {
-    id: 'sub-12',
-    title: 'Organic Grocery Essentials Pantry Pack 10kg',
-    type: 'deal',
-    store: 'BigBasket',
-    category: 'Grocery',
-    price: '₹1,199',
-    originalPrice: '₹1,850',
-    discount: '35% OFF',
-    postedAt: 'Yesterday, 11:20 AM',
-    timeframe: 'yesterday',
-    status: 'Approved',
-    clicks: 1650,
-    link: '/executive/deals'
-  },
-  // This week items
-  {
-    id: 'sub-13',
-    title: 'Zepto Super Saver Promo: Flat ₹150 Cashback',
-    type: 'coupon',
-    store: 'Zepto',
-    category: 'Grocery',
-    discount: '₹150 CASHBACK',
-    postedAt: '3 days ago',
-    timeframe: 'week',
-    status: 'Approved',
-    clicks: 5600,
-    link: '/executive/coupons'
-  },
-  {
-    id: 'sub-14',
-    title: 'OnePlus 12R 5G (16GB RAM, 256GB Storage)',
-    type: 'deal',
-    store: 'Amazon',
-    category: 'Electronics',
-    price: '₹42,999',
-    originalPrice: '₹45,999',
-    discount: '7% OFF',
-    postedAt: '4 days ago',
-    timeframe: 'week',
-    status: 'Approved',
-    clicks: 4100,
-    link: '/executive/deals'
-  },
-  {
-    id: 'sub-15',
-    title: 'Zomato Gold: 40% Off on Top Dining Restaurants',
-    type: 'coupon',
-    store: 'Zomato',
-    category: 'Food',
-    discount: '40% OFF',
-    postedAt: '5 days ago',
-    timeframe: 'week',
-    status: 'Approved',
-    clicks: 6800,
-    link: '/executive/coupons'
-  }
-]
-
 // Day-wise velocity for chart
-const WEEKLY_POSTING_DATA = [
-  { day: 'Mon', deals: 5, loot: 2, coupons: 8 },
-  { day: 'Tue', deals: 7, loot: 3, coupons: 11 },
-  { day: 'Wed', deals: 4, loot: 1, coupons: 6 },
-  { day: 'Thu', deals: 9, loot: 4, coupons: 10 },
-  { day: 'Fri', deals: 6, loot: 3, coupons: 14 },
-  { day: 'Sat', deals: 8, loot: 5, coupons: 12 },
-  { day: 'Today', deals: 8, loot: 4, coupons: 12, isToday: true }
-]
-
 export const ExecutiveDashboardPage: React.FC = () => {
   const [user, setUser] = useState<{ email: string; role: string; name?: string } | null>(null)
   const [greeting, setGreeting] = useState('')
   const [timeStr, setTimeStr] = useState('')
-  const [submissions, setSubmissions] = useState<SubmissionItem[]>(MOCK_SUBMISSIONS)
+  const [submissions, setSubmissions] = useState<SubmissionItem[]>([])
+  const [rawDeals, setRawDeals] = useState<any[]>([])
+  const [rawLoot, setRawLoot] = useState<any[]>([])
+  const [rawCoupons, setRawCoupons] = useState<any[]>([])
+  const [rawStores, setRawStores] = useState<any[]>([])
+  const [loadingSubmissions, setLoadingSubmissions] = useState(true)
 
   // Filter States
   const [activeTimeframe, setActiveTimeframe] = useState<TimeframeType>('today')
@@ -282,52 +58,219 @@ export const ExecutiveDashboardPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<StatusType>('all')
   const [sortOption, setSortOption] = useState<SortOption>('recent')
 
+  const [globalStats, setGlobalStats] = useState({
+    deals: 0,
+    loot: 0,
+    stores: 0,
+    coupons: 0,
+    clicks: 0,
+    pending: 0,
+    expired: 0
+  })
+
+  const loadLiveData = async () => {
+    setLoadingSubmissions(true)
+    try {
+      const [dealsRes, lootRes, couponsRes, storesRes, subsRes] = await Promise.all([
+        adminApi.getDeals().catch(() => []),
+        adminApi.getLootDeals().catch(() => []),
+        adminApi.getCoupons().catch(() => []),
+        adminApi.getStores().catch(() => []),
+        adminApi.getSubmissions().catch(() => [])
+      ])
+
+      const deals = Array.isArray(dealsRes) ? dealsRes : []
+      const loot = Array.isArray(lootRes) ? lootRes : []
+      const coupons = Array.isArray(couponsRes) ? couponsRes : []
+      const stores = Array.isArray(storesRes) ? storesRes : []
+      const subs = Array.isArray(subsRes) ? subsRes : []
+
+      setRawDeals(deals)
+      setRawLoot(loot)
+      setRawCoupons(coupons)
+      setRawStores(stores)
+
+      const dealClicks = deals.reduce((sum: number, d: any) => sum + (parseInt(String(d.clicks || 0)) || 0), 0)
+      const lootClicks = loot.reduce((sum: number, d: any) => sum + (parseInt(String(d.clicks || 0)) || 0), 0)
+      const couponClicks = coupons.reduce((sum: number, c: any) => sum + (parseInt(String(c.usageCount || c.clicks || 0)) || 0), 0)
+      const storeClicks = stores.reduce((sum: number, s: any) => sum + (parseInt(String(s.clicks || 0)) || 0), 0)
+      const totalClicks = dealClicks + lootClicks + couponClicks + storeClicks
+
+      const pendingCount = subs.filter((s: any) => s.status === 'Pending Approval' || s.status === 'Pending Review' || s.status === 'pending').length
+      const expiredCount = deals.filter((d: any) => d.status === 'expired').length + coupons.filter((c: any) => c.status === 'expired').length
+
+      setGlobalStats({
+        deals: deals.length,
+        loot: loot.length,
+        stores: stores.length,
+        coupons: coupons.length,
+        clicks: totalClicks,
+        pending: pendingCount,
+        expired: expiredCount
+      })
+
+      // Build unified live submissions & activity items
+      const mappedSubs: SubmissionItem[] = subs.map((s: any, idx: number) => {
+        const subDate = s.submittedAt || s.createdAt ? new Date(s.submittedAt || s.createdAt) : new Date()
+        const now = new Date()
+        const diffHours = (now.getTime() - subDate.getTime()) / (1000 * 60 * 60)
+        let tf: 'today' | 'yesterday' | 'week' | 'month' | 'older' = 'today'
+        if (diffHours > 24 && diffHours <= 48) tf = 'yesterday'
+        else if (diffHours > 48 && diffHours <= 168) tf = 'week'
+        else if (diffHours > 168 && diffHours <= 720) tf = 'month'
+        else if (diffHours > 720) tf = 'older'
+
+        return {
+          id: s.id || s._id || `sub-live-${idx}`,
+          title: s.title || s.dataSnapshot?.title || s.dataSnapshot?.name || 'Untitled Item',
+          type: (s.entityType === 'loot_deal' ? 'loot' : s.entityType === 'coupon' ? 'coupon' : 'deal') as 'deal' | 'loot' | 'coupon',
+          store: s.store || s.dataSnapshot?.store || s.dataSnapshot?.storeName || 'Partner Store',
+          category: s.category || s.dataSnapshot?.category || 'General',
+          price: s.dataSnapshot?.price || s.dataSnapshot?.currentPrice || s.dataSnapshot?.reward || '',
+          originalPrice: s.dataSnapshot?.originalPrice || '',
+          discount: s.dataSnapshot?.discount || 'Special Offer',
+          postedAt: subDate.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+          timeframe: tf,
+          status: (s.status === 'Approved' ? 'Approved' : s.status === 'Rejected' ? 'Draft' : 'Pending Review') as 'Approved' | 'Pending Review' | 'Draft',
+          clicks: s.dataSnapshot?.clicks || 0,
+          link: s.entityType === 'loot_deal' ? '/executive/loot-deals' : s.entityType === 'coupon' ? '/executive/coupons' : '/executive/deals'
+        }
+      })
+
+      // Also merge active published deals, loots, and coupons
+      const publishedDealItems: SubmissionItem[] = deals.map((d: any, idx: number) => {
+        const itemDate = d.createdAt ? new Date(d.createdAt) : new Date()
+        const diffHours = (Date.now() - itemDate.getTime()) / (1000 * 60 * 60)
+        let tf: 'today' | 'yesterday' | 'week' | 'month' | 'older' = 'today'
+        if (diffHours > 24 && diffHours <= 48) tf = 'yesterday'
+        else if (diffHours > 48 && diffHours <= 168) tf = 'week'
+        else if (diffHours > 168 && diffHours <= 720) tf = 'month'
+        else if (diffHours > 720) tf = 'older'
+
+        return {
+          id: String(d._id || d.id || `deal-${idx}`),
+          title: d.name || d.title || 'Deal Item',
+          type: 'deal' as const,
+          store: d.store || 'Amazon',
+          category: d.category || 'Electronics',
+          price: d.price || '₹999',
+          originalPrice: d.originalPrice || '',
+          discount: d.discount || 'Special Offer',
+          postedAt: itemDate.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+          timeframe: tf,
+          status: (d.status === 'active' ? 'Approved' : d.status === 'pending' ? 'Pending Review' : 'Draft') as 'Approved' | 'Pending Review' | 'Draft',
+          clicks: d.clicks || 0,
+          link: '/executive/deals'
+        }
+      })
+
+      const publishedLootItems: SubmissionItem[] = loot.map((l: any, idx: number) => {
+        const itemDate = l.createdAt ? new Date(l.createdAt) : new Date()
+        const diffHours = (Date.now() - itemDate.getTime()) / (1000 * 60 * 60)
+        let tf: 'today' | 'yesterday' | 'week' | 'month' | 'older' = 'today'
+        if (diffHours > 24 && diffHours <= 48) tf = 'yesterday'
+        else if (diffHours > 48 && diffHours <= 168) tf = 'week'
+        else if (diffHours > 168 && diffHours <= 720) tf = 'month'
+        else if (diffHours > 720) tf = 'older'
+
+        return {
+          id: String(l._id || l.id || `loot-${idx}`),
+          title: l.title || 'Flash Loot Offer',
+          type: 'loot' as const,
+          store: l.storeName || l.store || 'Amazon',
+          category: l.category || 'Electronics',
+          price: l.currentPrice || l.price || '₹499',
+          originalPrice: l.originalPrice || '',
+          discount: l.discount || '80% OFF',
+          postedAt: itemDate.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+          timeframe: tf,
+          status: (l.status === 'active' ? 'Approved' : 'Draft') as 'Approved' | 'Pending Review' | 'Draft',
+          clicks: l.clicks || 0,
+          link: '/executive/loot-deals'
+        }
+      })
+
+      const publishedCouponItems: SubmissionItem[] = coupons.map((c: any, idx: number) => {
+        const itemDate = c.createdAt ? new Date(c.createdAt) : new Date()
+        const diffHours = (Date.now() - itemDate.getTime()) / (1000 * 60 * 60)
+        let tf: 'today' | 'yesterday' | 'week' | 'month' | 'older' = 'today'
+        if (diffHours > 24 && diffHours <= 48) tf = 'yesterday'
+        else if (diffHours > 48 && diffHours <= 168) tf = 'week'
+        else if (diffHours > 168 && diffHours <= 720) tf = 'month'
+        else if (diffHours > 720) tf = 'older'
+
+        return {
+          id: String(c._id || c.id || `coupon-${idx}`),
+          title: `${c.store || 'Store'} Promo Code: ${c.code || 'COUPON'}`,
+          type: 'coupon' as const,
+          store: c.store || 'Amazon',
+          category: c.category || 'General',
+          price: c.code || 'CODE',
+          originalPrice: '',
+          discount: c.discount || 'Special Discount',
+          postedAt: itemDate.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+          timeframe: tf,
+          status: (c.status === 'active' ? 'Approved' : 'Draft') as 'Approved' | 'Pending Review' | 'Draft',
+          clicks: c.usageCount || c.clicks || 0,
+          link: '/executive/coupons'
+        }
+      })
+
+      // Combine and deduplicate
+      const allPublished = [...publishedDealItems, ...publishedLootItems, ...publishedCouponItems]
+      const combined = [...mappedSubs, ...allPublished.filter(p => !mappedSubs.some(s => s.id === p.id))]
+      setSubmissions(combined)
+    } catch (e) {
+      console.error('Failed to load dashboard data:', e)
+      setSubmissions([])
+    } finally {
+      setLoadingSubmissions(false)
+    }
+  }
+
   useEffect(() => {
     const userData = localStorage.getItem('staffUser')
     if (userData) {
       setUser(JSON.parse(userData))
     }
 
-    const loadLiveSubmissions = async () => {
-      try {
-        const live = await adminApi.getSubmissions()
-        if (Array.isArray(live) && live.length > 0) {
-          const mapped: SubmissionItem[] = live.map((s: any, idx: number) => ({
-            id: s.id || s._id || `sub-live-${idx}`,
-            title: s.title || 'Untitled Submission',
-            type: (s.entityType === 'loot_deal' ? 'loot' : s.entityType === 'coupon' ? 'coupon' : 'deal') as 'deal' | 'loot' | 'coupon',
-            store: s.store || 'Amazon',
-            category: s.category || 'General',
-            price: s.dataSnapshot?.price || '₹999',
-            originalPrice: s.dataSnapshot?.originalPrice || '₹1,999',
-            discount: s.dataSnapshot?.discount || '50% OFF',
-            postedAt: s.submittedAt ? new Date(s.submittedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }) : 'Just now',
-            timeframe: 'today',
-            status: (s.status === 'Approved' ? 'Approved' : s.status === 'Rejected' ? 'Draft' : 'Pending Review') as 'Approved' | 'Pending Review' | 'Draft',
-            clicks: s.dataSnapshot?.clicks || Math.floor(Math.random() * 500 + 50),
-            link: s.entityType === 'loot_deal' ? '/executive/loot-deals' : s.entityType === 'coupon' ? '/executive/coupons' : '/executive/deals'
-          }))
-          setSubmissions(mapped)
-        }
-      } catch (e) {
-        console.warn('Fallback to local submissions:', e)
-      }
+    loadLiveData()
+
+    const handleSync = () => {
+      loadLiveData()
     }
 
-    loadLiveSubmissions()
-
-    const handleSync = () => { loadLiveSubmissions() }
     window.addEventListener('wouchify_deals_updated', handleSync)
     window.addEventListener('wouchify_loot_deals_updated', handleSync)
+    window.addEventListener('wouchify_coupons_updated', handleSync)
+    window.addEventListener('wouchify_stores_updated', handleSync)
     window.addEventListener('wouchify_deal_clicked', handleSync)
+    window.addEventListener('wouchify_store_clicked', handleSync)
+    window.addEventListener('wouchify_coupon_clicked', handleSync)
+    window.addEventListener('wouchify_credit_card_clicked', handleSync)
+    window.addEventListener('wouchify_banner_clicked', handleSync)
+    window.addEventListener('wouchify_ad_clicked', handleSync)
     window.addEventListener('storage', handleSync)
     return () => {
       window.removeEventListener('wouchify_deals_updated', handleSync)
       window.removeEventListener('wouchify_loot_deals_updated', handleSync)
+      window.removeEventListener('wouchify_coupons_updated', handleSync)
+      window.removeEventListener('wouchify_stores_updated', handleSync)
       window.removeEventListener('wouchify_deal_clicked', handleSync)
+      window.removeEventListener('wouchify_store_clicked', handleSync)
+      window.removeEventListener('wouchify_coupon_clicked', handleSync)
+      window.removeEventListener('wouchify_credit_card_clicked', handleSync)
+      window.removeEventListener('wouchify_banner_clicked', handleSync)
+      window.removeEventListener('wouchify_ad_clicked', handleSync)
       window.removeEventListener('storage', handleSync)
     }
   }, [])
+
+  const totalDealsGlobal = globalStats.deals
+  const totalLootGlobal = globalStats.loot
+  const totalStoresGlobal = globalStats.stores
+  const totalCouponsGlobal = globalStats.coupons
+  const totalClicksGlobal = globalStats.clicks
 
   useEffect(() => {
     const update = () => {
@@ -392,114 +335,89 @@ export const ExecutiveDashboardPage: React.FC = () => {
       if (sortOption === 'discount') return b.discount.localeCompare(a.discount)
       return 0 // default 'recent'
     })
-  }, [activeTimeframe, activeType, statusFilter, searchTerm, sortOption])
+  }, [submissions, activeTimeframe, activeType, statusFilter, searchTerm, sortOption])
 
-  // Dynamic Global CMS stats that sync in real-time
-  const [globalStats, setGlobalStats] = useState({
-    deals: DEALS_CARD_ITEMS.length,
-    loot: MASTER_EXECUTIVE_LOOT_DEALS.length,
-    stores: FAVOURITE_STORES.length,
-    coupons: 45,
-    clicks: 125430,
-    pending: 5
-  })
+  // Dynamically computed weekly velocity data
+  const dynamicWeeklyPostingData = useMemo(() => {
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    const today = new Date()
+    const result = []
 
-  const refreshGlobalStats = () => {
-    try {
-      // 1. Deals count & clicks
-      let dealClicks = 0
-      let dealsCount = MASTER_EXECUTIVE_DEALS.length
-      const savedDealsRaw = localStorage.getItem('wouchify_public_deals') || localStorage.getItem('wouchify_executive_deals')
-      if (savedDealsRaw) {
-        const parsed = JSON.parse(savedDealsRaw)
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          dealsCount = parsed.length
-          dealClicks = parsed.reduce((sum: number, d: any) => sum + (parseInt(String(d.clicks || 0)) || 0), 0)
-        }
-      } else {
-        dealClicks = MASTER_EXECUTIVE_DEALS.reduce((sum, d) => sum + (d.clicks || 0), 0)
-      }
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date()
+      d.setDate(today.getDate() - i)
+      const dayName = i === 0 ? 'Today' : days[d.getDay()]
+      const isToday = i === 0
 
-      // 2. Loot deals count & clicks
-      let lootClicks = 0
-      let lootCount = MASTER_EXECUTIVE_LOOT_DEALS.length
-      const savedLootRaw = localStorage.getItem('wouchify_loot_deals')
-      if (savedLootRaw) {
-        const parsed = JSON.parse(savedLootRaw)
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          lootCount = parsed.length
-          lootClicks = parsed.reduce((sum: number, d: any) => sum + (parseInt(String(d.clicks || 0)) || 0), 0)
-        }
-      } else {
-        lootClicks = MASTER_EXECUTIVE_LOOT_DEALS.reduce((sum, d) => sum + (d.clicks || 0), 0)
-      }
+      // Match items created on that day
+      const dealsCount = rawDeals.filter(item => {
+        if (!item.createdAt) return i === 0 // default to today if no date
+        const itemDate = new Date(item.createdAt)
+        return itemDate.toDateString() === d.toDateString()
+      }).length
 
-      // 3. Coupons count & clicks
-      let couponClicks = 0
-      let couponCount = 45
-      const savedCouponsRaw = localStorage.getItem('wouchify_coupons')
-      if (savedCouponsRaw) {
-        const parsed = JSON.parse(savedCouponsRaw)
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          couponCount = parsed.length
-          couponClicks = parsed.reduce((sum: number, c: any) => sum + (parseInt(String(c.usageCount || c.clicks || 0)) || 0), 0)
-        }
-      }
+      const lootCount = rawLoot.filter(item => {
+        if (!item.createdAt) return i === 0
+        const itemDate = new Date(item.createdAt)
+        return itemDate.toDateString() === d.toDateString()
+      }).length
 
-      // 4. Stores count & clicks
-      let storeClicks = 0
-      let storesCount = FAVOURITE_STORES.length
-      const savedStoresRaw = localStorage.getItem('wouchify_stores')
-      if (savedStoresRaw) {
-        const parsed = JSON.parse(savedStoresRaw)
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          storesCount = parsed.length
-          storeClicks = parsed.reduce((sum: number, s: any) => sum + (parseInt(String(s.clicks || 0)) || 0), 0)
-        }
-      }
+      const couponsCount = rawCoupons.filter(item => {
+        if (!item.createdAt) return i === 0
+        const itemDate = new Date(item.createdAt)
+        return itemDate.toDateString() === d.toDateString()
+      }).length
 
-      // Base historical clicks + live aggregated clicks
-      const baseHistoricalClicks = 112500
-      const totalClicks = baseHistoricalClicks + dealClicks + lootClicks + couponClicks + storeClicks
-
-      setGlobalStats({
+      result.push({
+        day: dayName,
         deals: dealsCount,
         loot: lootCount,
-        stores: storesCount,
-        coupons: couponCount,
-        clicks: totalClicks,
-        pending: 5
+        coupons: couponsCount,
+        isToday
       })
-    } catch (e) {
-      console.warn('Error computing global dashboard stats:', e)
     }
-  }
+    return result
+  }, [rawDeals, rawLoot, rawCoupons])
 
-  useEffect(() => {
-    refreshGlobalStats()
-    const handleStatsSync = () => { refreshGlobalStats() }
-    window.addEventListener('wouchify_deals_updated', handleStatsSync)
-    window.addEventListener('wouchify_loot_deals_updated', handleStatsSync)
-    window.addEventListener('wouchify_stores_updated', handleStatsSync)
-    window.addEventListener('wouchify_store_clicked', handleStatsSync)
-    window.addEventListener('wouchify_deal_clicked', handleStatsSync)
-    window.addEventListener('storage', handleStatsSync)
-    return () => {
-      window.removeEventListener('wouchify_deals_updated', handleStatsSync)
-      window.removeEventListener('wouchify_loot_deals_updated', handleStatsSync)
-      window.removeEventListener('wouchify_stores_updated', handleStatsSync)
-      window.removeEventListener('wouchify_store_clicked', handleStatsSync)
-      window.removeEventListener('wouchify_deal_clicked', handleStatsSync)
-      window.removeEventListener('storage', handleStatsSync)
-    }
-  }, [])
+  // Dynamically computed top stores breakdown from live deals and loot
+  const dynamicTopStoresBreakdown = useMemo(() => {
+    const storeCountMap: Record<string, number> = {}
+    
+    // Count from deals
+    rawDeals.forEach((d: any) => {
+      const storeName = d.store || 'Amazon'
+      storeCountMap[storeName] = (storeCountMap[storeName] || 0) + 1
+    })
 
-  const totalDealsGlobal = globalStats.deals
-  const totalLootGlobal = globalStats.loot
-  const totalStoresGlobal = globalStats.stores
-  const totalCouponsGlobal = globalStats.coupons
-  const totalClicksGlobal = globalStats.clicks
-  const totalExpiredGlobal = 12
+    // Count from loot
+    rawLoot.forEach((l: any) => {
+      const storeName = l.storeName || l.store || 'Amazon'
+      storeCountMap[storeName] = (storeCountMap[storeName] || 0) + 1
+    })
+
+    // Count from stores list if not already present
+    rawStores.forEach((s: any) => {
+      if (!storeCountMap[s.name]) {
+        storeCountMap[s.name] = s.totalDeals || 0
+      }
+    })
+
+    const entries = Object.entries(storeCountMap)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5)
+
+    const maxCount = Math.max(...entries.map(e => e.count), 1)
+    const colors = ['#f97316', '#3b82f6', '#ec4899', '#f59e0b', '#8b5cf6']
+
+    return entries.map((st, idx) => ({
+      ...st,
+      fill: Math.round((st.count / maxCount) * 100),
+      color: colors[idx % colors.length]
+    }))
+  }, [rawDeals, rawLoot, rawStores])
+
+  const totalExpiredGlobal = globalStats.expired
   const pendingApprovalsCount = globalStats.pending
 
   const adminName = user?.name || 'Executive'
@@ -789,8 +707,8 @@ export const ExecutiveDashboardPage: React.FC = () => {
 
             {/* Multi-Bar CSS Chart */}
             <div className="bar-chart-container">
-              {WEEKLY_POSTING_DATA.map((item) => {
-                const maxVal = 16
+              {dynamicWeeklyPostingData.map((item) => {
+                const maxVal = Math.max(...dynamicWeeklyPostingData.flatMap(d => [d.deals, d.loot, d.coupons]), 5)
                 const dealH = Math.round((item.deals / maxVal) * 100)
                 const lootH = Math.round((item.loot / maxVal) * 100)
                 const coupH = Math.round((item.coupons / maxVal) * 100)
@@ -821,13 +739,11 @@ export const ExecutiveDashboardPage: React.FC = () => {
             </div>
 
             <div className="store-breakdown-list">
-              {[
-                { name: 'Amazon', count: 48, fill: 88, color: '#f97316' },
-                { name: 'Flipkart', count: 36, fill: 68, color: '#3b82f6' },
-                { name: 'Myntra', count: 24, fill: 45, color: '#ec4899' },
-                { name: 'Swiggy', count: 18, fill: 35, color: '#f59e0b' },
-                { name: 'Zepto', count: 12, fill: 24, color: '#8b5cf6' },
-              ].map((st) => (
+              {dynamicTopStoresBreakdown.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '24px', color: '#94a3b8', fontSize: '0.85rem' }}>
+                  No store offers recorded yet
+                </div>
+              ) : dynamicTopStoresBreakdown.map((st) => (
                 <div key={st.name} className="breakdown-row">
                   <div className="breakdown-row-header">
                     <div className="breakdown-store-name">
@@ -835,15 +751,16 @@ export const ExecutiveDashboardPage: React.FC = () => {
                         src={getStoreLogo(st.name)} 
                         alt={st.name} 
                         style={{ height: '14px', maxWidth: '30px', objectFit: 'contain' }} 
+                        onError={(e) => { (e.target as any).src = PLACEHOLDER_STORE_LOGO }}
                       />
                       <span>{st.name}</span>
                     </div>
-                    <span className="breakdown-count-badge">{st.count} posts</span>
+                    <span className="breakdown-count-badge">{st.count} offers</span>
                   </div>
                   <div className="breakdown-progress-track">
                     <div 
                       className="breakdown-progress-fill" 
-                      style={{ width: `${st.fill}%`, backgroundColor: st.color }} 
+                      style={{ width: `${Math.max(st.fill, 8)}%`, backgroundColor: st.color }} 
                     />
                   </div>
                 </div>
@@ -948,7 +865,19 @@ export const ExecutiveDashboardPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredSubmissions.map((sub) => (
+                {loadingSubmissions ? (
+                  <TableRowSkeleton columns={8} rows={5} />
+                ) : filteredSubmissions.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} style={{ textAlign: 'center', padding: '36px 16px' }}>
+                      <EmptyState
+                        icon="📋"
+                        title="No submissions found"
+                        description={searchTerm || activeType !== 'all' || statusFilter !== 'all' ? "No submissions match your filter criteria." : "No submissions logged for this timeframe."}
+                      />
+                    </td>
+                  </tr>
+                ) : filteredSubmissions.map((sub) => (
                   <tr key={sub.id}>
                     <td>
                       <div style={{ fontWeight: 600, color: '#0f172a', maxWidth: '320px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -1036,13 +965,6 @@ export const ExecutiveDashboardPage: React.FC = () => {
                     </td>
                   </tr>
                 ))}
-                {filteredSubmissions.length === 0 && (
-                  <tr>
-                    <td colSpan={8} style={{ textAlign: 'center', padding: '36px', color: '#64748b' }}>
-                      No submissions found matching the selected timeframe and filters.
-                    </td>
-                  </tr>
-                )}
               </tbody>
             </table>
           </div>

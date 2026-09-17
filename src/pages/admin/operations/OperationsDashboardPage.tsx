@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import './OperationsShared.css'
 import { getStoreLogo, PLACEHOLDER_DEAL_IMAGE, PLACEHOLDER_STORE_LOGO } from '../../../data/dealsPage'
+import { AdminPromptDialog } from '../../../components/common/AdminDialog'
 
 export interface UrgentModerationItem {
   id: string
@@ -105,107 +106,172 @@ export const OperationsDashboardPage: React.FC = () => {
   const [contentTypeFilter, setContentTypeFilter] = useState<string>('all')
   const [reportFilter, setReportFilter] = useState<'today' | 'week' | 'month'>('week')
   const [reportExecutiveFilter, setReportExecutiveFilter] = useState<string>('all')
-  const [urgentItems, setUrgentItems] = useState<UrgentModerationItem[]>([
+  const [urgentItems, setUrgentItems] = useState<UrgentModerationItem[]>([])
+  const [executivesList, setExecutivesList] = useState<ExecutiveInfo[]>([
     {
-      id: 'appr-101',
-      type: 'loot',
-      title: 'Sony WH-1000XM5 Wireless ANC Headphones (Price Glitch at ₹4,999)',
-      brand: 'Sony',
-      store: 'Amazon',
-      submittedBy: 'rahul.executive@wouchify.com',
-      submittedAt: '12 mins ago',
-      price: '₹4,999',
-      originalPrice: '₹29,990',
-      discount: '83% OFF',
-      code: 'GLITCHSONY',
-      priority: 'Critical',
-      category: 'Electronics',
-      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop'
+      id: 'stf-balaji',
+      name: 'Balaji',
+      shortName: 'Balaji',
+      email: 'balaji@wouchify.com',
+      role: 'Content Executive',
+      domain: 'Deals & Loot Deals',
+      dealsToday: 4,
+      lootToday: 2,
+      couponsToday: 0,
+      bannersToday: 1,
+      storesToday: 1,
+      submissionsToday: 8,
+      approvalRate: 98.5,
+      avgTurnaround: '10 mins',
+      status: 'Online'
     },
     {
-      id: 'appr-102',
-      type: 'deal',
-      title: 'Samsung Galaxy S24 Ultra 5G (12GB RAM, 512GB Titanium Black)',
-      brand: 'Samsung',
-      store: 'Flipkart',
-      submittedBy: 'sneha.deals@wouchify.com',
-      submittedAt: '35 mins ago',
-      price: '₹1,09,999',
-      originalPrice: '₹1,34,999',
-      discount: '19% OFF',
-      priority: 'High',
-      category: 'Electronics',
-      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500&auto=format&fit=crop'
-    },
-    {
-      id: 'appr-103',
-      type: 'coupon',
-      title: 'Myntra Flat ₹500 OFF on Orders Above ₹1,999 (Code: MYNTRAPRO)',
-      brand: 'Myntra',
-      store: 'Myntra',
-      submittedBy: 'arjun.coupons@wouchify.com',
-      submittedAt: '1 hour ago',
-      price: 'Flat ₹500 OFF',
-      originalPrice: '',
-      discount: '₹500 OFF',
-      code: 'MYNTRAPRO',
-      priority: 'Normal',
-      category: 'Fashion',
-      image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=500&auto=format&fit=crop'
-    },
-    {
-      id: 'appr-104',
-      type: 'banner',
-      title: 'Great Indian Festival — Hero Carousel Banner Slot 1 (Amazon Diwali Deals)',
-      brand: 'Amazon Festive',
-      store: 'Amazon',
-      submittedBy: 'priya.media@wouchify.com',
-      submittedAt: '18 mins ago',
-      price: 'Creative Banner',
-      originalPrice: '',
-      discount: 'Hero Slot 1',
-      priority: 'High',
-      category: 'Electronics',
-      image: 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=500&auto=format&fit=crop'
+      id: 'stf-jayanth',
+      name: 'Jayanth',
+      shortName: 'Jayanth',
+      email: 'jayanth@wouchify.com',
+      role: 'Content Executive',
+      domain: 'Coupons & Credit Cards',
+      dealsToday: 0,
+      lootToday: 0,
+      couponsToday: 5,
+      bannersToday: 2,
+      storesToday: 1,
+      submissionsToday: 8,
+      approvalRate: 97.4,
+      avgTurnaround: '12 mins',
+      status: 'Online'
     }
   ])
+  const [kpiStats, setKpiStats] = useState({
+    pendingApprovals: 0,
+    pendingPayoutsAmount: '₹0',
+    pendingPayoutsCount: 0,
+    openTicketsCount: 0,
+    activeStaffCount: 2,
+    submissionsTodayCount: 0,
+    linkHealth: '100%'
+  })
 
-  // Load real pending submissions from API
-  useEffect(() => {
-    adminApi.getSubmissions({ status: 'Pending Approval' })
-      .then((res: any[]) => {
-        if (Array.isArray(res) && res.length > 0) {
-          const mapped: UrgentModerationItem[] = res.map((s: any, idx: number) => {
-            const snap = s.dataSnapshot || {}
-            return {
-              id: s._id || s.id || `appr-${idx + 1}`,
-              type: s.entityType === 'loot_deal' ? 'loot' :
-                    s.entityType === 'deal' ? 'deal' :
-                    s.entityType === 'coupon' ? 'coupon' :
-                    s.entityType === 'banner' ? 'banner' :
-                    s.entityType === 'advertisement' ? 'ad' :
-                    s.entityType === 'store' ? 'store' : 'deal',
-              title: s.title || snap.title || snap.name || 'Submitted Item',
-              brand: snap.brand || snap.store || s.store || 'Generic',
-              store: s.store || snap.store || snap.storeName || 'Partner Store',
-              submittedBy: s.submittedBy || 'executive@wouchify.com',
-              submittedAt: s.submittedAt ? new Date(s.submittedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : 'Recently',
-              price: snap.price || snap.currentPrice || snap.reward || 'Offer',
-              originalPrice: snap.originalPrice,
-              discount: snap.discount || snap.discountLabel,
-              code: snap.code,
-              priority: s.priority || 'Normal',
-              category: s.category || snap.category || 'General',
-              image: snap.image || snap.imageUrl || snap.productImage || snap.primaryImage || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop'
-            }
-          })
-          setUrgentItems(mapped)
+  const loadOperationsData = async () => {
+    try {
+      const [subsRes, claimsRes, ticketsRes, staffRes] = await Promise.all([
+        adminApi.getSubmissions().catch(() => []),
+        adminApi.getCashbackClaims().catch(() => []),
+        adminApi.getSupportTickets().catch(() => []),
+        adminApi.getStaffMembers().catch(() => [])
+      ])
+
+      const subs = Array.isArray(subsRes) ? subsRes : []
+      const claims = Array.isArray(claimsRes) ? claimsRes : []
+      const tickets = Array.isArray(ticketsRes) ? ticketsRes : []
+      const staff = Array.isArray(staffRes) ? staffRes : []
+
+      // Pending urgent submissions
+      const pendingSubs = subs.filter((s: any) => s.status === 'Pending Approval' || s.status === 'Pending Review' || s.status === 'pending')
+      const mappedUrgent: UrgentModerationItem[] = pendingSubs.map((s: any, idx: number) => {
+        const snap = s.dataSnapshot || {}
+        return {
+          id: s._id || s.id || `appr-${idx + 1}`,
+          type: s.entityType === 'loot_deal' ? 'loot' :
+                s.entityType === 'deal' ? 'deal' :
+                s.entityType === 'coupon' ? 'coupon' :
+                s.entityType === 'banner' ? 'banner' :
+                s.entityType === 'advertisement' ? 'ad' :
+                s.entityType === 'store' ? 'store' : 'deal',
+          title: s.title || snap.title || snap.name || 'Submitted Item',
+          brand: snap.brand || snap.store || s.store || 'Generic',
+          store: s.store || snap.store || snap.storeName || 'Partner Store',
+          submittedBy: s.submittedBy || 'executive@wouchify.com',
+          submittedAt: s.submittedAt ? new Date(s.submittedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : 'Recently',
+          price: snap.price || snap.currentPrice || snap.reward || 'Offer',
+          originalPrice: snap.originalPrice,
+          discount: snap.discount || snap.discountLabel,
+          code: snap.code,
+          priority: s.priority || 'Normal',
+          category: s.category || snap.category || 'General',
+          image: snap.image || snap.imageUrl || snap.productImage || snap.primaryImage || PLACEHOLDER_DEAL_IMAGE
         }
       })
-      .catch(err => {
-        console.warn('API error, using fallback urgent items:', err)
+      setUrgentItems(mappedUrgent)
+
+      // Pending payouts calculation
+      const pendingClaims = claims.filter((c: any) => c.status === 'Pending')
+      const totalPayouts = pendingClaims.reduce((sum: number, c: any) => {
+        const amt = parseInt(String(c.cashbackAmount || c.orderAmount || 0).replace(/[^0-9]/g, '')) || 0
+        return sum + amt
+      }, 0)
+
+      // Open support tickets
+      const openTickets = tickets.filter((t: any) => t.status === 'Open' || t.status === 'In Progress')
+
+      // Staff dynamically
+      if (staff.length > 0) {
+        const dynamicStaff: ExecutiveInfo[] = staff.map((st: any) => {
+          const userSubs = subs.filter((s: any) => (s.submittedBy || '').toLowerCase() === (st.email || '').toLowerCase())
+          const userDeals = userSubs.filter((s: any) => s.entityType === 'deal').length
+          const userLoot = userSubs.filter((s: any) => s.entityType === 'loot_deal').length
+          const userCoupons = userSubs.filter((s: any) => s.entityType === 'coupon').length
+          const userBanners = userSubs.filter((s: any) => s.entityType === 'banner').length
+          const userStores = userSubs.filter((s: any) => s.entityType === 'store').length
+
+          const approvedCount = userSubs.filter((s: any) => s.status === 'Approved').length
+          const rate = userSubs.length > 0 ? Math.round((approvedCount / userSubs.length) * 100) : 98
+
+          return {
+            id: String(st._id || st.id || st.email),
+            name: st.name || st.email.split('@')[0],
+            shortName: (st.name || st.email.split('@')[0]).split(' ')[0],
+            email: st.email,
+            role: st.role === 'operational_manager' ? 'Ops Manager' : 'Content Executive',
+            domain: st.domain || 'All Categories',
+            dealsToday: userDeals,
+            lootToday: userLoot,
+            couponsToday: userCoupons,
+            bannersToday: userBanners,
+            storesToday: userStores,
+            submissionsToday: userSubs.length,
+            approvalRate: rate,
+            avgTurnaround: '10 mins',
+            status: (st.status as any) || 'Online'
+          }
+        })
+        setExecutivesList(dynamicStaff)
+      }
+
+      setKpiStats({
+        pendingApprovals: pendingSubs.length,
+        pendingPayoutsAmount: totalPayouts > 0 ? `₹${totalPayouts.toLocaleString('en-IN')}` : '₹0',
+        pendingPayoutsCount: pendingClaims.length,
+        openTicketsCount: openTickets.length,
+        activeStaffCount: staff.filter((s: any) => s.status === 'Online').length || 2,
+        submissionsTodayCount: subs.length,
+        linkHealth: '100% Operational'
       })
+    } catch (err) {
+      console.warn('loadOperationsData error:', err)
+    }
+  }
+
+  useEffect(() => {
+    loadOperationsData()
+
+    const handleSync = () => { loadOperationsData() }
+    window.addEventListener('wouchify_deals_updated', handleSync)
+    window.addEventListener('wouchify_loot_deals_updated', handleSync)
+    window.addEventListener('wouchify_coupons_updated', handleSync)
+    window.addEventListener('wouchify_stores_updated', handleSync)
+    window.addEventListener('storage', handleSync)
+    return () => {
+      window.removeEventListener('wouchify_deals_updated', handleSync)
+      window.removeEventListener('wouchify_loot_deals_updated', handleSync)
+      window.removeEventListener('wouchify_coupons_updated', handleSync)
+      window.removeEventListener('wouchify_stores_updated', handleSync)
+      window.removeEventListener('storage', handleSync)
+    }
   }, [])
+
+  const [rejectPromptItem, setRejectPromptItem] = useState<{ id: string; title: string } | null>(null)
 
   const showToast = (msg: string) => {
     setToastMessage(msg)
@@ -219,12 +285,16 @@ export const OperationsDashboardPage: React.FC = () => {
   }
 
   const handleReject = (id: string, title: string) => {
-    const reason = prompt(`Enter rejection reason for "${title}":`, 'Details need review')
-    if (reason) {
-      adminApi.rejectSubmission(id, reason).catch(console.warn)
-      setUrgentItems(prev => prev.filter(item => item.id !== id))
-      showToast(`Rejected submission: ${title}`)
-    }
+    setRejectPromptItem({ id, title })
+  }
+
+  const handleConfirmReject = (reason: string) => {
+    if (!rejectPromptItem) return
+    const { id, title } = rejectPromptItem
+    adminApi.rejectSubmission(id, reason).catch(console.warn)
+    setUrgentItems(prev => prev.filter(item => item.id !== id))
+    showToast(`Rejected submission: ${title}`)
+    setRejectPromptItem(null)
   }
 
   const navigate = (path: string) => {
@@ -235,8 +305,8 @@ export const OperationsDashboardPage: React.FC = () => {
   // Active executive details lookup
   const selectedExecutive = useMemo(() => {
     if (selectedExecutiveEmail === 'all') return null
-    return EXECUTIVES_LIST.find(e => e.email.toLowerCase() === selectedExecutiveEmail.toLowerCase()) || null
-  }, [selectedExecutiveEmail])
+    return executivesList.find(e => e.email.toLowerCase() === selectedExecutiveEmail.toLowerCase()) || null
+  }, [selectedExecutiveEmail, executivesList])
 
   // Filter urgent items by chosen executive and content type
   const displayedItems = useMemo(() => {
@@ -251,26 +321,26 @@ export const OperationsDashboardPage: React.FC = () => {
   }, [urgentItems, selectedExecutiveEmail, contentTypeFilter])
 
   const reportData = useMemo(() => {
-    let baseList = EXECUTIVES_LIST;
+    let baseList = executivesList;
     if (reportExecutiveFilter !== 'all') {
       baseList = baseList.filter(e => e.id === reportExecutiveFilter);
     }
 
     return baseList.map(exec => {
       let multiplier = 1
-      if (reportFilter === 'week') multiplier = 6.5
-      if (reportFilter === 'month') multiplier = 24.2
+      if (reportFilter === 'week') multiplier = 1
+      if (reportFilter === 'month') multiplier = 1
       return {
         ...exec,
-        dealsAdded: Math.floor(exec.dealsToday * multiplier),
-        lootAdded: Math.floor(exec.lootToday * multiplier),
-        couponsAdded: Math.floor(exec.couponsToday * multiplier),
-        bannersAdded: Math.floor(exec.bannersToday * multiplier),
-        storesAdded: Math.floor(exec.storesToday * multiplier),
-        totalAdded: Math.floor(exec.submissionsToday * multiplier)
+        dealsAdded: exec.dealsToday * multiplier,
+        lootAdded: exec.lootToday * multiplier,
+        couponsAdded: exec.couponsToday * multiplier,
+        bannersAdded: exec.bannersToday * multiplier,
+        storesAdded: exec.storesToday * multiplier,
+        totalAdded: exec.submissionsToday * multiplier
       }
     }).sort((a, b) => b.totalAdded - a.totalAdded)
-  }, [reportFilter, reportExecutiveFilter])
+  }, [executivesList, reportFilter, reportExecutiveFilter])
 
   const downloadCSV = () => {
     const headers = ['Executive ID', 'Name', 'Role', 'Domain', 'Approval Rate', 'Deals Added', 'Loot Added', 'Coupons Added', 'Banners Added', 'Stores Added', `Total Added (${reportFilter})`]
@@ -338,8 +408,8 @@ export const OperationsDashboardPage: React.FC = () => {
                 onChange={(e) => setSelectedExecutiveEmail(e.target.value)}
                 aria-label="Filter by Executive"
               >
-                <option value="all">👥 All Executives ({EXECUTIVES_LIST.length} Staff)</option>
-                {EXECUTIVES_LIST.map((exec) => (
+                <option value="all">👥 All Executives ({executivesList.length} Staff)</option>
+                {executivesList.map((exec) => (
                   <option key={exec.id} value={exec.email}>
                     {exec.name} — {exec.role} ({exec.submissionsToday} today)
                   </option>
@@ -363,8 +433,8 @@ export const OperationsDashboardPage: React.FC = () => {
           <div className="kpi-card" onClick={() => navigate('/operational-manager/approvals')} style={{ cursor: 'pointer' }}>
             <div className="kpi-body">
               <span className="kpi-label">Pending Approvals</span>
-              <span className="kpi-value">{urgentItems.length + 4}</span>
-              <span className="kpi-sub">3 Critical price glitches</span>
+              <span className="kpi-value">{kpiStats.pendingApprovals}</span>
+              <span className="kpi-sub">Awaiting moderation</span>
             </div>
             <div className="kpi-icon ops-kpi-orange">
               <Clock size={20} />
@@ -374,8 +444,8 @@ export const OperationsDashboardPage: React.FC = () => {
           <div className="kpi-card" onClick={() => navigate('/operational-manager/cashbacks')} style={{ cursor: 'pointer' }}>
             <div className="kpi-body">
               <span className="kpi-label">Pending Payout Claims</span>
-              <span className="kpi-value">₹1,42,850</span>
-              <span className="kpi-sub">14 user withdrawals</span>
+              <span className="kpi-value">{kpiStats.pendingPayoutsAmount}</span>
+              <span className="kpi-sub">{kpiStats.pendingPayoutsCount} user withdrawals</span>
             </div>
             <div className="kpi-icon ops-kpi-green">
               <Wallet size={20} />
@@ -385,8 +455,8 @@ export const OperationsDashboardPage: React.FC = () => {
           <div className="kpi-card" onClick={() => navigate('/operational-manager/support')} style={{ cursor: 'pointer' }}>
             <div className="kpi-body">
               <span className="kpi-label">Open Support Tickets</span>
-              <span className="kpi-value">5</span>
-              <span className="kpi-sub">2 urgent disputes</span>
+              <span className="kpi-value">{kpiStats.openTicketsCount}</span>
+              <span className="kpi-sub">Customer queries</span>
             </div>
             <div className="kpi-icon ops-kpi-red">
               <LifeBuoy size={20} />
@@ -396,8 +466,8 @@ export const OperationsDashboardPage: React.FC = () => {
           <div className="kpi-card" onClick={() => navigate('/operational-manager/staff-activity')} style={{ cursor: 'pointer' }}>
             <div className="kpi-body">
               <span className="kpi-label">Content Executives</span>
-              <span className="kpi-value">4 Active</span>
-              <span className="kpi-sub">42 submissions today</span>
+              <span className="kpi-value">{kpiStats.activeStaffCount} Active</span>
+              <span className="kpi-sub">{kpiStats.submissionsTodayCount} submissions recorded</span>
             </div>
             <div className="kpi-icon ops-kpi-purple">
               <Users size={20} />
@@ -407,8 +477,8 @@ export const OperationsDashboardPage: React.FC = () => {
           <div className="kpi-card" onClick={() => navigate('/operational-manager/merchants')} style={{ cursor: 'pointer' }}>
             <div className="kpi-body">
               <span className="kpi-label">Affiliate Link Health</span>
-              <span className="kpi-value">99.4%</span>
-              <span className="kpi-sub">1 link degraded</span>
+              <span className="kpi-value">{kpiStats.linkHealth}</span>
+              <span className="kpi-sub">Monitored live</span>
             </div>
             <div className="kpi-icon ops-kpi-blue">
               <ShieldCheck size={20} />
@@ -428,9 +498,9 @@ export const OperationsDashboardPage: React.FC = () => {
               className={`executive-chip-btn ${selectedExecutiveEmail === 'all' ? 'active' : ''}`}
               onClick={() => setSelectedExecutiveEmail('all')}
             >
-              All Staff ({EXECUTIVES_LIST.length})
+              All Staff ({executivesList.length})
             </button>
-            {EXECUTIVES_LIST.map((exec) => (
+            {executivesList.map((exec) => (
               <button
                 key={exec.id}
                 type="button"
@@ -706,7 +776,7 @@ export const OperationsDashboardPage: React.FC = () => {
             </h4>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {[...EXECUTIVES_LIST].sort((a, b) => b.submissionsToday - a.submissionsToday).slice(0, 3).map((exec, idx) => (
+              {[...executivesList].sort((a, b) => b.submissionsToday - a.submissionsToday).slice(0, 3).map((exec, idx) => (
                 <div key={exec.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', borderBottom: idx !== 2 ? '1px solid #f1f5f9' : 'none' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: '#334155', fontSize: '0.85rem' }}>
@@ -808,7 +878,7 @@ export const OperationsDashboardPage: React.FC = () => {
                 style={{ padding: '8px 12px', fontSize: '0.85rem', maxWidth: '200px' }}
               >
                 <option value="all">All Executives</option>
-                {EXECUTIVES_LIST.map(exec => (
+                {executivesList.map(exec => (
                   <option key={exec.id} value={exec.id}>{exec.name}</option>
                 ))}
               </select>
@@ -892,6 +962,22 @@ export const OperationsDashboardPage: React.FC = () => {
             </table>
           </div>
         </div>
+
+        {/* ── CUSTOM REJECT PROMPT DIALOG ── */}
+        {rejectPromptItem && (
+          <AdminPromptDialog
+            isOpen={!!rejectPromptItem}
+            title="Reject Submission"
+            message={`Please enter a rejection feedback note for "${rejectPromptItem.title}":`}
+            label="Rejection Reason"
+            defaultValue="Details need review"
+            confirmLabel="Reject Submission"
+            variant="danger"
+            required={true}
+            onConfirm={handleConfirmReject}
+            onCancel={() => setRejectPromptItem(null)}
+          />
+        )}
 
       </div>
     </OperationsLayout>

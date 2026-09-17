@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { MobileHeader } from './MobileHeader'
 import { MobileFooter } from './MobileFooter'
-import { FAVOURITE_STORES } from '../../data/storesHero'
 import type { StoreItem } from '../../data/storesHero'
 import { adminApi } from '../../services/adminApi'
 import searchIcon from '../../assets/icons/search.svg'
@@ -60,14 +59,54 @@ const AlphabetAnimation: React.FC<AlphabetAnimationProps> = ({ onSelectLetter, s
 export const MobileStoresPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedLetter, setSelectedLetter] = useState('')
+  const [storesList, setStoresList] = useState<StoreItem[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchLiveStores = async () => {
+    try {
+      const fetched = await adminApi.getStores()
+      if (Array.isArray(fetched)) {
+        const mapped: StoreItem[] = fetched
+          .filter((s: any) => s.status !== 'inactive' && s.status !== 'rejected')
+          .map((s: any) => ({
+            id: s._id || s.id || `store-${s.name}`,
+            name: s.name || 'Store',
+            slug: s.slug || (s.name || '').toLowerCase().replace(/\s+/g, '-'),
+            logo: s.logo || s.logoUrl || '',
+            category: s.category || 'Fashion',
+            reward: s.reward || 'Upto 5% rewards',
+            description: s.description || `${s.name} online deals & cashback`,
+            cardBg: s.cardBg || '#ECF4FF',
+            badgeBg: s.badgeBg || '#D3E0F2',
+            logoPanelBg: s.logoPanelBg
+          }))
+        setStoresList(mapped)
+      }
+    } catch (err) {
+      console.error('Failed to load stores:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchLiveStores()
+    const handleSync = () => fetchLiveStores()
+    window.addEventListener('wouchify_stores_updated', handleSync)
+    window.addEventListener('storage', handleSync)
+    return () => {
+      window.removeEventListener('wouchify_stores_updated', handleSync)
+      window.removeEventListener('storage', handleSync)
+    }
+  }, [])
 
   const filteredStores = useMemo(() => {
-    return FAVOURITE_STORES.filter(store => {
+    return storesList.filter(store => {
       const matchesQuery = store.name.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesLetter = selectedLetter ? store.name.toUpperCase().startsWith(selectedLetter) : true
       return matchesQuery && matchesLetter
     })
-  }, [searchQuery, selectedLetter])
+  }, [storesList, searchQuery, selectedLetter])
 
   return (
     <div className="mobile-stores-page">
@@ -97,7 +136,14 @@ export const MobileStoresPage: React.FC = () => {
       />
 
       <div className="mobile-stores__grid">
-        {filteredStores.length > 0 ? (
+        {loading ? (
+          <div style={{ gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px 19px' }}>
+            <div className="skeleton" style={{ height: '198px', borderRadius: '14px' }} />
+            <div className="skeleton" style={{ height: '198px', borderRadius: '14px' }} />
+            <div className="skeleton" style={{ height: '198px', borderRadius: '14px' }} />
+            <div className="skeleton" style={{ height: '198px', borderRadius: '14px' }} />
+          </div>
+        ) : filteredStores.length > 0 ? (
           filteredStores.map(store => (
             <StoreCard key={store.id} store={store} />
           ))

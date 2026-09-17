@@ -1,9 +1,10 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { DealCard } from './DealCard'
 import { DealsEmptyState } from './DealsEmptyState'
-import { normalizeDealToCard, normalizeLootToCard, BEST_SELLING_DEAL_ITEMS, MASTER_EXECUTIVE_LOOT_DEALS, type DealCardItem } from '../../data/dealsPage'
+import { normalizeDealToCard, normalizeLootToCard, type DealCardItem } from '../../data/dealsPage'
 import { adminApi } from '../../services/adminApi'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
+import { DealCardSkeleton } from '../common/Skeletons'
 import './BestSellingDeals.css'
 
 export interface BestSellingDealsProps {
@@ -27,39 +28,8 @@ export const BestSellingDeals: React.FC<BestSellingDealsProps> = ({
   const canvasRef = useRef<HTMLDivElement>(null)
   const [canvasHeight, setCanvasHeight] = useState<number>(520)
 
-  // Live Best Selling Deals list initialized from cached storage or defaults
-  const [bestDeals, setBestDeals] = useState<DealCardItem[]>(() => {
-    try {
-      if (dataSource === 'loot') {
-        const cached = localStorage.getItem('wouchify_loot_deals')
-        if (cached) {
-          const parsed = JSON.parse(cached)
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            const featured = parsed
-              .map((l: any, idx: number) => normalizeLootToCard(l, idx))
-              .filter((d: DealCardItem) => (!d.status || d.status.toLowerCase() === 'active' || d.status.toLowerCase() === 'approved') && Boolean(d.isBestSelling))
-            if (featured.length > 0) return featured
-          }
-        }
-        return MASTER_EXECUTIVE_LOOT_DEALS.map((l: any, idx: number) => normalizeLootToCard(l, idx)).filter(d => Boolean(d.isBestSelling))
-      } else {
-        const cached = localStorage.getItem('wouchify_public_deals')
-        if (cached) {
-          const parsed = JSON.parse(cached)
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            const featured = parsed
-              .map((d: any, idx: number) => normalizeDealToCard(d, idx))
-              .filter((d: DealCardItem) => (!d.status || d.status.toLowerCase() === 'active' || d.status.toLowerCase() === 'approved') && Boolean(d.isBestSelling))
-            if (featured.length > 0) return featured
-          }
-        }
-        return BEST_SELLING_DEAL_ITEMS
-      }
-    } catch {}
-    return dataSource === 'loot' 
-      ? MASTER_EXECUTIVE_LOOT_DEALS.map((l: any, idx: number) => normalizeLootToCard(l, idx)).filter(d => Boolean(d.isBestSelling))
-      : BEST_SELLING_DEAL_ITEMS
-  })
+  const [bestDeals, setBestDeals] = useState<DealCardItem[]>([])
+  const [loading, setLoading] = useState(true)
 
   // Fetch from adminApi & subscribe to live updates
   useEffect(() => {
@@ -70,31 +40,35 @@ export const BestSellingDeals: React.FC<BestSellingDealsProps> = ({
         if (dataSource === 'loot') {
           const res = await adminApi.getLootDeals()
           if (!isMounted) return
-          if (Array.isArray(res) && res.length > 0) {
+          if (Array.isArray(res)) {
             const normalized = res.map((l: any, idx: number) => normalizeLootToCard(l, idx))
-            const featured = normalized.filter(
-              (d: DealCardItem) => (!d.status || d.status.toLowerCase() === 'active' || d.status.toLowerCase() === 'approved') && Boolean(d.isBestSelling)
+            const activeDeals = normalized.filter(
+              (d: DealCardItem) => (!d.status || d.status.toLowerCase() === 'active' || d.status.toLowerCase() === 'approved')
             )
-            setBestDeals(featured)
+            const featured = activeDeals.filter(d => Boolean(d.isBestSelling))
+            setBestDeals(featured.length > 0 ? featured : activeDeals.slice(0, 4))
           }
         } else {
-          const res = await adminApi.getPublicDeals()
+          const res = await adminApi.getDeals()
           if (!isMounted) return
-          if (Array.isArray(res) && res.length > 0) {
+          if (Array.isArray(res)) {
             const normalized = res.map((d: any, idx: number) => normalizeDealToCard(d, idx))
-            const featured = normalized.filter(
-              (d: DealCardItem) => (!d.status || d.status.toLowerCase() === 'active' || d.status.toLowerCase() === 'approved') && Boolean(d.isBestSelling)
+            const activeDeals = normalized.filter(
+              (d: DealCardItem) => (!d.status || d.status.toLowerCase() === 'active' || d.status.toLowerCase() === 'approved')
             )
-            setBestDeals(featured)
+            const featured = activeDeals.filter(d => Boolean(d.isBestSelling))
+            setBestDeals(featured.length > 0 ? featured : activeDeals.slice(0, 4))
           }
         }
-      } catch {
-        // Fallback to cached/defaults
+      } catch (err) {
+        console.error('Failed to load best selling deals:', err)
+        if (isMounted) setBestDeals([])
+      } finally {
+        if (isMounted) setLoading(false)
       }
     }
 
     fetchBestSellingDeals()
-    const intervalId = setInterval(fetchBestSellingDeals, 10000)
 
     const handleUpdate = () => {
       fetchBestSellingDeals()
@@ -106,7 +80,6 @@ export const BestSellingDeals: React.FC<BestSellingDealsProps> = ({
     window.addEventListener('storage', handleUpdate)
     return () => {
       isMounted = false
-      clearInterval(intervalId)
       window.removeEventListener('wouchify_deals_updated', handleUpdate)
       window.removeEventListener('wouchify_loot_deals_updated', handleUpdate)
       window.removeEventListener('wouchify_deal_clicked', handleUpdate)
@@ -161,8 +134,12 @@ export const BestSellingDeals: React.FC<BestSellingDealsProps> = ({
           {topPillText}
         </div>
 
-        {/* Content: Cards or Empty State */}
-        {showEmptyState || bestDeals.length === 0 ? (
+        {/* Content: Loading Skeletons, Cards or Empty State */}
+        {loading ? (
+          <div className="best-selling-deals__cards-container">
+            <DealCardSkeleton count={4} />
+          </div>
+        ) : showEmptyState || bestDeals.length === 0 ? (
           <DealsEmptyState
             title={showEmptyState ? emptyStateTitle : (dataSource === 'loot' ? "No best selling loot deals selected" : "No best selling deals selected")}
             subtitle={showEmptyState ? emptyStateSubtitle : "Mark deals with ⭐ Best Seller in Executive Panel to feature them here"}

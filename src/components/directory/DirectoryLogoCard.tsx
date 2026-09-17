@@ -33,9 +33,12 @@ export const DirectoryLogoCard: React.FC<DirectoryLogoCardProps> = ({
 
   const imgSrc = data.logo || data.image
 
+  const isAmazon = data.slug?.toLowerCase() === 'amazon' || data.name?.toLowerCase() === 'amazon'
+  const targetHref = isAmazon ? '/brands/amazon' : (data.destinationHref || `/directory/${data.slug}`)
+
   return (
     <a
-      href={data.destinationHref || `/directory/${data.slug}`}
+      href={targetHref}
       className="directory-logo-card"
       onClick={(e) => {
         if (onClick) {

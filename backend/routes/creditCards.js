@@ -4,23 +4,34 @@ const mongoose = require('mongoose');
 const CreditCard = require('../models/CreditCard');
 const auth = require('../middleware/authMiddleware');
 const store = require('../services/inMemoryStore');
+const { handleEntityCreate, handleEntityUpdate, handleEntityDelete } = require('../middleware/approvalHelper');
 
 // GET /api/credit-cards - Public read access
 router.get('/', async (req, res, next) => {
   try {
+    const { bank, network, tier, status, submissionStatus, isFeatured, q, all } = req.query;
     if (mongoose.connection.readyState !== 1) {
-      return res.json(store.getCreditCards(req.query));
+      let memoryCards = store.getCreditCards(req.query);
+      return res.json(memoryCards);
     }
 
-    const { bank, network, tier, status, submissionStatus, isFeatured, q } = req.query;
     let query = {};
-
     if (bank && bank !== 'All') query.bank = bank;
     if (network && network !== 'All') query.network = network;
     if (tier && tier !== 'All') query.tier = tier;
-    if (status && status !== 'All') query.status = status;
-    if (submissionStatus && submissionStatus !== 'All') query.submissionStatus = submissionStatus;
     if (isFeatured !== undefined) query.isFeatured = String(isFeatured) === 'true';
+
+    if (all === 'true') {
+      if (status && status !== 'All' && status !== 'all') query.status = status;
+      if (submissionStatus && submissionStatus !== 'All' && submissionStatus !== 'all') query.submissionStatus = submissionStatus;
+    } else {
+      query.submissionStatus = { $nin: ['pending_approval', 'rejected', 'draft'] };
+      if (status && status !== 'All' && status !== 'all') {
+        query.status = status;
+      } else {
+        query.status = { $in: ['active', 'featured'] };
+      }
+    }
 
     if (q) {
       query.$or = [
@@ -49,33 +60,71 @@ router.get('/:id', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// POST /api/credit-cards/:id/click - Public apply/click counter
+router.post('/:id/click', async (req, res, next) => {
+  try {
+    const target = req.params.id;
+    const memoryCard = store.incrementCreditCardClicks(target);
+    if (mongoose.connection.readyState !== 1) {
+      if (!memoryCard) return res.status(404).json({ message: 'Credit Card not found' });
+      return res.json({ success: true, applyCount: memoryCard.applyCount });
+    }
+
+    const query = mongoose.Types.ObjectId.isValid(target)
+      ? { _id: target }
+      : { $or: [{ id: target }, { cardName: new RegExp(`^${target}$`, 'i') }] };
+
+    const card = await CreditCard.findOneAndUpdate(
+      query,
+      { $inc: { applyCount: 1 } },
+      { new: true }
+    );
+    if (!card) {
+      if (memoryCard) return res.json({ success: true, applyCount: memoryCard.applyCount });
+      return res.status(404).json({ message: 'Credit Card not found' });
+    }
+    res.json({ success: true, applyCount: card.applyCount });
+  } catch (err) { next(err); }
+});
+
 // Protected administrative mutation routes
 router.use(auth);
 
 // POST /api/credit-cards - Create
 router.post('/', async (req, res, next) => {
   try {
-    if (mongoose.connection.readyState !== 1) {
-      const created = store.addCreditCard(req.body);
-      return res.status(201).json(created);
-    }
-    const card = new CreditCard(req.body);
-    await card.save();
-    res.status(201).json(card);
+    const result = await handleEntityCreate({
+      entityType: 'credit_card',
+      title: req.body.cardName || 'New Credit Card',
+      store: req.body.bank,
+      category: req.body.tier || 'Finance',
+      priority: req.body.priority || 'Normal',
+      data: req.body,
+      user: req.user,
+      Model: CreditCard,
+      storeAddMethod: store.addCreditCard
+    });
+    res.status(201).json(result.entity || result);
   } catch (err) { next(err); }
 });
 
 // PUT /api/credit-cards/:id - Update
 router.put('/:id', async (req, res, next) => {
   try {
-    if (mongoose.connection.readyState !== 1) {
-      const updated = store.updateCreditCard(req.params.id, req.body);
-      if (!updated) return res.status(404).json({ message: 'Credit Card not found' });
-      return res.json(updated);
-    }
-    const updated = await CreditCard.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-    if (!updated) return res.status(404).json({ message: 'Credit Card not found' });
-    res.json(updated);
+    const result = await handleEntityUpdate({
+      id: req.params.id,
+      entityType: 'credit_card',
+      title: req.body.cardName,
+      store: req.body.bank,
+      category: req.body.tier || 'Finance',
+      priority: req.body.priority || 'Normal',
+      updates: req.body,
+      user: req.user,
+      Model: CreditCard,
+      storeUpdateMethod: store.updateCreditCard,
+      storeGetMethod: store.getCreditCardById
+    });
+    res.json(result.entity || result);
   } catch (err) { next(err); }
 });
 
@@ -100,14 +149,17 @@ router.patch('/:id/status', async (req, res, next) => {
 // DELETE /api/credit-cards/:id - Delete
 router.delete('/:id', async (req, res, next) => {
   try {
-    if (mongoose.connection.readyState !== 1) {
-      const ok = store.deleteCreditCard(req.params.id);
-      if (!ok) return res.status(404).json({ message: 'Credit Card not found' });
-      return res.json({ message: 'Credit Card deleted' });
-    }
-    const deleted = await CreditCard.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ message: 'Credit Card not found' });
-    res.json({ message: 'Credit Card deleted' });
+    const result = await handleEntityDelete({
+      id: req.params.id,
+      entityType: 'credit_card',
+      title: req.body?.cardName,
+      store: req.body?.bank,
+      user: req.user,
+      Model: CreditCard,
+      storeDeleteMethod: store.deleteCreditCard,
+      storeGetMethod: store.getCreditCardById
+    });
+    res.json(result);
   } catch (err) { next(err); }
 });
 

@@ -9,12 +9,22 @@ const Banner = require('../models/Banner');
 const Advertisement = require('../models/Advertisement');
 const LootDeal = require('../models/LootDeal');
 const Store = require('../models/Store');
+const Category = require('../models/Category');
 const auth = require('../middleware/authMiddleware');
 const store = require('../services/inMemoryStore');
 
-async function updateMongoEntityOnApproval(entityType, entityId, action) {
+async function updateMongoEntityOnApproval(entityType, entityId, action, dataSnapshot) {
   if (!entityId) return;
-  const updatePatch = { submissionStatus: 'approved', status: 'active' };
+  const updatePatch = { 
+    ...(dataSnapshot || {}),
+    submissionStatus: 'approved', 
+    status: 'active' 
+  };
+  delete updatePatch._id;
+  delete updatePatch.id;
+  delete updatePatch.createdAt;
+  delete updatePatch.__v;
+
   try {
     if (action === 'delete') {
       if (entityType === 'deal') await Deal.findByIdAndDelete(entityId);
@@ -24,14 +34,16 @@ async function updateMongoEntityOnApproval(entityType, entityId, action) {
       else if (entityType === 'advertisement') await Advertisement.findByIdAndDelete(entityId);
       else if (entityType === 'loot_deal') await LootDeal.findByIdAndDelete(entityId);
       else if (entityType === 'store') await Store.findByIdAndDelete(entityId);
+      else if (entityType === 'category') await Category.findByIdAndDelete(entityId);
     } else {
-      if (entityType === 'deal') await Deal.findByIdAndUpdate(entityId, updatePatch);
-      else if (entityType === 'credit_card') await CreditCard.findByIdAndUpdate(entityId, updatePatch);
-      else if (entityType === 'coupon') await Coupon.findByIdAndUpdate(entityId, updatePatch);
-      else if (entityType === 'banner') await Banner.findByIdAndUpdate(entityId, updatePatch);
-      else if (entityType === 'advertisement') await Advertisement.findByIdAndUpdate(entityId, updatePatch);
-      else if (entityType === 'loot_deal') await LootDeal.findByIdAndUpdate(entityId, updatePatch);
-      else if (entityType === 'store') await Store.findByIdAndUpdate(entityId, updatePatch);
+      if (entityType === 'deal') await Deal.findByIdAndUpdate(entityId, updatePatch, { new: true });
+      else if (entityType === 'credit_card') await CreditCard.findByIdAndUpdate(entityId, updatePatch, { new: true });
+      else if (entityType === 'coupon') await Coupon.findByIdAndUpdate(entityId, updatePatch, { new: true });
+      else if (entityType === 'banner') await Banner.findByIdAndUpdate(entityId, updatePatch, { new: true });
+      else if (entityType === 'advertisement') await Advertisement.findByIdAndUpdate(entityId, updatePatch, { new: true });
+      else if (entityType === 'loot_deal') await LootDeal.findByIdAndUpdate(entityId, updatePatch, { new: true });
+      else if (entityType === 'store') await Store.findByIdAndUpdate(entityId, updatePatch, { new: true });
+      else if (entityType === 'category') await Category.findByIdAndUpdate(entityId, updatePatch, { new: true });
     }
   } catch (e) {
     console.error(`Failed to update mongo entity on approval: ${e.message}`);
@@ -49,6 +61,7 @@ async function updateMongoEntityOnRejection(entityType, entityId) {
     else if (entityType === 'advertisement') await Advertisement.findByIdAndUpdate(entityId, updatePatch);
     else if (entityType === 'loot_deal') await LootDeal.findByIdAndUpdate(entityId, updatePatch);
     else if (entityType === 'store') await Store.findByIdAndUpdate(entityId, updatePatch);
+    else if (entityType === 'category') await Category.findByIdAndUpdate(entityId, updatePatch);
   } catch (e) {
     console.error(`Failed to update mongo entity on rejection: ${e.message}`);
   }
@@ -65,6 +78,7 @@ async function updateMongoEntityOnPending(entityType, entityId) {
     else if (entityType === 'advertisement') await Advertisement.findByIdAndUpdate(entityId, updatePatch);
     else if (entityType === 'loot_deal') await LootDeal.findByIdAndUpdate(entityId, updatePatch);
     else if (entityType === 'store') await Store.findByIdAndUpdate(entityId, updatePatch);
+    else if (entityType === 'category') await Category.findByIdAndUpdate(entityId, updatePatch);
   } catch (e) {
     console.error(`Failed to update mongo entity on pending: ${e.message}`);
   }
@@ -154,7 +168,7 @@ router.patch('/:id/approve', async (req, res, next) => {
     await sub.save();
 
     if (sub.entityType && sub.entityId) {
-      await updateMongoEntityOnApproval(sub.entityType, sub.entityId, sub.action);
+      await updateMongoEntityOnApproval(sub.entityType, sub.entityId, sub.action, sub.dataSnapshot);
     }
 
     res.json(sub);

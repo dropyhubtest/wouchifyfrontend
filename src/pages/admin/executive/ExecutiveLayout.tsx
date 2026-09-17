@@ -53,6 +53,9 @@ export const ExecutiveLayout: React.FC<ExecutiveLayoutProps> = ({ children, acti
     // Default executive profile for Executive Panel
     const defaultExec = { name: 'Balaji', email: 'balaji@wouchify.com', role: 'Content Executive' }
     localStorage.setItem('executiveUser', JSON.stringify(defaultExec))
+    if (!localStorage.getItem('staffToken')) {
+      localStorage.setItem('staffToken', 'dev-executive-token')
+    }
     setUser(defaultExec)
   }, [])
 
@@ -108,7 +111,12 @@ export const ExecutiveLayout: React.FC<ExecutiveLayoutProps> = ({ children, acti
         </button>
 
         <div className="sidebar-header">
-          <img src={logo} alt="Wouchify" className="executive-logo" onClick={() => navigate('/executive/dashboard')} />
+          <div className="sidebar-header-top-row">
+            <img src={logo} alt="Wouchify" className="executive-logo" onClick={() => navigate('/executive/dashboard')} />
+            <button className="sidebar-mobile-close-btn" onClick={() => setIsSidebarOpen(false)} aria-label="Close sidebar">
+              <span style={{ fontSize: '20px', lineHeight: 1 }}>✕</span>
+            </button>
+          </div>
           <div className="executive-badge">Content Executive</div>
         </div>
 

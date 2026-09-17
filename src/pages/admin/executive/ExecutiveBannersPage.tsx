@@ -27,15 +27,9 @@ import {
   Palette
 } from 'lucide-react'
 import './ExecutiveShared.css'
+import { AdminConfirmDialog, AdminAlertDialog } from '../../../components/common/AdminDialog'
 
 import heroImage from '../../../assets/deals/hero/hero_image.png'
-import deal1 from '../../../assets/deals/deal1.png'
-import deal2 from '../../../assets/deals/deal2.png'
-import banner1 from '../../../assets/recent-deals/banner_1.png'
-import banner2 from '../../../assets/recent-deals/banner_2.png'
-import amazonHero from '../../../assets/brands-inner/amazon-hero.png'
-import advertiseHero from '../../../assets/advertise/advertise_hero.png'
-import iciciPlatinumCard from '../../../assets/credit-cards/icici-platinum-card.png'
 import { PLACEHOLDER_DEAL_IMAGE } from '../../../data/dealsPage'
 
 /* ============================================================
@@ -190,137 +184,7 @@ function statusConfig(status: BannerStatus) {
   }
 }
 
-/* ============================================================
-   Initial Mock Data
-   ============================================================ */
-
-const MOCK_BANNERS: Banner[] = [
-  {
-    id: 'ban-1',
-    title: 'Main Deal Hunt Platform Hero',
-    targetPage: 'home-hero',
-    badgeText: "INDIA'S #1 DEAL HUNT PLATFORM",
-    headingLine1: "India's #1",
-    headingLine2: 'Deal Hunt',
-    headingLine3: 'Platform',
-    description: 'Find verified coupons, loot deals & credit card rewards from 500+ top brands.',
-    ctaText: 'Explore All Deals',
-    targetLink: '/deals',
-    primaryImage: heroImage,
-    dealChip1: 'Instant Deals',
-    dealChip2: 'Flat 90% Off',
-    themeColor: '#E31E25',
-    priority: 10,
-    status: 'active',
-    expiryDate: '2026-12-31',
-    views: 45200,
-    clicks: 8940,
-    createdAt: '2026-09-01'
-  },
-  {
-    id: 'ban-2',
-    title: 'Verified Stores Directory Showcase',
-    targetPage: 'stores-hero',
-    badgeText: 'EXPLORE BRAND HUBS',
-    headingLine1: 'Shop at',
-    headingLine2: '100+ Verified Stores',
-    headingLine3: '',
-    description: 'Find exclusive promo codes, real-time cashback, and verified store vouchers updated every hour.',
-    ctaText: 'Explore Stores',
-    targetLink: '/stores',
-    primaryImage: amazonHero,
-    secondaryImage: advertiseHero,
-    themeColor: '#f59e0b',
-    priority: 9,
-    status: 'active',
-    expiryDate: '2026-11-30',
-    views: 28400,
-    clicks: 4320,
-    createdAt: '2026-09-02'
-  },
-  {
-    id: 'ban-3',
-    title: 'Flash Loot Deals - 90% Off Drop',
-    targetPage: 'loot-hero',
-    badgeText: '⚡ FLASH LOOT DROP',
-    headingLine1: 'Up to 90% Off',
-    headingLine2: 'Mega Price Meltdown',
-    headingLine3: '',
-    description: 'Handpicked error deals, price drop glitches and lightning loot verified by our team in real-time.',
-    ctaText: 'Grab Loot Now',
-    targetLink: '/loot-deals',
-    primaryImage: banner1,
-    secondaryImage: banner2,
-    themeColor: '#ef4444',
-    priority: 8,
-    status: 'active',
-    expiryDate: '2026-09-30',
-    views: 39800,
-    clicks: 11200,
-    createdAt: '2026-09-04'
-  },
-  {
-    id: 'ban-4',
-    title: 'Exclusive Credit Card Rewards Spotlight',
-    targetPage: 'cards-hero',
-    badgeText: 'BANK REWARDS & CASHBACK',
-    headingLine1: 'Maximize Savings with',
-    headingLine2: 'Top Credit Cards',
-    headingLine3: '',
-    description: 'Earn up to 20% bonus reward points, airport lounge access and welcome gift vouchers worth ₹10,000.',
-    ctaText: 'Compare Cards',
-    targetLink: '/credit-cards',
-    primaryImage: iciciPlatinumCard,
-    themeColor: '#8b5cf6',
-    priority: 7,
-    status: 'active',
-    expiryDate: '2026-10-15',
-    views: 18200,
-    clicks: 3150,
-    createdAt: '2026-09-05'
-  },
-  {
-    id: 'ban-5',
-    title: 'Diwali Mega Festive Sale Countdown',
-    targetPage: 'festival-hero',
-    badgeText: '🪔 DIWALI DHAMAKA 2026',
-    headingLine1: 'Grand Festival Sale',
-    headingLine2: 'Extra ₹500 Cashback',
-    headingLine3: 'On Every Order',
-    description: 'Double cashback across Amazon, Flipkart, Myntra & Swiggy during our festive shopping bonanza.',
-    ctaText: 'Unlock Festival Deals',
-    targetLink: '/deals?tag=diwali',
-    primaryImage: deal1,
-    secondaryImage: deal2,
-    themeColor: '#ec4899',
-    priority: 9,
-    status: 'scheduled',
-    expiryDate: '2026-11-15',
-    views: 0,
-    clicks: 0,
-    createdAt: '2026-09-08'
-  },
-  {
-    id: 'ban-6',
-    title: 'Global Header Top Announcement Ribbon',
-    targetPage: 'header-strip',
-    badgeText: 'LIVE NOW',
-    headingLine1: '🔥 Flash Sale: Flat ₹200 Extra Instant Cashback on Orders above ₹999!',
-    headingLine2: '',
-    headingLine3: '',
-    description: 'Use code WOUCH200 at checkout.',
-    ctaText: 'Claim Now →',
-    targetLink: '/coupons',
-    primaryImage: '',
-    themeColor: '#0f172a',
-    priority: 6,
-    status: 'active',
-    expiryDate: '2026-09-25',
-    views: 84000,
-    clicks: 9400,
-    createdAt: '2026-09-03'
-  }
-]
+import { TableRowSkeleton, EmptyState } from '../../../components/common/Skeletons'
 
 /* ============================================================
    Realistic Live Hero Section Preview Component
@@ -740,7 +604,8 @@ export const HeroLivePreview: React.FC<HeroPreviewProps> = ({ banner }) => {
    ============================================================ */
 
 export const ExecutiveBannersPage: React.FC = () => {
-  const [banners, setBanners] = useState<Banner[]>(MOCK_BANNERS)
+  const [banners, setBanners] = useState<Banner[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterPage, setFilterPage] = useState<string>('all')
   const [filterStatus, setFilterStatus] = useState<string>('all')
@@ -750,42 +615,60 @@ export const ExecutiveBannersPage: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [formStep, setFormStep] = useState<1 | 2>(1)
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null)
-  const [previewingBanner, setPreviewingBanner] = useState<Banner | null>(null)
+  const [inspectedBanner, setInspectedBanner] = useState<Banner | null>(null)
+  const [drawerTab, setDrawerTab] = useState<string>('preview')
+  const [bannerToDelete, setBannerToDelete] = useState<string | null>(null)
+  const [bannerAlert, setBannerAlert] = useState<{ title: string; message: string; variant?: 'warning' | 'danger' | 'info' | 'success' } | null>(null)
+
+  const fetchLiveBanners = async () => {
+    setLoading(true)
+    try {
+      const res = await adminApi.getBanners()
+      if (Array.isArray(res)) {
+        const mapped: Banner[] = res.map((b: any, index: number) => ({
+          id: b._id || b.id || `ban-${index + 1}`,
+          title: b.title || 'Hero Banner',
+          targetPage: b.targetPage || 'home-hero',
+          badgeText: b.badgeText || '',
+          headingLine1: b.headingLine1 || '',
+          headingLine2: b.headingLine2 || '',
+          headingLine3: b.headingLine3 || '',
+          description: b.description || '',
+          ctaText: b.ctaText || 'Explore Deals',
+          targetLink: b.targetLink || '/deals',
+          primaryImage: b.primaryImage || '',
+          secondaryImage: b.secondaryImage || '',
+          backgroundImage: b.backgroundImage || '',
+          dealChip1: b.dealChip1 || '',
+          dealChip2: b.dealChip2 || '',
+          themeColor: b.themeColor || '#E31E25',
+          priority: Number(b.priority) || 5,
+          status: (b.status as BannerStatus) || 'active',
+          expiryDate: b.expiryDate || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+          views: b.views || 0,
+          clicks: b.clicks || 0,
+          createdAt: b.createdAt ? new Date(b.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+        }))
+        setBanners(mapped)
+      }
+    } catch (err) {
+      console.error('Failed to load banners:', err)
+      setBanners([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    adminApi.getBanners()
-      .then((res: any[]) => {
-        if (Array.isArray(res) && res.length > 0) {
-          const mapped: Banner[] = res.map((b: any, index: number) => ({
-            id: b._id || b.id || `ban-${index + 1}`,
-            title: b.title,
-            targetPage: b.targetPage || 'home-hero',
-            badgeText: b.badgeText || '',
-            headingLine1: b.headingLine1 || '',
-            headingLine2: b.headingLine2 || '',
-            headingLine3: b.headingLine3 || '',
-            description: b.description || '',
-            ctaText: b.ctaText || 'Explore Deals',
-            targetLink: b.targetLink || '/deals',
-            primaryImage: b.primaryImage || '',
-            secondaryImage: b.secondaryImage || '',
-            backgroundImage: b.backgroundImage || '',
-            dealChip1: b.dealChip1 || '',
-            dealChip2: b.dealChip2 || '',
-            themeColor: b.themeColor || '#E31E25',
-            priority: Number(b.priority) || 5,
-            status: (b.status as BannerStatus) || 'active',
-            expiryDate: b.expiryDate || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
-            views: b.views || 0,
-            clicks: b.clicks || 0,
-            createdAt: b.createdAt ? new Date(b.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
-          }))
-          setBanners(mapped)
-        }
-      })
-      .catch(err => {
-        console.warn('API error, using mock banners:', err)
-      })
+    fetchLiveBanners()
+
+    const handleSync = () => { fetchLiveBanners() }
+    window.addEventListener('wouchify_banners_updated', handleSync)
+    window.addEventListener('storage', handleSync)
+    return () => {
+      window.removeEventListener('wouchify_banners_updated', handleSync)
+      window.removeEventListener('storage', handleSync)
+    }
   }, [])
 
   // Form State
@@ -896,10 +779,15 @@ export const ExecutiveBannersPage: React.FC = () => {
   }
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to permanently delete this hero banner?')) {
-      adminApi.deleteBanner(id).catch(console.warn)
-      setBanners(prev => prev.filter(b => b.id !== id))
-    }
+    setBannerToDelete(id)
+  }
+
+  const confirmDeleteBanner = () => {
+    if (!bannerToDelete) return
+    const id = bannerToDelete
+    adminApi.deleteBanner(id).catch(console.warn)
+    setBanners(prev => prev.filter(b => b.id !== id))
+    setBannerToDelete(null)
   }
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'primaryImage' | 'secondaryImage') => {
@@ -917,12 +805,12 @@ export const ExecutiveBannersPage: React.FC = () => {
     e.preventDefault()
 
     if (!formData.title?.trim()) {
-      alert('Banner Title is required.')
+      setBannerAlert({ title: 'Validation Error', message: 'Banner Title is required.', variant: 'warning' })
       return
     }
 
     if (!formData.expiryDate) {
-      alert('Banner Expiry Date is mandatory. Please set a valid expiry date.')
+      setBannerAlert({ title: 'Validation Error', message: 'Banner Expiry Date is mandatory. Please set a valid expiry date.', variant: 'warning' })
       return
     }
 
@@ -1181,14 +1069,32 @@ export const ExecutiveBannersPage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredBanners.map(banner => {
+              {loading ? (
+                <TableRowSkeleton columns={8} rows={5} />
+              ) : filteredBanners.length === 0 ? (
+                <tr>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '48px 16px' }}>
+                    <EmptyState
+                      icon="🖼️"
+                      title="No hero banners found"
+                      description={searchTerm || filterPage !== 'all' || filterStatus !== 'all' ? "Try adjusting your filters." : "No hero banners currently in the directory."}
+                      actionLabel="+ Add Hero Banner"
+                      onAction={handleOpenAdd}
+                    />
+                  </td>
+                </tr>
+              ) : filteredBanners.map(banner => {
                 const days = daysLeft(banner.expiryDate)
                 const pill = expiryPill(days)
                 const stat = statusConfig(banner.status)
                 const pageCfg = getTargetConfig(banner.targetPage)
 
                 return (
-                  <tr key={banner.id}>
+                  <tr 
+                    key={banner.id}
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => { setInspectedBanner(banner); setDrawerTab('preview'); }}
+                  >
                     <td>
                       <div style={{
                         width: '110px',
@@ -1333,12 +1239,12 @@ export const ExecutiveBannersPage: React.FC = () => {
                       </span>
                     </td>
 
-                    <td style={{ textAlign: 'right' }}>
+                    <td style={{ textAlign: 'right' }} onClick={(e) => e.stopPropagation()}>
                       <div style={{ display: 'inline-flex', gap: '6px' }}>
                         <button
                           className="action-btn"
                           title="Preview Hero"
-                          onClick={() => setPreviewingBanner(banner)}
+                          onClick={() => { setInspectedBanner(banner); setDrawerTab('preview'); }}
                         >
                           <Eye size={16} />
                         </button>
@@ -1361,16 +1267,6 @@ export const ExecutiveBannersPage: React.FC = () => {
                   </tr>
                 )
               })}
-
-              {filteredBanners.length === 0 && (
-                <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', padding: '48px 16px', color: '#94a3b8' }}>
-                    <div style={{ fontSize: '2rem', marginBottom: '8px' }}>🖼️</div>
-                    <div style={{ fontWeight: 600, color: '#475569' }}>No hero banners found</div>
-                    <div style={{ fontSize: '0.85rem' }}>Try adjusting your filters or click "+ Add Hero Banner"</div>
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         </div>
@@ -1807,7 +1703,7 @@ export const ExecutiveBannersPage: React.FC = () => {
                         className="btn-save"
                         onClick={() => {
                           if (!formData.title?.trim()) {
-                            alert('Please enter a Banner Title before proceeding.')
+                            setBannerAlert({ title: 'Validation Error', message: 'Please enter a Banner Title before proceeding.', variant: 'warning' })
                             return
                           }
                           setFormStep(2)
@@ -1833,86 +1729,274 @@ export const ExecutiveBannersPage: React.FC = () => {
         )}
 
         {/* ============================================================
-            FULL PREVIEW MODAL
+            DEEP INSPECTION DRAWER (SLIDE-OVER)
             ============================================================ */}
-        {previewingBanner && (
-          <div className="crud-modal-overlay">
-            <div className="crud-modal" style={{ maxWidth: '850px', width: '90%' }}>
-              <div className="modal-header">
-                <div>
-                  <h3 className="modal-title">{previewingBanner.title}</h3>
-                  <div style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '2px' }}>
-                    Slot: <strong>{getTargetConfig(previewingBanner.targetPage).label}</strong> · Priority Level {previewingBanner.priority}
+        {inspectedBanner && (
+          <div className="exec-drawer-overlay" onClick={() => setInspectedBanner(null)}>
+            <div className="exec-drawer" onClick={e => e.stopPropagation()}>
+              <div className="exec-drawer__header">
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                  <div className="exec-drawer__avatar" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
+                    {inspectedBanner.primaryImage ? (
+                       <img src={inspectedBanner.primaryImage} alt="" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                    ) : (
+                       <ImageIcon size={24} color="#94a3b8" />
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="exec-drawer__title">{inspectedBanner.title}</h3>
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '6px', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '0.75rem', background: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: '12px', fontWeight: 600 }}>
+                        {getTargetConfig(inspectedBanner.targetPage).label}
+                      </span>
+                      <span style={{ fontSize: '0.75rem', background: statusConfig(inspectedBanner.status).bg, color: statusConfig(inspectedBanner.status).color, padding: '2px 8px', borderRadius: '12px', fontWeight: 600 }}>
+                        {statusConfig(inspectedBanner.status).label}
+                      </span>
+                      <span style={{ fontSize: '0.75rem', background: '#fee2e2', color: '#dc2626', padding: '2px 8px', borderRadius: '12px', fontWeight: 600 }}>
+                        Priority P{inspectedBanner.priority}
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <button className="modal-close" onClick={() => setPreviewingBanner(null)}>
+                <button className="exec-drawer__close" onClick={() => setInspectedBanner(null)}>
                   <X size={20} />
                 </button>
               </div>
 
-              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                {/* Full Size Live Hero Render */}
-                <div>
-                  <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '8px' }}>
-                    CUSTOMER-FACING HERO SECTION
-                  </div>
-                  <HeroLivePreview banner={previewingBanner} />
+              <div className="exec-drawer__stats">
+                <div className="stat-box">
+                  <div className="stat-label">Impressions</div>
+                  <div className="stat-value">{inspectedBanner.views.toLocaleString()}</div>
                 </div>
-
-                {/* Banner Metadata & Performance Grid */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(4, 1fr)',
-                  gap: '12px',
-                  background: '#f8fafc',
-                  padding: '16px',
-                  borderRadius: '10px',
-                  border: '1px solid #e2e8f0'
-                }}>
-                  <div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748b' }}>STATUS</div>
-                    <div style={{ fontWeight: 700, color: '#0f172a', textTransform: 'capitalize' }}>
-                      {previewingBanner.status}
-                    </div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748b' }}>EXPIRY DATE</div>
-                    <div style={{ fontWeight: 700, color: '#dc2626' }}>
-                      {previewingBanner.expiryDate} ({daysLeft(previewingBanner.expiryDate)}d left)
-                    </div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748b' }}>TOTAL IMPRESSIONS</div>
-                    <div style={{ fontWeight: 700, color: '#0f172a' }}>
-                      {previewingBanner.views.toLocaleString()}
-                    </div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748b' }}>TOTAL CLICKS</div>
-                    <div style={{ fontWeight: 700, color: '#0f172a' }}>
-                      {previewingBanner.clicks.toLocaleString()}
-                    </div>
+                <div className="stat-box">
+                  <div className="stat-label">CTA Clicks</div>
+                  <div className="stat-value">{inspectedBanner.clicks.toLocaleString()}</div>
+                </div>
+                <div className="stat-box">
+                  <div className="stat-label">CTR</div>
+                  <div className="stat-value">{inspectedBanner.views > 0 ? ((inspectedBanner.clicks / inspectedBanner.views) * 100).toFixed(1) : '0.0'}%</div>
+                </div>
+                <div className="stat-box">
+                  <div className="stat-label">Expires In</div>
+                  <div className="stat-value" style={{ color: daysLeft(inspectedBanner.expiryDate) <= 3 ? '#dc2626' : 'inherit' }}>
+                    {daysLeft(inspectedBanner.expiryDate)}d
                   </div>
                 </div>
               </div>
 
-              <div className="modal-footer">
-                <button className="btn-cancel" onClick={() => setPreviewingBanner(null)}>
-                  Close
+              <div className="exec-drawer__tabs">
+                <button className={`exec-drawer__tab ${drawerTab === 'preview' ? 'active' : ''}`} onClick={() => setDrawerTab('preview')}>
+                  Visual Preview
                 </button>
+                <button className={`exec-drawer__tab ${drawerTab === 'content' ? 'active' : ''}`} onClick={() => setDrawerTab('content')}>
+                  Content
+                </button>
+                <button className={`exec-drawer__tab ${drawerTab === 'siblings' ? 'active' : ''}`} onClick={() => setDrawerTab('siblings')}>
+                  Slot Siblings
+                </button>
+                <button className={`exec-drawer__tab ${drawerTab === 'performance' ? 'active' : ''}`} onClick={() => setDrawerTab('performance')}>
+                  Performance
+                </button>
+              </div>
+
+              <div className="exec-drawer__body">
+                {drawerTab === 'preview' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '12px' }}>
+                        CUSTOMER-FACING HERO RENDER
+                      </div>
+                      <HeroLivePreview banner={inspectedBanner} />
+                    </div>
+                    {inspectedBanner.secondaryImage && (
+                       <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                         <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '12px' }}>
+                           SECONDARY GRAPHIC / ART
+                         </div>
+                         <div style={{ width: '80px', height: '80px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #cbd5e1' }}>
+                           <img src={inspectedBanner.secondaryImage} alt="" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                         </div>
+                       </div>
+                    )}
+                  </div>
+                )}
+
+                {drawerTab === 'content' && (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
+                    <div className="detail-group">
+                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>Heading Copy</label>
+                      <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '6px', fontSize: '0.9rem', color: '#0f172a' }}>
+                        <div><strong>L1:</strong> {inspectedBanner.headingLine1 || 'N/A'}</div>
+                        <div><strong>L2:</strong> {inspectedBanner.headingLine2 || 'N/A'}</div>
+                        <div><strong>L3:</strong> {inspectedBanner.headingLine3 || 'N/A'}</div>
+                      </div>
+                    </div>
+                    <div className="detail-group">
+                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>Description</label>
+                      <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '6px', fontSize: '0.9rem', color: '#0f172a' }}>
+                        {inspectedBanner.description || 'N/A'}
+                      </div>
+                    </div>
+                    <div className="detail-group">
+                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>Badge & Chips</label>
+                      <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '6px', fontSize: '0.9rem', color: '#0f172a' }}>
+                        <div><strong>Badge:</strong> {inspectedBanner.badgeText || 'N/A'}</div>
+                        <div><strong>Chip 1:</strong> {inspectedBanner.dealChip1 || 'N/A'}</div>
+                        <div><strong>Chip 2:</strong> {inspectedBanner.dealChip2 || 'N/A'}</div>
+                      </div>
+                    </div>
+                    <div className="detail-group">
+                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>Call to Action (CTA)</label>
+                      <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '6px', fontSize: '0.9rem', color: '#0f172a' }}>
+                        <div><strong>Label:</strong> {inspectedBanner.ctaText}</div>
+                        <div><strong>Link:</strong> {inspectedBanner.targetLink}</div>
+                      </div>
+                    </div>
+                    <div className="detail-group">
+                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>Targeting & Schedule</label>
+                      <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '6px', fontSize: '0.9rem', color: '#0f172a' }}>
+                        <div><strong>Slot:</strong> {getTargetConfig(inspectedBanner.targetPage).label}</div>
+                        <div><strong>Priority:</strong> {inspectedBanner.priority}</div>
+                        <div><strong>Status:</strong> <span style={{textTransform: 'capitalize'}}>{inspectedBanner.status}</span></div>
+                        <div><strong>Expiry:</strong> {inspectedBanner.expiryDate}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {drawerTab === 'siblings' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 12px 0' }}>
+                      Other banners competing for the <strong>{getTargetConfig(inspectedBanner.targetPage).label}</strong> slot.
+                    </p>
+                    {banners.filter(b => b.targetPage === inspectedBanner.targetPage && b.id !== inspectedBanner.id).length === 0 ? (
+                      <div style={{ padding: '24px', textAlign: 'center', color: '#94a3b8', background: '#f8fafc', borderRadius: '8px' }}>
+                        No other banners in this slot.
+                      </div>
+                    ) : (
+                      banners.filter(b => b.targetPage === inspectedBanner.targetPage && b.id !== inspectedBanner.id)
+                        .sort((a,b) => b.priority - a.priority)
+                        .map(sibling => (
+                        <div key={sibling.id} className="exec-drawer__item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'white', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                          <div>
+                            <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#0f172a' }}>{sibling.title}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>
+                              Priority: P{sibling.priority} · {statusConfig(sibling.status).label}
+                            </div>
+                          </div>
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.9rem' }}>{sibling.clicks.toLocaleString()}</div>
+                            <div style={{ fontSize: '0.7rem', color: '#64748b' }}>Clicks</div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+
+                {drawerTab === 'performance' && (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
+                    <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Total Impressions</span>
+                        <span style={{ fontWeight: 800, color: '#0f172a' }}>{inspectedBanner.views.toLocaleString()}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>CTA Clicks</span>
+                        <span style={{ fontWeight: 800, color: '#0f172a' }}>{inspectedBanner.clicks.toLocaleString()}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Click-Through Rate (CTR)</span>
+                        <span style={{ fontWeight: 800, color: '#3b82f6' }}>
+                          {inspectedBanner.views > 0 ? ((inspectedBanner.clicks / inspectedBanner.views) * 100).toFixed(1) : '0.0'}%
+                        </span>
+                      </div>
+                      <hr style={{ border: 'none', borderTop: '1px solid #e2e8f0', margin: '4px 0' }} />
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Created Date</span>
+                        <span style={{ fontWeight: 600, color: '#0f172a' }}>{inspectedBanner.createdAt}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Expiry Date</span>
+                        <span style={{ fontWeight: 600, color: '#dc2626' }}>{inspectedBanner.expiryDate} ({daysLeft(inspectedBanner.expiryDate)}d)</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Current Status</span>
+                        <span style={{ fontWeight: 600, color: '#0f172a', textTransform: 'capitalize' }}>{inspectedBanner.status}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="exec-drawer__actions">
                 <button
-                  className="btn-save"
+                  className="drawer-btn primary"
                   onClick={() => {
-                    const b = previewingBanner
-                    setPreviewingBanner(null)
+                    const b = inspectedBanner
+                    setInspectedBanner(null)
                     handleOpenEdit(b)
                   }}
                 >
-                  <Edit2 size={16} /> Edit This Banner
+                  <Edit2 size={16} /> Edit Banner
+                </button>
+                <button
+                  className="drawer-btn secondary"
+                  onClick={() => {
+                    const newStatus = inspectedBanner.status === 'active' ? 'inactive' : 'active';
+                    adminApi.updateBanner(inspectedBanner.id, { status: newStatus }).then(() => {
+                      setBanners(prev => prev.map(b => b.id === inspectedBanner.id ? { ...b, status: newStatus } : b));
+                      setInspectedBanner(prev => prev ? { ...prev, status: newStatus } : null);
+                    }).catch(console.warn);
+                  }}
+                >
+                  <RotateCcw size={16} /> Toggle Status
+                </button>
+                <button
+                  className="drawer-btn secondary"
+                  onClick={() => {
+                    window.open(inspectedBanner.targetLink, '_blank')
+                  }}
+                >
+                  <ExternalLink size={16} /> Open Link
+                </button>
+                <button
+                  className="drawer-btn danger"
+                  onClick={() => {
+                    handleDelete(inspectedBanner.id)
+                    setInspectedBanner(null)
+                  }}
+                >
+                  <Trash2 size={16} /> Delete
                 </button>
               </div>
             </div>
           </div>
+        )}
+
+        {/* ── CUSTOM CONFIRM DIALOG ── */}
+        <AdminConfirmDialog
+          isOpen={!!bannerToDelete}
+          title="Delete Hero Banner"
+          message="Are you sure you want to permanently delete this hero banner? This cannot be undone."
+          confirmLabel="Delete Banner"
+          cancelLabel="Cancel"
+          variant="danger"
+          icon="trash"
+          onConfirm={confirmDeleteBanner}
+          onCancel={() => setBannerToDelete(null)}
+        />
+
+        {/* ── CUSTOM ALERT DIALOG ── */}
+        {bannerAlert && (
+          <AdminAlertDialog
+            isOpen={!!bannerAlert}
+            title={bannerAlert.title}
+            message={bannerAlert.message}
+            variant={bannerAlert.variant || 'warning'}
+            buttonLabel="Understood"
+            onClose={() => setBannerAlert(null)}
+          />
         )}
       </div>
     </ExecutiveLayout>

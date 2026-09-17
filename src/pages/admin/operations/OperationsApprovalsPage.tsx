@@ -16,19 +16,24 @@ import {
   Megaphone,
   Send,
   ShieldAlert,
-  Store
+  Store,
+  CreditCard,
+  Layers
 } from 'lucide-react'
 import './OperationsShared.css'
 import { getStoreLogo, PLACEHOLDER_DEAL_IMAGE, PLACEHOLDER_STORE_LOGO } from '../../../data/dealsPage'
-import api from '../../../services/api'
+import { AdminPromptDialog, AdminAlertDialog } from '../../../components/common/AdminDialog'
 
 export interface ModerationItem {
   id: string
-  type: 'loot' | 'deal' | 'coupon' | 'banner' | 'ad' | 'store'
+  entityId?: string
+  action?: 'create' | 'update' | 'delete'
+  type: 'loot' | 'deal' | 'coupon' | 'banner' | 'ad' | 'store' | 'credit_card' | 'category'
   title: string
   brand?: string
   store: string
   submittedBy: string
+  submittedByName?: string
   submittedAt: string
   price: string
   originalPrice?: string
@@ -58,166 +63,12 @@ export interface ModerationItem {
   expiresAt?: string
   description?: string
   terms?: string
+  dataSnapshot?: any
 }
 
-const initialApprovalQueue: ModerationItem[] = [
-  {
-    id: 'appr-201',
-    type: 'loot',
-    title: 'Sony WH-1000XM5 Wireless ANC Headphones (Price Glitch at ₹4,999)',
-    brand: 'Sony',
-    store: 'Amazon',
-    submittedBy: 'balaji@wouchify.com',
-    submittedAt: '12 mins ago',
-    price: '₹4,999',
-    originalPrice: '₹29,990',
-    discount: '83% OFF',
-    code: 'GLITCHSONY',
-    priority: 'Critical',
-    link: 'https://amazon.in/dp/B09XS7JWHH',
-    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop',
-    notes: 'Price drop verified on Amazon seller app. Very high urgency.',
-    category: 'Electronics',
-    subCategory: 'Headphones',
-    asinOrSku: 'B09XS7JWHH',
-    bankOffer: '10% Instant Discount via SBI Credit Card',
-    cashback: '₹200 Amazon Pay Balance',
-    stockStatus: 'Lightning Deal (85% Claimed)',
-    rating: '4.5/5 (2,300 reviews)',
-    deliveryInfo: 'Free One-Day Delivery for Prime',
-    description: 'The best ANC headphones in the market, now at an unbelievable glitch price.',
-    highlights: ['Industry Leading ANC', '30hr Battery Life', 'Multipoint connection'],
-    status: 'Pending Approval'
-  },
-  {
-    id: 'appr-202',
-    type: 'loot',
-    title: 'Puma Speedcat OG Leather Sneakers (Under ₹999 Steal Deal)',
-    brand: 'Puma',
-    store: 'Myntra',
-    submittedBy: 'balaji@wouchify.com',
-    submittedAt: '25 mins ago',
-    price: '₹949',
-    originalPrice: '₹7,999',
-    discount: '88% OFF',
-    code: 'PUMASTEAL',
-    priority: 'Critical',
-    link: 'https://myntra.com/puma-speedcat',
-    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&auto=format&fit=crop',
-    notes: 'Myntra End of Reason flash glitch.',
-    category: 'Footwear',
-    status: 'Pending Approval'
-  },
-  {
-    id: 'appr-203',
-    type: 'deal',
-    title: 'Samsung Galaxy S24 Ultra 5G (12GB RAM, 512GB Titanium Black)',
-    brand: 'Samsung',
-    store: 'Flipkart',
-    submittedBy: 'balaji@wouchify.com',
-    submittedAt: '35 mins ago',
-    price: '₹1,09,999',
-    originalPrice: '₹1,34,999',
-    discount: '19% OFF',
-    priority: 'High',
-    link: 'https://flipkart.com/samsung-s24-ultra',
-    image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500&auto=format&fit=crop',
-    notes: 'Includes ₹5,000 instant HDFC Bank discount.',
-    category: 'Electronics',
-    status: 'Pending Approval'
-  },
-  {
-    id: 'appr-204',
-    type: 'deal',
-    title: 'Apple MacBook Air M3 (13.6-inch Liquid Retina, 8GB/256GB SSD)',
-    brand: 'Apple',
-    store: 'Amazon',
-    submittedBy: 'balaji@wouchify.com',
-    submittedAt: '45 mins ago',
-    price: '₹94,990',
-    originalPrice: '₹1,14,900',
-    discount: '17% OFF',
-    priority: 'High',
-    link: 'https://amazon.in/dp/B0CX2319',
-    image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&auto=format&fit=crop',
-    notes: 'Amazon Prime Day special pricing.',
-    category: 'Computers',
-    status: 'Pending Approval'
-  },
-  {
-    id: 'appr-205',
-    type: 'coupon',
-    title: 'Myntra Flat ₹500 OFF on Orders Above ₹1,999',
-    brand: 'Myntra',
-    store: 'Myntra',
-    submittedBy: 'jayanth@wouchify.com',
-    submittedAt: '1 hour ago',
-    price: 'Flat ₹500 OFF',
-    code: 'MYNTRAPRO',
-    discount: '₹500 OFF',
-    priority: 'Normal',
-    link: 'https://myntra.com',
-    image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=500&auto=format&fit=crop',
-    notes: 'Verified working coupon on Fashion catalog.',
-    category: 'Fashion',
-    status: 'Pending Approval'
-  },
-  {
-    id: 'appr-206',
-    type: 'coupon',
-    title: 'Dominos Pizza: Flat 50% OFF up to ₹120 on Pizza Mania & Combos',
-    brand: "Domino's",
-    store: 'Dominos',
-    submittedBy: 'jayanth@wouchify.com',
-    submittedAt: '2 hours ago',
-    price: '50% OFF',
-    code: 'DOM50FEST',
-    discount: '50% OFF',
-    priority: 'Normal',
-    link: 'https://dominos.co.in',
-    image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500&auto=format&fit=crop',
-    notes: 'Applicable on min order ₹249.',
-    category: 'Food',
-    status: 'Pending Approval'
-  },
-  {
-    id: 'appr-207',
-    type: 'banner',
-    title: 'Home Page Hero: Diwali Mega Cashback Bonanza (Up to 15% Extra)',
-    brand: 'Wouchify',
-    store: 'Wouchify',
-    submittedBy: 'balaji@wouchify.com',
-    submittedAt: '3 hours ago',
-    price: 'Heroic Banner',
-    discount: 'Up to 15% Cashback',
-    priority: 'High',
-    link: '/stores',
-    image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200&auto=format&fit=crop',
-    notes: 'Scheduled to go live for upcoming festive season.',
-    category: 'Campaign',
-    status: 'Pending Approval'
-  },
-  {
-    id: 'appr-208',
-    type: 'ad',
-    title: 'Header Sticky Sponsor Banner: HDFC Regalia Gold Credit Card',
-    brand: 'HDFC Bank',
-    store: 'HDFC Bank',
-    submittedBy: 'jayanth@wouchify.com',
-    submittedAt: '4 hours ago',
-    price: '₹45,000 / Week',
-    discount: 'Sponsor Ad',
-    priority: 'Normal',
-    link: 'https://hdfcbank.com/credit-cards',
-    image: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=800&auto=format&fit=crop',
-    notes: 'Targeting Deals & Coupons page header slot.',
-    category: 'Banking',
-    status: 'Pending Approval'
-  }
-]
-
 export const OperationsApprovalsPage: React.FC = () => {
-  const [items, setItems] = useState<ModerationItem[]>(initialApprovalQueue)
+  const [items, setItems] = useState<ModerationItem[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [filterType, setFilterType] = useState<string>('all')
   const [filterExecutive, setFilterExecutive] = useState<string>('all')
@@ -227,115 +78,185 @@ export const OperationsApprovalsPage: React.FC = () => {
   // Rejection Modal
   const [rejectingItem, setRejectingItem] = useState<ModerationItem | null>(null)
   const [rejectionReason, setRejectionReason] = useState('')
+  const [bulkRejectOpen, setBulkRejectOpen] = useState(false)
+  const [approvalAlert, setApprovalAlert] = useState<{ title: string; message: string; variant?: 'warning' | 'danger' | 'info' | 'success' } | null>(null)
 
   // Preview Modal
   const [previewItem, setPreviewItem] = useState<ModerationItem | null>(null)
-
-  React.useEffect(() => {
-    fetchPendingItems()
-  }, [])
-
-  const fetchPendingItems = async () => {
-    try {
-      const storesRes = await api.get('/stores/pending')
-      const couponsRes = await api.get('/coupons/pending')
-      
-      const mappedStores = storesRes.data.map((s: any) => ({
-        id: s._id || s.id,
-        type: 'store',
-        title: s.name,
-        store: s.name,
-        submittedBy: s.submittedBy || 'executive@wouchify.com',
-        submittedAt: s.createdAt ? new Date(s.createdAt).toISOString().split('T')[0] : 'Just now',
-        price: '-',
-        priority: 'Normal',
-        link: s.affiliateLink || '',
-        image: s.logo || '',
-        category: s.categories?.[0] || 'Store',
-        status: 'Pending Approval'
-      }))
-
-      const mappedCoupons = couponsRes.data.map((c: any) => ({
-        id: c._id || c.id,
-        type: 'coupon',
-        title: c.title,
-        store: c.store,
-        submittedBy: c.submittedBy || 'executive@wouchify.com',
-        submittedAt: c.createdAt ? new Date(c.createdAt).toISOString().split('T')[0] : 'Just now',
-        price: c.discount || '',
-        code: c.code || '',
-        priority: 'Normal',
-        link: c.affiliateLink || '',
-        image: '',
-        category: c.category || 'Coupon',
-        status: 'Pending Approval'
-      }))
-
-      setItems([...mappedStores, ...mappedCoupons])
-    } catch (err) {
-      console.error('Failed to fetch pending items', err)
-    }
-  }
 
   const showToast = (msg: string) => {
     setToastMessage(msg)
     setTimeout(() => setToastMessage(null), 3000)
   }
 
-  // Load from backend API submissions queue
+  const fetchQueue = async () => {
+    try {
+      setLoading(true)
+      const res = await adminApi.getSubmissions()
+      if (Array.isArray(res)) {
+        const mapped: ModerationItem[] = res.map((s: any, idx: number) => {
+          const snap = s.dataSnapshot || {}
+          return {
+            id: s._id || s.id || `appr-${idx + 1}`,
+            entityId: s.entityId,
+            action: s.action || 'create',
+            type: s.entityType === 'loot_deal' ? 'loot' :
+                  s.entityType === 'deal' ? 'deal' :
+                  s.entityType === 'coupon' ? 'coupon' :
+                  s.entityType === 'banner' ? 'banner' :
+                  s.entityType === 'advertisement' ? 'ad' :
+                  s.entityType === 'store' ? 'store' :
+                  s.entityType === 'credit_card' ? 'credit_card' :
+                  s.entityType === 'category' ? 'category' : 'deal',
+            title: s.title || snap.title || snap.name || snap.cardName || 'Submitted Item',
+            brand: snap.brand || snap.bank || snap.store || s.store || 'Generic',
+            store: s.store || snap.store || snap.storeName || snap.advertiser || snap.bank || 'Partner',
+            submittedBy: s.submittedBy || 'executive@wouchify.com',
+            submittedByName: s.submittedByName,
+            submittedAt: s.submittedAt ? new Date(s.submittedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : 'Recently',
+            price: snap.price || snap.currentPrice || snap.reward || snap.annualFee || (snap.pricingModel ? `${snap.pricingModel} • ${snap.budgetOrRate || ''}` : 'Special Offer'),
+            originalPrice: snap.originalPrice || '',
+            discount: snap.discount || snap.discountLabel || snap.rewardRate || '',
+            code: snap.code || '',
+            priority: s.priority || 'Normal',
+            link: snap.link || snap.href || snap.targetLink || snap.affiliateLink || 'https://wouchify.com',
+            image: snap.image || snap.imageUrl || snap.productImage || snap.primaryImage || snap.logo || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop',
+            notes: s.notes || snap.proofNote || snap.description || '',
+            category: s.category || snap.category || 'General',
+            status: s.status === 'Approved' ? 'Approved' : (s.status === 'Rejected' ? 'Rejected' : 'Pending Approval'),
+            rejectionReason: s.rejectionReason,
+            description: snap.description,
+            terms: snap.terms,
+            highlights: snap.highlights || snap.keyBenefits,
+            dataSnapshot: snap
+          }
+        })
+        setItems(mapped)
+      }
+    } catch (err) {
+      console.error('Failed to load submissions queue:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
-    adminApi.getSubmissions()
-      .then((res: any[]) => {
-        if (Array.isArray(res) && res.length > 0) {
-          const mapped: ModerationItem[] = res.map((s: any, idx: number) => {
-            const snap = s.dataSnapshot || {}
-            return {
-              id: s._id || s.id || `appr-${idx + 1}`,
-              type: s.entityType === 'loot_deal' ? 'loot' :
-                    s.entityType === 'deal' ? 'deal' :
-                    s.entityType === 'coupon' ? 'coupon' :
-                    s.entityType === 'banner' ? 'banner' :
-                    s.entityType === 'advertisement' ? 'ad' :
-                    s.entityType === 'store' ? 'store' : 'deal',
-              title: s.title || snap.title || snap.name || 'Submitted Item',
-              brand: snap.brand || snap.store || s.store || 'Generic',
-              store: s.store || snap.store || snap.storeName || 'Partner Store',
-              submittedBy: s.submittedBy || 'executive@wouchify.com',
-              submittedAt: s.submittedAt ? new Date(s.submittedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : 'Recently',
-              price: snap.price || snap.currentPrice || snap.reward || 'Special Offer',
-              originalPrice: snap.originalPrice || '',
-              discount: snap.discount || snap.discountLabel || '',
-              code: snap.code || '',
-              priority: s.priority || 'Normal',
-              link: snap.link || snap.href || snap.targetLink || 'https://wouchify.com',
-              image: snap.image || snap.imageUrl || snap.productImage || snap.primaryImage || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop',
-              notes: s.notes || snap.proofNote || snap.description || '',
-              category: s.category || snap.category || 'General',
-              status: s.status === 'Approved' ? 'Approved' : (s.status === 'Rejected' ? 'Rejected' : 'Pending Approval'),
-              rejectionReason: s.rejectionReason,
-              description: snap.description,
-              terms: snap.terms,
-              highlights: snap.highlights
-            }
-          })
-          setItems(mapped)
-        }
-      })
-      .catch(err => {
-        console.warn('API error, using mock moderation items:', err)
-      })
+    fetchQueue()
+    const handleSubmissionsUpdated = () => fetchQueue()
+    window.addEventListener('wouchify_submissions_updated', handleSubmissionsUpdated)
+    return () => {
+      window.removeEventListener('wouchify_submissions_updated', handleSubmissionsUpdated)
+    }
   }, [])
+
+  const handleApproveOne = async (id: string, title: string) => {
+    try {
+      await adminApi.approveSubmission(id)
+      setItems(prev => prev.map(i => i.id === id ? { ...i, status: 'Approved' } : i))
+      setSelectedIds(prev => prev.filter(selId => selId !== id))
+      showToast(`Approved: "${title}"`)
+      window.dispatchEvent(new CustomEvent('wouchify_deals_updated'))
+      window.dispatchEvent(new CustomEvent('wouchify_loot_deals_updated'))
+      window.dispatchEvent(new CustomEvent('wouchify_stores_updated'))
+      window.dispatchEvent(new CustomEvent('wouchify_coupons_updated'))
+      window.dispatchEvent(new CustomEvent('wouchify_credit_cards_updated'))
+      window.dispatchEvent(new CustomEvent('wouchify_banners_updated'))
+      window.dispatchEvent(new CustomEvent('wouchify_advertisements_updated'))
+      window.dispatchEvent(new CustomEvent('wouchify_categories_updated'))
+    } catch (err: any) {
+      console.error('Approve failed:', err)
+      showToast(`Error approving item: ${err?.message || 'Unknown error'}`)
+    }
+  }
+
+  const handleOpenRejectModal = (item: ModerationItem) => {
+    setRejectingItem(item)
+    setRejectionReason('')
+  }
+
+  const handleConfirmReject = async () => {
+    if (!rejectingItem) return
+    if (!rejectionReason.trim()) {
+      setApprovalAlert({ title: 'Missing Reason', message: 'Please enter a rejection reason note for the executive team.', variant: 'warning' })
+      return
+    }
+
+    try {
+      await adminApi.rejectSubmission(rejectingItem.id, rejectionReason)
+      setItems(prev => prev.map(item => 
+        item.id === rejectingItem.id ? { ...item, status: 'Rejected', rejectionReason } : item
+      ))
+      setSelectedIds(prev => prev.filter(id => id !== rejectingItem.id))
+      showToast(`Rejected submission with feedback note`)
+      setRejectingItem(null)
+      setRejectionReason('')
+      window.dispatchEvent(new CustomEvent('wouchify_submissions_updated'))
+    } catch (err: any) {
+      console.error('Reject failed:', err)
+      showToast(`Error rejecting item: ${err?.message || 'Unknown error'}`)
+    }
+  }
+
+  const handleBulkApprove = async () => {
+    if (selectedIds.length === 0) return
+    try {
+      await Promise.all(selectedIds.map(id => adminApi.approveSubmission(id)))
+      setItems(prev => prev.map(item => selectedIds.includes(item.id) ? { ...item, status: 'Approved' } : item))
+      showToast(`Bulk approved ${selectedIds.length} submissions`)
+      setSelectedIds([])
+      window.dispatchEvent(new CustomEvent('wouchify_submissions_updated'))
+      window.dispatchEvent(new CustomEvent('wouchify_deals_updated'))
+      window.dispatchEvent(new CustomEvent('wouchify_loot_deals_updated'))
+      window.dispatchEvent(new CustomEvent('wouchify_stores_updated'))
+      window.dispatchEvent(new CustomEvent('wouchify_coupons_updated'))
+      window.dispatchEvent(new CustomEvent('wouchify_credit_cards_updated'))
+      window.dispatchEvent(new CustomEvent('wouchify_banners_updated'))
+      window.dispatchEvent(new CustomEvent('wouchify_advertisements_updated'))
+      window.dispatchEvent(new CustomEvent('wouchify_categories_updated'))
+    } catch (err: any) {
+      console.error('Bulk approve failed:', err)
+      showToast(`Error during bulk approval`)
+    }
+  }
+
+  const handleBulkReject = () => {
+    if (selectedIds.length === 0) return
+    setBulkRejectOpen(true)
+  }
+
+  const handleConfirmBulkReject = async (reason: string) => {
+    try {
+      await Promise.all(selectedIds.map(id => adminApi.rejectSubmission(id, reason)))
+      setItems(prev => prev.map(item => selectedIds.includes(item.id) ? { ...item, status: 'Rejected', rejectionReason: reason } : item))
+      showToast(`Rejected ${selectedIds.length} submissions`)
+      setSelectedIds([])
+      setBulkRejectOpen(false)
+      window.dispatchEvent(new CustomEvent('wouchify_submissions_updated'))
+    } catch (err: any) {
+      console.error('Bulk reject failed:', err)
+      showToast(`Error during bulk rejection`)
+    }
+  }
 
   // KPIs
   const pendingCount = items.filter(i => i.status === 'Pending Approval').length
   const criticalCount = items.filter(i => i.status === 'Pending Approval' && i.priority === 'Critical').length
   const dealsCount = items.filter(i => i.status === 'Pending Approval' && (i.type === 'deal' || i.type === 'loot')).length
   const couponsCount = items.filter(i => i.status === 'Pending Approval' && i.type === 'coupon').length
+  const cardsCount = items.filter(i => i.status === 'Pending Approval' && i.type === 'credit_card').length
   const bannersCount = items.filter(i => i.status === 'Pending Approval' && (i.type === 'banner' || i.type === 'ad')).length
+
+  const executiveOptions = useMemo(() => {
+    const set = new Set<string>()
+    items.forEach(i => {
+      if (i.submittedBy) set.add(i.submittedBy)
+    })
+    return ['all', ...Array.from(set)]
+  }, [items])
 
   // Filtered List
   const filteredItems = useMemo(() => {
-    return items.filter(item => {
+    return items.filter((item: ModerationItem) => {
       if (item.status !== 'Pending Approval') return false
 
       if (filterType !== 'all' && item.type !== filterType) {
@@ -359,81 +280,9 @@ export const OperationsApprovalsPage: React.FC = () => {
     })
   }, [items, filterType, filterExecutive, searchTerm])
 
-  const handleApproveOne = async (id: string, title: string) => {
-    const item = items.find(i => i.id === id)
-    try {
-      if (item && (item.type === 'store' || item.type === 'coupon')) {
-        const endpoint = item.type === 'store' ? `/stores/${id}/approve/opsManager` : `/coupons/${id}/approve/opsManager`
-        await api.patch(endpoint)
-      } else {
-        await adminApi.approveSubmission(id)
-      }
-      setItems(prev => prev.map(i => i.id === id ? { ...i, status: 'Approved' } : i))
-      setSelectedIds(prev => prev.filter(selId => selId !== id))
-      showToast(`Approved: "${title}"`)
-    } catch (err) {
-      adminApi.approveSubmission(id).catch(console.warn)
-      setItems(prev => prev.map(i => i.id === id ? { ...i, status: 'Approved' } : i))
-      setSelectedIds(prev => prev.filter(selId => selId !== id))
-      showToast(`Approved: "${title}"`)
-    }
-  }
-
-  const handleOpenRejectModal = (item: ModerationItem) => {
-    setRejectingItem(item)
-    setRejectionReason('')
-  }
-
-  const handleConfirmReject = async () => {
-    if (!rejectingItem) return
-    if (!rejectionReason.trim()) {
-      alert('Please enter a rejection reason note for the executive team.')
-      return
-    }
-
-    try {
-      if (rejectingItem.type === 'store' || rejectingItem.type === 'coupon') {
-        const endpoint = rejectingItem.type === 'store' 
-          ? `/stores/${rejectingItem.id}/reject/opsManager` 
-          : `/coupons/${rejectingItem.id}/reject/opsManager`
-        await api.patch(endpoint, { reason: rejectionReason })
-      } else {
-        await adminApi.rejectSubmission(rejectingItem.id, rejectionReason)
-      }
-    } catch {
-      adminApi.rejectSubmission(rejectingItem.id, rejectionReason).catch(console.warn)
-    }
-    setItems(prev => prev.map(item => 
-      item.id === rejectingItem.id ? { ...item, status: 'Rejected', rejectionReason } : item
-    ))
-    setSelectedIds(prev => prev.filter(id => id !== rejectingItem.id))
-    showToast(`Rejected submission with feedback note`)
-    setRejectingItem(null)
-    setRejectionReason('')
-  }
-
-  const handleBulkApprove = async () => {
-    if (selectedIds.length === 0) return
-    selectedIds.forEach(id => adminApi.approveSubmission(id).catch(console.warn))
-    setItems(prev => prev.map(item => selectedIds.includes(item.id) ? { ...item, status: 'Approved' } : item))
-    showToast(`Bulk approved ${selectedIds.length} submissions`)
-    setSelectedIds([])
-  }
-
-  const handleBulkReject = async () => {
-    if (selectedIds.length === 0) return
-    const reason = prompt(`Enter rejection reason for ${selectedIds.length} selected items:`, 'Details incomplete or inaccurate')
-    if (reason) {
-      selectedIds.forEach(id => adminApi.rejectSubmission(id, reason).catch(console.warn))
-      setItems(prev => prev.map(item => selectedIds.includes(item.id) ? { ...item, status: 'Rejected', rejectionReason: reason } : item))
-      showToast(`Rejected ${selectedIds.length} submissions`)
-      setSelectedIds([])
-    }
-  }
-
   const handleSelectAll = () => {
-    const pageIds = filteredItems.map(i => i.id)
-    if (pageIds.every(id => selectedIds.includes(id))) {
+    const pageIds = filteredItems.map((i: ModerationItem) => i.id)
+    if (pageIds.every((id: string) => selectedIds.includes(id))) {
       setSelectedIds(selectedIds.filter(id => !pageIds.includes(id)))
     } else {
       setSelectedIds(Array.from(new Set([...selectedIds, ...pageIds])))
@@ -450,7 +299,7 @@ export const OperationsApprovalsPage: React.FC = () => {
 
   const handleExportCSV = () => {
     const headers = ['ID', 'Type', 'Title', 'Store', 'Price', 'Discount', 'Code', 'SubmittedBy', 'SubmittedAt', 'Priority', 'Status']
-    const rows = filteredItems.map(i => [
+    const rows = filteredItems.map((i: ModerationItem) => [
       i.id,
       i.type,
       `"${i.title.replace(/"/g, '""')}"`,
@@ -463,7 +312,7 @@ export const OperationsApprovalsPage: React.FC = () => {
       i.priority,
       i.status
     ])
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r: string[]) => r.join(','))].join('\n')
     const encodedUri = encodeURI(csvContent)
     const link = document.createElement('a')
     link.setAttribute('href', encodedUri)
@@ -559,6 +408,17 @@ export const OperationsApprovalsPage: React.FC = () => {
             </div>
           </div>
 
+          <div className="kpi-card" onClick={() => setFilterType('credit_card')} style={{ cursor: 'pointer', border: filterType === 'credit_card' ? '1.5px solid #0891b2' : undefined }}>
+            <div className="kpi-body">
+              <span className="kpi-label">Credit Cards</span>
+              <span className="kpi-value">{cardsCount}</span>
+              <span className="kpi-sub">Banking & cards</span>
+            </div>
+            <div className="kpi-icon" style={{ background: '#ecfeff', color: '#0891b2' }}>
+              <CreditCard size={20} />
+            </div>
+          </div>
+
           <div className="kpi-card" onClick={() => setFilterType('banner')} style={{ cursor: 'pointer', border: filterType === 'banner' ? '1.5px solid #16a34a' : undefined }}>
             <div className="kpi-body">
               <span className="kpi-label">Banners & Ads</span>
@@ -600,8 +460,10 @@ export const OperationsApprovalsPage: React.FC = () => {
               <option value="deal">Standard Deals</option>
               <option value="coupon">Coupons</option>
               <option value="store">Stores</option>
+              <option value="credit_card">Credit Cards</option>
               <option value="banner">Hero Banners</option>
               <option value="ad">Advertisements</option>
+              <option value="category">Categories</option>
             </select>
 
             <select 
@@ -611,15 +473,24 @@ export const OperationsApprovalsPage: React.FC = () => {
               aria-label="Filter by Executive"
             >
               <option value="all">👥 All Executives</option>
-              <option value="balaji@wouchify.com">Balaji (Deals Exec)</option>
-              <option value="jayanth@wouchify.com">Jayanth (Coupons Exec)</option>
+              {executiveOptions.filter(e => e !== 'all').map(email => (
+                <option key={email} value={email}>
+                  {email}
+                </option>
+              ))}
             </select>
           </div>
         </div>
 
         {/* Moderation Table */}
         <div className="crud-table-card">
-          {filteredItems.length === 0 ? (
+          {loading ? (
+            <div style={{ padding: '48px 20px', textAlign: 'center', color: '#64748b' }}>
+              <Clock size={36} style={{ color: '#2563eb', margin: '0 auto 12px', display: 'block', animation: 'spin 1.5s linear infinite' }} />
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>Loading Moderation Queue…</h3>
+              <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>Syncing with central database</p>
+            </div>
+          ) : filteredItems.length === 0 ? (
             <div style={{ padding: '48px 20px', textAlign: 'center', color: '#64748b' }}>
               <CheckCircle2 size={42} style={{ color: '#16a34a', margin: '0 auto 12px', display: 'block' }} />
               <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>Approval Queue is Clear!</h3>
@@ -699,15 +570,33 @@ export const OperationsApprovalsPage: React.FC = () => {
                         </td>
                         <td>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
-                            <span className={`ops-type-badge ${item.type}`}>
-                              {item.type === 'loot' && <Flame size={12} />}
-                              {item.type === 'deal' && <Zap size={12} />}
-                              {item.type === 'coupon' && <Tag size={12} />}
-                              {item.type === 'banner' && <ImageIcon size={12} />}
-                              {item.type === 'ad' && <Megaphone size={12} />}
-                              {item.type === 'store' && <Store size={12} />}
-                              {item.type.toUpperCase()}
-                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                              <span className={`ops-type-badge ${item.type}`}>
+                                {item.type === 'loot' && <Flame size={12} />}
+                                {item.type === 'deal' && <Zap size={12} />}
+                                {item.type === 'coupon' && <Tag size={12} />}
+                                {item.type === 'banner' && <ImageIcon size={12} />}
+                                {item.type === 'ad' && <Megaphone size={12} />}
+                                {item.type === 'store' && <Store size={12} />}
+                                {item.type === 'credit_card' && <CreditCard size={12} />}
+                                {item.type === 'category' && <Layers size={12} />}
+                                {item.type.replace('_', ' ').toUpperCase()}
+                              </span>
+                              {item.action && (
+                                <span style={{
+                                  fontSize: '0.68rem',
+                                  fontWeight: 800,
+                                  padding: '2px 6px',
+                                  borderRadius: '4px',
+                                  textTransform: 'uppercase',
+                                  background: item.action === 'create' ? '#ecfdf5' : item.action === 'update' ? '#eff6ff' : '#fef2f2',
+                                  color: item.action === 'create' ? '#059669' : item.action === 'update' ? '#2563eb' : '#dc2626',
+                                  border: `1px solid ${item.action === 'create' ? '#a7f3d0' : item.action === 'update' ? '#bfdbfe' : '#fecaca'}`
+                                }}>
+                                  {item.action}
+                                </span>
+                              )}
+                            </div>
                             <span className={`priority-pill ${item.priority.toLowerCase()}`}>
                               {item.priority}
                             </span>
@@ -863,13 +752,29 @@ export const OperationsApprovalsPage: React.FC = () => {
         {/* ── MODAL 2: LIVE STOREFRONT PREVIEW ── */}
         {previewItem && (
           <div className="crud-modal-overlay" onClick={() => setPreviewItem(null)}>
-            <div className="crud-modal" style={{ maxWidth: '640px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="crud-modal" style={{ maxWidth: '680px' }} onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
                 <div>
-                  <span className="modal-badge" style={{ background: '#eff6ff', color: '#2563eb' }}>
-                    <Eye size={12} /> Storefront Preview
-                  </span>
-                  <h3 className="modal-title" style={{ marginTop: '4px' }}>Live Preview Inspection</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className="modal-badge" style={{ background: '#eff6ff', color: '#2563eb' }}>
+                      <Eye size={12} /> Submission Inspection
+                    </span>
+                    {previewItem.action && (
+                      <span style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 800,
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        textTransform: 'uppercase',
+                        background: previewItem.action === 'create' ? '#ecfdf5' : previewItem.action === 'update' ? '#eff6ff' : '#fef2f2',
+                        color: previewItem.action === 'create' ? '#059669' : previewItem.action === 'update' ? '#2563eb' : '#dc2626',
+                        border: `1px solid ${previewItem.action === 'create' ? '#a7f3d0' : previewItem.action === 'update' ? '#bfdbfe' : '#fecaca'}`
+                      }}>
+                        Proposed Action: {previewItem.action}
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="modal-title" style={{ marginTop: '4px' }}>Review Proposed Content</h3>
                 </div>
                 <button className="modal-close" onClick={() => setPreviewItem(null)}>
                   <X size={18} />
@@ -883,13 +788,14 @@ export const OperationsApprovalsPage: React.FC = () => {
                       src={previewItem.image} 
                       alt={previewItem.title} 
                       style={{ maxHeight: '180px', maxWidth: '100%', objectFit: 'contain', margin: '0 auto 16px', borderRadius: '8px' }} 
+                      onError={(e) => { (e.target as any).src = PLACEHOLDER_DEAL_IMAGE }}
                     />
                   )}
                   <h4 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: '0 0 8px' }}>
                     {previewItem.title}
                   </h4>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '12px' }}>
-                    <img src={getStoreLogo(previewItem.store)} alt={previewItem.store} style={{ height: '20px' }} />
+                    <img src={getStoreLogo(previewItem.store)} alt={previewItem.store} style={{ height: '20px' }} onError={(e) => { (e.target as any).src = PLACEHOLDER_STORE_LOGO }} />
                     <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{previewItem.store}</span>
                   </div>
                   <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#dc2626', marginBottom: '8px' }}>
@@ -903,25 +809,35 @@ export const OperationsApprovalsPage: React.FC = () => {
                 </div>
 
                 <div style={{ marginTop: '20px' }}>
-                  <h5 style={{ fontSize: '0.9rem', color: '#0f172a', fontWeight: 700, marginBottom: '12px', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px' }}>Detailed Deal Information</h5>
+                  <h5 style={{ fontSize: '0.9rem', color: '#0f172a', fontWeight: 700, marginBottom: '12px', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px' }}>Detailed Submission Information</h5>
                   
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                     <div style={{ fontSize: '0.8rem' }}>
-                      <span style={{ color: '#64748b', display: 'block', marginBottom: '2px' }}>Category & Brand</span>
-                      <strong style={{ color: '#0f172a' }}>{previewItem.category} {previewItem.subCategory ? `> ${previewItem.subCategory}` : ''} • {previewItem.brand || 'No Brand'}</strong>
+                      <span style={{ color: '#64748b', display: 'block', marginBottom: '2px' }}>Submitter / Creator</span>
+                      <strong style={{ color: '#0f172a' }}>{previewItem.submittedByName || previewItem.submittedBy}</strong>
                     </div>
                     <div style={{ fontSize: '0.8rem' }}>
-                      <span style={{ color: '#64748b', display: 'block', marginBottom: '2px' }}>Stock & Delivery</span>
-                      <strong style={{ color: '#0f172a' }}>{previewItem.stockStatus || 'Not specified'} • {previewItem.deliveryInfo || 'Standard Delivery'}</strong>
+                      <span style={{ color: '#64748b', display: 'block', marginBottom: '2px' }}>Category & Module</span>
+                      <strong style={{ color: '#0f172a' }}>{previewItem.category} • {previewItem.type.toUpperCase()}</strong>
                     </div>
                     <div style={{ fontSize: '0.8rem' }}>
-                      <span style={{ color: '#64748b', display: 'block', marginBottom: '2px' }}>Additional Offers</span>
-                      <strong style={{ color: '#0f172a' }}>{previewItem.bankOffer || 'No Bank Offer'} {previewItem.cashback ? ` | ${previewItem.cashback}` : ''}</strong>
+                      <span style={{ color: '#64748b', display: 'block', marginBottom: '2px' }}>Priority & Urgency</span>
+                      <strong style={{ color: '#0f172a' }}>{previewItem.priority}</strong>
                     </div>
                     <div style={{ fontSize: '0.8rem' }}>
-                      <span style={{ color: '#64748b', display: 'block', marginBottom: '2px' }}>Product ASIN / SKU</span>
-                      <strong style={{ color: '#0f172a' }}>{previewItem.asinOrSku || 'N/A'}</strong>
+                      <span style={{ color: '#64748b', display: 'block', marginBottom: '2px' }}>Target Link</span>
+                      {previewItem.link ? (
+                        <a href={previewItem.link} target="_blank" rel="noreferrer" style={{ color: '#2563eb', textDecoration: 'underline', wordBreak: 'break-all', fontSize: '0.78rem' }}>
+                          Open Target URL ↗
+                        </a>
+                      ) : <strong style={{ color: '#0f172a' }}>None</strong>}
                     </div>
+                    {previewItem.notes && (
+                      <div style={{ gridColumn: 'span 2', fontSize: '0.8rem', marginTop: '4px', background: '#f8fafc', padding: '10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                        <span style={{ color: '#64748b', display: 'block', marginBottom: '2px', fontWeight: 700 }}>Executive Notes:</span>
+                        <p style={{ margin: 0, color: '#334155', lineHeight: '1.4' }}>"{previewItem.notes}"</p>
+                      </div>
+                    )}
                     {previewItem.description && (
                       <div style={{ gridColumn: 'span 2', fontSize: '0.8rem', marginTop: '8px' }}>
                         <span style={{ color: '#64748b', display: 'block', marginBottom: '2px' }}>Description</span>
@@ -930,9 +846,9 @@ export const OperationsApprovalsPage: React.FC = () => {
                     )}
                     {previewItem.highlights && previewItem.highlights.length > 0 && (
                       <div style={{ gridColumn: 'span 2', fontSize: '0.8rem', marginTop: '4px' }}>
-                        <span style={{ color: '#64748b', display: 'block', marginBottom: '2px' }}>Highlights</span>
+                        <span style={{ color: '#64748b', display: 'block', marginBottom: '2px' }}>Highlights / Key Benefits</span>
                         <ul style={{ margin: 0, paddingLeft: '20px', color: '#334155' }}>
-                          {previewItem.highlights.map((h, i) => <li key={i}>{h}</li>)}
+                          {previewItem.highlights.map((h: string, i: number) => <li key={i}>{h}</li>)}
                         </ul>
                       </div>
                     )}
@@ -958,6 +874,33 @@ export const OperationsApprovalsPage: React.FC = () => {
               </div>
             </div>
           </div>
+        )}
+
+        {/* ── CUSTOM BULK REJECT PROMPT DIALOG ── */}
+        <AdminPromptDialog
+          isOpen={bulkRejectOpen}
+          title="Reject Selected Submissions"
+          message={`Please enter a rejection feedback note for all ${selectedIds.length} selected items:`}
+          label="Rejection Reason Note"
+          placeholder="Details incomplete, coupon invalid, or price mismatch..."
+          defaultValue="Details incomplete or inaccurate. Please review and resubmit."
+          confirmLabel={`Reject ${selectedIds.length} Items`}
+          variant="danger"
+          required={true}
+          onConfirm={handleConfirmBulkReject}
+          onCancel={() => setBulkRejectOpen(false)}
+        />
+
+        {/* ── CUSTOM ALERT DIALOG ── */}
+        {approvalAlert && (
+          <AdminAlertDialog
+            isOpen={!!approvalAlert}
+            title={approvalAlert.title}
+            message={approvalAlert.message}
+            variant={approvalAlert.variant || 'warning'}
+            buttonLabel="Understood"
+            onClose={() => setApprovalAlert(null)}
+          />
         )}
 
       </div>

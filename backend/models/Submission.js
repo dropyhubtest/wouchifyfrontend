@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const submissionSchema = new mongoose.Schema({
   entityType: { 
     type: String, 
-    enum: ['deal', 'loot_deal', 'coupon', 'store', 'credit_card', 'banner', 'advertisement'], 
+    enum: ['deal', 'loot_deal', 'coupon', 'store', 'credit_card', 'banner', 'advertisement', 'category'], 
     required: true 
   },
   entityId: { type: String, default: '' },

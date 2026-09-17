@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const Coupon = require('../models/Coupon');
 const auth = require('../middleware/authMiddleware');
 const store = require('../services/inMemoryStore');
+const { handleEntityCreate, handleEntityUpdate, handleEntityDelete } = require('../middleware/approvalHelper');
 
 // Helper to build flexible query matching ObjectId, string id, or coupon code
 function buildCouponQuery(identifier) {
@@ -21,7 +22,7 @@ function buildCouponQuery(identifier) {
 
 // 1. PUBLIC: Get all active/filtered coupons (No auth required for customer pages & public storefront)
 router.get('/', async (req, res, next) => {
-  const { status, public: isPublic, store: storeName, category } = req.query;
+  const { status, public: isPublic, store: storeName, category, all } = req.query;
   try {
     if (mongoose.connection.readyState !== 1) {
       let memoryCoupons = store.getCoupons();
@@ -34,8 +35,8 @@ router.get('/', async (req, res, next) => {
       if (category && category !== 'All') {
         memoryCoupons = memoryCoupons.filter(c => c.category && c.category.toLowerCase() === category.toLowerCase());
       }
-      if (isPublic === 'true') {
-        memoryCoupons = memoryCoupons.filter(c => c.opsManagerApproval !== 'Rejected' && c.managerApproval !== 'Rejected');
+      if (all !== 'true') {
+        memoryCoupons = memoryCoupons.filter(c => c.submissionStatus !== 'pending_approval' && c.opsManagerApproval !== 'Rejected');
       }
       return res.json(memoryCoupons);
     }
@@ -50,12 +51,37 @@ router.get('/', async (req, res, next) => {
     if (category && category !== 'All') {
       query.category = new RegExp(`^${category}$`, 'i');
     }
-    if (isPublic === 'true') {
-      query.status = { $ne: 'rejected' };
+    if (all !== 'true') {
+      query.status = { $ne: 'rejected', $ne: 'pending' };
+      query.opsManagerApproval = { $ne: 'Rejected' };
+      query.submissionStatus = { $ne: 'pending_approval' };
     }
 
     const coupons = await Coupon.find(query).sort({ createdAt: -1 });
     res.json(coupons);
+  } catch (err) { next(err); }
+});
+
+// PUBLIC: Click & usage counter
+router.post('/:id/click', async (req, res, next) => {
+  try {
+    const memoryCoupon = store.incrementCouponClicks(req.params.id);
+    if (mongoose.connection.readyState !== 1) {
+      if (!memoryCoupon) return res.status(404).json({ message: 'Coupon not found' });
+      return res.json({ success: true, clicks: memoryCoupon.clicks, usageCount: memoryCoupon.usageCount });
+    }
+
+    const query = buildCouponQuery(req.params.id);
+    const coupon = await Coupon.findOneAndUpdate(
+      query,
+      { $inc: { clicks: 1, usageCount: 1 } },
+      { new: true }
+    );
+    if (!coupon) {
+      if (memoryCoupon) return res.json({ success: true, clicks: memoryCoupon.clicks, usageCount: memoryCoupon.usageCount });
+      return res.status(404).json({ message: 'Coupon not found' });
+    }
+    res.json({ success: true, clicks: coupon.clicks || coupon.usageCount || 1, usageCount: coupon.usageCount || 1 });
   } catch (err) { next(err); }
 });
 
@@ -66,20 +92,9 @@ router.use(auth);
 router.get('/pending', async (req, res, next) => {
   try {
     if (mongoose.connection.readyState !== 1) {
-      return res.json(store.getCoupons().filter(c => c.opsManagerApproval === 'Pending'));
+      return res.json(store.getCoupons().filter(c => c.opsManagerApproval === 'Pending' || c.submissionStatus === 'pending_approval'));
     }
-    const coupons = await Coupon.find({ opsManagerApproval: 'Pending' }).sort({ createdAt: -1 });
-    res.json(coupons);
-  } catch (err) { next(err); }
-});
-
-// Get manager pending coupons (Manager queue)
-router.get('/manager-pending', async (req, res, next) => {
-  try {
-    if (mongoose.connection.readyState !== 1) {
-      return res.json(store.getCoupons().filter(c => c.opsManagerApproval === 'Approved' && c.managerApproval === 'Pending'));
-    }
-    const coupons = await Coupon.find({ opsManagerApproval: 'Approved', managerApproval: 'Pending' }).sort({ createdAt: -1 });
+    const coupons = await Coupon.find({ $or: [{ opsManagerApproval: 'Pending' }, { submissionStatus: 'pending_approval' }] }).sort({ createdAt: -1 });
     res.json(coupons);
   } catch (err) { next(err); }
 });
@@ -87,100 +102,61 @@ router.get('/manager-pending', async (req, res, next) => {
 // Create coupon
 router.post('/', async (req, res, next) => {
   try {
-    const payload = {
-      id: req.body.id || `coupon-${Date.now()}`,
-      ...req.body,
-      code: (req.body.code || '').toUpperCase().trim(),
-      status: req.body.status || 'active'
-    };
-
-    if (mongoose.connection.readyState !== 1) {
-      const created = store.addCoupon(payload);
-      return res.status(201).json(created);
-    }
-    const coupon = new Coupon(payload);
-    await coupon.save();
-    res.status(201).json(coupon);
+    const result = await handleEntityCreate({
+      entityType: 'coupon',
+      title: req.body.title || req.body.code || 'New Coupon',
+      store: req.body.store,
+      category: req.body.category,
+      priority: req.body.priority || 'Normal',
+      data: {
+        ...req.body,
+        code: (req.body.code || '').toUpperCase().trim(),
+      },
+      user: req.user,
+      Model: Coupon,
+      storeAddMethod: store.addCoupon
+    });
+    res.status(201).json(result.entity || result);
   } catch (err) { next(err); }
 });
 
 // Update coupon
 router.put('/:id', async (req, res, next) => {
   try {
-    if (mongoose.connection.readyState !== 1) {
-      const updated = store.updateCoupon(req.params.id, req.body);
-      if (!updated) return res.status(404).json({ message: 'Coupon not found' });
-      return res.json(updated);
-    }
-
-    const query = buildCouponQuery(req.params.id);
-    const coupon = await Coupon.findOneAndUpdate(query, req.body, { new: true, runValidators: true });
-    if (!coupon) return res.status(404).json({ message: 'Coupon not found' });
-    res.json(coupon);
+    const result = await handleEntityUpdate({
+      id: req.params.id,
+      entityType: 'coupon',
+      title: req.body.title || req.body.code,
+      store: req.body.store,
+      category: req.body.category,
+      priority: req.body.priority || 'Normal',
+      updates: {
+        ...req.body,
+        code: req.body.code ? req.body.code.toUpperCase().trim() : undefined
+      },
+      user: req.user,
+      Model: Coupon,
+      storeUpdateMethod: store.updateCoupon,
+      storeGetMethod: store.getCouponById
+    });
+    res.json(result.entity || result);
   } catch (err) { next(err); }
 });
 
-// Approve coupon
-router.patch('/:id/approve/:role', async (req, res, next) => {
-  const { role } = req.params;
-  try {
-    if (mongoose.connection.readyState !== 1) {
-      const approved = store.approveCoupon(req.params.id, role);
-      if (!approved) return res.status(404).json({ message: 'Coupon not found' });
-      return res.json(approved);
-    }
-
-    const query = buildCouponQuery(req.params.id);
-    const couponDoc = await Coupon.findOne(query);
-    if (!couponDoc) return res.status(404).json({ message: 'Coupon not found' });
-    
-    if (role === 'opsManager') couponDoc.opsManagerApproval = 'Approved';
-    if (role === 'manager') couponDoc.managerApproval = 'Approved';
-    
-    if (couponDoc.opsManagerApproval === 'Approved' && couponDoc.managerApproval === 'Approved') {
-      couponDoc.status = 'active';
-    }
-    await couponDoc.save();
-    res.json(couponDoc);
-  } catch (err) { next(err); }
-});
-
-// Reject coupon
-router.patch('/:id/reject/:role', async (req, res, next) => {
-  const { role } = req.params;
-  try {
-    if (mongoose.connection.readyState !== 1) {
-      const rejected = store.rejectCoupon(req.params.id, role);
-      if (!rejected) return res.status(404).json({ message: 'Coupon not found' });
-      return res.json(rejected);
-    }
-
-    const query = buildCouponQuery(req.params.id);
-    const couponDoc = await Coupon.findOne(query);
-    if (!couponDoc) return res.status(404).json({ message: 'Coupon not found' });
-    
-    if (role === 'opsManager') couponDoc.opsManagerApproval = 'Rejected';
-    if (role === 'manager') couponDoc.managerApproval = 'Rejected';
-    couponDoc.status = 'rejected';
-    await couponDoc.save();
-    res.json(couponDoc);
-  } catch (err) { next(err); }
-});
-
-// Delete coupon (Multi-field match)
+// Delete coupon
 router.delete('/:id', async (req, res, next) => {
   try {
-    const target = req.params.id;
-    // Always delete from memory store as well
-    store.deleteCoupon(target);
-
-    if (mongoose.connection.readyState !== 1) {
-      return res.json({ message: 'Coupon deleted from memory store' });
-    }
-
-    const query = buildCouponQuery(target);
-    const result = await Coupon.deleteMany(query);
-    res.json({ message: 'Coupon deleted successfully', deletedCount: result.deletedCount });
+    const result = await handleEntityDelete({
+      id: req.params.id,
+      entityType: 'coupon',
+      title: req.body?.code || req.body?.title,
+      store: req.body?.store,
+      user: req.user,
+      Model: Coupon,
+      storeDeleteMethod: store.deleteCoupon,
+      storeGetMethod: store.getCouponById
+    });
+    res.json(result);
   } catch (err) { next(err); }
 });
 

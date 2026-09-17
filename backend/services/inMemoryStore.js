@@ -1659,67 +1659,130 @@ let banners = [
 
 let advertisements = [
   {
-    _id: 'ad-1',
-    id: 'ad-1',
-    title: 'Samsung Galaxy S24 Ultra Festive Promo',
-    advertiser: 'Samsung India',
-    placement: 'homepage_top_banner',
-    imageUrl: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=800&auto=format&fit=crop&q=80',
-    targetLink: 'https://samsung.com/in/smartphones/galaxy-s24-ultra/?aff=wouchify',
-    ctaText: 'Buy Now with ₹10k Bonus',
-    badgeText: 'Sponsored Ad',
-    pricingModel: 'CPC',
-    budgetOrRate: '₹12.50 / click',
+    _id: 'ad-wouchify-mega-sale',
+    id: 'ad-wouchify-mega-sale',
+    title: 'Wouchify Mega Sale & Cashback Bonanza',
+    advertiser: 'Wouchify',
+    placement: 'homepage-banner-1713x685',
+    imageUrl: '/src/assets/advertisement/image-7.png',
+    targetLink: '/offers/sale',
+    ctaText: 'Explore Deals',
+    badgeText: 'FEATURED',
+    pricingModel: 'Flat Monthly',
+    budgetOrRate: '₹50,000 / month',
     status: 'active',
-    expiryDate: '2026-10-31',
-    impressions: 89000,
-    clicks: 4320,
+    expiryDate: '2026-12-31',
+    impressions: 145000,
+    clicks: 9240,
     submittedBy: 'marketing@wouchify.com',
     submissionStatus: 'approved',
     createdAt: '2026-09-01T00:00:00.000Z',
     updatedAt: '2026-09-15T07:00:00.000Z'
   },
   {
-    _id: 'ad-2',
-    id: 'ad-2',
-    title: 'Hostinger Cloud Hosting - 78% OFF + Free SSL',
-    advertiser: 'Hostinger International',
-    placement: 'sidebar_deal_view',
-    imageUrl: 'https://images.unsplash.com/photo-1542744094-3a31f272c490?w=800&auto=format&fit=crop&q=80',
-    targetLink: 'https://hostinger.in/web-hosting?aff=wouchify',
-    ctaText: 'Claim 78% Discount',
-    badgeText: 'Featured Partner',
-    pricingModel: 'Affiliate',
-    budgetOrRate: '40% RevShare',
+    _id: 'ad-amazon-great-indian',
+    id: 'ad-amazon-great-indian',
+    title: 'Amazon Great Indian Festival - Up to 80% Off + 7.5% Cashback',
+    advertiser: 'Amazon India',
+    placement: 'homepage-banner-1713x685',
+    imageUrl: '/src/assets/store-promos/amazon_banner.png',
+    targetLink: '/stores#amazon',
+    ctaText: 'Shop Amazon Deals',
+    badgeText: 'HOT SALE',
+    pricingModel: 'CPC',
+    budgetOrRate: '₹15 / click',
     status: 'active',
     expiryDate: '2026-11-30',
-    impressions: 42100,
-    clicks: 1980,
+    impressions: 98400,
+    clicks: 6120,
     submittedBy: 'executive@wouchify.com',
     submissionStatus: 'approved',
     createdAt: '2026-09-02T00:00:00.000Z',
-    updatedAt: '2026-09-11T12:00:00.000Z'
+    updatedAt: '2026-09-12T10:00:00.000Z'
   },
   {
-    _id: 'ad-3',
-    id: 'ad-3',
-    title: 'Tata Neu Infinity HDFC Credit Card Promotion',
-    advertiser: 'Tata Digital / HDFC',
-    placement: 'credit_card_list_ad',
-    imageUrl: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=800&auto=format&fit=crop&q=80',
-    targetLink: 'https://tatadigital.com/finance/creditcard?aff=wouchify',
-    ctaText: 'Apply in 2 Mins',
-    badgeText: 'Promoted',
-    pricingModel: 'CPM',
-    budgetOrRate: '₹85 / 1000 impressions',
+    _id: 'ad-flipkart-bbd',
+    id: 'ad-flipkart-bbd',
+    title: 'Flipkart Big Billion Days - Extra ₹1,500 Bank Discount',
+    advertiser: 'Flipkart',
+    placement: 'homepage-banner-1713x685',
+    imageUrl: '/src/assets/store-promos/filpkart_banner.png',
+    targetLink: '/stores#flipkart',
+    ctaText: 'Grab Flipkart Loot',
+    badgeText: 'TOP DEALS',
+    pricingModel: 'CPC',
+    budgetOrRate: '₹18 / click',
+    status: 'active',
+    expiryDate: '2026-11-20',
+    impressions: 87300,
+    clicks: 5430,
+    submittedBy: 'executive@wouchify.com',
+    submissionStatus: 'approved',
+    createdAt: '2026-09-03T00:00:00.000Z',
+    updatedAt: '2026-09-13T11:00:00.000Z'
+  },
+  {
+    _id: 'ad-ajio-all-stars',
+    id: 'ad-ajio-all-stars',
+    title: 'Ajio All Stars Sale - Flat 50% to 90% Off Fashion',
+    advertiser: 'Ajio',
+    placement: 'leaderboard-728x90',
+    imageUrl: '/src/assets/store-promos/ajio_banner.png',
+    targetLink: '/stores#ajio',
+    ctaText: 'Shop Trendy Fashion',
+    badgeText: 'TRENDING',
+    pricingModel: 'Affiliate',
+    budgetOrRate: '12% Commission',
     status: 'active',
     expiryDate: '2026-12-15',
-    impressions: 110200,
-    clicks: 5800,
+    impressions: 64500,
+    clicks: 3890,
     submittedBy: 'executive@wouchify.com',
     submissionStatus: 'approved',
     createdAt: '2026-09-04T00:00:00.000Z',
-    updatedAt: '2026-09-13T15:00:00.000Z'
+    updatedAt: '2026-09-14T09:00:00.000Z'
+  },
+  {
+    _id: 'ad-firstcry-carnival',
+    id: 'ad-firstcry-carnival',
+    title: 'FirstCry Mega Baby Carnival - Up to 65% Off',
+    advertiser: 'FirstCry',
+    placement: 'store-card-360x180',
+    imageUrl: '/src/assets/store-promos/firtcry_banner.png',
+    targetLink: '/stores#firstcry',
+    ctaText: 'Explore Baby Gear',
+    badgeText: 'EXCLUSIVE',
+    pricingModel: 'CPM',
+    budgetOrRate: '₹75 / 1k imp',
+    status: 'active',
+    expiryDate: '2026-10-31',
+    impressions: 41200,
+    clicks: 2150,
+    submittedBy: 'executive@wouchify.com',
+    submissionStatus: 'approved',
+    createdAt: '2026-09-05T00:00:00.000Z',
+    updatedAt: '2026-09-14T14:00:00.000Z'
+  },
+  {
+    _id: 'ad-croma-clearance',
+    id: 'ad-croma-clearance',
+    title: 'Croma Electronics Super Clearance - Flat ₹5,000 Off',
+    advertiser: 'Croma',
+    placement: 'sidebar-300x250',
+    imageUrl: '/src/assets/recent-deals/banner_1.png',
+    targetLink: '/deals',
+    ctaText: 'Claim Tech Offer',
+    badgeText: 'FLASH DEAL',
+    pricingModel: 'CPC',
+    budgetOrRate: '₹10 / click',
+    status: 'active',
+    expiryDate: '2026-11-15',
+    impressions: 32000,
+    clicks: 1680,
+    submittedBy: 'executive@wouchify.com',
+    submissionStatus: 'approved',
+    createdAt: '2026-09-06T00:00:00.000Z',
+    updatedAt: '2026-09-15T08:00:00.000Z'
   }
 ];
 
@@ -2118,6 +2181,9 @@ module.exports = {
   // Deals
   getDeals: (filter = {}) => {
     let result = [...deals];
+    if (filter.all !== 'true') {
+      result = result.filter(d => (d.submissionStatus === undefined || d.submissionStatus === 'approved') && d.status !== 'pending' && d.status !== 'rejected');
+    }
     if (filter.category && filter.category !== 'All') {
       result = result.filter(d => d.category && d.category.toLowerCase() === filter.category.toLowerCase());
     }
@@ -2173,6 +2239,9 @@ module.exports = {
   // Coupons
   getCoupons: (filter = {}) => {
     let result = [...coupons];
+    if (filter.all !== 'true') {
+      result = result.filter(c => (c.submissionStatus === undefined || c.submissionStatus === 'approved') && c.status !== 'pending' && c.status !== 'rejected' && c.opsManagerApproval !== 'Rejected');
+    }
     if (filter.store && filter.store !== 'All') {
       result = result.filter(c => c.store && c.store.toLowerCase() === filter.store.toLowerCase());
     }
@@ -2238,6 +2307,7 @@ module.exports = {
     if (role === 'manager') coupon.managerApproval = 'Approved';
     if (coupon.opsManagerApproval === 'Approved' && coupon.managerApproval === 'Approved') {
       coupon.status = 'active';
+      coupon.submissionStatus = 'approved';
     }
     saveToDisk();
     return coupon;
@@ -2253,6 +2323,7 @@ module.exports = {
     if (role === 'opsManager') coupon.opsManagerApproval = 'Rejected';
     if (role === 'manager') coupon.managerApproval = 'Rejected';
     coupon.status = 'rejected';
+    coupon.submissionStatus = 'rejected';
     saveToDisk();
     return coupon;
   },
@@ -2260,6 +2331,9 @@ module.exports = {
   // Loot Deals
   getLootDeals: (filter = {}) => {
     let result = [...lootDeals];
+    if (filter.all !== 'true') {
+      result = result.filter(l => (l.submissionStatus === undefined || l.submissionStatus === 'approved') && l.status !== 'pending' && l.status !== 'rejected');
+    }
     if (filter.dealType && filter.dealType !== 'All') {
       result = result.filter(l => l.dealType === filter.dealType);
     }
@@ -2304,7 +2378,13 @@ module.exports = {
   },
 
   // Stores
-  getStores: () => [...stores],
+  getStores: (filter = {}) => {
+    let result = [...stores];
+    if (filter.all !== 'true') {
+      result = result.filter(s => (s.submissionStatus === undefined || s.submissionStatus === 'approved') && s.status !== 'pending' && s.status !== 'rejected' && s.opsManagerApproval !== 'Rejected');
+    }
+    return result;
+  },
   addStore: (item) => {
     const id = Date.now().toString();
     const created = { 
@@ -2356,7 +2436,13 @@ module.exports = {
   },
 
   // Categories
-  getCategories: () => [...categories],
+  getCategories: (filter = {}) => {
+    let result = [...categories];
+    if (filter.all !== 'true') {
+      result = result.filter(c => (c.submissionStatus === undefined || c.submissionStatus === 'approved') && c.status !== 'pending' && c.status !== 'rejected' && c.opsManagerApproval !== 'Rejected');
+    }
+    return result;
+  },
   getCategoryById: (id) => {
     return categories.find(c => c._id === id || String(c.id) === String(id) || c.slug === id) || null;
   },
@@ -2445,19 +2531,28 @@ module.exports = {
   // ================= Credit Cards =================
   getCreditCards: (filter = {}) => {
     let result = [...creditCards];
-    if (filter.bank && filter.bank !== 'All') {
+    if (filter.all !== 'true') {
+      result = result.filter(c => 
+        c.submissionStatus !== 'pending_approval' && 
+        c.submissionStatus !== 'rejected' && 
+        c.submissionStatus !== 'draft' &&
+        c.status !== 'pending' &&
+        (c.status === 'active' || c.status === 'featured' || !c.status)
+      );
+    }
+    if (filter.bank && filter.bank !== 'All' && filter.bank !== 'all') {
       result = result.filter(c => c.bank && c.bank.toLowerCase() === filter.bank.toLowerCase());
     }
-    if (filter.network && filter.network !== 'All') {
+    if (filter.network && filter.network !== 'All' && filter.network !== 'all') {
       result = result.filter(c => c.network && c.network.toLowerCase() === filter.network.toLowerCase());
     }
-    if (filter.tier && filter.tier !== 'All') {
+    if (filter.tier && filter.tier !== 'All' && filter.tier !== 'all') {
       result = result.filter(c => c.tier && c.tier.toLowerCase() === filter.tier.toLowerCase());
     }
-    if (filter.status && filter.status !== 'All') {
+    if (filter.status && filter.status !== 'All' && filter.status !== 'all') {
       result = result.filter(c => c.status && c.status.toLowerCase() === filter.status.toLowerCase());
     }
-    if (filter.submissionStatus && filter.submissionStatus !== 'All') {
+    if (filter.submissionStatus && filter.submissionStatus !== 'All' && filter.submissionStatus !== 'all') {
       result = result.filter(c => c.submissionStatus && c.submissionStatus.toLowerCase() === filter.submissionStatus.toLowerCase());
     }
     if (filter.isFeatured !== undefined) {
@@ -2734,7 +2829,13 @@ module.exports = {
     if (sub.entityType && sub.entityId) {
       const entType = sub.entityType;
       const entId = sub.entityId;
-      const patch = { submissionStatus: 'approved', status: 'active' };
+      const patch = { 
+        ...(sub.dataSnapshot || {}),
+        submissionStatus: 'approved', 
+        status: 'active' 
+      };
+      delete patch._id;
+      delete patch.id;
       if (sub.action === 'delete') {
         if (entType === 'deal') module.exports.deleteDeal(entId);
         else if (entType === 'credit_card') module.exports.deleteCreditCard(entId);
@@ -2743,6 +2844,7 @@ module.exports = {
         else if (entType === 'advertisement') module.exports.deleteAdvertisement(entId);
         else if (entType === 'loot_deal') module.exports.deleteLootDeal(entId);
         else if (entType === 'store') module.exports.deleteStore(entId);
+        else if (entType === 'category') module.exports.deleteCategory(entId);
       } else {
         if (entType === 'deal') module.exports.updateDeal(entId, patch);
         else if (entType === 'credit_card') module.exports.updateCreditCard(entId, patch);
@@ -2751,6 +2853,7 @@ module.exports = {
         else if (entType === 'advertisement') module.exports.updateAdvertisement(entId, patch);
         else if (entType === 'loot_deal') module.exports.updateLootDeal(entId, patch);
         else if (entType === 'store') module.exports.updateStore(entId, patch);
+        else if (entType === 'category') module.exports.updateCategory(entId, patch);
       }
     }
     saveToDisk();
@@ -2976,6 +3079,84 @@ module.exports = {
     staffMembers.splice(idx, 1);
     saveToDisk();
     return true;
+  },
+  // Click & Engagement Tracking
+  incrementDealClicks: (id) => {
+    const target = String(id).trim().toLowerCase();
+    const deal = deals.find(d => String(d._id) === target || String(d.id) === target || (d.name && d.name.toLowerCase() === target));
+    if (deal) {
+      deal.clicks = (deal.clicks || 0) + 1;
+      saveToDisk();
+      return deal;
+    }
+    return null;
+  },
+  incrementLootClicks: (id) => {
+    const target = String(id).trim().toLowerCase();
+    const loot = lootDeals.find(l => String(l._id) === target || String(l.id) === target || (l.title && l.title.toLowerCase() === target));
+    if (loot) {
+      loot.clicks = (loot.clicks || 0) + 1;
+      saveToDisk();
+      return loot;
+    }
+    return null;
+  },
+  incrementStoreClicks: (idOrSlugOrName) => {
+    const target = String(idOrSlugOrName).trim().toLowerCase();
+    const s = stores.find(item => 
+      String(item._id) === target || 
+      String(item.id) === target || 
+      (item.slug && item.slug.toLowerCase() === target) ||
+      (item.name && item.name.toLowerCase() === target)
+    );
+    if (s) {
+      s.clicks = (s.clicks || 0) + 1;
+      saveToDisk();
+      return s;
+    }
+    return null;
+  },
+  incrementCouponClicks: (idOrCode) => {
+    const target = String(idOrCode).trim().toLowerCase();
+    const coupon = coupons.find(c => 
+      String(c._id) === target || 
+      String(c.id) === target || 
+      (c.code && c.code.toLowerCase() === target)
+    );
+    if (coupon) {
+      coupon.clicks = (coupon.clicks || 0) + 1;
+      coupon.usageCount = (coupon.usageCount || 0) + 1;
+      saveToDisk();
+      return coupon;
+    }
+    return null;
+  },
+  incrementAdClicks: (id) => {
+    const ad = advertisements.find(a => String(a._id) === String(id) || String(a.id) === String(id));
+    if (ad) {
+      ad.clicks = (ad.clicks || 0) + 1;
+      saveToDisk();
+      return ad;
+    }
+    return null;
+  },
+  incrementBannerClicks: (id) => {
+    const banner = banners.find(b => String(b._id) === String(id) || String(b.id) === String(id));
+    if (banner) {
+      banner.clicks = (banner.clicks || 0) + 1;
+      saveToDisk();
+      return banner;
+    }
+    return null;
+  },
+  incrementCreditCardClicks: (id) => {
+    const card = creditCards.find(c => String(c._id) === String(id) || String(c.id) === String(id));
+    if (card) {
+      card.applyCount = (card.applyCount || 0) + 1;
+      saveToDisk();
+      return card;
+    }
+    return null;
   },
 
   // Seed / Reset

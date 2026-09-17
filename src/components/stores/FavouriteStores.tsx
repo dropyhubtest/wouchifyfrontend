@@ -3,134 +3,66 @@ import { StoreCard } from './StoreCard'
 import { StoreSearch } from './StoreSearch'
 import { StoreCategoryFilter } from './StoreCategoryFilter'
 import { StoreAlphabetFilter } from './StoreAlphabetFilter'
-import { FAVOURITE_STORES, STORE_CATEGORIES, type StoreItem } from '../../data/storesHero'
+import { STORE_CATEGORIES, type StoreItem } from '../../data/storesHero'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
-import { getPublicStores } from '../../services/api'
+import { adminApi } from '../../services/adminApi'
+import { StoreCardSkeleton } from '../common/Skeletons'
 import './FavouriteStores.css'
-
-const normalizeStoreKey = (val?: string) => (val || '').toLowerCase().replace(/[^a-z0-9]/g, '')
-
-const mergeWithMasterStores = (list: any[]): StoreItem[] => {
-  if (!Array.isArray(list) || list.length === 0) return FAVOURITE_STORES
-
-  // Build a Set of all normalized master store identifiers (id, name, slug)
-  const masterKeys = new Set<string>()
-  FAVOURITE_STORES.forEach(orig => {
-    masterKeys.add(normalizeStoreKey(orig.id))
-    masterKeys.add(normalizeStoreKey(orig.slug))
-    masterKeys.add(normalizeStoreKey(orig.name))
-  })
-
-  // Start with all 20 FAVOURITE_STORES to guarantee exact original Figma design & ordering
-  const mapped = FAVOURITE_STORES.map(orig => {
-    const origNormId = normalizeStoreKey(orig.id)
-    const origNormSlug = normalizeStoreKey(orig.slug)
-    const origNormName = normalizeStoreKey(orig.name)
-
-    const updated = list.find(s => {
-      const sId = normalizeStoreKey(s.id || s._id)
-      const sSlug = normalizeStoreKey(s.slug)
-      const sName = normalizeStoreKey(s.name)
-      return (
-        (sId && (sId === origNormId || sId === origNormSlug || sId === origNormName)) ||
-        (sSlug && (sSlug === origNormId || sSlug === origNormSlug || sSlug === origNormName)) ||
-        (sName && (sName === origNormId || sName === origNormSlug || sName === origNormName))
-      )
-    })
-
-    if (!updated) return orig
-    return {
-      ...orig,
-      name: updated.name || orig.name,
-      category: updated.category || orig.category,
-      reward: updated.reward || orig.reward,
-      description: updated.description || orig.description,
-      cardBg: updated.cardBg || orig.cardBg,
-      badgeBg: updated.badgeBg || orig.badgeBg,
-      logoPanelBg: updated.logoPanelBg || orig.logoPanelBg,
-      logo: orig.logo || updated.logo || updated.logoUrl,
-      status: updated.status || 'active'
-    }
-  })
-
-  // Only include genuinely new custom stores that do not match ANY of the 20 FAVOURITE_STORES
-  const extraStores: StoreItem[] = []
-  list.forEach((s: any) => {
-    const sId = normalizeStoreKey(s.id || s._id)
-    const sSlug = normalizeStoreKey(s.slug)
-    const sName = normalizeStoreKey(s.name)
-
-    const isMasterStore = (
-      (sId && masterKeys.has(sId)) ||
-      (sSlug && masterKeys.has(sSlug)) ||
-      (sName && masterKeys.has(sName))
-    )
-
-    if (!isMasterStore && (s.name || s.id)) {
-      extraStores.push({
-        id: s.id || s._id || `store-${Date.now()}`,
-        name: s.name || 'Store',
-        slug: s.slug || (s.name || '').toLowerCase().replace(/\s+/g, '-'),
-        logo: s.logo || s.logoUrl || '',
-        category: s.category || 'Fashion',
-        reward: s.reward || 'Upto 5% rewards',
-        description: s.description || `${s.name} online deals & cashback`,
-        cardBg: s.cardBg || '#ECF4FF',
-        badgeBg: s.badgeBg || '#D3E0F2',
-      })
-    }
-  })
-
-  return [...mapped, ...extraStores].filter(s => (s as any).status !== 'inactive')
-}
 
 export const FavouriteStores: React.FC = () => {
   const scale = useDesktopScale()
   const [searchQuery, setSearchQuery] = useState('')
   const [activeLetter, setActiveLetter] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState('All Stores')
-  const [storesList, setStoresList] = useState<StoreItem[]>(() => {
-    try {
-      const cached = localStorage.getItem('wouchify_stores')
-      if (cached) {
-        const parsed = JSON.parse(cached)
-        if (Array.isArray(parsed) && parsed.length > 0) return mergeWithMasterStores(parsed)
-      }
-    } catch {}
-    return FAVOURITE_STORES
-  })
+  const [storesList, setStoresList] = useState<StoreItem[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
   const gridRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
   const [canvasHeight, setCanvasHeight] = useState<number>(1800)
   const [revealed, setRevealed] = useState(false)
 
+  const fetchLiveStores = useCallback(async () => {
+    try {
+      const fetched = await adminApi.getStores()
+      if (Array.isArray(fetched)) {
+        const mapped: StoreItem[] = fetched
+          .filter((s: any) => s.status !== 'inactive' && s.status !== 'rejected')
+          .map((s: any) => ({
+            id: s._id || s.id || `store-${s.name}`,
+            name: s.name || 'Store',
+            slug: s.slug || (s.name || '').toLowerCase().replace(/\s+/g, '-'),
+            logo: s.logo || s.logoUrl || '',
+            category: s.category || 'Fashion',
+            reward: s.reward || 'Upto 5% rewards',
+            description: s.description || `${s.name} online deals & cashback`,
+            cardBg: s.cardBg || '#ECF4FF',
+            badgeBg: s.badgeBg || '#D3E0F2',
+            logoPanelBg: s.logoPanelBg
+          }))
+        setStoresList(mapped)
+      }
+    } catch (err) {
+      console.error('Failed to auto-refresh stores:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     let isMounted = true
-    const fetchLiveStores = async () => {
-      try {
-        const fetched = await getPublicStores()
-        if (!isMounted) return
-        if (Array.isArray(fetched) && fetched.length > 0) {
-          setStoresList(mergeWithMasterStores(fetched))
-        }
-      } catch (err) {
-        console.error("Failed to auto-refresh stores:", err)
-      }
-    }
-
     fetchLiveStores()
-    const intervalId = setInterval(fetchLiveStores, 10000)
 
-    const handleSync = () => { fetchLiveStores() }
+    const handleSync = () => {
+      if (isMounted) fetchLiveStores()
+    }
     window.addEventListener('wouchify_stores_updated', handleSync)
     window.addEventListener('storage', handleSync)
     return () => {
       isMounted = false
-      clearInterval(intervalId)
       window.removeEventListener('wouchify_stores_updated', handleSync)
       window.removeEventListener('storage', handleSync)
     }
-  }, [])
+  }, [fetchLiveStores])
 
   // Single derived filtered list combining all three filters
   const filteredStores = useMemo(() => {
@@ -145,7 +77,7 @@ export const FavouriteStores: React.FC = () => {
 
       const matchesCategory =
         selectedCategory === 'All Stores' ||
-        store.category === selectedCategory
+        store.category.toLowerCase() === selectedCategory.toLowerCase()
 
       return matchesSearch && matchesLetter && matchesCategory
     })
@@ -159,10 +91,9 @@ export const FavouriteStores: React.FC = () => {
       }
     }
     updateHeight()
-    // Small timeout to allow DOM layout to settle
     const timer = setTimeout(updateHeight, 50)
     return () => clearTimeout(timer)
-  }, [filteredStores.length])
+  }, [filteredStores.length, loading])
 
   // Subtle entrance animation via IntersectionObserver
   const observerCallback = useCallback((entries: IntersectionObserverEntry[]) => {
@@ -202,7 +133,6 @@ export const FavouriteStores: React.FC = () => {
         {/* Controls row: heading with blue accent + search + category dropdown */}
         <div className="favourite-stores__controls">
           <div className="favourite-stores__heading-group">
-            {/* Figma node 3603:981: Blue accent circle on left edge (x: -37px, y: 796px, 75x75) */}
             <div className="favourite-stores__heading-accent" aria-hidden="true" />
             <h2 className="favourite-stores__heading">Your Favourite Stores</h2>
           </div>
@@ -226,7 +156,9 @@ export const FavouriteStores: React.FC = () => {
           ref={gridRef}
           className={`favourite-stores__grid ${revealed ? 'favourite-stores__grid--revealed' : ''}`}
         >
-          {filteredStores.length > 0 ? (
+          {loading ? (
+            <StoreCardSkeleton count={8} />
+          ) : filteredStores.length > 0 ? (
             filteredStores.map((store, index) => (
               <div
                 key={store.id}

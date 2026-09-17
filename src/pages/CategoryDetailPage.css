@@ -140,6 +140,234 @@
   color: #6B7280;
 }
 
+.category-detail-hero__tabs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.category-tab-btn {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.category-tab-btn:hover {
+  background: #FFFFFF;
+  border-color: #2F368C;
+  color: #2F368C;
+}
+
+.category-tab-btn--active {
+  background: #2F368C;
+  color: #FFFFFF;
+  border-color: #2F368C;
+  box-shadow: 0 2px 8px rgba(47, 54, 140, 0.25);
+}
+
+.category-section-block {
+  margin-bottom: 48px;
+}
+
+.category-section-block__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #F3F4F6;
+  padding-bottom: 12px;
+}
+
+.category-section-pill {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.category-section-pill::before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #E31E25;
+}
+
+.category-section-pill--orange::before {
+  background: #F59E0B;
+}
+
+.category-section-pill--navy::before {
+  background: #2F368C;
+}
+
+.category-section-pill--gray::before {
+  background: #6B7280;
+}
+
+.category-section-count {
+  font-size: 13px;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+.category-deals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.category-coupons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.category-coupon-card {
+  background: #F8F9FE;
+  border: 1px dashed #A5B4FC;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.category-coupon-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.category-coupon-card__store {
+  font-weight: 700;
+  font-size: 15px;
+  color: #1E293B;
+}
+
+.category-coupon-card__discount {
+  background: #E0E7FF;
+  color: #3730A3;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.category-coupon-card__desc {
+  font-size: 13px;
+  color: #475569;
+  margin: 0 0 16px 0;
+  line-height: 1.4;
+}
+
+.category-coupon-card__actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 6px 12px;
+}
+
+.category-coupon-card__code {
+  font-family: monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1E1B4B;
+  letter-spacing: 0.5px;
+}
+
+.category-coupon-card__btn {
+  background: #E31E25;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.category-coupon-card__btn:hover {
+  opacity: 0.9;
+}
+
+.category-stores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.category-store-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 18px;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  text-decoration: none;
+  background: #FFFFFF;
+  transition: all 0.2s ease;
+}
+
+.category-store-card:hover {
+  border-color: #2F368C;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.category-store-card__logo-wrap {
+  width: 72px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.category-store-card__logo {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.category-store-card__name-badge {
+  font-weight: 700;
+  font-size: 13px;
+  color: #2F368C;
+}
+
+.category-store-card__name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.category-store-card__reward {
+  font-size: 12px;
+  color: #059669;
+  font-weight: 600;
+}
+
 @media (max-width: 1200px) {
   .category-detail-page__grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -155,5 +383,11 @@
 @media (max-width: 600px) {
   .category-detail-page__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .category-deals-grid {
+    grid-template-columns: 1fr;
+  }
+  .category-coupons-grid {
+    grid-template-columns: 1fr;
   }
 }

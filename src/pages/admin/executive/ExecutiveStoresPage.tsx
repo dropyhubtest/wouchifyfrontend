@@ -27,11 +27,11 @@ import {
   Image as ImageIcon,
 } from 'lucide-react'
 import './ExecutiveShared.css'
-import { STORE_CATEGORIES, FAVOURITE_STORES } from '../../../data/storesHero'
+import { STORE_CATEGORIES } from '../../../data/storesHero'
 import { getStoreLogo } from '../../../data/dealsPage'
 import { ImageUploadField } from './ImageUploadField'
-import { MASTER_STORES_DATA } from '../../../services/adminApi'
-import api from '../../../services/api'
+import { TableRowSkeleton, StoreCardSkeleton, EmptyState } from '../../../components/common/Skeletons'
+import { AdminConfirmDialog, AdminAlertDialog } from '../../../components/common/AdminDialog'
 
 /* ============================================================
    Types
@@ -60,63 +60,7 @@ interface ManagedStore {
   _id?: string
 }
 
-/* ============================================================
-   Seed data from MASTER_STORES_DATA
-   ============================================================ */
-
 const CATEGORY_LIST: StoreCategory[] = [...STORE_CATEGORIES]
-
-const normalizeStoreKey = (val?: string) => (val || '').toLowerCase().replace(/[^a-z0-9]/g, '')
-
-function loadInitialStores(): ManagedStore[] {
-  try {
-    const cached = localStorage.getItem('wouchify_stores')
-    if (cached) {
-      const parsed = JSON.parse(cached)
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        const cachedMap = new Map<string, any>()
-        parsed.forEach((s: any) => {
-          if (s.id) cachedMap.set(normalizeStoreKey(s.id), s)
-          if (s._id) cachedMap.set(normalizeStoreKey(s._id), s)
-          if (s.slug) cachedMap.set(normalizeStoreKey(s.slug), s)
-          if (s.name) cachedMap.set(normalizeStoreKey(s.name), s)
-        })
-
-        const all20Stores = MASTER_STORES_DATA.map((master: any) => {
-          const matched =
-            cachedMap.get(normalizeStoreKey(master.id)) ||
-            cachedMap.get(normalizeStoreKey(master.slug)) ||
-            cachedMap.get(normalizeStoreKey(master.name)) ||
-            master
-          return {
-            id: matched._id || matched.id || master.id,
-            name: matched.name || master.name,
-            slug: matched.slug || master.slug,
-            logoUrl: matched.logoUrl || matched.logo || getStoreLogo(matched.slug || matched.name),
-            category: (matched.category as StoreCategory) || master.category || 'Fashion',
-            reward: matched.reward || master.reward || 'Upto 5% rewards',
-            description: matched.description || master.description || `${master.name} online deals & cashback`,
-            affiliateLink: matched.affiliateLink || matched.href || master.affiliateLink,
-            cardBg: matched.cardBg || master.cardBg || '#E8F5FF',
-            badgeBg: matched.badgeBg || master.badgeBg || '#B3DCFA',
-            status: matched.status === 'inactive' ? 'inactive' : (matched.isFeatured ? 'featured' : 'active'),
-            isFeatured: Boolean(matched.isFeatured || matched.status === 'featured'),
-            clicks: typeof matched.clicks === 'number' ? matched.clicks : (parseInt(String(matched.clicks || 0)) || master.clicks || 1000),
-            totalDeals: typeof matched.totalDeals === 'number' ? matched.totalDeals : (master.totalDeals || 15),
-            addedOn: matched.addedOn || master.addedOn || '2026-01-15',
-          }
-        })
-        return all20Stores as ManagedStore[]
-      }
-    }
-  } catch {}
-  return (MASTER_STORES_DATA as any[]).map((master: any) => ({
-    ...master,
-    logoUrl: master.logoUrl || master.logo || getStoreLogo(master.slug || master.name)
-  })) as unknown as ManagedStore[]
-}
-
-const INITIAL_STORES = loadInitialStores()
 
 const EMPTY_FORM: Partial<ManagedStore> = {
   name: '',
@@ -247,12 +191,16 @@ const StoreFormModal: React.FC<StoreFormModalProps> = ({ editing, onClose, onSav
   const [form, setForm] = useState<Partial<ManagedStore>>(
     editing ? { ...editing } : { ...EMPTY_FORM }
   )
+  const [formAlert, setFormAlert] = useState<{ title: string; message: string } | null>(null)
 
   const set = (key: keyof ManagedStore, value: unknown) =>
     setForm(f => ({ ...f, [key]: value }))
 
   const handleSave = () => {
-    if (!form.name?.trim()) return alert('Store name is required')
+    if (!form.name?.trim()) {
+      setFormAlert({ title: 'Missing Store Name', message: 'Store name is required.' })
+      return
+    }
     const now = new Date().toISOString().split('T')[0]
     onSave({
       id: editing?.id ?? `store-${Date.now()}`,
@@ -464,7 +412,7 @@ const StoreFormModal: React.FC<StoreFormModalProps> = ({ editing, onClose, onSav
                 className="btn-save"
                 onClick={() => {
                   if (!form.name?.trim()) {
-                    alert('Store name is required')
+                    setFormAlert({ title: 'Missing Store Name', message: 'Store name is required.' })
                     return
                   }
                   setFormStep(2)
@@ -482,124 +430,251 @@ const StoreFormModal: React.FC<StoreFormModalProps> = ({ editing, onClose, onSav
             </>
           )}
         </div>
+
+        {formAlert && (
+          <AdminAlertDialog
+            isOpen={!!formAlert}
+            title={formAlert.title}
+            message={formAlert.message}
+            variant="warning"
+            buttonLabel="Understood"
+            onClose={() => setFormAlert(null)}
+          />
+        )}
       </div>
     </div>
   )
 }
 
 /* ============================================================
-   Customer Preview Modal
+   Deep Inspection Drawer
    ============================================================ */
 
-const CustomerPreviewModal: React.FC<{
+const StoreDrawer: React.FC<{
   store: ManagedStore
   onClose: () => void
-}> = ({ store, onClose }) => {
+  onEdit: () => void
+  onToggleStatus: () => void
+  rawDeals: any[]
+  rawLoots: any[]
+  rawCoupons: any[]
+}> = ({ store, onClose, onEdit, onToggleStatus, rawDeals, rawLoots, rawCoupons }) => {
+  const [activeTab, setActiveTab] = useState<'overview' | 'deals' | 'loots' | 'coupons'>('overview')
   const [copied, setCopied] = useState(false)
 
+  const storeDeals = useMemo(() => {
+    return rawDeals.filter(d => d.store?.toLowerCase() === store.name.toLowerCase() || d.storeName?.toLowerCase() === store.name.toLowerCase())
+  }, [rawDeals, store.name])
+
+  const storeLoots = useMemo(() => {
+    return rawLoots.filter(l => l.store?.toLowerCase() === store.name.toLowerCase() || l.storeName?.toLowerCase() === store.name.toLowerCase())
+  }, [rawLoots, store.name])
+
+  const storeCoupons = useMemo(() => {
+    return rawCoupons.filter(c => c.store?.toLowerCase() === store.name.toLowerCase() || c.storeName?.toLowerCase() === store.name.toLowerCase())
+  }, [rawCoupons, store.name])
+
   return (
-    <div className="crud-modal-overlay">
-      <div className="crud-modal" style={{ maxWidth: 480, width: '95vw' }}>
-        <div className="modal-header">
-          <h3 className="modal-title"><Eye size={18} style={{ marginRight: 8 }} />Customer View</h3>
-          <button className="modal-close" onClick={onClose}><X size={20} /></button>
-        </div>
-        <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
-          {/* Large preview card */}
-          <div
-            style={{
-              width: '100%', maxWidth: 360,
-              borderRadius: 20, padding: '28px 24px',
-              background: store.cardBg,
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
-            }}
-          >
-            <div style={{
-              background: store.badgeBg, borderRadius: 20,
-              padding: '4px 14px', fontSize: '0.72rem', fontWeight: 700,
-              color: '#0f172a', display: 'flex', alignItems: 'center', gap: 5,
-            }}>
-              <Tag size={10} />{store.category}
-            </div>
-            <div style={{
-              width: 90, height: 60, borderRadius: 14,
-              background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)', padding: '6px 12px'
-            }}>
-              <img
-                src={store.logoUrl || getStoreLogo(store.slug || store.name)}
-                alt={store.name}
-                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+    <>
+      <div className="exec-drawer-overlay" onClick={onClose} />
+      <div className="exec-drawer">
+        <div className="exec-drawer__header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div className="exec-drawer__avatar" style={{ background: store.cardBg || '#ffffff', padding: 8 }}>
+              <img 
+                src={store.logoUrl || getStoreLogo(store.slug || store.name)} 
+                alt={store.name} 
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 onError={e => { (e.currentTarget as HTMLImageElement).src = getStoreLogo(store.slug || store.name) }}
               />
             </div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>{store.name}</div>
-            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#ef4444' }}>{store.reward}</div>
-            <div style={{ fontSize: '0.82rem', color: '#475569', textAlign: 'center' }}>{store.description}</div>
-            <div style={{
-              marginTop: 6, background: '#0f172a', color: 'white',
-              borderRadius: 10, padding: '10px 28px', fontWeight: 700, fontSize: '0.9rem',
-            }}>
-              Shop at {store.name} →
+            <div>
+              <div className="exec-drawer__title">{store.name}</div>
+              <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                <span style={{
+                  background: store.badgeBg, borderRadius: 12,
+                  padding: '2px 8px', fontSize: '0.7rem', fontWeight: 600, color: '#0f172a',
+                }}>{store.category}</span>
+                <span className={statusClass(store.status)} style={{ fontSize: '0.7rem' }}>
+                  {statusLabel(store.status)}
+                </span>
+                <span style={{ fontSize: '0.75rem', color: '#ef4444', fontWeight: 600 }}>{store.reward}</span>
+              </div>
             </div>
           </div>
+          <button className="exec-drawer__close" onClick={onClose}><X size={20} /></button>
+        </div>
 
-          {/* Affiliate link */}
-          <div style={{ width: '100%' }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: 6 }}>Affiliate Link</div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <div style={{
-                flex: 1, background: '#f8fafc', borderRadius: 8, padding: '8px 12px',
-                fontSize: '0.8rem', color: '#3b82f6', overflow: 'hidden', textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap', border: '1px solid #e2e8f0',
-              }}>
-                {store.affiliateLink}
-              </div>
-              <button
-                onClick={() => copyToClipboard(store.affiliateLink, setCopied)}
-                style={{
-                  padding: '8px 14px', background: copied ? '#22c55e' : '#0f172a',
-                  color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer', display: 'flex',
-                  alignItems: 'center', gap: 5, fontSize: '0.8rem', transition: 'background 0.2s',
-                }}
-              >
-                {copied ? <Check size={14} /> : <Copy size={14} />}
-                {copied ? 'Copied!' : 'Copy'}
-              </button>
-            </div>
+        <div className="exec-drawer__stats">
+          <div className="stat-box">
+            <div className="stat-value">{storeDeals.length}</div>
+            <div className="stat-label">Deals</div>
           </div>
-
-          {/* Stats row */}
-          <div style={{ display: 'flex', gap: 12, width: '100%' }}>
-            {[
-              { label: 'Total Clicks', value: store.clicks.toLocaleString() },
-              { label: 'Active Deals', value: store.totalDeals },
-              { label: 'Status', value: statusLabel(store.status) },
-            ].map(item => (
-              <div key={item.label} style={{
-                flex: 1, background: '#f8fafc', borderRadius: 10, padding: '12px',
-                textAlign: 'center', border: '1px solid #e2e8f0',
-              }}>
-                <div style={{ fontWeight: 700, fontSize: '1rem', color: '#0f172a' }}>{item.value}</div>
-                <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: 2 }}>{item.label}</div>
-              </div>
-            ))}
+          <div className="stat-box">
+            <div className="stat-value">{storeLoots.length}</div>
+            <div className="stat-label">Loot Deals</div>
+          </div>
+          <div className="stat-box">
+            <div className="stat-value">{storeCoupons.length}</div>
+            <div className="stat-label">Coupons</div>
+          </div>
+          <div className="stat-box">
+            <div className="stat-value">{store.clicks.toLocaleString()}</div>
+            <div className="stat-label">Total Clicks</div>
           </div>
         </div>
-        <div className="modal-footer">
-          <a href={store.affiliateLink} target="_blank" rel="noopener noreferrer"
-            style={{
-              display: 'flex', alignItems: 'center', gap: 6,
-              background: '#3b82f6', color: 'white', border: 'none',
-              borderRadius: 8, padding: '10px 18px', fontWeight: 600, textDecoration: 'none',
-            }}
-          >
-            <ExternalLink size={16} /> Open Link
-          </a>
-          <button className="btn-save" onClick={onClose}>Close</button>
+
+        <div className="exec-drawer__tabs">
+          <button className={`exec-drawer__tab ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>Overview</button>
+          <button className={`exec-drawer__tab ${activeTab === 'deals' ? 'active' : ''}`} onClick={() => setActiveTab('deals')}>Deals ({storeDeals.length})</button>
+          <button className={`exec-drawer__tab ${activeTab === 'loots' ? 'active' : ''}`} onClick={() => setActiveTab('loots')}>Loot Deals ({storeLoots.length})</button>
+          <button className={`exec-drawer__tab ${activeTab === 'coupons' ? 'active' : ''}`} onClick={() => setActiveTab('coupons')}>Coupons ({storeCoupons.length})</button>
+        </div>
+
+        <div className="exec-drawer__body">
+          {activeTab === 'overview' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div className="exec-drawer__item" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+                <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginBottom: 4 }}>Store Details</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, width: '100%' }}>
+                  <div>
+                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Category</div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{store.category}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Reward</div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#ef4444' }}>{store.reward}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Status</div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{statusLabel(store.status)}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Date Added</div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{store.addedOn || 'Recently'}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="exec-drawer__item" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+                <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginBottom: 8 }}>Affiliate Link</div>
+                <div style={{ display: 'flex', gap: 8, width: '100%' }}>
+                  <div style={{
+                    flex: 1, background: '#f1f5f9', borderRadius: 6, padding: '8px 12px',
+                    fontSize: '0.8rem', color: '#3b82f6', overflow: 'hidden', textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap', border: '1px solid #e2e8f0',
+                  }}>
+                    {store.affiliateLink}
+                  </div>
+                  <button
+                    onClick={() => copyToClipboard(store.affiliateLink, setCopied)}
+                    style={{
+                      padding: '8px 14px', background: copied ? '#22c55e' : '#0f172a',
+                      color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', display: 'flex',
+                      alignItems: 'center', gap: 5, fontSize: '0.8rem', transition: 'background 0.2s',
+                    }}
+                  >
+                    {copied ? <Check size={14} /> : <Copy size={14} />}
+                    {copied ? 'Copied' : 'Copy'}
+                  </button>
+                </div>
+              </div>
+              
+              <div className="exec-drawer__item" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+                <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600, marginBottom: 8 }}>Card Background Preview</div>
+                <div style={{ display: 'flex', gap: 16 }}>
+                   <div style={{ width: 40, height: 40, borderRadius: 8, background: store.cardBg, border: '1px solid #e2e8f0' }} title="Card Bg" />
+                   <div style={{ width: 40, height: 40, borderRadius: 8, background: store.badgeBg, border: '1px solid #e2e8f0' }} title="Badge Bg" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'deals' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {storeDeals.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '32px 0', color: '#94a3b8', fontSize: '0.9rem' }}>No active deals found for this store.</div>
+              ) : (
+                storeDeals.map(d => (
+                  <div key={d._id || d.id} className="exec-drawer__item">
+                    <img src={d.imageUrl || d.image} alt="" style={{ width: 48, height: 48, borderRadius: 8, objectFit: 'cover' }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.title}</div>
+                      <div style={{ fontSize: '0.8rem', color: '#64748b' }}>₹{d.price || d.dealPrice} <span style={{ textDecoration: 'line-through', color: '#cbd5e1', marginLeft: 4 }}>₹{d.originalPrice || d.mrp}</span></div>
+                    </div>
+                    {d.discount && (
+                      <span style={{ background: '#ef4444', color: 'white', padding: '2px 6px', borderRadius: 4, fontSize: '0.7rem', fontWeight: 700 }}>
+                        {d.discount}
+                      </span>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {activeTab === 'loots' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {storeLoots.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '32px 0', color: '#94a3b8', fontSize: '0.9rem' }}>No active loot deals found for this store.</div>
+              ) : (
+                storeLoots.map(l => (
+                  <div key={l._id || l.id} className="exec-drawer__item">
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.title}</div>
+                      <div style={{ fontSize: '0.8rem', color: '#64748b' }}>₹{l.lootPrice || l.price} <span style={{ textDecoration: 'line-through', color: '#cbd5e1', marginLeft: 4 }}>₹{l.originalPrice || l.mrp}</span></div>
+                    </div>
+                    {l.lootType && (
+                      <span className="loot-badge-glitch" style={{ padding: '2px 8px', borderRadius: 4, fontSize: '0.7rem' }}>
+                        {l.lootType}
+                      </span>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {activeTab === 'coupons' && (
+             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+             {storeCoupons.length === 0 ? (
+               <div style={{ textAlign: 'center', padding: '32px 0', color: '#94a3b8', fontSize: '0.9rem' }}>No active coupons found for this store.</div>
+             ) : (
+               storeCoupons.map(c => (
+                 <div key={c._id || c.id} className="exec-drawer__item">
+                   <div style={{ flex: 1, minWidth: 0 }}>
+                     <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#0f172a' }}>{c.code}</div>
+                     <div style={{ fontSize: '0.8rem', color: '#ef4444', fontWeight: 600 }}>{c.discount || c.offerText}</div>
+                     {c.expiryDate && <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: 2 }}>Expires: {new Date(c.expiryDate).toLocaleDateString()}</div>}
+                   </div>
+                   <button 
+                     onClick={() => navigator.clipboard.writeText(c.code)}
+                     className="action-btn" title="Copy Code"
+                   >
+                     <Copy size={14} />
+                   </button>
+                 </div>
+               ))
+             )}
+           </div>
+          )}
+        </div>
+
+        <div className="exec-drawer__actions">
+          <button className="btn-cancel" onClick={onToggleStatus}>
+            {store.status === 'active' ? 'Deactivate' : 'Activate'} Store
+          </button>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <a href={store.affiliateLink} target="_blank" rel="noopener noreferrer" className="btn-save" style={{ background: '#3b82f6', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <ExternalLink size={16} /> Open Store
+            </a>
+            <button className="btn-save" onClick={onEdit} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Edit2 size={16} /> Edit
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 
@@ -616,7 +691,11 @@ const StoreGridCard: React.FC<{
   const logoSrc = store.logoUrl || getStoreLogo(store.slug || store.name)
 
   return (
-    <div className="store-grid-card" style={{ borderTop: `4px solid ${store.badgeBg}` }}>
+    <div 
+      className="store-grid-card" 
+      style={{ borderTop: `4px solid ${store.badgeBg}`, cursor: 'pointer' }}
+      onClick={onPreview}
+    >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
         <div style={{
           background: store.badgeBg, borderRadius: 16, padding: '3px 10px',
@@ -660,7 +739,7 @@ const StoreGridCard: React.FC<{
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 6 }}>
+      <div style={{ display: 'flex', gap: 6 }} onClick={(e) => e.stopPropagation()}>
         <button className="action-btn" onClick={onPreview} title="Preview" style={{ flex: 1 }}><Eye size={15} /></button>
         <button className="action-btn" onClick={onEdit} title="Edit" style={{ flex: 1 }}><Edit2 size={15} /></button>
         <button className="action-btn delete" onClick={onDelete} title="Delete" style={{ flex: 1 }}><Trash2 size={15} /></button>
@@ -674,7 +753,8 @@ const StoreGridCard: React.FC<{
    ============================================================ */
 
 export const ExecutiveStoresPage: React.FC = () => {
-  const [stores, setStores] = useState<ManagedStore[]>(INITIAL_STORES)
+  const [stores, setStores] = useState<ManagedStore[]>([])
+  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filterCategory, setFilterCategory] = useState<StoreCategory | 'All Stores'>('All Stores')
   const [filterStatus, setFilterStatus] = useState<'all' | StoreStatus>('all')
@@ -682,96 +762,72 @@ export const ExecutiveStoresPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editing, setEditing] = useState<ManagedStore | null>(null)
-  const [previewing, setPreviewing] = useState<ManagedStore | null>(null)
-  React.useEffect(() => {
-    fetchStores()
-  }, [])
+  const [inspectedStore, setInspectedStore] = useState<ManagedStore | null>(null)
 
-  const fetchStores = async () => {
+  const [rawDeals, setRawDeals] = useState<any[]>([])
+  const [rawLoots, setRawLoots] = useState<any[]>([])
+  const [rawCoupons, setRawCoupons] = useState<any[]>([])
+
+  const fetchLiveStores = async () => {
+    setLoading(true)
     try {
-      const res = await api.get('/stores')
-      // Map backend id to frontend format and inject local logos if missing
-      const mapped = res.data.map((s: any) => {
-        const fallbackStore = FAVOURITE_STORES.find(fs => fs.name.toLowerCase() === s.name.toLowerCase())
-        return {
-          ...s,
-          id: s._id || s.id,
-          logoUrl: s.logo || s.logoUrl || fallbackStore?.logo || getStoreLogo(`${s.name.toLowerCase().replace(/\s+/g, '')}.png`) || '',
-          category: s.category || fallbackStore?.category || 'Fashion',
-          reward: s.reward || fallbackStore?.reward || 'Upto 5% rewards',
-          description: s.reward || fallbackStore?.description || 'Shop and Earn',
-          cardBg: s.cardBg || fallbackStore?.cardBg || '#E8F5FF',
-          badgeBg: s.badgeBg || fallbackStore?.badgeBg || '#B3DCFA',
+      const [res, dealsRes, lootsRes, couponsRes] = await Promise.all([
+        adminApi.getStores(),
+        adminApi.getDeals().catch(() => []),
+        adminApi.getLootDeals().catch(() => []),
+        adminApi.getCoupons().catch(() => [])
+      ])
+      
+      if (Array.isArray(res)) {
+        const mapped: ManagedStore[] = res.map((s: any) => ({
+          id: String(s._id || s.id),
+          _id: String(s._id || s.id),
+          name: s.name,
+          slug: s.slug || s.name.toLowerCase().replace(/\s+/g, '-'),
+          logoUrl: s.logoUrl || s.logo || getStoreLogo(s.slug || s.name),
+          category: (s.category as StoreCategory) || 'Fashion',
+          reward: s.reward || 'Upto 5% rewards',
+          description: s.description || `${s.name} online deals & cashback`,
+          affiliateLink: s.affiliateLink || `https://${(s.slug || s.name).toLowerCase().replace(/\s+/g, '')}.com/?tag=wouchify`,
+          cardBg: s.cardBg || '#E8F5FF',
+          badgeBg: s.badgeBg || '#B3DCFA',
+          status: (s.status as StoreStatus) || 'active',
+          isFeatured: Boolean(s.isFeatured),
           clicks: s.clicks || 0,
           totalDeals: s.totalDeals || 0,
-          addedOn: s.createdAt ? new Date(s.createdAt).toISOString().split('T')[0] : 'Just now'
-        }
-      })
-      setStores(mapped)
+          addedOn: s.createdAt ? new Date(s.createdAt).toISOString().split('T')[0] : 'Recently'
+        }))
+        setStores(mapped)
+      } else {
+        setStores([])
+      }
+
+      setRawDeals(Array.isArray(dealsRes) ? dealsRes : (dealsRes as any).data || [])
+      setRawLoots(Array.isArray(lootsRes) ? lootsRes : (lootsRes as any).data || [])
+      setRawCoupons(Array.isArray(couponsRes) ? couponsRes : (couponsRes as any).data || [])
     } catch (err) {
-      console.error('Failed to fetch stores:', err)
+      console.warn('Data fetch error:', err)
+      setStores([])
+    } finally {
+      setLoading(false)
     }
   }
 
   useEffect(() => {
-    let isMounted = true
-    const fetchLiveStores = () => {
-      adminApi.getStores()
-        .then((res: any[]) => {
-          if (!isMounted) return
-          if (Array.isArray(res) && res.length > 0) {
-            const cachedMap = new Map<string, any>()
-            res.forEach((s: any) => {
-              if (s.id) cachedMap.set(normalizeStoreKey(s.id), s)
-              if (s._id) cachedMap.set(normalizeStoreKey(s._id), s)
-              if (s.slug) cachedMap.set(normalizeStoreKey(s.slug), s)
-              if (s.name) cachedMap.set(normalizeStoreKey(s.name), s)
-            })
-
-            // Guarantee all 20 stores from MASTER_STORES_DATA are included
-            const mapped: ManagedStore[] = MASTER_STORES_DATA.map((master: any) => {
-              const matched =
-                cachedMap.get(normalizeStoreKey(master.id)) ||
-                cachedMap.get(normalizeStoreKey(master.slug)) ||
-                cachedMap.get(normalizeStoreKey(master.name)) ||
-                master
-              return {
-                id: matched._id || matched.id || master.id,
-                name: matched.name || master.name,
-                slug: matched.slug || master.slug,
-                logoUrl: matched.logoUrl || matched.logo || getStoreLogo(matched.slug || matched.name),
-                category: (matched.category as StoreCategory) || master.category || 'Fashion',
-                reward: matched.reward || master.reward || 'Upto 5% rewards',
-                description: matched.description || master.description || `${master.name} online deals & cashback`,
-                affiliateLink: matched.affiliateLink || matched.href || master.affiliateLink,
-                cardBg: matched.cardBg || master.cardBg || '#E8F5FF',
-                badgeBg: matched.badgeBg || master.badgeBg || '#B3DCFA',
-                status: matched.status === 'inactive' ? 'inactive' : (matched.isFeatured ? 'featured' : 'active'),
-                isFeatured: Boolean(matched.isFeatured || matched.status === 'featured'),
-                clicks: typeof matched.clicks === 'number' ? matched.clicks : (parseInt(String(matched.clicks || 0)) || master.clicks || 1000),
-                totalDeals: typeof matched.totalDeals === 'number' ? matched.totalDeals : (master.totalDeals || 15),
-                addedOn: matched.addedOn || master.addedOn || '2026-01-15'
-              }
-            })
-            setStores(mapped)
-          }
-        })
-        .catch(err => {
-          console.warn('API error, using initial stores:', err)
-        })
-    }
-
     fetchLiveStores()
 
     const handleSync = () => { fetchLiveStores() }
     window.addEventListener('wouchify_store_clicked', handleSync)
     window.addEventListener('wouchify_stores_updated', handleSync)
-    window.addEventListener('storage', handleSync)
+    window.addEventListener('wouchify_deals_updated', handleSync)
+    window.addEventListener('wouchify_loot_deals_updated', handleSync)
+    window.addEventListener('wouchify_coupons_updated', handleSync)
     return () => {
-      isMounted = false
       window.removeEventListener('wouchify_store_clicked', handleSync)
       window.removeEventListener('wouchify_stores_updated', handleSync)
-      window.removeEventListener('storage', handleSync)
+      window.removeEventListener('wouchify_deals_updated', handleSync)
+      window.removeEventListener('wouchify_loot_deals_updated', handleSync)
+      window.removeEventListener('wouchify_coupons_updated', handleSync)
     }
   }, [])
 
@@ -811,6 +867,7 @@ export const ExecutiveStoresPage: React.FC = () => {
   /* Actions */
   const openAdd = () => { setEditing(null); setIsFormOpen(true) }
   const openEdit = (s: ManagedStore) => { setEditing(s); setIsFormOpen(true) }
+  const [storeAlert, setStoreAlert] = useState<{ title: string; message: string; variant?: 'warning' | 'danger' | 'info' | 'success' } | null>(null)
 
   const handleSave = async (data: ManagedStore) => {
     try {
@@ -820,12 +877,12 @@ export const ExecutiveStoresPage: React.FC = () => {
       } else {
         await adminApi.createStore(payload)
       }
-      fetchStores()
+      fetchLiveStores()
       setIsFormOpen(false)
     } catch (err: any) {
       console.error('Failed to save store', err)
       const errorMsg = err.response?.data?.message || 'Failed to save store'
-      alert(errorMsg)
+      setStoreAlert({ title: 'Save Failed', message: errorMsg, variant: 'danger' })
     }
   }
 
@@ -838,8 +895,8 @@ export const ExecutiveStoresPage: React.FC = () => {
   const confirmDelete = async () => {
     if (!storeToDelete) return
     try {
-      await api.delete(`/stores/${storeToDelete}`)
-      fetchStores()
+      await adminApi.deleteStore(storeToDelete)
+      fetchLiveStores()
     } catch (err) {
       console.error('Failed to delete store', err)
     } finally {
@@ -965,12 +1022,19 @@ export const ExecutiveStoresPage: React.FC = () => {
         {/* ── Grid View ── */}
         {viewMode === 'grid' && (
           <>
-            {filtered.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '60px 0', color: '#94a3b8' }}>
-                <StoreIcon size={48} strokeWidth={1} style={{ marginBottom: 12, opacity: 0.4 }} />
-                <div style={{ fontSize: '1rem', fontWeight: 600 }}>No stores found</div>
-                <div style={{ fontSize: '0.85rem', marginTop: 4 }}>Try adjusting filters or add a new store</div>
+            {loading ? (
+              <div className="skeletons-grid-stores" style={{ padding: '20px 0' }}>
+                {[...Array(8)].map((_, i) => (
+                  <StoreCardSkeleton key={`store-skel-${i}`} />
+                ))}
               </div>
+            ) : filtered.length === 0 ? (
+              <EmptyState
+                title="No Stores Found"
+                message="No stores match your filters in the database."
+                actionText="Add New Store"
+                onAction={openAdd}
+              />
             ) : (
               <div className="stores-grid">
                 {filtered.map(store => (
@@ -979,7 +1043,7 @@ export const ExecutiveStoresPage: React.FC = () => {
                     store={store}
                     onEdit={() => openEdit(store)}
                     onDelete={() => handleDeleteClick(store._id || store.id)}
-                    onPreview={() => setPreviewing(store)}
+                    onPreview={() => setInspectedStore(store)}
                   />
                 ))}
               </div>
@@ -1005,14 +1069,25 @@ export const ExecutiveStoresPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {filtered.length === 0 ? (
+                {loading ? (
+                  <TableRowSkeleton cols={6} rows={6} />
+                ) : filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={9} style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
-                      No stores match your filters
+                    <td colSpan={9} style={{ padding: '32px 16px' }}>
+                      <EmptyState
+                        title="No Stores Found"
+                        message="No stores match your filters in the database."
+                        actionText="Add New Store"
+                        onAction={openAdd}
+                      />
                     </td>
                   </tr>
                 ) : filtered.map(store => (
-                  <tr key={store.id}>
+                  <tr 
+                    key={store.id}
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => setInspectedStore(store)}
+                  >
                     {/* Store logo + name */}
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -1041,7 +1116,7 @@ export const ExecutiveStoresPage: React.FC = () => {
                       }}>{store.category}</span>
                     </td>
                     <td style={{ fontSize: '0.85rem', color: '#ef4444', fontWeight: 600 }}>{store.reward}</td>
-                    <td style={{ maxWidth: 180 }}>
+                    <td style={{ maxWidth: 180 }} onClick={e => e.stopPropagation()}>
                       <a
                         href={store.affiliateLink} target="_blank" rel="noopener noreferrer"
                         style={{ color: '#3b82f6', fontSize: '0.8rem', textDecoration: 'none',
@@ -1058,9 +1133,9 @@ export const ExecutiveStoresPage: React.FC = () => {
                       </span>
                     </td>
                     <td style={{ fontSize: '0.8rem', color: '#64748b' }}>{store.addedOn}</td>
-                    <td>
+                    <td onClick={e => e.stopPropagation()}>
                       <div style={{ display: 'flex', gap: 4 }}>
-                        <button className="action-btn" onClick={() => setPreviewing(store)} title="Preview">
+                        <button className="action-btn" onClick={() => setInspectedStore(store)} title="Preview">
                           <Eye size={15} />
                         </button>
                         <button className="action-btn" onClick={() => openEdit(store)} title="Edit">
@@ -1088,42 +1163,48 @@ export const ExecutiveStoresPage: React.FC = () => {
           onSave={handleSave}
         />
       )}
-      {previewing && (
-        <CustomerPreviewModal
-          store={previewing}
-          onClose={() => setPreviewing(null)}
+      {inspectedStore && (
+        <StoreDrawer
+          store={inspectedStore}
+          onClose={() => setInspectedStore(null)}
+          onEdit={() => {
+            setInspectedStore(null)
+            openEdit(inspectedStore)
+          }}
+          onToggleStatus={() => {
+            const newStatus = inspectedStore.status === 'active' ? 'inactive' : 'active'
+            handleSave({ ...inspectedStore, status: newStatus })
+            setInspectedStore({ ...inspectedStore, status: newStatus })
+          }}
+          rawDeals={rawDeals}
+          rawLoots={rawLoots}
+          rawCoupons={rawCoupons}
         />
       )}
 
-      {/* Delete Confirmation Modal */}
-      {storeToDelete && (
-        <div className="crud-modal-overlay" style={{ zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="crud-modal" style={{ maxWidth: '400px', width: '90%', padding: '24px', textAlign: 'center', borderRadius: '12px' }}>
-            <div style={{ marginBottom: '16px', color: '#EF4444' }}>
-              <Trash2 size={48} style={{ margin: '0 auto' }} />
-            </div>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: '#1E293B', marginBottom: '8px' }}>
-              Delete Store
-            </h3>
-            <p style={{ color: '#64748B', marginBottom: '24px', fontSize: '0.95rem' }}>
-              Are you sure you want to delete this store? This action cannot be undone and will remove it from all portals.
-            </p>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-              <button 
-                onClick={() => setStoreToDelete(null)}
-                style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid #CBD5E1', background: '#FFF', color: '#475569', fontWeight: 500, cursor: 'pointer' }}
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={confirmDelete}
-                style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#EF4444', color: '#FFF', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
-              >
-                <Trash2 size={16} /> Delete
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* ── CUSTOM CONFIRM DIALOG ── */}
+      <AdminConfirmDialog
+        isOpen={!!storeToDelete}
+        title="Delete Store"
+        message="Are you sure you want to delete this store? This action cannot be undone and will remove it from all portals."
+        confirmLabel="Delete Store"
+        cancelLabel="Cancel"
+        variant="danger"
+        icon="trash"
+        onConfirm={confirmDelete}
+        onCancel={() => setStoreToDelete(null)}
+      />
+
+      {/* ── CUSTOM ALERT DIALOG ── */}
+      {storeAlert && (
+        <AdminAlertDialog
+          isOpen={!!storeAlert}
+          title={storeAlert.title}
+          message={storeAlert.message}
+          variant={storeAlert.variant || 'warning'}
+          buttonLabel="Understood"
+          onClose={() => setStoreAlert(null)}
+        />
       )}
     </ExecutiveLayout>
   )

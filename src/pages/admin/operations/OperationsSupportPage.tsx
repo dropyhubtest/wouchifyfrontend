@@ -14,6 +14,7 @@ import {
   Wallet
 } from 'lucide-react'
 import './OperationsShared.css'
+import { AdminConfirmDialog, AdminAlertDialog } from '../../../components/common/AdminDialog'
 
 export interface SupportTicket {
   id: string
@@ -154,6 +155,8 @@ export const OperationsSupportPage: React.FC = () => {
   const [activeTicket, setActiveTicket] = useState<SupportTicket | null>(null)
   const [replyText, setReplyText] = useState('')
   const [creditAmount, setCreditAmount] = useState<number>(0)
+  const [confirmCreditModal, setConfirmCreditModal] = useState(false)
+  const [supportAlert, setSupportAlert] = useState<{ title: string; message: string; variant?: 'warning' | 'danger' | 'info' | 'success' } | null>(null)
 
   const showToast = (msg: string) => {
     setToastMessage(msg)
@@ -195,25 +198,24 @@ export const OperationsSupportPage: React.FC = () => {
 
   // KPIs
   const openCount = tickets.filter(t => t.status === 'Open').length
-  const urgentCount = tickets.filter(t => t.priority === 'Urgent' && t.status !== 'Resolved' && t.status !== 'Closed').length
+  const urgentCount = tickets.filter(t => t.priority === 'Urgent' && t.status !== 'Resolved').length
   const inProgressCount = tickets.filter(t => t.status === 'In Progress').length
   const resolvedCount = tickets.filter(t => t.status === 'Resolved').length
 
   const filteredTickets = useMemo(() => {
     return tickets.filter(t => {
-      if (categoryFilter !== 'all' && t.category !== categoryFilter) return false
       if (statusFilter !== 'all' && t.status !== statusFilter) return false
       if (searchTerm.trim()) {
         const q = searchTerm.toLowerCase()
-        const matchId = t.id.toLowerCase().includes(q)
         const matchUser = t.userName.toLowerCase().includes(q)
         const matchEmail = t.userEmail.toLowerCase().includes(q)
         const matchSubject = t.subject.toLowerCase().includes(q)
-        if (!matchId && !matchUser && !matchEmail && !matchSubject) return false
+        const matchId = t.id.toLowerCase().includes(q)
+        if (!matchUser && !matchEmail && !matchSubject && !matchId) return false
       }
       return true
     })
-  }, [tickets, categoryFilter, statusFilter, searchTerm])
+  }, [tickets, statusFilter, searchTerm])
 
   const handleOpenTicket = (ticket: SupportTicket) => {
     setActiveTicket(ticket)
@@ -224,7 +226,7 @@ export const OperationsSupportPage: React.FC = () => {
   const handleSendReply = (newStatus: 'In Progress' | 'Resolved') => {
     if (!activeTicket) return
     if (!replyText.trim()) {
-      alert('Please enter a reply message before sending.')
+      setSupportAlert({ title: 'Missing Reply Message', message: 'Please enter a reply message before sending.', variant: 'warning' })
       return
     }
 
@@ -252,26 +254,30 @@ export const OperationsSupportPage: React.FC = () => {
 
   const handleCreditWalletDirectly = () => {
     if (!activeTicket || creditAmount <= 0) return
-    if (window.confirm(`Instantly credit ₹${creditAmount} to ${activeTicket.userName}'s wallet and resolve ticket?`)) {
-      const newMsg = {
-        sender: 'staff' as const,
-        senderName: 'Operations Billing',
-        time: 'Just now',
-        text: `Resolution: An instant goodwill refund of ₹${creditAmount} has been credited to your Wouchify wallet. Ticket marked resolved.`
-      }
-      const updated: SupportTicket = {
-        ...activeTicket,
-        status: 'Resolved',
-        messages: [...activeTicket.messages, newMsg]
-      }
+    setConfirmCreditModal(true)
+  }
 
-      adminApi.replySupportTicket(activeTicket.id, newMsg).catch(console.warn)
-      adminApi.updateSupportTicketStatus(activeTicket.id, 'Resolved').catch(console.warn)
-
-      setTickets(prev => prev.map(t => t.id === activeTicket.id ? updated : t))
-      setActiveTicket(updated)
-      showToast(`Credited ₹${creditAmount} to ${activeTicket.userName}'s wallet`)
+  const confirmCreditWalletExecution = () => {
+    if (!activeTicket || creditAmount <= 0) return
+    const newMsg = {
+      sender: 'staff' as const,
+      senderName: 'Operations Billing',
+      time: 'Just now',
+      text: `Resolution: An instant goodwill refund of ₹${creditAmount} has been credited to your Wouchify wallet. Ticket marked resolved.`
     }
+    const updated: SupportTicket = {
+      ...activeTicket,
+      status: 'Resolved',
+      messages: [...activeTicket.messages, newMsg]
+    }
+
+    adminApi.replySupportTicket(activeTicket.id, newMsg).catch(console.warn)
+    adminApi.updateSupportTicketStatus(activeTicket.id, 'Resolved').catch(console.warn)
+
+    setTickets(prev => prev.map(t => t.id === activeTicket.id ? updated : t))
+    setActiveTicket(updated)
+    setConfirmCreditModal(false)
+    showToast(`Credited ₹${creditAmount} to ${activeTicket.userName}'s wallet`)
   }
 
   return (
@@ -581,6 +587,31 @@ export const OperationsSupportPage: React.FC = () => {
               </div>
             </div>
           </div>
+        )}
+
+        {/* ── CUSTOM CONFIRM DIALOG (WALLET CREDIT) ── */}
+        <AdminConfirmDialog
+          isOpen={confirmCreditModal}
+          title="Direct Wallet Credit"
+          message={activeTicket ? `Are you sure you want to instantly credit ₹${creditAmount} to ${activeTicket.userName}'s wallet and mark ticket #${activeTicket.id} as Resolved?` : ''}
+          confirmLabel={`Credit ₹${creditAmount}`}
+          cancelLabel="Cancel"
+          variant="primary"
+          icon="check"
+          onConfirm={confirmCreditWalletExecution}
+          onCancel={() => setConfirmCreditModal(false)}
+        />
+
+        {/* ── CUSTOM ALERT DIALOG ── */}
+        {supportAlert && (
+          <AdminAlertDialog
+            isOpen={!!supportAlert}
+            title={supportAlert.title}
+            message={supportAlert.message}
+            variant={supportAlert.variant || 'warning'}
+            buttonLabel="Understood"
+            onClose={() => setSupportAlert(null)}
+          />
         )}
 
       </div>

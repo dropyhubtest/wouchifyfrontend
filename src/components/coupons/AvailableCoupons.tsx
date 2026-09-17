@@ -3,60 +3,42 @@ import { useDesktopScale } from '../../hooks/useDesktopScale'
 import amazonLogo from '../../assets/coupons/amazon.png'
 import styles from './AvailableCoupons.module.css'
 import { getPublicCoupons } from '../../services/api'
-import { MASTER_COUPONS } from '../../data/couponsData'
+import { CouponCardSkeleton } from '../common/Skeletons'
 
 export const AvailableCoupons: React.FC = () => {
   const scale = useDesktopScale()
   const canvasRef = useRef<HTMLDivElement>(null)
   const [canvasHeight, setCanvasHeight] = useState<number>(600)
   const [copiedId, setCopiedId] = useState<number | null>(null)
-  const [coupons, setCoupons] = useState<any[]>(() => {
-    try {
-      let deletedSet = new Set<string>()
-      const delStr = localStorage.getItem('wouchify_deleted_coupons')
-      if (delStr) {
-        deletedSet = new Set(JSON.parse(delStr).map((s: string) => String(s).trim().toLowerCase()))
-      }
-      const cached = localStorage.getItem('wouchify_coupons')
-      if (cached) {
-        const parsed = JSON.parse(cached)
-        if (Array.isArray(parsed)) {
-          return parsed.filter((c: any) => {
-            const cId = String(c._id || '').toLowerCase()
-            const cCustomId = String(c.id || '').toLowerCase()
-            const cCode = String(c.code || '').toLowerCase()
-            return !deletedSet.has(cId) && !deletedSet.has(cCustomId) && !deletedSet.has(cCode)
-          })
-        }
-      }
-      return MASTER_COUPONS.filter((c: any) => {
-        const cId = String(c._id || '').toLowerCase()
-        const cCustomId = String(c.id || '').toLowerCase()
-        const cCode = String(c.code || '').toLowerCase()
-        return !deletedSet.has(cId) && !deletedSet.has(cCustomId) && !deletedSet.has(cCode)
-      })
-    } catch {
-      return MASTER_COUPONS
-    }
-  })
+  const [coupons, setCoupons] = useState<any[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
-    const fetchCoupons = () => {
-      getPublicCoupons()
-        .then(data => {
+    let isMounted = true
+    const fetchCoupons = async () => {
+      try {
+        const data = await getPublicCoupons()
+        if (isMounted) {
           if (Array.isArray(data)) {
             setCoupons(data)
+          } else {
+            setCoupons([])
           }
-        })
-        .catch(err => console.error("Failed to auto-refresh coupons:", err))
+        }
+      } catch (err) {
+        console.error("Failed to fetch coupons:", err)
+        if (isMounted) setCoupons([])
+      } finally {
+        if (isMounted) setLoading(false)
+      }
     }
 
     fetchCoupons()
-    window.addEventListener('wouchify_coupons_updated', fetchCoupons)
-    const intervalId = setInterval(fetchCoupons, 5000)
+    const handleUpdate = () => fetchCoupons()
+    window.addEventListener('wouchify_coupons_updated', handleUpdate)
     return () => {
-      window.removeEventListener('wouchify_coupons_updated', fetchCoupons)
-      clearInterval(intervalId)
+      isMounted = false
+      window.removeEventListener('wouchify_coupons_updated', handleUpdate)
     }
   }, [])
 
@@ -86,7 +68,7 @@ export const AvailableCoupons: React.FC = () => {
       window.removeEventListener('resize', updateHeight)
       window.removeEventListener('load', updateHeight)
     }
-  }, [scale, coupons])
+  }, [scale, coupons, loading])
 
   const handleCopyCode = (code: string, index: number) => {
     navigator.clipboard.writeText(code)
@@ -146,112 +128,118 @@ export const AvailableCoupons: React.FC = () => {
 
         {/* Scaled Coupon Tickets Container */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', marginTop: '24px', width: '100%', alignItems: 'center' }}>
-          {coupons.map((coupon, index) => (
-            <div key={coupon._id || index} className={styles.couponCard}>
-              <svg
-                className={styles.ticketSvgBg}
-                width="1560"
-                height="480"
-                viewBox="0 0 1560 480"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-              >
-                <defs>
-                  <filter id={`ticketOuterShadow-${index}`} x="-30%" y="-30%" width="160%" height="160%">
-                    <feDropShadow dx="0" dy="20" stdDeviation="22" floodColor="#000000" floodOpacity="0.18" />
-                  </filter>
-                  <filter id={`ticketInnerBlur-${index}`} x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="5.5" />
-                  </filter>
-                  <clipPath id={`ticketOutlineClip-${index}`}>
-                    <path d={ticketPath} />
-                  </clipPath>
-                </defs>
-                <path d={ticketPath} fill="#FFE5D8" filter={`url(#ticketOuterShadow-${index})`} />
-                <g clipPath={`url(#ticketOutlineClip-${index})`}>
-                  <path
-                    d={ticketPath}
-                    fill="none"
-                    stroke="#6B2F1C"
-                    strokeWidth="13"
-                    filter={`url(#ticketInnerBlur-${index})`}
-                    opacity="0.36"
-                  />
-                </g>
-                <line
-                  x1="1020" y1="30" x2="1020" y2="450"
-                  stroke="#FFFFFF" strokeWidth="2.5" strokeDasharray="8 8" strokeLinecap="round"
-                />
-              </svg>
-
-              {/* Left Partition */}
-              <div className={styles.cardLeft}>
-                <div className={styles.logoBox}>
-                  {/* For fallback we use amazonLogo, but normally coupon.store logo goes here */}
-                  <img
-                    src={amazonLogo}
-                    alt={coupon.store}
-                    className={styles.storeLogo}
-                    width="297"
-                    height="131"
-                    style={{ objectFit: 'contain' }}
-                  />
-                </div>
-                <div className={styles.discountRow}>
-                  <span className={styles.discountPercent}>{coupon.discount}</span>
-                  <span className={styles.discountOff}>off</span>
-                </div>
-                <div className={styles.metaRow}>
-                  <div className={styles.metaItem}>
-                    <svg className={styles.metaIcon} width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#282D78" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <circle cx="12" cy="12" r="10" />
-                      <polyline points="12 6 12 12 16 14" />
-                    </svg>
-                    <span className={styles.metaText}>Expires: {coupon.expiry || 'In 3 days'}</span>
-                  </div>
-                  <div className={styles.metaItem}>
-                    <svg className={styles.metaIcon} width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#282D78" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <circle cx="9" cy="21" r="1" />
-                      <circle cx="20" cy="21" r="1" />
-                      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                    </svg>
-                    <span className={styles.metaText}>Min Order: 499</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Partition */}
-              <div className={styles.cardRight}>
-                <span className={styles.useCodeLabel}>USE CODE:</span>
-                <button
-                  type="button"
-                  className={styles.codeButton}
-                  onClick={() => handleCopyCode(coupon.code, index)}
-                  title={`Click to copy ${coupon.code}`}
-                >
-                  {coupon.code}
-                </button>
-                <button
-                  type="button"
-                  className={styles.copyAction}
-                  onClick={() => handleCopyCode(coupon.code, index)}
-                  aria-label="Copy coupon code"
-                >
-                  <span className={styles.copyText}>
-                    {copiedId === index ? 'Copied! ✓' : 'Copy Code'}
-                  </span>
-                  <svg className={styles.copyIcon} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                  </svg>
-                </button>
-              </div>
+          {loading ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%', maxWidth: '1560px' }}>
+              <CouponCardSkeleton />
+              <CouponCardSkeleton />
+              <CouponCardSkeleton />
             </div>
-          ))}
-          {coupons.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '100px', fontSize: '30px', color: '#666' }}>
-              No active coupons available right now.
+          ) : coupons.length > 0 ? (
+            coupons.map((coupon, index) => (
+              <div key={coupon._id || coupon.id || index} className={styles.couponCard}>
+                <svg
+                  className={styles.ticketSvgBg}
+                  width="1560"
+                  height="480"
+                  viewBox="0 0 1560 480"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <defs>
+                    <filter id={`ticketOuterShadow-${index}`} x="-30%" y="-30%" width="160%" height="160%">
+                      <feDropShadow dx="0" dy="20" stdDeviation="22" floodColor="#000000" floodOpacity="0.18" />
+                    </filter>
+                    <filter id={`ticketInnerBlur-${index}`} x="-20%" y="-20%" width="140%" height="140%">
+                      <feGaussianBlur stdDeviation="5.5" />
+                    </filter>
+                    <clipPath id={`ticketOutlineClip-${index}`}>
+                      <path d={ticketPath} />
+                    </clipPath>
+                  </defs>
+                  <path d={ticketPath} fill="#FFE5D8" filter={`url(#ticketOuterShadow-${index})`} />
+                  <g clipPath={`url(#ticketOutlineClip-${index})`}>
+                    <path
+                      d={ticketPath}
+                      fill="none"
+                      stroke="#6B2F1C"
+                      strokeWidth="13"
+                      filter={`url(#ticketInnerBlur-${index})`}
+                      opacity="0.36"
+                    />
+                  </g>
+                  <line
+                    x1="1020" y1="30" x2="1020" y2="450"
+                    stroke="#FFFFFF" strokeWidth="2.5" strokeDasharray="8 8" strokeLinecap="round"
+                  />
+                </svg>
+
+                {/* Left Partition */}
+                <div className={styles.cardLeft}>
+                  <div className={styles.logoBox}>
+                    <img
+                      src={amazonLogo}
+                      alt={coupon.store || 'Store'}
+                      className={styles.storeLogo}
+                      width="297"
+                      height="131"
+                      style={{ objectFit: 'contain' }}
+                    />
+                  </div>
+                  <div className={styles.discountRow}>
+                    <span className={styles.discountPercent}>{coupon.discount}</span>
+                    <span className={styles.discountOff}>off</span>
+                  </div>
+                  <div className={styles.metaRow}>
+                    <div className={styles.metaItem}>
+                      <svg className={styles.metaIcon} width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#282D78" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                      </svg>
+                      <span className={styles.metaText}>Expires: {coupon.expiry || coupon.expiryDate || 'In 30 days'}</span>
+                    </div>
+                    <div className={styles.metaItem}>
+                      <svg className={styles.metaIcon} width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#282D78" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <circle cx="9" cy="21" r="1" />
+                        <circle cx="20" cy="21" r="1" />
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                      </svg>
+                      <span className={styles.metaText}>{coupon.minOrder || 'Min Order: 499'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Partition */}
+                <div className={styles.cardRight}>
+                  <span className={styles.useCodeLabel}>USE CODE:</span>
+                  <button
+                    type="button"
+                    className={styles.codeButton}
+                    onClick={() => handleCopyCode(coupon.code, index)}
+                    title={`Click to copy ${coupon.code}`}
+                  >
+                    {coupon.code}
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.copyAction}
+                    onClick={() => handleCopyCode(coupon.code, index)}
+                    aria-label="Copy coupon code"
+                  >
+                    <span className={styles.copyText}>
+                      {copiedId === index ? 'Copied! ✓' : 'Copy Code'}
+                    </span>
+                    <svg className={styles.copyIcon} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div style={{ textAlign: 'center', padding: '80px 20px', fontSize: '24px', color: '#666' }}>
+              No active coupons available right now. Check back soon!
             </div>
           )}
         </div>

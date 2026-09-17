@@ -1,0 +1,235 @@
+.skeleton-box {
+  background: linear-gradient(90deg, #f0f1f5 25%, #e2e4ed 37%, #f0f1f5 63%);
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+  border-radius: 6px;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Skeleton Container Grids */
+.skeletons-grid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  width: 100%;
+}
+
+.skeletons-grid-deals {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+  width: 100%;
+}
+
+.skeletons-grid-stores {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+.skeletons-grid-coupons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  width: 100%;
+}
+
+/* Skeleton Card Designs */
+.skeleton-deal-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeleton-deal-card .skeleton-img {
+  width: 100%;
+  height: 160px;
+  border-radius: 8px;
+}
+
+.skeleton-deal-card .skeleton-title {
+  width: 80%;
+  height: 18px;
+}
+
+.skeleton-deal-card .skeleton-meta {
+  width: 50%;
+  height: 14px;
+}
+
+.skeleton-deal-card .skeleton-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.skeleton-coupon-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px dashed #d1d5db;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeleton-coupon-card .skeleton-badge {
+  width: 90px;
+  height: 22px;
+  border-radius: 4px;
+}
+
+.skeleton-coupon-card .skeleton-title {
+  width: 75%;
+  height: 20px;
+}
+
+.skeleton-coupon-card .skeleton-desc {
+  width: 90%;
+  height: 14px;
+}
+
+.skeleton-coupon-card .skeleton-code-box {
+  width: 100%;
+  height: 40px;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.skeleton-store-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.skeleton-store-card .skeleton-logo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+}
+
+.skeleton-store-card .skeleton-name {
+  width: 60%;
+  height: 16px;
+}
+
+.skeleton-store-card .skeleton-offer {
+  width: 80%;
+  height: 14px;
+}
+
+.skeleton-table-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f3f7;
+}
+
+.skeleton-table-row .skeleton-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.skeleton-table-row .skeleton-col-wide {
+  flex: 2;
+  height: 16px;
+}
+
+.skeleton-table-row .skeleton-col-mid {
+  flex: 1;
+  height: 16px;
+}
+
+.skeleton-table-row .skeleton-col-btn {
+  width: 80px;
+  height: 32px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.skeleton-kpi-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.skeleton-kpi-card .skeleton-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+}
+
+.skeleton-kpi-card .skeleton-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+/* Empty State Styling */
+.wouchify-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px dashed #d1d5db;
+  margin: 16px 0;
+  width: 100%;
+}
+
+.wouchify-empty-state .empty-icon-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  color: #6b7280;
+}
+
+.wouchify-empty-state h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 6px 0;
+}
+
+.wouchify-empty-state p {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin: 0;
+  max-width: 380px;
+}

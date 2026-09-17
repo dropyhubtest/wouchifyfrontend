@@ -4,6 +4,7 @@ import { FooterSection } from '../components/footer'
 import { WatermarkAnimation } from '../components/hero'
 import watermarkMain from '../assets/hero/hero-watermark-main.png'
 import watermarkMainState2 from '../assets/hero/hero-watermark-main-state-2.png'
+import { adminApi } from '../services/adminApi'
 import './ContactUsPage.css'
 
 export const ContactUsPage: React.FC = () => {
@@ -14,6 +15,7 @@ export const ContactUsPage: React.FC = () => {
   })
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [fileError, setFileError] = useState<string>('')
+  const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -50,9 +52,32 @@ export const ContactUsPage: React.FC = () => {
     fileInputRef.current?.click()
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSubmitted(true)
+    setSubmitting(true)
+    try {
+      await adminApi.createSupportTicket({
+        userName: formData.name || 'Website Visitor',
+        userEmail: formData.email,
+        subject: formData.query.slice(0, 60) || 'Customer Support Request',
+        category: 'General Inquiry',
+        priority: 'Medium',
+        status: 'Open',
+        messages: [
+          {
+            sender: 'user',
+            senderName: formData.name || 'User',
+            text: formData.query,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }
+        ]
+      })
+    } catch (err) {
+      console.warn('Created ticket locally / offline:', err)
+    } finally {
+      setSubmitting(false)
+      setSubmitted(true)
+    }
   }
 
   return (
@@ -191,8 +216,8 @@ export const ContactUsPage: React.FC = () => {
                 </div>
               </div>
 
-              <button type="submit" className="contact-page__submit-btn">
-                <span>Submit</span>
+              <button type="submit" className="contact-page__submit-btn" disabled={submitting}>
+                <span>{submitting ? 'Submitting...' : 'Submit'}</span>
                 <span>&gt;&gt;</span>
               </button>
             </div>

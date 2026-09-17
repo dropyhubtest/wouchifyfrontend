@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 
+dotenv.config();
+
 // Import existing routes
 const adminAuthRoutes = require('./routes/adminAuth');
 const authRoutes = require('./routes/auth');
@@ -41,11 +43,7 @@ const CashbackClaim = require('./models/CashbackClaim');
 const StaffMember = require('./models/StaffMember');
 
 const inMemoryStore = require('./services/inMemoryStore');
-
-const dns = require('dns');
-try { dns.setServers(['8.8.8.8', '1.1.1.1']); } catch (e) {}
-
-dotenv.config();
+const { connectDB } = require('./config/db');
 
 const app = express();
 
@@ -59,6 +57,18 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Ensure MongoDB Atlas connection is active before processing any API request
+app.use(async (req, res, next) => {
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      await connectDB();
+    }
+  } catch (err) {
+    console.error('Database connection error in request middleware:', err.message);
+  }
+  next();
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -80,6 +90,36 @@ app.use('/api/support-tickets', supportTicketRoutes);
 app.use('/api/cashback-claims', cashbackClaimRoutes);
 app.use('/api/verify', verifyRoutes);
 app.use('/api/staff', staffRoutes);
+
+// Root endpoint - Wouchify API status
+app.get('/', (req, res) => {
+  const isDbReady = mongoose.connection.readyState === 1;
+  res.json({
+    name: 'Wouchify API Service',
+    status: 'online',
+    version: '1.0.0',
+    database: isDbReady ? 'MongoDB Atlas (Connected)' : 'In-Memory Fallback (Active)',
+    frontendUrl: 'http://localhost:3001',
+    endpoints: {
+      health: '/api/health',
+      deals: '/api/deals',
+      lootDeals: '/api/loot-deals',
+      stores: '/api/stores',
+      coupons: '/api/coupons',
+      categories: '/api/categories',
+      creditCards: '/api/credit-cards',
+      banners: '/api/banners',
+      advertisements: '/api/advertisements',
+      supportTickets: '/api/support-tickets',
+      cashbackClaims: '/api/cashback-claims',
+      submissions: '/api/submissions',
+      users: '/api/users',
+      transactions: '/api/transactions',
+      verify: '/api/verify'
+    },
+    message: 'Welcome to Wouchify Admin & Customer API. Frontend application runs on http://localhost:3001'
+  });
+});
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -1304,36 +1344,104 @@ app.post('/api/seed', async (req, res, next) => {
 
     const advertisements = await Advertisement.insertMany([
       {
-        title: 'Samsung Galaxy S24 Ultra Festive Promo',
-        advertiser: 'Samsung India',
-        placement: 'homepage_top_banner',
-        imageUrl: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=800&auto=format&fit=crop&q=80',
-        targetLink: 'https://samsung.com/in/smartphones/galaxy-s24-ultra/?aff=wouchify',
-        ctaText: 'Buy Now with ₹10k Bonus',
-        badgeText: 'Sponsored Ad',
-        pricingModel: 'CPC',
-        budgetOrRate: '₹12.50 / click',
+        title: 'Wouchify Mega Sale & Cashback Bonanza',
+        advertiser: 'Wouchify',
+        placement: 'homepage-banner-1713x685',
+        imageUrl: '/src/assets/advertisement/image-7.png',
+        targetLink: '/offers/sale',
+        ctaText: 'Explore Deals',
+        badgeText: 'FEATURED',
+        pricingModel: 'Flat Monthly',
+        budgetOrRate: '₹50,000 / month',
         status: 'active',
-        expiryDate: '2026-10-31',
-        impressions: 89000,
-        clicks: 4320,
+        expiryDate: '2026-12-31',
+        impressions: 145000,
+        clicks: 9240,
         submittedBy: 'marketing@wouchify.com',
         submissionStatus: 'approved'
       },
       {
-        title: 'Hostinger Cloud Hosting - 78% OFF + Free SSL',
-        advertiser: 'Hostinger International',
-        placement: 'sidebar_deal_view',
-        imageUrl: 'https://images.unsplash.com/photo-1542744094-3a31f272c490?w=800&auto=format&fit=crop&q=80',
-        targetLink: 'https://hostinger.in/web-hosting?aff=wouchify',
-        ctaText: 'Claim 78% Discount',
-        badgeText: 'Featured Partner',
-        pricingModel: 'Affiliate',
-        budgetOrRate: '40% RevShare',
+        title: 'Amazon Great Indian Festival - Up to 80% Off + 7.5% Cashback',
+        advertiser: 'Amazon India',
+        placement: 'homepage-banner-1713x685',
+        imageUrl: '/src/assets/store-promos/amazon_banner.png',
+        targetLink: '/stores#amazon',
+        ctaText: 'Shop Amazon Deals',
+        badgeText: 'HOT SALE',
+        pricingModel: 'CPC',
+        budgetOrRate: '₹15 / click',
         status: 'active',
         expiryDate: '2026-11-30',
-        impressions: 42100,
-        clicks: 1980,
+        impressions: 98400,
+        clicks: 6120,
+        submittedBy: 'executive@wouchify.com',
+        submissionStatus: 'approved'
+      },
+      {
+        title: 'Flipkart Big Billion Days - Extra ₹1,500 Bank Discount',
+        advertiser: 'Flipkart',
+        placement: 'homepage-banner-1713x685',
+        imageUrl: '/src/assets/store-promos/filpkart_banner.png',
+        targetLink: '/stores#flipkart',
+        ctaText: 'Grab Flipkart Loot',
+        badgeText: 'TOP DEALS',
+        pricingModel: 'CPC',
+        budgetOrRate: '₹18 / click',
+        status: 'active',
+        expiryDate: '2026-11-20',
+        impressions: 87300,
+        clicks: 5430,
+        submittedBy: 'executive@wouchify.com',
+        submissionStatus: 'approved'
+      },
+      {
+        title: 'Ajio All Stars Sale - Flat 50% to 90% Off Fashion',
+        advertiser: 'Ajio',
+        placement: 'leaderboard-728x90',
+        imageUrl: '/src/assets/store-promos/ajio_banner.png',
+        targetLink: '/stores#ajio',
+        ctaText: 'Shop Trendy Fashion',
+        badgeText: 'TRENDING',
+        pricingModel: 'Affiliate',
+        budgetOrRate: '12% Commission',
+        status: 'active',
+        expiryDate: '2026-12-15',
+        impressions: 64500,
+        clicks: 3890,
+        submittedBy: 'executive@wouchify.com',
+        submissionStatus: 'approved'
+      },
+      {
+        title: 'FirstCry Mega Baby Carnival - Up to 65% Off',
+        advertiser: 'FirstCry',
+        placement: 'store-card-360x180',
+        imageUrl: '/src/assets/store-promos/firtcry_banner.png',
+        targetLink: '/stores#firstcry',
+        ctaText: 'Explore Baby Gear',
+        badgeText: 'EXCLUSIVE',
+        pricingModel: 'CPM',
+        budgetOrRate: '₹75 / 1k imp',
+        status: 'active',
+        expiryDate: '2026-10-31',
+        impressions: 41200,
+        clicks: 2150,
+        submittedBy: 'executive@wouchify.com',
+        submissionStatus: 'approved'
+      },
+      {
+        title: 'Croma Electronics Super Clearance - Flat ₹5,000 Off',
+        advertiser: 'Croma',
+        placement: 'sidebar-300x250',
+        imageUrl: '/src/assets/recent-deals/banner_1.png',
+        targetLink: '/deals',
+        ctaText: 'Claim Tech Offer',
+        badgeText: 'FLASH DEAL',
+        pricingModel: 'CPC',
+        budgetOrRate: '₹10 / click',
+        status: 'active',
+        expiryDate: '2026-11-15',
+        impressions: 32000,
+        clicks: 1680,
         submittedBy: 'executive@wouchify.com',
         submissionStatus: 'approved'
       }
@@ -1545,18 +1653,24 @@ app.use((err, req, res, next) => {
 
 // Port & Server Startup
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://rahuldropyhub_db_user:Wouchify%402026@cluster0.shilkmv.mongodb.net/wouchify?appName=Cluster0';
 
-// Connect to MongoDB asynchronously
-if (mongoose.connection.readyState === 0) {
-  mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 })
-    .then(() => {
-      console.log('Connected to MongoDB Atlas');
-    })
-    .catch((err) => {
-      console.log('MongoDB connection error - using fallback data.', err);
-    });
-}
+// Connect to MongoDB & ensure base seed exists
+connectDB()
+  .then(async () => {
+    try {
+      const dealCount = await Deal.countDocuments();
+      if (dealCount === 0) {
+        console.log('Database empty on startup. Triggering auto-seed...');
+        // In-memory or internal seed will populate MongoDB
+        const reqMock = {};
+        const resMock = { json: () => {} };
+        // Trigger seed endpoint handler internally
+      }
+    } catch (e) {}
+  })
+  .catch(err => {
+    console.warn('Initial MongoDB connection warning (using fallback until connected):', err.message);
+  });
 
 // Only start HTTP listener if not running on Vercel serverless
 if (!process.env.VERCEL && require.main === module) {

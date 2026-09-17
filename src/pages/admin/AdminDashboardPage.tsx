@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import wouchifyLogo from '../../assets/navbar/wouchify-logo.png'
-import { FAVOURITE_STORES } from '../../data/storesHero'
-import { CATEGORIES_DATA } from '../../data/categories'
+import { FAVOURITE_STORES, type StoreItem } from '../../data/storesHero'
 import { adminApi } from '../../services/adminApi'
 import './AdminDashboardPage.css'
 import { AdminApprovalsView } from './AdminApprovalsView'
+import { AdminConfirmDialog } from '../../components/common/AdminDialog'
 
 // Types
 import type {
@@ -20,13 +20,7 @@ import type {
 
 // Mock Data
 import {
-  INITIAL_STAFF,
-  INITIAL_GOVERNANCE_LOGS,
-  INITIAL_LOOT_DEALS,
-  INITIAL_DEALS,
-  INITIAL_COUPONS,
-  INITIAL_TRANSACTIONS,
-  INITIAL_USERS
+  INITIAL_GOVERNANCE_LOGS
 } from './manager/mockData'
 
 // Icons
@@ -78,92 +72,61 @@ export const AdminDashboardPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('')
 
   // Core Datasets
-  const [deals, setDeals] = useState<DealItem[]>(() => {
-    try {
-      const cached = localStorage.getItem('wouchify_public_deals')
-      if (cached) {
-        const parsed = JSON.parse(cached)
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const cachedIds = new Set(parsed.map((d: any) => String(d._id || d.id)))
-          const cachedNames = new Set(parsed.map((d: any) => String(d.name).toLowerCase().trim()))
-          const missingDefaults = INITIAL_DEALS.filter(
-            (d) => !cachedIds.has(String(d._id || d.id)) && !cachedNames.has(d.name.toLowerCase().trim())
-          )
-          return [...parsed, ...missingDefaults]
-        }
-      }
-    } catch {}
-    return INITIAL_DEALS
-  })
-
-  const [coupons, setCoupons] = useState<CouponItem[]>(INITIAL_COUPONS)
-  const [lootDeals, setLootDeals] = useState<LootDealAdminItem[]>(INITIAL_LOOT_DEALS)
-  const [transactions, setTransactions] = useState<TransactionItem[]>(INITIAL_TRANSACTIONS)
-  const [users] = useState<UserItem[]>(INITIAL_USERS)
+  const [deals, setDeals] = useState<DealItem[]>([])
+  const [coupons, setCoupons] = useState<CouponItem[]>([])
+  const [lootDeals, setLootDeals] = useState<LootDealAdminItem[]>([])
+  const [transactions, setTransactions] = useState<TransactionItem[]>([])
+  const [users, setUsers] = useState<UserItem[]>([])
+  const [stores, setStores] = useState<StoreItem[]>([])
+  const [categories, setCategories] = useState<any[]>([])
+  const [staffMembers, setStaffMembers] = useState<StaffItem[]>([])
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [isBackendConnected, setIsBackendConnected] = useState<boolean>(true)
   const [pendingApprovalsCount, setPendingApprovalsCount] = useState<number>(0)
-
-  const [staffMembers, setStaffMembers] = useState<StaffItem[]>(() => {
-    try {
-      const cached = localStorage.getItem('wouchify_staff_members')
-      if (cached) {
-        const parsed = JSON.parse(cached)
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed
-      }
-    } catch {}
-    return INITIAL_STAFF
-  })
 
   // Load live data from Backend API on mount
   useEffect(() => {
     let isMounted = true
     const fetchLiveData = async () => {
       try {
-        const [dealsRes, couponsRes, lootRes, txnsRes, pendingStoresRes, pendingCouponsRes] = await Promise.allSettled([
+        const [dealsRes, couponsRes, lootRes, txnsRes, storesRes, catsRes, usersRes, staffRes, pendingStoresRes, pendingCouponsRes] = await Promise.allSettled([
           adminApi.getDeals(),
           adminApi.getCoupons(),
           adminApi.getLootDeals(),
           adminApi.getTransactions(),
+          adminApi.getStores(),
+          adminApi.getCategories(),
+          adminApi.getUsers(),
+          adminApi.getStaffMembers(),
           adminApi.getManagerPendingStores(),
           adminApi.getManagerPendingCoupons()
         ])
         if (!isMounted) return
 
-        if (dealsRes.status === 'fulfilled' && Array.isArray(dealsRes.value) && dealsRes.value.length > 0) {
-          setDeals((prevDeals) => {
-            const backendDeals = dealsRes.value
-            const backendIds = new Set(backendDeals.map((d: any) => String(d._id || d.id)))
-            const backendNames = new Set(backendDeals.map((d: any) => String(d.name).toLowerCase().trim()))
-
-            // Retain any custom deals created by the user locally that backend might not have yet
-            const locallyCreated = prevDeals.filter(
-              (d) => !backendIds.has(String(d._id || d.id)) && !backendNames.has(d.name.toLowerCase().trim())
-            )
-
-            // Auto-sync any local custom deals to backend so backend persists them too!
-            if (locallyCreated.length > 0) {
-              locallyCreated.forEach((deal) => {
-                adminApi.createDeal(deal).catch(() => {})
-              })
-            }
-
-            const merged = [...locallyCreated, ...backendDeals]
-            try {
-              localStorage.setItem('wouchify_public_deals', JSON.stringify(merged))
-            } catch {}
-            return merged
-          })
+        if (dealsRes.status === 'fulfilled' && Array.isArray(dealsRes.value)) {
+          setDeals(dealsRes.value)
         }
-        if (couponsRes.status === 'fulfilled' && Array.isArray(couponsRes.value) && couponsRes.value.length > 0) {
+        if (couponsRes.status === 'fulfilled' && Array.isArray(couponsRes.value)) {
           setCoupons(couponsRes.value)
         }
-        if (lootRes.status === 'fulfilled' && Array.isArray(lootRes.value) && lootRes.value.length > 0) {
+        if (lootRes.status === 'fulfilled' && Array.isArray(lootRes.value)) {
           setLootDeals(lootRes.value)
         }
-        if (txnsRes.status === 'fulfilled' && Array.isArray(txnsRes.value) && txnsRes.value.length > 0) {
+        if (txnsRes.status === 'fulfilled' && Array.isArray(txnsRes.value)) {
           setTransactions(txnsRes.value)
+        }
+        if (storesRes.status === 'fulfilled' && Array.isArray(storesRes.value)) {
+          setStores(storesRes.value)
+        }
+        if (catsRes.status === 'fulfilled' && Array.isArray(catsRes.value)) {
+          setCategories(catsRes.value)
+        }
+        if (usersRes.status === 'fulfilled' && Array.isArray(usersRes.value)) {
+          setUsers(usersRes.value)
+        }
+        if (staffRes.status === 'fulfilled' && Array.isArray(staffRes.value)) {
+          setStaffMembers(staffRes.value)
         }
         
         let managerCount = 0
@@ -289,6 +252,14 @@ export const AdminDashboardPage: React.FC = () => {
     const activeCouponsCount = coupons.filter((c) => c.status === 'active').length
     const activeLootCount = lootDeals.filter((l) => l.status === 'active').length
     const onlineStaffCount = staffMembers.filter((s) => s.status === 'Online').length
+    
+    // Sum real transactions
+    const totalTxnAmount = transactions.reduce((sum, t) => {
+      const num = parseInt(t.amount.replace(/[^0-9]/g, '')) || 0
+      return sum + num
+    }, 0)
+    const disbursed = totalTxnAmount > 0 ? `₹${totalTxnAmount.toLocaleString('en-IN')}` : '₹0'
+
     return {
       totalUsers,
       activeDealsCount,
@@ -296,16 +267,24 @@ export const AdminDashboardPage: React.FC = () => {
       activeLootCount,
       staffCount: staffMembers.length,
       onlineStaffCount,
-      disbursedCashback: '₹12,45,890',
+      disbursedCashback: disbursed,
       systemHealth: isBackendConnected ? '100% Operational' : 'Offline Mode'
     }
-  }, [deals, coupons, lootDeals, users, staffMembers, isBackendConnected])
+  }, [deals, coupons, lootDeals, users, staffMembers, transactions, isBackendConnected])
 
   // Toast Helper
   const showToast = (msg: string) => {
     setToastMessage(msg)
     window.setTimeout(() => setToastMessage(null), 3200)
   }
+
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    type: 'deal' | 'loot' | 'staff'
+    id: number | string
+    title: string
+    message: string
+    confirmLabel: string
+  } | null>(null)
 
   // Action Handlers
   const handleToggleDealStatus = (id: number | string) => {
@@ -323,13 +302,13 @@ export const AdminDashboardPage: React.FC = () => {
   }
 
   const handleDeleteDeal = (id: number | string) => {
-    if (!window.confirm('Are you sure you want to delete this deal?')) return
-    const updated = deals.filter((d) => d.id !== id)
-    setDeals(updated)
-    try {
-      adminApi.deleteDeal(String(id))
-    } catch {}
-    showToast('Deal deleted from platform.')
+    setDeleteConfirm({
+      type: 'deal',
+      id,
+      title: 'Delete Promotional Deal',
+      message: 'Are you sure you want to permanently delete this deal from the platform?',
+      confirmLabel: 'Delete Deal'
+    })
   }
 
   const handleToggleLootDealStatus = (id: number | string) => {
@@ -347,13 +326,13 @@ export const AdminDashboardPage: React.FC = () => {
   }
 
   const handleDeleteLootDeal = (id: number | string) => {
-    if (!window.confirm('Are you sure you want to delete this loot deal?')) return
-    const updated = lootDeals.filter((ld) => ld.id !== id)
-    setLootDeals(updated)
-    try {
-      adminApi.deleteLootDeal(String(id))
-    } catch {}
-    showToast('Loot deal deleted.')
+    setDeleteConfirm({
+      type: 'loot',
+      id,
+      title: 'Delete Loot Drop',
+      message: 'Are you sure you want to permanently delete this loot deal?',
+      confirmLabel: 'Delete Loot Deal'
+    })
   }
 
   const handleToggleStaffStatus = (id: string) => {
@@ -372,9 +351,37 @@ export const AdminDashboardPage: React.FC = () => {
   }
 
   const handleDeleteStaff = (id: string) => {
-    if (!window.confirm('Are you sure you want to remove this staff account?')) return
-    setStaffMembers((prev) => prev.filter((s) => s.id !== id && s._id !== id))
-    showToast('Staff account deactivated.')
+    setDeleteConfirm({
+      type: 'staff',
+      id,
+      title: 'Remove Staff Account',
+      message: 'Are you sure you want to deactivate and remove this staff account?',
+      confirmLabel: 'Remove Staff'
+    })
+  }
+
+  const handleConfirmDelete = () => {
+    if (!deleteConfirm) return
+    const { type, id } = deleteConfirm
+    if (type === 'deal') {
+      const updated = deals.filter((d) => d.id !== id)
+      setDeals(updated)
+      try {
+        adminApi.deleteDeal(String(id))
+      } catch {}
+      showToast('Deal deleted from platform.')
+    } else if (type === 'loot') {
+      const updated = lootDeals.filter((ld) => ld.id !== id)
+      setLootDeals(updated)
+      try {
+        adminApi.deleteLootDeal(String(id))
+      } catch {}
+      showToast('Loot deal deleted.')
+    } else if (type === 'staff') {
+      setStaffMembers((prev) => prev.filter((s) => s.id !== id && s._id !== id))
+      showToast('Staff account deactivated.')
+    }
+    setDeleteConfirm(null)
   }
 
   const handleApproveTransaction = (id: string) => {
@@ -592,10 +599,14 @@ export const AdminDashboardPage: React.FC = () => {
   }
 
   const getStoreLogo = (storeName: string): string | null => {
-    const s = FAVOURITE_STORES.find(
+    const s = stores.find(
       (item) => item.name.toLowerCase().trim() === storeName.toLowerCase().trim()
     )
-    return s ? s.logo : null
+    if (s && s.logo) return s.logo
+    const orig = FAVOURITE_STORES.find(
+      (item) => item.name.toLowerCase().trim() === storeName.toLowerCase().trim()
+    )
+    return orig ? orig.logo : null
   }
 
   // Filtered Datasets
@@ -634,24 +645,24 @@ export const AdminDashboardPage: React.FC = () => {
   }, [transactions, searchQuery, transactionTypeFilter])
 
   const filteredStores = useMemo(() => {
-    return FAVOURITE_STORES.filter((s) => {
+    return stores.filter((s) => {
       return (
         searchQuery.trim() === '' ||
         s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         s.category.toLowerCase().includes(searchQuery.toLowerCase())
       )
     })
-  }, [searchQuery])
+  }, [stores, searchQuery])
 
   const filteredCategories = useMemo(() => {
-    return CATEGORIES_DATA.filter((cat) => {
+    return categories.filter((cat) => {
       return (
         searchQuery.trim() === '' ||
-        cat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        cat.description.toLowerCase().includes(searchQuery.toLowerCase())
+        (cat.name && cat.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (cat.description && cat.description.toLowerCase().includes(searchQuery.toLowerCase()))
       )
     })
-  }, [searchQuery])
+  }, [categories, searchQuery])
 
   const filteredUsers = useMemo(() => {
     return users.filter((u) => {
@@ -697,8 +708,8 @@ export const AdminDashboardPage: React.FC = () => {
     { key: 'deals', label: 'Deals Management', icon: <IconDeals />, badge: deals.length },
     { key: 'loot-deals', label: 'Loot Deals Studio', icon: <IconFlame />, badge: lootDeals.length },
     { key: 'coupons', label: 'Verified Coupons', icon: <IconCoupons />, badge: coupons.length },
-    { key: 'categories', label: 'Categories Studio', icon: <IconCategories />, badge: CATEGORIES_DATA.length },
-    { key: 'stores', label: 'Partner Stores', icon: <IconStores />, badge: FAVOURITE_STORES.length },
+    { key: 'categories', label: 'Categories Studio', icon: <IconCategories />, badge: categories.length },
+    { key: 'stores', label: 'Partner Stores', icon: <IconStores />, badge: stores.length },
     { key: 'users', label: 'Users Directory', icon: <IconUsers />, badge: users.length },
     { key: 'wallet', label: 'Wallet & Payouts', icon: <IconWallet />, badge: null }
   ]
@@ -735,6 +746,13 @@ export const AdminDashboardPage: React.FC = () => {
               </span>
             )}
           </div>
+          <button
+            className="sidebar-mobile-close-btn"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-label="Close navigation menu"
+          >
+            <span style={{ fontSize: '18px', lineHeight: 1 }}>✕</span>
+          </button>
           <button
             className="sidebar-toggle-btn"
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -998,7 +1016,13 @@ export const AdminDashboardPage: React.FC = () => {
             <AdminApprovalsView />
           )}
           {activeNav === 'dashboard' && (
-            <CommercialAnalyticsView liveStats={liveStats} />
+            <CommercialAnalyticsView
+              liveStats={liveStats}
+              stores={stores}
+              deals={deals}
+              coupons={coupons}
+              transactions={transactions}
+            />
           )}
 
           {activeNav === 'staff' && (
@@ -1119,6 +1143,21 @@ export const AdminDashboardPage: React.FC = () => {
         onSubmit={handleEditStaffSubmit}
         setEditingStaff={setEditingStaff}
       />
+
+      {/* ── CUSTOM CONFIRM DIALOG ── */}
+      {deleteConfirm && (
+        <AdminConfirmDialog
+          isOpen={!!deleteConfirm}
+          title={deleteConfirm.title}
+          message={deleteConfirm.message}
+          confirmLabel={deleteConfirm.confirmLabel}
+          cancelLabel="Cancel"
+          variant="danger"
+          icon="trash"
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setDeleteConfirm(null)}
+        />
+      )}
     </div>
   )
 }

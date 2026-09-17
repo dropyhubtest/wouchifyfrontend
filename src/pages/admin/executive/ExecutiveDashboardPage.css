@@ -655,18 +655,139 @@
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+  .executive-dashboard {
+    padding: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .dashboard-header {
+    margin-bottom: 20px;
+  }
+
+  .dashboard-title {
+    font-size: 1.45rem;
+  }
+
+  .today-spotlight-section,
+  .chart-card,
+  .submissions-section {
+    padding: 14px !important;
+    border-radius: 14px !important;
+    margin-bottom: 20px !important;
+  }
+
   .today-metrics-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .today-metric-card {
+    padding: 12px 14px !important;
+    border-radius: 10px !important;
+  }
+
+  .today-metric-label {
+    font-size: 0.68rem !important;
+  }
+
+  .today-metric-value {
+    font-size: 1.4rem !important;
+  }
+
+  .today-metric-icon {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 8px !important;
+    font-size: 1rem !important;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .stat-card {
+    padding: 14px !important;
+    border-radius: 10px !important;
+  }
+
+  .stat-title {
+    font-size: 0.68rem !important;
+  }
+
+  .stat-value {
+    font-size: 1.4rem !important;
+  }
+
+  .stat-icon {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 8px !important;
+  }
+
+  .timeframe-tabs-group {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 
   .filter-controls-bar {
-    flex-direction: column;
-    align-items: stretch;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    padding: 10px !important;
+  }
+
+  .filter-search-box {
+    grid-column: 1 / -1 !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  .filter-select {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    height: 36px !important;
+    font-size: 0.78rem !important;
   }
 
   .filter-type-pills {
-    overflow-x: auto;
-    padding-bottom: 4px;
+    grid-column: 1 / -1 !important;
+    overflow-x: auto !important;
+    padding-bottom: 4px !important;
+    display: flex !important;
+    gap: 6px !important;
+  }
+
+  .submissions-table-container {
+    border-radius: 10px !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .submissions-table {
+    min-width: 650px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .today-metrics-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .today-metric-card {
+    padding: 10px 10px !important;
+  }
+
+  .today-metric-value {
+    font-size: 1.2rem !important;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr !important;
   }
 }

@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { Navbar } from '../components/layout'
 import { FooterSection } from '../components/footer'
 import { DealCard } from '../components/deals/DealCard'
 import { DEALS_CARD_ITEMS, type DealCardItem } from '../data/dealsPage'
+import { adminApi } from '../services/adminApi'
 import amazonLogo from '../assets/brand-logos/amazon-logo.png'
 import deal1 from '../assets/deals/deal1.png'
 import deal2 from '../assets/deals/deal2.png'
@@ -11,9 +12,115 @@ import './ProductDisplayPage.css'
 export const ProductDisplayPage: React.FC = () => {
   const [copied, setCopied] = useState(false)
   const [applied, setApplied] = useState(false)
+  const [liveProduct, setLiveProduct] = useState<any>(null)
+  const [categoryDeals, setCategoryDeals] = useState<DealCardItem[]>([])
 
-  const product = {
+  const loadProductData = useCallback(async () => {
+    try {
+      const urlParams = new URLSearchParams(window.location.search)
+      const targetId = urlParams.get('id') || urlParams.get('product') || 'deal-1'
+
+      const [dealsRes, lootsRes] = await Promise.all([
+        adminApi.getDeals(),
+        adminApi.getLootDeals()
+      ])
+
+      const foundDeal = dealsRes.find((d: any) => String(d.id || d._id) === String(targetId))
+      const foundLoot = !foundDeal ? lootsRes.find((l: any) => String(l.id || l._id) === String(targetId)) : null
+
+      if (foundDeal) {
+        setLiveProduct({
+          id: foundDeal.id || foundDeal._id,
+          isLoot: false,
+          titleLine1: (foundDeal.name || foundDeal.title || '').slice(0, 45),
+          titleLine2: (foundDeal.name || foundDeal.title || '').slice(45, 90),
+          titleLine3: (foundDeal.name || foundDeal.title || '').slice(90),
+          fullTitle: foundDeal.name || foundDeal.title,
+          category: foundDeal.category || 'ELECTRONICS',
+          store: foundDeal.store || 'Amazon',
+          storeLogo: amazonLogo,
+          productImage: foundDeal.image || foundDeal.productImage || deal1,
+          price: foundDeal.price ? `₹${foundDeal.price.toString().replace(/[^0-9]/g, '')}/-` : '₹37,998/-',
+          originalPrice: foundDeal.originalPrice ? `₹${foundDeal.originalPrice.toString().replace(/[^0-9]/g, '')}/-` : '₹65,000/-',
+          discount: foundDeal.discount || '40% off',
+          rewards: '10% Rewards',
+          rating: '4.5',
+          ratingCount: '2,140 Ratings',
+          dealTag: 'Deal',
+          couponCode: (foundDeal.couponCode || `${(foundDeal.store || 'WOUCH').toUpperCase().replace(/[^A-Z0-9]/g, '')}10`).toUpperCase(),
+          ctaHref: foundDeal.ctaHref || foundDeal.href || 'https://www.amazon.in',
+          ctaText: 'Grab this Deal now>>',
+          aboutParagraph: foundDeal.description || `Special offer on verified ${foundDeal.name || foundDeal.title} with high savings and guaranteed cashback through Wouchify.`,
+          specs: [
+            `Category: ${foundDeal.category || 'General'}`,
+            `Store: ${foundDeal.store || 'Amazon'}`,
+            `Status: ${foundDeal.status || 'Active'}`,
+            `Verified: Instant cashback eligible`,
+            `Expiry: ${foundDeal.expiry || 'Limited time offer'}`
+          ],
+          redeemSteps: ['1. Click Grab Deal to visit store', '2. Apply coupon at checkout & get cashback']
+        })
+
+        const related = dealsRes
+          .filter((d: any) => d.id !== foundDeal.id && (d.category === foundDeal.category || d.store === foundDeal.store))
+          .map((d: any) => ({
+            id: d.id || d._id,
+            title: d.name || d.title,
+            category: d.category || 'DEALS',
+            store: d.store || 'Amazon',
+            storeLogo: amazonLogo,
+            productImage: d.image || d.productImage || deal2,
+            price: d.price ? `₹${d.price.toString().replace(/[^0-9]/g, '')}` : '₹604',
+            originalPrice: d.originalPrice ? `₹${d.originalPrice.toString().replace(/[^0-9]/g, '')}` : undefined,
+            discountPercentage: d.discount || '40% OFF',
+            ctaText: 'GRAB DEAL',
+            ctaHref: `/product?id=${d.id || d._id}`
+          }))
+        setCategoryDeals(related)
+      } else if (foundLoot) {
+        setLiveProduct({
+          id: foundLoot.id || foundLoot._id,
+          isLoot: true,
+          titleLine1: (foundLoot.title || '').slice(0, 45),
+          titleLine2: (foundLoot.title || '').slice(45, 90),
+          titleLine3: (foundLoot.title || '').slice(90),
+          fullTitle: foundLoot.title,
+          category: foundLoot.category || 'LOOT DEALS',
+          store: foundLoot.storeName || 'Amazon',
+          storeLogo: amazonLogo,
+          productImage: foundLoot.image || foundLoot.productImage || deal1,
+          price: foundLoot.currentPrice ? `₹${foundLoot.currentPrice.toString().replace(/[^0-9]/g, '')}/-` : '₹499/-',
+          originalPrice: foundLoot.originalPrice ? `₹${foundLoot.originalPrice.toString().replace(/[^0-9]/g, '')}/-` : '₹1,999/-',
+          discount: foundLoot.discount || '75% off',
+          rewards: '15% Rewards',
+          rating: '4.8',
+          ratingCount: '3,450 Ratings',
+          dealTag: 'Loot Deal',
+          couponCode: 'LOOTNOW',
+          ctaHref: foundLoot.href || 'https://www.amazon.in',
+          ctaText: 'Grab this Loot now>>',
+          aboutParagraph: `Exclusive flash loot deal on ${foundLoot.title}. Hurry before stocks run out!`,
+          specs: [
+            `Category: ${foundLoot.category || 'General'}`,
+            `Store: ${foundLoot.storeName || 'Partner Store'}`,
+            `Deal Type: ${foundLoot.dealType || 'Flash'}`,
+            `Status: Active Loot`
+          ],
+          redeemSteps: ['1. Click Grab Loot', '2. Checkout immediately before deal expires']
+        })
+      }
+    } catch (err) {
+      console.warn('ProductDisplayPage load error:', err)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadProductData()
+  }, [loadProductData])
+
+  const defaultProduct = {
     id: 'deal-1',
+    isLoot: false,
     titleLine1: 'Xiaomi 138 cm (55 inch) FX Pro QLED',
     titleLine2: 'Ultra HD 4K Smart Fire TV',
     titleLine3: 'L55MB-FPIN',
@@ -49,44 +156,59 @@ export const ProductDisplayPage: React.FC = () => {
     redeemSteps: ['1. Grab deal', '2. pay'],
   }
 
-  const similarProducts: DealCardItem[] = [
-    DEALS_CARD_ITEMS[0] || {
-      id: 'deal-1',
-      title: 'Xiaomi 138 cm (55 inch) FX Pro QLED Ultra HD 4K Smart Fire TV L55MB-FPIN',
-      category: 'ELECTRONICS',
-      store: 'Amazon',
-      storeLogo: amazonLogo,
-      productImage: deal1,
-      price: '37998',
-      originalPrice: '62999',
-      discountPercentage: '40% OFF',
-      ctaText: 'GRAB DEAL',
-      ctaHref: '/product?id=deal-1',
-    },
-    DEALS_CARD_ITEMS[1] || {
-      id: 'deal-2',
-      title: 'Milton Rapid Electric Kettle 1.8L | 1500 Watts | Stainless Steel Hot Water portable Electric..',
-      category: 'ELECTRONICS',
-      store: 'Amazon',
-      storeLogo: amazonLogo,
-      productImage: deal2,
-      price: '604',
-      originalPrice: '1499',
-      discountPercentage: '60% OFF',
-      ctaText: 'GRAB DEAL',
-      ctaHref: '/product?id=deal-2',
-    },
-  ]
+  const product = liveProduct || defaultProduct
+
+  const similarProducts: DealCardItem[] = useMemo(() => {
+    if (categoryDeals.length > 0) return categoryDeals
+    return [
+      DEALS_CARD_ITEMS[0] || {
+        id: 'deal-1',
+        title: 'Xiaomi 138 cm (55 inch) FX Pro QLED Ultra HD 4K Smart Fire TV L55MB-FPIN',
+        category: 'ELECTRONICS',
+        store: 'Amazon',
+        storeLogo: amazonLogo,
+        productImage: deal1,
+        price: '37998',
+        originalPrice: '62999',
+        discountPercentage: '40% OFF',
+        ctaText: 'GRAB DEAL',
+        ctaHref: '/product?id=deal-1',
+      },
+      DEALS_CARD_ITEMS[1] || {
+        id: 'deal-2',
+        title: 'Milton Rapid Electric Kettle 1.8L | 1500 Watts | Stainless Steel Hot Water portable Electric..',
+        category: 'ELECTRONICS',
+        store: 'Amazon',
+        storeLogo: amazonLogo,
+        productImage: deal2,
+        price: '604',
+        originalPrice: '1499',
+        discountPercentage: '60% OFF',
+        ctaText: 'GRAB DEAL',
+        ctaHref: '/product?id=deal-2',
+      },
+    ]
+  }, [categoryDeals])
 
   const handleCopyCode = (code: string) => {
     navigator.clipboard?.writeText(code)
     setCopied(true)
+    adminApi.trackCouponClick(code)
     setTimeout(() => setCopied(false), 2500)
   }
 
   const handleApplyCoupon = () => {
     setApplied(true)
+    adminApi.trackCouponClick(product.couponCode)
     setTimeout(() => setApplied(false), 2500)
+  }
+
+  const handleGrabDealClick = () => {
+    if (product.isLoot) {
+      adminApi.trackLootClick(product.id)
+    } else {
+      adminApi.trackDealClick(product.id)
+    }
   }
 
   return (
@@ -271,6 +393,7 @@ export const ProductDisplayPage: React.FC = () => {
             target="_blank"
             rel="noopener noreferrer"
             className="product-details-grab-btn"
+            onClick={handleGrabDealClick}
           >
             {product.ctaText}
           </a>
@@ -280,7 +403,7 @@ export const ProductDisplayPage: React.FC = () => {
             <h3 className="product-about-heading">About the Product:</h3>
             <p className="product-about-paragraph">{product.aboutParagraph}</p>
             <ul className="product-about-specs-list">
-              {product.specs.map((spec, index) => (
+              {(product.specs || []).map((spec: string, index: number) => (
                 <li key={index} className="product-about-spec-item">
                   {spec}
                 </li>
@@ -292,7 +415,7 @@ export const ProductDisplayPage: React.FC = () => {
           <div className="product-redeem-section">
             <h3 className="product-redeem-heading">How to Redeem:</h3>
             <ol className="product-redeem-list">
-              {product.redeemSteps.map((step, index) => (
+              {(product.redeemSteps || []).map((step: string, index: number) => (
                 <li key={index} className="product-redeem-item">
                   {step}
                 </li>

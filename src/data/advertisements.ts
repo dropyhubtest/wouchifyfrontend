@@ -8,12 +8,4 @@ export interface Advertisement {
   href: string
 }
 
-export const ADVERTISEMENTS: Advertisement[] = [
-  {
-    id: 'wouchify-sale',
-    title: 'Wouchify Sale',
-    image: advertisementImage,
-    alt: 'Wouchify sale advertisement banner',
-    href: '/offers/sale',
-  },
-]
+export const ADVERTISEMENT_FALLBACK_IMAGE = advertisementImage

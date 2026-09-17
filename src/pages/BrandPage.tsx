@@ -8,6 +8,7 @@ import { useMediaQuery } from '../hooks/useMediaQuery'
 import { MobileBrandPage } from './MobileBrandPage'
 import { getBrandData } from '../data/brandDeals'
 import { DEALS_CARD_ITEMS, type DealCardItem } from '../data/dealsPage'
+import { adminApi } from '../services/adminApi'
 
 import watermarkMain from '../assets/hero/hero-watermark-main.png'
 import watermarkMainState2 from '../assets/hero/hero-watermark-main-state-2.png'
@@ -49,12 +50,108 @@ export const BrandPage: React.FC<BrandPageProps> = ({ brandSlug }) => {
   }
 
   const scale = useDesktopScale()
-  const brand = getBrandData(brandSlug) || getBrandData('amazon')
-  const brandName = brand?.name || 'Amazon'
-
+  const staticBrand = getBrandData(brandSlug) || getBrandData('amazon')
+  
+  const [liveStore, setLiveStore] = useState<any>(null)
+  const [liveDeals, setLiveDeals] = useState<any[]>([])
+  const [liveCoupons, setLiveCoupons] = useState<any[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<FilterPill>('All')
-  const [copied, setCopied] = useState(false)
+  const [copiedCode, setCopiedCode] = useState<string | null>(null)
+
+  const brandName = liveStore?.name || staticBrand?.name || brandSlug.charAt(0).toUpperCase() + brandSlug.slice(1)
+  const brandLogo = liveStore?.logo || staticBrand?.logoSrc || amazonLogo
+  const rewardText = liveStore?.reward || (staticBrand ? `Up to ${staticBrand.rewardValue} rewards` : 'Up to 6.2% rewards')
+  const storeHref = liveStore?.href || 'https://www.amazon.in'
+
+  const loadBrandData = useCallback(async () => {
+    try {
+      const [stores, deals, loots, coupons] = await Promise.all([
+        adminApi.getStores(),
+        adminApi.getDeals(),
+        adminApi.getLootDeals(),
+        adminApi.getCoupons()
+      ]);
+
+      const targetSlug = brandSlug.toLowerCase();
+      const matchedStore = stores.find(
+        (s: any) =>
+          (s.slug && s.slug.toLowerCase() === targetSlug) ||
+          (s.name && s.name.toLowerCase() === targetSlug) ||
+          (s.name && targetSlug.includes(s.name.toLowerCase()))
+      );
+      if (matchedStore) {
+        setLiveStore(matchedStore);
+      }
+
+      const matchName = (matchedStore?.name || brandName || brandSlug).toLowerCase();
+      
+      const filteredLiveDeals = deals.filter(
+        (d: any) =>
+          d.store && (d.store.toLowerCase() === matchName || d.store.toLowerCase().includes(targetSlug) || targetSlug.includes(d.store.toLowerCase()))
+      );
+
+      const filteredLiveLoots = loots.filter(
+        (l: any) =>
+          l.storeName && (l.storeName.toLowerCase() === matchName || l.storeName.toLowerCase().includes(targetSlug) || targetSlug.includes(l.storeName.toLowerCase()))
+      );
+
+      const combinedDeals = [
+        ...filteredLiveDeals.map((d: any) => ({
+          id: d.id || d._id,
+          title: d.name || d.title,
+          category: d.category || 'DEALS',
+          store: d.store || brandName,
+          storeLogo: brandLogo,
+          productImage: d.image || d.productImage || deal1Fallback(d.category),
+          price: d.price ? `₹${d.price.toString().replace(/[^0-9]/g, '')}` : '₹999',
+          originalPrice: d.originalPrice ? `₹${d.originalPrice.toString().replace(/[^0-9]/g, '')}` : undefined,
+          discountPercentage: d.discount || '20% OFF',
+          ctaText: 'GRAB DEAL',
+          ctaHref: `/product?id=${d.id || d._id}`
+        })),
+        ...filteredLiveLoots.map((l: any) => ({
+          id: l.id || l._id,
+          title: l.title,
+          category: l.category || 'LOOT',
+          store: l.storeName || brandName,
+          storeLogo: brandLogo,
+          productImage: l.image || l.productImage || deal1Fallback(l.category),
+          price: l.currentPrice ? `₹${l.currentPrice.toString().replace(/[^0-9]/g, '')}` : '₹499',
+          originalPrice: l.originalPrice ? `₹${l.originalPrice.toString().replace(/[^0-9]/g, '')}` : undefined,
+          discountPercentage: l.discount || '50% OFF',
+          ctaText: 'GRAB LOOT',
+          ctaHref: l.href || `/product?id=${l.id || l._id}`
+        }))
+      ];
+
+      setLiveDeals(combinedDeals);
+
+      const filteredLiveCoupons = coupons.filter(
+        (c: any) =>
+          c.store && (c.store.toLowerCase() === matchName || c.store.toLowerCase().includes(targetSlug) || targetSlug.includes(c.store.toLowerCase()))
+      );
+      setLiveCoupons(filteredLiveCoupons);
+    } catch (err) {
+      console.warn('BrandPage fetch error:', err);
+    }
+  }, [brandSlug, brandName, brandLogo]);
+
+  useEffect(() => {
+    loadBrandData();
+    window.addEventListener('wouchify_deals_updated', loadBrandData);
+    window.addEventListener('wouchify_coupons_updated', loadBrandData);
+    window.addEventListener('wouchify_stores_updated', loadBrandData);
+    return () => {
+      window.removeEventListener('wouchify_deals_updated', loadBrandData);
+      window.removeEventListener('wouchify_coupons_updated', loadBrandData);
+      window.removeEventListener('wouchify_stores_updated', loadBrandData);
+    };
+  }, [loadBrandData]);
+
+  function deal1Fallback(cat?: string) {
+    return (cat && cat.toLowerCase().includes('elec')) ? DEALS_CARD_ITEMS[0]?.productImage : (DEALS_CARD_ITEMS[1]?.productImage || DEALS_CARD_ITEMS[0]?.productImage);
+  }
 
   // Animation DOM Refs for top-to-bottom bars sweep
   const fullBarsGroupRef = useRef<SVGGElement | null>(null)
@@ -88,8 +185,8 @@ export const BrandPage: React.FC<BrandPageProps> = ({ brandSlug }) => {
       return
     }
 
-    const PHASE1_DURATION = 500 // 0.5s: sweep down from top to bottom
-    const PHASE2_DURATION = 500 // 0.5s: white bars exit downwards, peach fills
+    const PHASE1_DURATION = 500
+    const PHASE2_DURATION = 500
     const TOTAL_DURATION = PHASE1_DURATION + PHASE2_DURATION
 
     let startTime: number | null = null
@@ -99,7 +196,6 @@ export const BrandPage: React.FC<BrandPageProps> = ({ brandSlug }) => {
       const elapsed = timestamp - startTime
 
       if (elapsed < PHASE1_DURATION) {
-        // Phase 1: Bars sweep down from 0 to 640px
         const progress = Math.min(1, elapsed / PHASE1_DURATION)
         const eased = easeOutCubic(progress)
         const currentHeight = HERO_HEIGHT * eased
@@ -107,23 +203,18 @@ export const BrandPage: React.FC<BrandPageProps> = ({ brandSlug }) => {
         if (fullBarsGroupRef.current) {
           fullBarsGroupRef.current.style.display = 'block'
         }
-
         if (heroClipRectRef.current) {
           heroClipRectRef.current.setAttribute('y', '0')
           heroClipRectRef.current.setAttribute('height', currentHeight.toString())
         }
-
         if (basePeachRectRef.current) {
           basePeachRectRef.current.style.display = 'none'
         }
-
         if (whiteBarsGroupRef.current) {
           whiteBarsGroupRef.current.style.display = 'none'
         }
-
         animFrameRef.current = requestAnimationFrame(step)
       } else if (elapsed < TOTAL_DURATION) {
-        // Phase 2: White bars exit downwards, base peach rect fills
         const p2Elapsed = elapsed - PHASE1_DURATION
         const progress = Math.min(1, p2Elapsed / PHASE2_DURATION)
         const eased = easeInOutQuad(progress)
@@ -134,25 +225,20 @@ export const BrandPage: React.FC<BrandPageProps> = ({ brandSlug }) => {
         if (fullBarsGroupRef.current) {
           fullBarsGroupRef.current.style.display = 'none'
         }
-
         if (basePeachRectRef.current) {
           basePeachRectRef.current.style.display = 'block'
           basePeachRectRef.current.setAttribute('y', '0')
           basePeachRectRef.current.setAttribute('height', HERO_HEIGHT.toString())
         }
-
         if (whiteBarsGroupRef.current) {
           whiteBarsGroupRef.current.style.display = 'block'
         }
-
         if (whiteBarsClipRectRef.current) {
           whiteBarsClipRectRef.current.setAttribute('y', exitY.toString())
           whiteBarsClipRectRef.current.setAttribute('height', remainingHeight.toString())
         }
-
         animFrameRef.current = requestAnimationFrame(step)
       } else {
-        // Completed
         if (fullBarsGroupRef.current) {
           fullBarsGroupRef.current.style.display = 'none'
         }
@@ -181,20 +267,28 @@ export const BrandPage: React.FC<BrandPageProps> = ({ brandSlug }) => {
     }
   }, [runAnimation])
 
-  const handleCopyCode = (code: string) => {
+  const handleCopyCode = (code: string, couponId?: string | number) => {
     navigator.clipboard.writeText(code).catch(() => {})
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    setCopiedCode(code)
+    if (couponId || code) {
+      adminApi.trackCouponClick(couponId || code);
+    }
+    setTimeout(() => setCopiedCode(null), 2000)
   }
 
-  // 2 sample deals matching Figma media_1788953307381.png
-  const amazonDeals: DealCardItem[] = useMemo(() => {
-    return DEALS_CARD_ITEMS.slice(0, 2)
-  }, [])
+  const handleStoreCtaClick = () => {
+    adminApi.trackStoreClick(liveStore?.id || liveStore?.name || brandSlug);
+  }
+
+  // Combine live deals with static fallback if needed
+  const displayDeals: DealCardItem[] = useMemo(() => {
+    if (liveDeals.length > 0) return liveDeals;
+    return DEALS_CARD_ITEMS.slice(0, 4);
+  }, [liveDeals]);
 
   // Filtered deals based on search and active filter pill
   const filteredDeals = useMemo(() => {
-    return amazonDeals.filter((deal) => {
+    return displayDeals.filter((deal) => {
       const matchesSearch =
         !searchQuery.trim() ||
         deal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -204,11 +298,14 @@ export const BrandPage: React.FC<BrandPageProps> = ({ brandSlug }) => {
 
       if (activeFilter === 'All' || activeFilter === 'Deals') return true
       if (activeFilter === 'Coupons') return false
-      if (activeFilter === 'Loot') return true
-      if (activeFilter === '25%+') return true
+      if (activeFilter === 'Loot') return deal.category.toLowerCase().includes('loot') || deal.ctaText?.includes('LOOT')
+      if (activeFilter === '25%+') {
+        const num = parseInt(deal.discountPercentage?.replace(/[^0-9]/g, '') || '0', 10);
+        return num >= 25;
+      }
       return true
     })
-  }, [amazonDeals, searchQuery, activeFilter])
+  }, [displayDeals, searchQuery, activeFilter])
 
   // Compact Coupon Ticket SVG Path (960 x 300) matching Figma Image 3
   const ticketPath = `
@@ -405,10 +502,10 @@ export const BrandPage: React.FC<BrandPageProps> = ({ brandSlug }) => {
           <div className="amazon-hero__inner">
             {/* Left Copy Block (Half Width, Bigger Content) */}
             <div className="amazon-hero__left">
-              {/* Amazon Brand Logo */}
+              {/* Brand Logo */}
               <div className="amazon-hero__logo-box">
                 <img
-                  src={amazonLogo}
+                  src={brandLogo}
                   alt={brandName}
                   className="amazon-hero__logo"
                   width="360"
@@ -418,21 +515,22 @@ export const BrandPage: React.FC<BrandPageProps> = ({ brandSlug }) => {
 
               {/* Main Headline */}
               <h1 className="amazon-hero__headline">
-                Up to 6.2% rewards
+                {rewardText}
               </h1>
 
               {/* Subtitle */}
               <p className="amazon-hero__subtitle">
-                Get verified electronics, fashion, and home coupons with high success rates.
+                Get verified deals, loot offers, and coupons from {brandName} with real-time rewards tracking.
               </p>
 
               {/* Red CTA Button */}
               <a
-                href="https://www.amazon.in"
+                href={storeHref}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="amazon-hero__cta"
-                aria-label="View Amazon Store"
+                onClick={handleStoreCtaClick}
+                aria-label={`View ${brandName} Store`}
               >
                 View Store&gt;&gt;
               </a>
@@ -442,7 +540,7 @@ export const BrandPage: React.FC<BrandPageProps> = ({ brandSlug }) => {
             <div className="amazon-hero__right">
               <img
                 src={amazonHeroArtwork}
-                alt="Amazon Rewards and Deals Box"
+                alt={`${brandName} Rewards and Deals Box`}
                 className="amazon-hero__artwork-img"
                 width="940"
                 height="627"
@@ -481,7 +579,7 @@ export const BrandPage: React.FC<BrandPageProps> = ({ brandSlug }) => {
             <input
               type="text"
               className="amazon-search-input"
-              placeholder="Search Store, Code or Discount"
+              placeholder={`Search ${brandName} Store, Code or Discount`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               aria-label="Search Store, Code or Discount"
@@ -542,186 +640,195 @@ export const BrandPage: React.FC<BrandPageProps> = ({ brandSlug }) => {
               <h2 className="amazon-section-title">Available Coupons</h2>
             </div>
 
-            {/* Perforated Coupon Ticket (960 x 300) matching Figma Image 3 */}
-            <div className="amazon-coupon-ticket">
-              <svg
-                className="amazon-ticket-svg"
-                width="960"
-                height="300"
-                viewBox="0 0 960 300"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-              >
-                <defs>
-                  <clipPath id="couponClip">
-                    <path d={ticketPath} />
-                  </clipPath>
-                  {/* Linear gradient for subtle top inner shadow */}
-                  <linearGradient id="topInnerShadowGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#000000" stopOpacity="0.06" />
-                    <stop offset="50%" stopColor="#000000" stopOpacity="0.015" />
-                    <stop offset="100%" stopColor="#000000" stopOpacity="0" />
-                  </linearGradient>
-                  {/* Subtle side inner shadow gradients */}
-                  <linearGradient id="leftInnerShadowGrad" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="#000000" stopOpacity="0.03" />
-                    <stop offset="100%" stopColor="#000000" stopOpacity="0" />
-                  </linearGradient>
-                  <linearGradient id="rightInnerShadowGrad" x1="1" y1="0" x2="0" y2="0">
-                    <stop offset="0%" stopColor="#000000" stopOpacity="0.03" />
-                    <stop offset="100%" stopColor="#000000" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
+            {/* Render dynamic coupons or default ticket */}
+            {(liveCoupons.length > 0 ? liveCoupons : [{
+              id: 'default-coupon',
+              code: `${brandName.toUpperCase().replace(/[^A-Z0-9]/g, '') || 'WOUCH'}10`,
+              discount: '10% off',
+              expiry: '3 days',
+              minOrder: '499'
+            }]).map((cpn: any, idx: number) => {
+              const code = (cpn.code || `${brandName.toUpperCase()}10`).toUpperCase();
+              const discountText = cpn.discount || '10% off';
+              const isCopied = copiedCode === code;
 
-                {/* Lavender Ticket Body */}
-                <path
-                  d={ticketPath}
-                  fill="#E5E7FF"
-                />
-
-                {/* Top Inner Shadow (soft 12px height) */}
-                <rect
-                  x="0"
-                  y="0"
-                  width="960"
-                  height="12"
-                  fill="url(#topInnerShadowGrad)"
-                  clipPath="url(#couponClip)"
-                />
-
-                {/* Left Inner Shadow */}
-                <rect
-                  x="0"
-                  y="0"
-                  width="12"
-                  height="300"
-                  fill="url(#leftInnerShadowGrad)"
-                  clipPath="url(#couponClip)"
-                />
-
-                {/* Right Inner Shadow */}
-                <rect
-                  x="948"
-                  y="0"
-                  width="12"
-                  height="300"
-                  fill="url(#rightInnerShadowGrad)"
-                  clipPath="url(#couponClip)"
-                />
-
-                {/* White Dotted Perforation Line */}
-                <line
-                  x1="630"
-                  y1="24"
-                  x2="630"
-                  y2="276"
-                  stroke="#FFFFFF"
-                  strokeWidth="2.5"
-                  strokeDasharray="6 6"
-                  strokeLinecap="round"
-                />
-              </svg>
-
-              {/* Left Partition: Logo, 10% Off (Centered), Expiry (Left) & Min Order (Right) */}
-              <div className="amazon-coupon-left">
-                {/* White Logo Container */}
-                <div className="amazon-coupon-logo-box">
-                  <img
-                    src={amazonCouponLogo}
-                    alt="Amazon"
-                    className="amazon-coupon-logo"
-                    width="220"
-                    height="60"
-                  />
-                </div>
-
-                {/* Discount Value (Centered in Left Partition) */}
-                <div className="amazon-coupon-discount-row">
-                  <span className="amazon-coupon-discount-value">10%</span>
-                  <span className="amazon-coupon-discount-off">off</span>
-                </div>
-
-                {/* Meta details (Expires in 3 days on left, Min Order on right) */}
-                <div className="amazon-coupon-meta-row">
-                  <div className="amazon-coupon-meta-item">
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="#282D78"
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <circle cx="12" cy="12" r="10" />
-                      <polyline points="12 6 12 12 16 14" />
-                    </svg>
-                    <span>Expires in 3 days</span>
-                  </div>
-
-                  <div className="amazon-coupon-meta-item amazon-coupon-meta-item--right">
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="#282D78"
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <circle cx="9" cy="21" r="1" />
-                      <circle cx="20" cy="21" r="1" />
-                      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                    </svg>
-                    <span>Min Order: 499</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Partition: USE CODE & AMAZON10 Copy Pill */}
-              <div className="amazon-coupon-right">
-                <span className="amazon-coupon-use-code">USE CODE :</span>
-
-                <button
-                  type="button"
-                  className="amazon-coupon-code-btn"
-                  onClick={() => handleCopyCode('AMAZON10')}
-                  title="Click to copy AMAZON10"
-                >
-                  AMAZON10
-                </button>
-
-                <button
-                  type="button"
-                  className="amazon-coupon-copy-action"
-                  onClick={() => handleCopyCode('AMAZON10')}
-                  aria-label="Copy code"
-                >
-                  <span className="amazon-coupon-copy-text">
-                    {copied ? 'Copied! ✓' : 'Copy Code'}
-                  </span>
+              return (
+                <div key={cpn.id || cpn._id || idx} className="amazon-coupon-ticket" style={{ marginBottom: liveCoupons.length > 1 ? 24 : 0 }}>
                   <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
+                    className="amazon-ticket-svg"
+                    width="960"
+                    height="300"
+                    viewBox="0 0 960 300"
                     fill="none"
-                    stroke="#000000"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                    xmlns="http://www.w3.org/2000/svg"
                     aria-hidden="true"
                   >
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                    <defs>
+                      <clipPath id={`couponClip-${idx}`}>
+                        <path d={ticketPath} />
+                      </clipPath>
+                      <linearGradient id={`topInnerShadowGrad-${idx}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#000000" stopOpacity="0.06" />
+                        <stop offset="50%" stopColor="#000000" stopOpacity="0.015" />
+                        <stop offset="100%" stopColor="#000000" stopOpacity="0" />
+                      </linearGradient>
+                      <linearGradient id={`leftInnerShadowGrad-${idx}`} x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#000000" stopOpacity="0.03" />
+                        <stop offset="100%" stopColor="#000000" stopOpacity="0" />
+                      </linearGradient>
+                      <linearGradient id={`rightInnerShadowGrad-${idx}`} x1="1" y1="0" x2="0" y2="0">
+                        <stop offset="0%" stopColor="#000000" stopOpacity="0.03" />
+                        <stop offset="100%" stopColor="#000000" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+
+                    {/* Lavender Ticket Body */}
+                    <path
+                      d={ticketPath}
+                      fill="#E5E7FF"
+                    />
+
+                    {/* Top Inner Shadow */}
+                    <rect
+                      x="0"
+                      y="0"
+                      width="960"
+                      height="12"
+                      fill={`url(#topInnerShadowGrad-${idx})`}
+                      clipPath={`url(#couponClip-${idx})`}
+                    />
+
+                    {/* Left Inner Shadow */}
+                    <rect
+                      x="0"
+                      y="0"
+                      width="12"
+                      height="300"
+                      fill={`url(#leftInnerShadowGrad-${idx})`}
+                      clipPath={`url(#couponClip-${idx})`}
+                    />
+
+                    {/* Right Inner Shadow */}
+                    <rect
+                      x="948"
+                      y="0"
+                      width="12"
+                      height="300"
+                      fill={`url(#rightInnerShadowGrad-${idx})`}
+                      clipPath={`url(#couponClip-${idx})`}
+                    />
+
+                    {/* White Dotted Perforation Line */}
+                    <line
+                      x1="630"
+                      y1="24"
+                      x2="630"
+                      y2="276"
+                      stroke="#FFFFFF"
+                      strokeWidth="2.5"
+                      strokeDasharray="6 6"
+                      strokeLinecap="round"
+                    />
                   </svg>
-                </button>
-              </div>
-            </div>
+
+                  {/* Left Partition: Logo, Discount, Expiry & Min Order */}
+                  <div className="amazon-coupon-left">
+                    <div className="amazon-coupon-logo-box">
+                      <img
+                        src={brandLogo || amazonCouponLogo}
+                        alt={brandName}
+                        className="amazon-coupon-logo"
+                        width="220"
+                        height="60"
+                      />
+                    </div>
+
+                    <div className="amazon-coupon-discount-row">
+                      <span className="amazon-coupon-discount-value">{discountText.replace(/off/i, '').trim()}</span>
+                      <span className="amazon-coupon-discount-off">off</span>
+                    </div>
+
+                    <div className="amazon-coupon-meta-row">
+                      <div className="amazon-coupon-meta-item">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="#282D78"
+                          strokeWidth="2.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <circle cx="12" cy="12" r="10" />
+                          <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                        <span>{cpn.expiry ? `Expires: ${cpn.expiry}` : 'Expires in 3 days'}</span>
+                      </div>
+
+                      <div className="amazon-coupon-meta-item amazon-coupon-meta-item--right">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="#282D78"
+                          strokeWidth="2.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <circle cx="9" cy="21" r="1" />
+                          <circle cx="20" cy="21" r="1" />
+                          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                        </svg>
+                        <span>Min Order: {cpn.minOrder || '499'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Partition: USE CODE & Copy Pill */}
+                  <div className="amazon-coupon-right">
+                    <span className="amazon-coupon-use-code">USE CODE :</span>
+
+                    <button
+                      type="button"
+                      className="amazon-coupon-code-btn"
+                      onClick={() => handleCopyCode(code, cpn.id || cpn._id)}
+                      title={`Click to copy ${code}`}
+                    >
+                      {code}
+                    </button>
+
+                    <button
+                      type="button"
+                      className="amazon-coupon-copy-action"
+                      onClick={() => handleCopyCode(code, cpn.id || cpn._id)}
+                      aria-label="Copy code"
+                    >
+                      <span className="amazon-coupon-copy-text">
+                        {isCopied ? 'Copied! ✓' : 'Copy Code'}
+                      </span>
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#000000"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </section>
         )}
 

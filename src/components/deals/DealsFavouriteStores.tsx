@@ -3,14 +3,13 @@ import { DealCard } from './DealCard'
 import {
   DEALS_FILTER_CATEGORIES,
   DEALS_FAVOURITE_STORES,
-  DEALS_CARD_ITEMS,
-  MASTER_EXECUTIVE_LOOT_DEALS,
   normalizeDealToCard,
   normalizeLootToCard,
   type DealCardItem,
 } from '../../data/dealsPage'
 import { adminApi } from '../../services/adminApi'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
+import { DealCardSkeleton } from '../common/Skeletons'
 import './DealsFavouriteStores.css'
 
 export interface DealsFavouriteStoresProps {
@@ -53,31 +52,8 @@ export const DealsFavouriteStores: React.FC<DealsFavouriteStoresProps> = ({
     Coupons: 'All Coupons',
   })
 
-  // Live deals list initialized from cache or static default items
-  const [dealsList, setDealsList] = useState<DealCardItem[]>(() => {
-    try {
-      if (dataSource === 'loot') {
-        const cached = localStorage.getItem('wouchify_loot_deals')
-        if (cached) {
-          const parsed = JSON.parse(cached)
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            return parsed.map((l: any, idx: number) => normalizeLootToCard(l, idx))
-          }
-        }
-      } else {
-        const cached = localStorage.getItem('wouchify_public_deals')
-        if (cached) {
-          const parsed = JSON.parse(cached)
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            return parsed.map((d: any, idx: number) => normalizeDealToCard(d, idx))
-          }
-        }
-      }
-    } catch {}
-    return dataSource === 'loot' 
-      ? MASTER_EXECUTIVE_LOOT_DEALS.map((l: any, idx: number) => normalizeLootToCard(l, idx)) 
-      : DEALS_CARD_ITEMS
-  })
+  const [dealsList, setDealsList] = useState<DealCardItem[]>([])
+  const [loading, setLoading] = useState(true)
 
   // Fetch live deals from Backend API & listen to update events
   useEffect(() => {
@@ -87,24 +63,27 @@ export const DealsFavouriteStores: React.FC<DealsFavouriteStoresProps> = ({
         if (dataSource === 'loot') {
           const res = await adminApi.getLootDeals()
           if (!isMounted) return
-          if (Array.isArray(res) && res.length > 0) {
+          if (Array.isArray(res)) {
             const normalized = res
-              .filter((l: any) => l.status === 'active' || l.status === 'Approved')
+              .filter((l: any) => !l.status || l.status.toLowerCase() === 'active' || l.status.toLowerCase() === 'approved')
               .map((l: any, idx: number) => normalizeLootToCard(l, idx))
             setDealsList(normalized)
           }
         } else {
-          const res = await adminApi.getPublicDeals()
+          const res = await adminApi.getDeals()
           if (!isMounted) return
-          if (Array.isArray(res) && res.length > 0) {
+          if (Array.isArray(res)) {
             const normalized = res
-              .filter((d: any) => d.status === 'active' || d.status === 'Approved')
+              .filter((d: any) => !d.status || d.status.toLowerCase() === 'active' || d.status.toLowerCase() === 'approved')
               .map((d: any, idx: number) => normalizeDealToCard(d, idx))
             setDealsList(normalized)
           }
         }
-      } catch {
-        // Keeps cached/static fallback
+      } catch (err) {
+        console.error('Failed to load deals:', err)
+        if (isMounted) setDealsList([])
+      } finally {
+        if (isMounted) setLoading(false)
       }
     }
 
@@ -377,7 +356,9 @@ export const DealsFavouriteStores: React.FC<DealsFavouriteStoresProps> = ({
         {/* Deal Cards Grid (Optional) */}
         {!hideCards && (
           <div className={`deals-favourite__grid ${singleCardMode ? 'deals-favourite__grid--single' : ''}`}>
-            {filteredDeals.length > 0 ? (
+            {loading ? (
+              <DealCardSkeleton count={8} />
+            ) : filteredDeals.length > 0 ? (
               singleCardMode ? (
                 <DealCard key={filteredDeals[0].id} deal={filteredDeals[0]} isLoot={dataSource === 'loot'} />
               ) : (

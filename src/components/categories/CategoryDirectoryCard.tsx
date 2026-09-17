@@ -7,9 +7,12 @@ interface CategoryDirectoryCardProps {
 }
 
 export const CategoryDirectoryCard: React.FC<CategoryDirectoryCardProps> = ({ item }) => {
+  const isAmazon = item.slug.toLowerCase() === 'amazon' || item.name.toLowerCase() === 'amazon'
+  const targetHref = isAmazon ? '/brands/amazon' : `/categories/${item.slug}`
+
   return (
     <a
-      href={`/categories/${item.slug}`}
+      href={targetHref}
       className="category-dir-card"
       title={item.name}
     >
