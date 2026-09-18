@@ -893,49 +893,23 @@ export const ExecutiveDealsPage: React.FC = () => {
         {/* Active / Expired Tab Switcher */}
         <div className="deals-tab-bar">
           <button
-            className="deals-tab-btn"
+            className={`deals-tab-btn ${dealsTab === 'active' ? 'active' : ''}`}
             onClick={() => { setDealsTab('active'); setCurrentPage(1); }}
-            style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: dealsTab === 'active' ? '3px solid var(--color-red, #E31E25)' : '3px solid transparent',
-              marginBottom: '-2px',
-              fontWeight: dealsTab === 'active' ? 700 : 500,
-              color: dealsTab === 'active' ? 'var(--color-red, #E31E25)' : '#64748b',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
           >
             <CheckCircle2 size={15} />
-            Active Deals
-            <span style={{ background: dealsTab === 'active' ? 'var(--color-red, #E31E25)' : '#e2e8f0', color: dealsTab === 'active' ? '#fff' : '#64748b', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', minWidth: '20px', textAlign: 'center' }}>
+            <span>Active Deals</span>
+            <span className="deals-tab-badge active-badge">
               {activeDeals.length}
             </span>
           </button>
           <button
-            className="deals-tab-btn"
+            className={`deals-tab-btn ${dealsTab === 'expired' ? 'expired' : ''}`}
             onClick={() => { setDealsTab('expired'); setCurrentPage(1); }}
-            style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: dealsTab === 'expired' ? '3px solid #ef4444' : '3px solid transparent',
-              marginBottom: '-2px',
-              fontWeight: dealsTab === 'expired' ? 700 : 500,
-              color: dealsTab === 'expired' ? '#ef4444' : '#64748b',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
           >
             <AlertTriangle size={15} />
-            Expired Deals
+            <span>Expired Deals</span>
             {kpiStats.expired > 0 && (
-              <span style={{ background: dealsTab === 'expired' ? '#ef4444' : '#fee2e2', color: dealsTab === 'expired' ? '#fff' : '#ef4444', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', minWidth: '20px', textAlign: 'center' }}>
+              <span className="deals-tab-badge expired-badge">
                 {kpiStats.expired}
               </span>
             )}

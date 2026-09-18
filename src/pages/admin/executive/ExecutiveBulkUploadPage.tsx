@@ -49,41 +49,49 @@ export const ExecutiveBulkUploadPage: React.FC = () => {
   
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Module configuration
+  // Module configuration with matched icons and theme accents
   const moduleConfig = {
     deals: {
       name: 'Promotional Deals',
       badge: '🔥 Deals',
-      icon: <Zap size={22} color="#3b82f6" />,
-      color: '#3b82f6',
-      bg: '#eff6ff',
+      icon: <Flame size={22} color="#dc2626" />,
+      color: '#dc2626',
+      bg: '#fef2f2',
+      border: '#fee2e2',
+      accentGlow: 'rgba(220, 38, 38, 0.18)',
       description: 'Bulk import e-commerce deals, discounts, MRPs, and affiliate links.',
       viewLink: '/executive/deals'
     },
     'loot-deals': {
       name: 'Loot & Flash Drops',
       badge: '⚡ Loot Drops',
-      icon: <Flame size={22} color="#ef4444" />,
-      color: '#ef4444',
-      bg: '#fef2f2',
+      icon: <Zap size={22} color="#d97706" />,
+      color: '#d97706',
+      bg: '#fffbeb',
+      border: '#fef3c7',
+      accentGlow: 'rgba(217, 119, 6, 0.18)',
       description: 'Bulk import high-discount glitch offers, steals, and flash loot deals.',
       viewLink: '/executive/loot-deals'
     },
     coupons: {
       name: 'Verified Coupons',
       badge: '🎟️ Coupons',
-      icon: <Tag size={22} color="#8b5cf6" />,
-      color: '#8b5cf6',
+      icon: <Tag size={22} color="#7c3aed" />,
+      color: '#7c3aed',
       bg: '#f5f3ff',
+      border: '#ede9fe',
+      accentGlow: 'rgba(124, 58, 237, 0.18)',
       description: 'Bulk import verified discount coupon promo codes and voucher rules.',
       viewLink: '/executive/coupons'
     },
     stores: {
       name: 'Partner Stores',
       badge: '🏬 Stores',
-      icon: <Store size={22} color="#10b981" />,
-      color: '#10b981',
-      bg: '#f0fdf4',
+      icon: <Store size={22} color="#059669" />,
+      color: '#059669',
+      bg: '#ecfdf5',
+      border: '#d1fae5',
+      accentGlow: 'rgba(5, 150, 105, 0.18)',
       description: 'Bulk import affiliate partner store directories, logos, and reward cashback.',
       viewLink: '/executive/stores'
     }
@@ -744,7 +752,7 @@ export const ExecutiveBulkUploadPage: React.FC = () => {
           </div>
         </div>
 
-        {/* ── MODULE SELECTOR TABS ── */}
+        {/* ── MODULE SELECTOR CARDS ── */}
         <div className="bulk-module-grid">
           {(['deals', 'loot-deals', 'coupons', 'stores'] as BulkModule[]).map((mod) => {
             const conf = moduleConfig[mod]
@@ -752,7 +760,12 @@ export const ExecutiveBulkUploadPage: React.FC = () => {
             return (
               <div
                 key={mod}
-                className={`bulk-module-card ${isSelected ? 'active' : ''}`}
+                className={`bulk-module-card mod-${mod} ${isSelected ? 'active' : ''}`}
+                style={{
+                  borderColor: isSelected ? conf.color : undefined,
+                  background: isSelected ? `linear-gradient(145deg, #ffffff 0%, ${conf.bg} 100%)` : undefined,
+                  boxShadow: isSelected ? `0 10px 24px -4px ${conf.accentGlow}` : undefined
+                }}
                 onClick={() => {
                   setActiveModule(mod)
                   setParsedRows([])
@@ -762,11 +775,17 @@ export const ExecutiveBulkUploadPage: React.FC = () => {
                 }}
               >
                 {isSelected && (
-                  <div className="bulk-module-check">
-                    <Check size={12} strokeWidth={3} />
+                  <div className="bulk-module-check" style={{ background: conf.color }}>
+                    <Check size={13} strokeWidth={3} />
                   </div>
                 )}
-                <div className="bulk-module-icon" style={{ background: conf.bg }}>
+                <div 
+                  className="bulk-module-icon" 
+                  style={{ 
+                    background: conf.bg, 
+                    border: `1px solid ${conf.border}` 
+                  }}
+                >
                   {conf.icon}
                 </div>
                 <div className="bulk-module-info">

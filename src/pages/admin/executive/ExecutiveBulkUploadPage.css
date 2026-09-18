@@ -52,65 +52,87 @@
 
 .bulk-module-card {
   background: #ffffff;
-  border: 2px solid #e2e8f0;
-  border-radius: 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
   padding: 18px 20px;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 14px;
   position: relative;
   text-align: left;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+  user-select: none;
 }
 
 .bulk-module-card:hover {
-  border-color: #94a3b8;
   transform: translateY(-2px);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+  border-color: #cbd5e1;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.07);
 }
 
 .bulk-module-card.active {
-  border-color: #059669;
-  background: #f0fdf4;
-  box-shadow: 0 6px 20px rgba(5, 150, 105, 0.12);
+  border-width: 2px;
 }
 
 .bulk-module-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.bulk-module-card:hover .bulk-module-icon {
+  transform: scale(1.05);
+}
+
+.bulk-module-info {
+  flex: 1;
+  min-width: 0;
 }
 
 .bulk-module-info h4 {
-  margin: 0 0 4px;
+  margin: 0 0 5px;
   font-size: 15px;
-  font-weight: 700;
-  color: #1e293b;
+  font-weight: 750;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .bulk-module-info p {
   margin: 0;
-  font-size: 12px;
+  font-size: 12.5px;
+  line-height: 1.45;
   color: #64748b;
+  font-weight: 450;
 }
 
 .bulk-module-check {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: #059669;
   color: #ffffff;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  animation: checkPop 0.2s ease-out;
+}
+
+@keyframes checkPop {
+  0% { transform: scale(0.6); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 /* Templates Bar */
