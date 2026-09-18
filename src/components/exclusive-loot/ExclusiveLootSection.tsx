@@ -61,8 +61,7 @@ export const ExclusiveLootSection: React.FC = () => {
 
               {/* Right Content Area */}
               <div className="exclusive-loot__details">
-                <div className="exclusive-loot__top-row">
-                  <span className="exclusive-loot__tag">{deal.category}</span>
+                <div className="exclusive-loot__store-row">
                   <img
                     src={deal.storeLogo}
                     alt={deal.storeName}
@@ -70,11 +69,14 @@ export const ExclusiveLootSection: React.FC = () => {
                   />
                 </div>
                 <h3 className="exclusive-loot__card-title">{deal.title}</h3>
-                <div className="exclusive-loot__price-group">
-                  <span className="exclusive-loot__price">₹{deal.currentPrice}</span>
-                  <span className="exclusive-loot__original-price">₹{deal.originalPrice}</span>
+                <div className="exclusive-loot__tag-row">
+                  <span className="exclusive-loot__tag">{deal.category}</span>
                 </div>
-                <div className="exclusive-loot__cta-row">
+                <div className="exclusive-loot__bottom-row">
+                  <div className="exclusive-loot__price-group">
+                    <span className="exclusive-loot__price">₹{deal.currentPrice}</span>
+                    <span className="exclusive-loot__original-price">{deal.originalPrice}</span>
+                  </div>
                   <span className="exclusive-loot__grab-btn">Grab deal!!</span>
                 </div>
               </div>

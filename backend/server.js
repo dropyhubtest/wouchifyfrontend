@@ -58,14 +58,15 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Ensure MongoDB Atlas connection is active before processing any API request
-app.use(async (req, res, next) => {
-  try {
-    if (mongoose.connection.readyState !== 1) {
-      await connectDB();
-    }
-  } catch (err) {
-    console.error('Database connection error in request middleware:', err.message);
+// Non-blocking background MongoDB Atlas connection monitor
+let lastConnectAttempt = 0;
+app.use((req, res, next) => {
+  const now = Date.now();
+  if (mongoose.connection.readyState === 0 && now - lastConnectAttempt > 30000) {
+    lastConnectAttempt = now;
+    connectDB().catch((err) => {
+      console.warn('Background MongoDB connection retry note:', err.message);
+    });
   }
   next();
 });
@@ -91,8 +92,76 @@ app.use('/api/cashback-claims', cashbackClaimRoutes);
 app.use('/api/verify', verifyRoutes);
 app.use('/api/staff', staffRoutes);
 
+// Compatibility / Data API routes for customer homepage sections
+app.get('/api/data/deals', async (req, res) => {
+  try {
+    let deals = [];
+    if (mongoose.connection.readyState === 1) {
+      deals = await Deal.find({ status: { $in: ['active', 'Approved', 'approved'] } }).lean();
+    } else {
+      deals = inMemoryStore.getDeals({ status: 'active' });
+    }
+    const formatted = (deals || []).map(d => ({
+      _id: d._id || d.id,
+      title: d.title || d.name,
+      name: d.title || d.name,
+      price: d.price,
+      originalPrice: d.originalPrice,
+      discount: d.discount || d.discountLabel,
+      brand: {
+        name: d.brand || d.store,
+        logoUrl: d.logoUrl || d.brandLogo || d.image || '/images/default-logo.png'
+      },
+      image: d.image || d.imageUrl || '/images/default-logo.png',
+      store: d.store,
+      category: d.category,
+      code: d.code,
+      rating: d.rating,
+      expiry: d.expiry
+    }));
+    res.json(formatted);
+  } catch (err) {
+    res.status(200).json([]);
+  }
+});
+
+app.get('/api/data/brands/popular', async (req, res) => {
+  try {
+    let stores = [];
+    if (mongoose.connection.readyState === 1) {
+      stores = await Store.find({ status: 'active' }).lean();
+    } else {
+      stores = inMemoryStore.getStores({ status: 'active' });
+    }
+    const formatted = (stores || []).map(s => ({
+      _id: s._id || s.id,
+      name: s.name,
+      logoUrl: s.logo || s.logoUrl || '/images/default-logo.png',
+      cashbackText: s.reward || s.cashbackText || 'Up to 10% Cashback',
+      categories: [{ name: s.category || 'Shopping' }]
+    }));
+    res.json(formatted);
+  } catch (err) {
+    res.status(200).json([]);
+  }
+});
+
+app.get('/api/data/categories', async (req, res) => {
+  try {
+    let categories = [];
+    if (mongoose.connection.readyState === 1) {
+      categories = await Category.find({}).lean();
+    } else {
+      categories = inMemoryStore.getCategories();
+    }
+    res.json(categories);
+  } catch (err) {
+    res.status(200).json([]);
+  }
+});
+
 // Root endpoint - Wouchify API status
-app.get('/', (req, res) => {
+const apiStatusHandler = (req, res) => {
   const isDbReady = mongoose.connection.readyState === 1;
   res.json({
     name: 'Wouchify API Service',
@@ -119,7 +188,11 @@ app.get('/', (req, res) => {
     },
     message: 'Welcome to Wouchify Admin & Customer API. Frontend application runs on http://localhost:3001'
   });
-});
+};
+
+app.get('/', apiStatusHandler);
+app.get('/api', apiStatusHandler);
+app.get('/api/', apiStatusHandler);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

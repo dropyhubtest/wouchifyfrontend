@@ -1,4 +1,4 @@
-﻿const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 const dns = require('dns');
 const path = require('path');
 const dotenv = require('dotenv');
@@ -9,6 +9,9 @@ dotenv.config();
 try {
   dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
 } catch (e) {}
+
+// Disable command buffering so queries instantly fallback to in-memory store if DB is disconnected/offline
+mongoose.set('bufferCommands', false);
 
 const MONGO_URI =
   process.env.MONGO_URI ||

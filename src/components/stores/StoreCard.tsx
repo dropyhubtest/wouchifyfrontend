@@ -22,7 +22,8 @@ export const StoreCard: React.FC<StoreCardProps> = ({ store }) => {
   const cardBg = store.cardBg || orig?.cardBg || '#ECF4FF'
   const badgeBg = store.badgeBg || orig?.badgeBg || '#D3E0F2'
   const logoPanelBg = store.logoPanelBg || orig?.logoPanelBg
-  const logoSrc = orig?.logo || store.logo || (store as any).logoUrl || getStoreLogo(store.slug || store.name)
+  const rawLogo = store.logo && !store.logo.includes('clearbit.com') ? store.logo : ''
+  const logoSrc = orig?.logo || rawLogo || (store as any).logoUrl || getStoreLogo(store.slug || store.name)
   const storeId = store.id || orig?.id || 'store'
   const category = store.category || orig?.category || 'FASHION'
   const name = store.name || orig?.name || 'Store'

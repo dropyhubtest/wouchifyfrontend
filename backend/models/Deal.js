@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const dealSchema = new mongoose.Schema({
+  id: { type: String },
   name: { type: String, required: true },
   title: { type: String },
   store: { type: String, required: true },

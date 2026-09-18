@@ -23,22 +23,26 @@ function buildCouponQuery(identifier) {
 // 1. PUBLIC: Get all active/filtered coupons (No auth required for customer pages & public storefront)
 router.get('/', async (req, res, next) => {
   const { status, public: isPublic, store: storeName, category, all } = req.query;
+  const getFallback = () => {
+    let memoryCoupons = store.getCoupons();
+    if (status && status !== 'all') {
+      memoryCoupons = memoryCoupons.filter(c => (c.status || 'active').toLowerCase() === status.toLowerCase());
+    }
+    if (storeName && storeName !== 'All') {
+      memoryCoupons = memoryCoupons.filter(c => c.store && c.store.toLowerCase() === storeName.toLowerCase());
+    }
+    if (category && category !== 'All') {
+      memoryCoupons = memoryCoupons.filter(c => c.category && c.category.toLowerCase() === category.toLowerCase());
+    }
+    if (all !== 'true') {
+      memoryCoupons = memoryCoupons.filter(c => c.submissionStatus !== 'pending_approval' && c.opsManagerApproval !== 'Rejected');
+    }
+    return memoryCoupons;
+  };
+
   try {
     if (mongoose.connection.readyState !== 1) {
-      let memoryCoupons = store.getCoupons();
-      if (status && status !== 'all') {
-        memoryCoupons = memoryCoupons.filter(c => (c.status || 'active').toLowerCase() === status.toLowerCase());
-      }
-      if (storeName && storeName !== 'All') {
-        memoryCoupons = memoryCoupons.filter(c => c.store && c.store.toLowerCase() === storeName.toLowerCase());
-      }
-      if (category && category !== 'All') {
-        memoryCoupons = memoryCoupons.filter(c => c.category && c.category.toLowerCase() === category.toLowerCase());
-      }
-      if (all !== 'true') {
-        memoryCoupons = memoryCoupons.filter(c => c.submissionStatus !== 'pending_approval' && c.opsManagerApproval !== 'Rejected');
-      }
-      return res.json(memoryCoupons);
+      return res.json(getFallback());
     }
 
     const query = {};
@@ -52,7 +56,7 @@ router.get('/', async (req, res, next) => {
       query.category = new RegExp(`^${category}$`, 'i');
     }
     if (all !== 'true') {
-      query.status = { $ne: 'rejected', $ne: 'pending' };
+      query.status = { $nin: ['rejected', 'pending'] };
       query.opsManagerApproval = { $ne: 'Rejected' };
       query.submissionStatus = { $ne: 'pending_approval' };
       query.publishAt = { $lte: new Date() };
@@ -64,8 +68,14 @@ router.get('/', async (req, res, next) => {
     }
 
     const coupons = await Coupon.find(query).sort({ createdAt: -1 });
+    if (!coupons || coupons.length === 0) {
+      return res.json(getFallback());
+    }
     res.json(coupons);
-  } catch (err) { next(err); }
+  } catch (err) {
+    console.warn('Coupons route fallback to in-memory store:', err.message);
+    return res.json(getFallback());
+  }
 });
 
 // PUBLIC: Click & usage counter

@@ -31,8 +31,22 @@ router.get('/', async (req, res, next) => {
     }
 
     const ads = await Advertisement.find(query).sort({ createdAt: -1 });
+    if (!ads || ads.length === 0) {
+      let memoryAds = store.getAdvertisements(req.query);
+      if (all !== 'true') {
+        memoryAds = memoryAds.filter(a => a.submissionStatus !== 'pending_approval' && (a.status || 'active') === 'active');
+      }
+      return res.json(memoryAds);
+    }
     res.json(ads);
-  } catch (err) { next(err); }
+  } catch (err) {
+    console.warn('Advertisements route fallback to in-memory store:', err.message);
+    let memoryAds = store.getAdvertisements(req.query);
+    if (all !== 'true') {
+      memoryAds = memoryAds.filter(a => a.submissionStatus !== 'pending_approval' && (a.status || 'active') === 'active');
+    }
+    return res.json(memoryAds);
+  }
 });
 
 // GET /api/advertisements/:id

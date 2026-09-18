@@ -19,8 +19,10 @@ async function handleEntityCreate({
   storeAddMethod
 }) {
   const isExecutive = user.role === 'executive';
-  const submissionStatus = isExecutive ? 'pending_approval' : 'approved';
+  const submissionStatus = isExecutive ? 'pending_approval' : (data.submissionStatus || 'approved');
   const status = isExecutive ? 'pending' : (data.status || 'active');
+  const opsManagerApproval = isExecutive ? 'Pending' : 'Approved';
+  const managerApproval = isExecutive ? 'Pending' : 'Approved';
 
   const entityData = {
     ...data,
@@ -28,6 +30,8 @@ async function handleEntityCreate({
     title: data.title || data.name || title || 'Item',
     submissionStatus,
     status,
+    opsManagerApproval,
+    managerApproval,
     submittedBy: user.email || 'executive@wouchify.com',
     submittedByName: user.name || 'Content Executive',
   };

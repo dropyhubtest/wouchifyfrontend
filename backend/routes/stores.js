@@ -9,31 +9,41 @@ const { handleEntityCreate, handleEntityUpdate, handleEntityDelete } = require('
 // 1. PUBLIC: Get all stores (with optional status filter)
 router.get('/', async (req, res, next) => {
   const { status, public: isPublic, all } = req.query;
+  const getFallback = () => {
+    let memoryStores = store.getStores();
+    if (status && status !== 'all') {
+      memoryStores = memoryStores.filter(s => s.status === status);
+    }
+    if (all !== 'true') {
+      memoryStores = memoryStores.filter(s => s.submissionStatus !== 'pending_approval' && s.opsManagerApproval !== 'Rejected');
+    }
+    return memoryStores;
+  };
+
   try {
     if (mongoose.connection.readyState !== 1) {
-      let memoryStores = store.getStores();
-      if (status && status !== 'all') {
-        memoryStores = memoryStores.filter(s => s.status === status);
-      }
-      if (all !== 'true') {
-        memoryStores = memoryStores.filter(s => s.submissionStatus !== 'pending_approval' && s.opsManagerApproval !== 'Rejected');
-      }
-      return res.json(memoryStores);
+      return res.json(getFallback());
     }
 
     let query = {};
     if (status && status !== 'all') query.status = status;
 
     if (all !== 'true') {
-      query.status = { $ne: 'rejected', $ne: 'pending' };
+      query.status = { $nin: ['rejected', 'pending'] };
       query.opsManagerApproval = { $ne: 'Rejected' };
       query.submissionStatus = { $ne: 'pending_approval' };
       query.publishAt = { $lte: new Date() };
     }
 
     const stores = await Store.find(query).sort({ name: 1 });
+    if (!stores || stores.length === 0) {
+      return res.json(getFallback());
+    }
     res.json(stores);
-  } catch (err) { next(err); }
+  } catch (err) {
+    console.warn('Stores route fallback to in-memory store:', err.message);
+    return res.json(getFallback());
+  }
 });
 
 // 2. PUBLIC: Track Store Click

@@ -96,8 +96,10 @@
 }
 
 .top-stores__cta:hover {
-  opacity: 0.92;
-  transform: scale(1.02);
+  opacity: 1;
+  transform: translateY(-2px) scale(1.04);
+  filter: brightness(1.08);
+  box-shadow: 0 8px 20px rgba(227, 30, 37, 0.4);
 }
 
 .top-stores__cta:focus-visible {
@@ -155,13 +157,13 @@
   cursor: pointer;
   text-decoration: none;
   box-sizing: border-box;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.10);
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .top-stores__tile:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.18);
 }
 
 .top-stores__tile:focus-visible {
@@ -182,6 +184,11 @@
   z-index: 1;
   pointer-events: none;
   user-select: none;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.top-stores__tile:hover .top-stores__bg-image {
+  transform: scale(1.05);
 }
 
 /* 1. Top Reward Badges */

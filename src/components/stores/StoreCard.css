@@ -14,17 +14,17 @@
   flex-direction: column;
   align-items: flex-start;
   box-shadow:
-    0px 4px 4px rgba(0, 0, 0, 0.25),
-    inset 0px 4px 4px rgba(0, 0, 0, 0.25);
-  transition: transform 200ms ease, box-shadow 200ms ease;
+    0px 4px 4px rgba(0, 0, 0, 0.20),
+    inset 0px 4px 4px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
   cursor: pointer;
 }
 
 .store-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-8px) scale(1.02);
   box-shadow:
-    0px 8px 16px rgba(0, 0, 0, 0.18),
-    inset 0px 4px 4px rgba(0, 0, 0, 0.25);
+    0px 16px 32px rgba(0, 0, 0, 0.22),
+    inset 0px 4px 4px rgba(0, 0, 0, 0.15);
 }
 
 /* White logo panel: ~207 × 78px, 20px radius, centered horizontally */
@@ -152,13 +152,15 @@
   cursor: pointer;
   margin-top: auto;
   align-self: flex-end; /* Align to the right side of the card */
-  box-shadow: inset 0px 4px 4px rgba(0, 0, 0, 0.25);
-  transition: background-color 150ms ease;
+  box-shadow: inset 0px 4px 4px rgba(0, 0, 0, 0.20);
+  transition: background-color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
   white-space: nowrap;
 }
 
 .store-card__details-btn:hover {
-  background-color: #E8E2E2;
+  background-color: #E2DCDC;
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .store-card__details-btn:focus-visible {

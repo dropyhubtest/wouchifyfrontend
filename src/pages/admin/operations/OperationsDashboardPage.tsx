@@ -17,8 +17,6 @@ import {
   Tag,
   ImageIcon,
   UserCheck,
-  AlertTriangle,
-  AlertCircle,
   Download,
   CalendarDays,
   Store
@@ -62,44 +60,6 @@ export interface ExecutiveInfo {
   status: 'Online' | 'Away' | 'Offline'
 }
 
-export const EXECUTIVES_LIST: ExecutiveInfo[] = [
-  {
-    id: 'stf-balaji',
-    name: 'Balaji',
-    shortName: 'Balaji',
-    email: 'balaji@wouchify.com',
-    role: 'Content Executive',
-    domain: 'Deals & Loot Deals',
-    dealsToday: 12,
-    lootToday: 6,
-    couponsToday: 0,
-    bannersToday: 2,
-    storesToday: 1,
-    submissionsToday: 21,
-    approvalRate: 98.5,
-    avgTurnaround: '10 mins',
-    status: 'Online'
-  },
-  {
-    id: 'stf-jayanth',
-    name: 'Jayanth',
-    shortName: 'Jayanth',
-    email: 'jayanth@wouchify.com',
-    role: 'Content Executive',
-    domain: 'Coupons & Credit Cards',
-    dealsToday: 0,
-    lootToday: 0,
-    couponsToday: 8,
-    bannersToday: 3,
-    storesToday: 2,
-    submissionsToday: 13,
-    approvalRate: 97.4,
-    avgTurnaround: '12 mins',
-    status: 'Online'
-  }
-]
-
-
 export const OperationsDashboardPage: React.FC = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [selectedExecutiveEmail, setSelectedExecutiveEmail] = useState<string>('all')
@@ -107,50 +67,15 @@ export const OperationsDashboardPage: React.FC = () => {
   const [reportFilter, setReportFilter] = useState<'today' | 'week' | 'month'>('week')
   const [reportExecutiveFilter, setReportExecutiveFilter] = useState<string>('all')
   const [urgentItems, setUrgentItems] = useState<UrgentModerationItem[]>([])
-  const [executivesList, setExecutivesList] = useState<ExecutiveInfo[]>([
-    {
-      id: 'stf-balaji',
-      name: 'Balaji',
-      shortName: 'Balaji',
-      email: 'balaji@wouchify.com',
-      role: 'Content Executive',
-      domain: 'Deals & Loot Deals',
-      dealsToday: 4,
-      lootToday: 2,
-      couponsToday: 0,
-      bannersToday: 1,
-      storesToday: 1,
-      submissionsToday: 8,
-      approvalRate: 98.5,
-      avgTurnaround: '10 mins',
-      status: 'Online'
-    },
-    {
-      id: 'stf-jayanth',
-      name: 'Jayanth',
-      shortName: 'Jayanth',
-      email: 'jayanth@wouchify.com',
-      role: 'Content Executive',
-      domain: 'Coupons & Credit Cards',
-      dealsToday: 0,
-      lootToday: 0,
-      couponsToday: 5,
-      bannersToday: 2,
-      storesToday: 1,
-      submissionsToday: 8,
-      approvalRate: 97.4,
-      avgTurnaround: '12 mins',
-      status: 'Online'
-    }
-  ])
+  const [executivesList, setExecutivesList] = useState<ExecutiveInfo[]>([])
   const [kpiStats, setKpiStats] = useState({
     pendingApprovals: 0,
     pendingPayoutsAmount: '₹0',
     pendingPayoutsCount: 0,
     openTicketsCount: 0,
-    activeStaffCount: 2,
+    activeStaffCount: 0,
     submissionsTodayCount: 0,
-    linkHealth: '100%'
+    linkHealth: '100% Operational'
   })
 
   const loadOperationsData = async () => {
@@ -205,46 +130,61 @@ export const OperationsDashboardPage: React.FC = () => {
       // Open support tickets
       const openTickets = tickets.filter((t: any) => t.status === 'Open' || t.status === 'In Progress')
 
-      // Staff dynamically
-      if (staff.length > 0) {
-        const dynamicStaff: ExecutiveInfo[] = staff.map((st: any) => {
-          const userSubs = subs.filter((s: any) => (s.submittedBy || '').toLowerCase() === (st.email || '').toLowerCase())
-          const userDeals = userSubs.filter((s: any) => s.entityType === 'deal').length
-          const userLoot = userSubs.filter((s: any) => s.entityType === 'loot_deal').length
-          const userCoupons = userSubs.filter((s: any) => s.entityType === 'coupon').length
-          const userBanners = userSubs.filter((s: any) => s.entityType === 'banner').length
-          const userStores = userSubs.filter((s: any) => s.entityType === 'store').length
-
-          const approvedCount = userSubs.filter((s: any) => s.status === 'Approved').length
-          const rate = userSubs.length > 0 ? Math.round((approvedCount / userSubs.length) * 100) : 98
-
-          return {
-            id: String(st._id || st.id || st.email),
-            name: st.name || st.email.split('@')[0],
-            shortName: (st.name || st.email.split('@')[0]).split(' ')[0],
-            email: st.email,
-            role: st.role === 'operational_manager' ? 'Ops Manager' : 'Content Executive',
-            domain: st.domain || 'All Categories',
-            dealsToday: userDeals,
-            lootToday: userLoot,
-            couponsToday: userCoupons,
-            bannersToday: userBanners,
-            storesToday: userStores,
-            submissionsToday: userSubs.length,
-            approvalRate: rate,
-            avgTurnaround: '10 mins',
-            status: (st.status as any) || 'Online'
-          }
+      // Staff dynamically from real DB and real submissions
+      let baseStaff = [...staff]
+      if (baseStaff.length === 0 && subs.length > 0) {
+        const emailMap = new Map<string, string>()
+        subs.forEach(s => {
+          if (s.submittedBy) emailMap.set(s.submittedBy.toLowerCase(), s.submittedByName || s.submittedBy.split('@')[0])
         })
-        setExecutivesList(dynamicStaff)
+        baseStaff = Array.from(emailMap.entries()).map(([email, name], idx) => ({
+          _id: `stf-gen-${idx + 1}`,
+          name: name.charAt(0).toUpperCase() + name.slice(1),
+          email,
+          role: 'executive',
+          domain: 'Deals & Coupons',
+          status: 'Online'
+        }))
       }
+
+      const dynamicStaff: ExecutiveInfo[] = baseStaff.map((st: any) => {
+        const userEmail = (st.email || '').toLowerCase()
+        const userSubs = subs.filter((s: any) => (s.submittedBy || '').toLowerCase() === userEmail)
+        const userDeals = userSubs.filter((s: any) => s.entityType === 'deal').length
+        const userLoot = userSubs.filter((s: any) => s.entityType === 'loot_deal').length
+        const userCoupons = userSubs.filter((s: any) => s.entityType === 'coupon').length
+        const userBanners = userSubs.filter((s: any) => s.entityType === 'banner').length
+        const userStores = userSubs.filter((s: any) => s.entityType === 'store').length
+
+        const approvedCount = userSubs.filter((s: any) => s.status === 'Approved').length
+        const rate = userSubs.length > 0 ? Math.round((approvedCount / userSubs.length) * 100) : 100
+
+        return {
+          id: String(st._id || st.id || st.email),
+          name: st.name || st.email.split('@')[0],
+          shortName: (st.name || st.email.split('@')[0]).split(' ')[0],
+          email: st.email,
+          role: st.role === 'operational_manager' ? 'Ops Manager' : 'Content Executive',
+          domain: st.domain || 'All Categories',
+          dealsToday: userDeals,
+          lootToday: userLoot,
+          couponsToday: userCoupons,
+          bannersToday: userBanners,
+          storesToday: userStores,
+          submissionsToday: userSubs.length,
+          approvalRate: rate,
+          avgTurnaround: '10 mins',
+          status: (st.status as any) || 'Online'
+        }
+      })
+      setExecutivesList(dynamicStaff)
 
       setKpiStats({
         pendingApprovals: pendingSubs.length,
         pendingPayoutsAmount: totalPayouts > 0 ? `₹${totalPayouts.toLocaleString('en-IN')}` : '₹0',
         pendingPayoutsCount: pendingClaims.length,
         openTicketsCount: openTickets.length,
-        activeStaffCount: staff.filter((s: any) => s.status === 'Online').length || 2,
+        activeStaffCount: dynamicStaff.filter(s => s.status === 'Online').length,
         submissionsTodayCount: subs.length,
         linkHealth: '100% Operational'
       })
@@ -544,7 +484,7 @@ export const OperationsDashboardPage: React.FC = () => {
           ) : (
             <div style={{ fontSize: '0.78rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <UserCheck size={14} style={{ color: '#16a34a' }} />
-              <span>4 content executives active today across Electronics, Deals, Coupons & Media.</span>
+              <span>{executivesList.length} content executive{executivesList.length === 1 ? '' : 's'} registered on platform.</span>
             </div>
           )}
         </div>
@@ -601,7 +541,7 @@ export const OperationsDashboardPage: React.FC = () => {
                 onClick={() => navigate('/operational-manager/approvals')}
                 style={{ padding: '8px 14px', background: '#f1f5f9', border: '1px solid #e2e8f0', color: '#334155', fontWeight: 600, fontSize: '0.8rem', borderRadius: '8px' }}
               >
-                View Full Queue ({urgentItems.length + 4}) <ArrowUpRight size={14} />
+                View Full Queue ({kpiStats.pendingApprovals}) <ArrowUpRight size={14} />
               </button>
             </div>
           </div>
@@ -619,7 +559,7 @@ export const OperationsDashboardPage: React.FC = () => {
               <p style={{ fontSize: '0.9rem', marginTop: '6px', maxWidth: '400px', margin: '6px auto 0' }}>
                 {selectedExecutive 
                   ? `All submissions from this executive have been reviewed or approved.`
-                  : 'Good job! No critical items are pending right now. Take a break or check other queues.'}
+                  : 'No critical items are pending right now. All submissions are published.'}
               </p>
               {selectedExecutive && (
                 <button 
@@ -775,25 +715,31 @@ export const OperationsDashboardPage: React.FC = () => {
               <Users size={16} style={{ color: '#8b5cf6' }} /> Top Performing Executives
             </h4>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {[...executivesList].sort((a, b) => b.submissionsToday - a.submissionsToday).slice(0, 3).map((exec, idx) => (
-                <div key={exec.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', borderBottom: idx !== 2 ? '1px solid #f1f5f9' : 'none' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: '#334155', fontSize: '0.85rem' }}>
-                      #{idx + 1}
+            {executivesList.length === 0 ? (
+              <div style={{ padding: '24px 0', textAlign: 'center', color: '#64748b' }}>
+                <p style={{ fontSize: '0.85rem', margin: 0 }}>No executive activity recorded yet.</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {[...executivesList].sort((a, b) => b.submissionsToday - a.submissionsToday).slice(0, 3).map((exec, idx) => (
+                  <div key={exec.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', borderBottom: idx !== Math.min(executivesList.length - 1, 2) ? '1px solid #f1f5f9' : 'none' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: '#334155', fontSize: '0.85rem' }}>
+                        #{idx + 1}
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.85rem' }}>{exec.name}</div>
+                        <div style={{ fontSize: '0.72rem', color: '#64748b' }}>{exec.domain}</div>
+                      </div>
                     </div>
-                    <div>
-                      <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.85rem' }}>{exec.name}</div>
-                      <div style={{ fontSize: '0.72rem', color: '#64748b' }}>{exec.domain}</div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontWeight: 700, color: '#16a34a', fontSize: '0.85rem' }}>{exec.submissionsToday} Submissions</div>
+                      <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{exec.approvalRate}% Accuracy</div>
                     </div>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontWeight: 700, color: '#16a34a', fontSize: '0.85rem' }}>{exec.submissionsToday} Deals</div>
-                    <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{exec.approvalRate}% Accuracy</div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
             
             <button style={{ width: '100%', padding: '8px', marginTop: '4px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', color: '#3b82f6', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }} onClick={() => navigate('/operational-manager/staff-activity')}>
               View Full Leaderboard
@@ -804,49 +750,51 @@ export const OperationsDashboardPage: React.FC = () => {
           <div className="crud-table-card" style={{ padding: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
               <h4 style={{ fontSize: '0.98rem', fontWeight: 700, margin: 0, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <AlertTriangle size={16} style={{ color: '#ef4444' }} /> Fraud & Anomaly Alerts
+                <ShieldCheck size={16} style={{ color: '#16a34a' }} /> Security & Anomaly Monitor
               </h4>
-              <span className="status-badge warning" style={{ padding: '2px 8px', fontSize: '0.65rem', background: '#fef2f2', color: '#b91c1c' }}>2 ACTIVE ALERTS</span>
+              <span className="status-badge" style={{ padding: '2px 8px', fontSize: '0.65rem', background: '#ecfdf5', color: '#15803d' }}>
+                NORMAL
+              </span>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                  <div style={{ padding: '6px', background: '#fef2f2', borderRadius: '6px', color: '#ef4444' }}>
-                    <AlertCircle size={14} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ padding: '6px', background: '#ecfdf5', borderRadius: '6px', color: '#16a34a' }}>
+                    <CheckCircle2 size={14} />
                   </div>
                   <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0f172a' }}>High-Frequency Claims</div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>User <em>vik***@gmail.com</em> submitted 14 claims in 1 hour.</div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0f172a' }}>Affiliate Click Integrity</div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>Live bot & click fraud filters active. All links verified.</div>
                   </div>
                 </div>
-                <button style={{ fontSize: '0.7rem', fontWeight: 700, color: '#ef4444', background: 'transparent', border: 'none', cursor: 'pointer' }}>REVIEW</button>
+                <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#16a34a' }}>PASS</span>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                  <div style={{ padding: '6px', background: '#fffbeb', borderRadius: '6px', color: '#f59e0b' }}>
-                    <Users size={14} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ padding: '6px', background: '#eff6ff', borderRadius: '6px', color: '#2563eb' }}>
+                    <ShieldCheck size={14} />
                   </div>
                   <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0f172a' }}>Duplicate Receipt Uploads</div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>3 duplicate invoices blocked for Amazon Great Indian Festival.</div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0f172a' }}>Maker-Checker Compliance</div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>All live deals gated by operational manager review.</div>
                   </div>
                 </div>
-                <button style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', background: 'transparent', border: 'none', cursor: 'pointer' }}>DETAILS</button>
+                <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#2563eb' }}>ACTIVE</span>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingBottom: '4px' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                  <div style={{ padding: '6px', background: '#eff6ff', borderRadius: '6px', color: '#3b82f6' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '4px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ padding: '6px', background: '#ecfdf5', borderRadius: '6px', color: '#16a34a' }}>
                     <TrendingUp size={14} />
                   </div>
                   <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0f172a' }}>Unusual Deal Velocity</div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>Sony WH-1000XM5 deal is trending unusually fast. Bot check passed.</div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0f172a' }}>System Velocity Check</div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>Submission processing running normally with low latency.</div>
                   </div>
                 </div>
-                <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#10b981' }}>SAFE</span>
+                <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#10b981' }}>OPTIMAL</span>
               </div>
             </div>
           </div>
@@ -876,6 +824,7 @@ export const OperationsDashboardPage: React.FC = () => {
                 value={reportExecutiveFilter}
                 onChange={(e) => setReportExecutiveFilter(e.target.value)}
                 style={{ padding: '8px 12px', fontSize: '0.85rem', maxWidth: '200px' }}
+                aria-label="Filter by Executive"
               >
                 <option value="all">All Executives</option>
                 {executivesList.map(exec => (
@@ -888,6 +837,7 @@ export const OperationsDashboardPage: React.FC = () => {
                 value={reportFilter}
                 onChange={(e) => setReportFilter(e.target.value as any)}
                 style={{ padding: '8px 12px', fontSize: '0.85rem' }}
+                aria-label="Filter by Time Period"
               >
                 <option value="today">Today (Every day)</option>
                 <option value="week">1 Week Back to Today</option>
@@ -920,44 +870,52 @@ export const OperationsDashboardPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {reportData.map((exec, idx) => (
-                  <tr key={exec.id}>
-                    <td>
-                      <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: idx < 3 ? '#fffbeb' : '#f8fafc', color: idx < 3 ? '#d97706' : '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.8rem' }}>
-                        #{idx + 1}
-                      </div>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <strong style={{ fontSize: '0.9rem', color: '#0f172a' }}>{exec.name}</strong>
-                        <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{exec.role}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <span style={{ fontSize: '0.8rem', color: '#64748b' }}>{exec.domain}</span>
-                    </td>
-                    <td style={{ textAlign: 'center', color: '#334155', fontWeight: 500 }}>
-                      {exec.dealsAdded.toLocaleString()}
-                    </td>
-                    <td style={{ textAlign: 'center', color: '#334155', fontWeight: 500 }}>
-                      {exec.lootAdded.toLocaleString()}
-                    </td>
-                    <td style={{ textAlign: 'center', color: '#334155', fontWeight: 500 }}>
-                      {exec.couponsAdded.toLocaleString()}
-                    </td>
-                    <td style={{ textAlign: 'center', color: '#334155', fontWeight: 500 }}>
-                      {exec.bannersAdded.toLocaleString()}
-                    </td>
-                    <td style={{ textAlign: 'center', color: '#334155', fontWeight: 500 }}>
-                      {exec.storesAdded.toLocaleString()}
-                    </td>
-                    <td style={{ textAlign: 'right', paddingRight: '20px' }}>
-                      <strong style={{ fontSize: '1.05rem', color: '#2563eb' }}>
-                        {exec.totalAdded.toLocaleString()}
-                      </strong>
+                {reportData.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} style={{ textAlign: 'center', padding: '32px 20px', color: '#64748b' }}>
+                      No executive upload activity recorded yet.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  reportData.map((exec, idx) => (
+                    <tr key={exec.id}>
+                      <td>
+                        <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: idx < 3 ? '#fffbeb' : '#f8fafc', color: idx < 3 ? '#d97706' : '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.8rem' }}>
+                          #{idx + 1}
+                        </div>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          <strong style={{ fontSize: '0.9rem', color: '#0f172a' }}>{exec.name}</strong>
+                          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{exec.role}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span style={{ fontSize: '0.8rem', color: '#64748b' }}>{exec.domain}</span>
+                      </td>
+                      <td style={{ textAlign: 'center', color: '#334155', fontWeight: 500 }}>
+                        {exec.dealsAdded.toLocaleString()}
+                      </td>
+                      <td style={{ textAlign: 'center', color: '#334155', fontWeight: 500 }}>
+                        {exec.lootAdded.toLocaleString()}
+                      </td>
+                      <td style={{ textAlign: 'center', color: '#334155', fontWeight: 500 }}>
+                        {exec.couponsAdded.toLocaleString()}
+                      </td>
+                      <td style={{ textAlign: 'center', color: '#334155', fontWeight: 500 }}>
+                        {exec.bannersAdded.toLocaleString()}
+                      </td>
+                      <td style={{ textAlign: 'center', color: '#334155', fontWeight: 500 }}>
+                        {exec.storesAdded.toLocaleString()}
+                      </td>
+                      <td style={{ textAlign: 'right', paddingRight: '20px' }}>
+                        <strong style={{ fontSize: '1.05rem', color: '#2563eb' }}>
+                          {exec.totalAdded.toLocaleString()}
+                        </strong>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

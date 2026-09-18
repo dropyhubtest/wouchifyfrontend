@@ -178,11 +178,12 @@
   z-index: 3;
   box-sizing: border-box;
   background: transparent;
-  transition: transform 0.2s ease;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .featured-credit-cards__card-link:hover {
-  transform: translateY(-2px);
+  transform: translateY(-12px) rotate(-1.5deg) scale(1.04);
+  filter: drop-shadow(0 30px 45px rgba(0, 0, 0, 0.28));
 }
 
 .featured-credit-cards__card-link:focus-visible {
@@ -198,8 +199,11 @@
   object-fit: contain;
   pointer-events: none;
   user-select: none;
-  background: transparent;
-  border-radius: 0;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.featured-credit-cards__card-link:hover .featured-credit-cards__card-image {
+  transform: scale(1.02);
 }
 
 /* ==========================================================================

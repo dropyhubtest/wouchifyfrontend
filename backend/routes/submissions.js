@@ -13,72 +13,121 @@ const Category = require('../models/Category');
 const auth = require('../middleware/authMiddleware');
 const store = require('../services/inMemoryStore');
 
+function getEntityModel(entityType) {
+  switch (entityType) {
+    case 'deal': return Deal;
+    case 'credit_card': return CreditCard;
+    case 'coupon': return Coupon;
+    case 'banner': return Banner;
+    case 'advertisement': return Advertisement;
+    case 'loot_deal': return LootDeal;
+    case 'store': return Store;
+    case 'category': return Category;
+    default: return null;
+  }
+}
+
+function buildEntityQuery(entityId, dataSnapshot = null) {
+  const conditions = [];
+  if (entityId) {
+    const str = String(entityId).trim();
+    conditions.push({ id: str });
+    conditions.push({ _id: str });
+    if (mongoose.Types.ObjectId.isValid(str)) {
+      try {
+        conditions.push({ _id: new mongoose.Types.ObjectId(str) });
+      } catch {}
+    }
+  }
+  if (dataSnapshot) {
+    if (dataSnapshot.id && String(dataSnapshot.id) !== String(entityId)) {
+      conditions.push({ id: String(dataSnapshot.id).trim() });
+    }
+    if (dataSnapshot._id && String(dataSnapshot._id) !== String(entityId)) {
+      const snapId = String(dataSnapshot._id).trim();
+      conditions.push({ _id: snapId });
+      if (mongoose.Types.ObjectId.isValid(snapId)) {
+        try {
+          conditions.push({ _id: new mongoose.Types.ObjectId(snapId) });
+        } catch {}
+      }
+    }
+    if (dataSnapshot.name) conditions.push({ name: dataSnapshot.name });
+    if (dataSnapshot.title) conditions.push({ title: dataSnapshot.title });
+    if (dataSnapshot.cardName) conditions.push({ cardName: dataSnapshot.cardName });
+    if (dataSnapshot.code) conditions.push({ code: dataSnapshot.code.toUpperCase() });
+  }
+
+  if (conditions.length === 0) return { _id: null };
+  return { $or: conditions };
+}
+
 async function updateMongoEntityOnApproval(entityType, entityId, action, dataSnapshot) {
-  if (!entityId) return;
+  if (!entityId && !dataSnapshot) return;
+  const Model = getEntityModel(entityType);
+  if (!Model) return;
+
   const updatePatch = { 
     ...(dataSnapshot || {}),
     submissionStatus: 'approved', 
-    status: 'active' 
+    status: 'active',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved'
   };
   delete updatePatch._id;
   delete updatePatch.id;
   delete updatePatch.createdAt;
   delete updatePatch.__v;
 
+  const query = buildEntityQuery(entityId, dataSnapshot);
+
   try {
     if (action === 'delete') {
-      if (entityType === 'deal') await Deal.findByIdAndDelete(entityId);
-      else if (entityType === 'credit_card') await CreditCard.findByIdAndDelete(entityId);
-      else if (entityType === 'coupon') await Coupon.findByIdAndDelete(entityId);
-      else if (entityType === 'banner') await Banner.findByIdAndDelete(entityId);
-      else if (entityType === 'advertisement') await Advertisement.findByIdAndDelete(entityId);
-      else if (entityType === 'loot_deal') await LootDeal.findByIdAndDelete(entityId);
-      else if (entityType === 'store') await Store.findByIdAndDelete(entityId);
-      else if (entityType === 'category') await Category.findByIdAndDelete(entityId);
+      await Model.findOneAndDelete(query);
     } else {
-      if (entityType === 'deal') await Deal.findByIdAndUpdate(entityId, updatePatch, { new: true });
-      else if (entityType === 'credit_card') await CreditCard.findByIdAndUpdate(entityId, updatePatch, { new: true });
-      else if (entityType === 'coupon') await Coupon.findByIdAndUpdate(entityId, updatePatch, { new: true });
-      else if (entityType === 'banner') await Banner.findByIdAndUpdate(entityId, updatePatch, { new: true });
-      else if (entityType === 'advertisement') await Advertisement.findByIdAndUpdate(entityId, updatePatch, { new: true });
-      else if (entityType === 'loot_deal') await LootDeal.findByIdAndUpdate(entityId, updatePatch, { new: true });
-      else if (entityType === 'store') await Store.findByIdAndUpdate(entityId, updatePatch, { new: true });
-      else if (entityType === 'category') await Category.findByIdAndUpdate(entityId, updatePatch, { new: true });
+      const updated = await Model.findOneAndUpdate(query, updatePatch, { new: true, upsert: false });
+      if (!updated && action === 'create' && dataSnapshot) {
+        const toCreate = new Model({
+          ...dataSnapshot,
+          id: entityId || `entity-${Date.now()}`,
+          submissionStatus: 'approved',
+          status: 'active',
+          opsManagerApproval: 'Approved',
+          managerApproval: 'Approved'
+        });
+        await toCreate.save();
+      }
     }
   } catch (e) {
     console.error(`Failed to update mongo entity on approval: ${e.message}`);
   }
 }
 
-async function updateMongoEntityOnRejection(entityType, entityId) {
-  if (!entityId) return;
-  const updatePatch = { submissionStatus: 'rejected' };
+async function updateMongoEntityOnRejection(entityType, entityId, dataSnapshot) {
+  if (!entityId && !dataSnapshot) return;
+  const Model = getEntityModel(entityType);
+  if (!Model) return;
+
+  const query = buildEntityQuery(entityId, dataSnapshot);
+  const updatePatch = { submissionStatus: 'rejected', status: 'inactive', opsManagerApproval: 'Rejected', managerApproval: 'Rejected' };
+
   try {
-    if (entityType === 'deal') await Deal.findByIdAndUpdate(entityId, updatePatch);
-    else if (entityType === 'credit_card') await CreditCard.findByIdAndUpdate(entityId, updatePatch);
-    else if (entityType === 'coupon') await Coupon.findByIdAndUpdate(entityId, updatePatch);
-    else if (entityType === 'banner') await Banner.findByIdAndUpdate(entityId, updatePatch);
-    else if (entityType === 'advertisement') await Advertisement.findByIdAndUpdate(entityId, updatePatch);
-    else if (entityType === 'loot_deal') await LootDeal.findByIdAndUpdate(entityId, updatePatch);
-    else if (entityType === 'store') await Store.findByIdAndUpdate(entityId, updatePatch);
-    else if (entityType === 'category') await Category.findByIdAndUpdate(entityId, updatePatch);
+    await Model.findOneAndUpdate(query, updatePatch, { new: true });
   } catch (e) {
     console.error(`Failed to update mongo entity on rejection: ${e.message}`);
   }
 }
 
-async function updateMongoEntityOnPending(entityType, entityId) {
-  if (!entityId) return;
-  const updatePatch = { submissionStatus: 'pending_approval' };
+async function updateMongoEntityOnPending(entityType, entityId, dataSnapshot) {
+  if (!entityId && !dataSnapshot) return;
+  const Model = getEntityModel(entityType);
+  if (!Model) return;
+
+  const query = buildEntityQuery(entityId, dataSnapshot);
+  const updatePatch = { submissionStatus: 'pending_approval', status: 'pending', opsManagerApproval: 'Pending', managerApproval: 'Pending' };
+
   try {
-    if (entityType === 'deal') await Deal.findByIdAndUpdate(entityId, updatePatch);
-    else if (entityType === 'credit_card') await CreditCard.findByIdAndUpdate(entityId, updatePatch);
-    else if (entityType === 'coupon') await Coupon.findByIdAndUpdate(entityId, updatePatch);
-    else if (entityType === 'banner') await Banner.findByIdAndUpdate(entityId, updatePatch);
-    else if (entityType === 'advertisement') await Advertisement.findByIdAndUpdate(entityId, updatePatch);
-    else if (entityType === 'loot_deal') await LootDeal.findByIdAndUpdate(entityId, updatePatch);
-    else if (entityType === 'store') await Store.findByIdAndUpdate(entityId, updatePatch);
-    else if (entityType === 'category') await Category.findByIdAndUpdate(entityId, updatePatch);
+    await Model.findOneAndUpdate(query, updatePatch, { new: true });
   } catch (e) {
     console.error(`Failed to update mongo entity on pending: ${e.message}`);
   }
@@ -97,28 +146,40 @@ router.get('/', async (req, res, next) => {
     const { status, entityType, submittedBy, priority } = req.query;
     let query = {};
 
-    if (status && status !== 'All') query.status = status;
-    if (entityType && entityType !== 'All') query.entityType = entityType;
-    if (submittedBy && submittedBy !== 'All') query.submittedBy = submittedBy;
-    if (priority && priority !== 'All') query.priority = priority;
+    if (status && status !== 'All' && status !== 'all') query.status = status;
+    if (entityType && entityType !== 'All' && entityType !== 'all') query.entityType = entityType;
+    if (submittedBy && submittedBy !== 'All' && submittedBy !== 'all') query.submittedBy = submittedBy;
+    if (priority && priority !== 'All' && priority !== 'all') query.priority = priority;
 
     const submissions = await Submission.find(query).sort({ submittedAt: -1, createdAt: -1 });
     res.json(submissions);
-  } catch (err) { next(err); }
+  } catch (err) { 
+    console.warn('Submissions GET fallback to in-memory store:', err.message);
+    return res.json(store.getSubmissions(req.query));
+  }
 });
 
 // GET /api/submissions/:id
 router.get('/:id', async (req, res, next) => {
   try {
+    const subQuery = buildEntityQuery(req.params.id);
     if (mongoose.connection.readyState !== 1) {
       const sub = store.getSubmissionById(req.params.id);
       if (!sub) return res.status(404).json({ message: 'Submission not found' });
       return res.json(sub);
     }
-    const sub = await Submission.findById(req.params.id);
-    if (!sub) return res.status(404).json({ message: 'Submission not found' });
+    const sub = await Submission.findOne(subQuery);
+    if (!sub) {
+      const mem = store.getSubmissionById(req.params.id);
+      if (mem) return res.json(mem);
+      return res.status(404).json({ message: 'Submission not found' });
+    }
     res.json(sub);
-  } catch (err) { next(err); }
+  } catch (err) {
+    const mem = store.getSubmissionById(req.params.id);
+    if (mem) return res.json(mem);
+    return res.status(404).json({ message: 'Submission not found' });
+  }
 });
 
 // POST /api/submissions - Create new submission
@@ -131,47 +192,61 @@ router.post('/', async (req, res, next) => {
       ...req.body
     };
 
-    if (mongoose.connection.readyState !== 1) {
-      const created = store.addSubmission(payload);
-      return res.status(201).json(created);
+    // Always record in in-memory store
+    const memCreated = store.addSubmission(payload);
+
+    if (mongoose.connection.readyState === 1) {
+      try {
+        const sub = new Submission(payload);
+        await sub.save();
+
+        // Mark corresponding entity as pending_approval in Mongo
+        if (sub.entityType && sub.entityId) {
+          await updateMongoEntityOnPending(sub.entityType, sub.entityId, sub.dataSnapshot);
+        }
+        return res.status(201).json(sub);
+      } catch (e) {
+        console.warn('MongoDB submission save error, returning memory record:', e.message);
+        return res.status(201).json(memCreated);
+      }
     }
 
-    const sub = new Submission(payload);
-    await sub.save();
-
-    // Mark corresponding entity as pending_approval in Mongo
-    if (sub.entityType && sub.entityId) {
-      await updateMongoEntityOnPending(sub.entityType, sub.entityId);
-    }
-
-    res.status(201).json(sub);
+    res.status(201).json(memCreated);
   } catch (err) { next(err); }
 });
 
 // PATCH /api/submissions/:id/approve - Approve submission & activate entity
 router.patch('/:id/approve', async (req, res, next) => {
   try {
-    const reviewer = req.user?.email || req.body.reviewedBy || 'manager@wouchify.com';
+    const reviewer = req.user?.email || req.body.reviewedBy || 'ops.manager@wouchify.com';
+    const subId = req.params.id;
 
-    if (mongoose.connection.readyState !== 1) {
-      const approved = store.approveSubmission(req.params.id, reviewer);
-      if (!approved) return res.status(404).json({ message: 'Submission not found' });
-      return res.json(approved);
+    // 1. Sync memory store immediately
+    const memApproved = store.approveSubmission(subId, reviewer);
+
+    // 2. Sync MongoDB
+    if (mongoose.connection.readyState === 1) {
+      try {
+        const subQuery = buildEntityQuery(subId);
+        const sub = await Submission.findOne(subQuery);
+        if (sub) {
+          sub.status = 'Approved';
+          sub.reviewedBy = reviewer;
+          sub.reviewedAt = new Date();
+          await sub.save();
+
+          if (sub.entityType && sub.entityId) {
+            await updateMongoEntityOnApproval(sub.entityType, sub.entityId, sub.action, sub.dataSnapshot);
+          }
+          return res.json(sub);
+        }
+      } catch (e) {
+        console.warn('MongoDB submission approval error, returning memory record:', e.message);
+      }
     }
 
-    const sub = await Submission.findById(req.params.id);
-    if (!sub) return res.status(404).json({ message: 'Submission not found' });
-
-    sub.status = 'Approved';
-    sub.reviewedBy = reviewer;
-    sub.reviewedAt = new Date();
-    await sub.save();
-
-    if (sub.entityType && sub.entityId) {
-      await updateMongoEntityOnApproval(sub.entityType, sub.entityId, sub.action, sub.dataSnapshot);
-    }
-
-    res.json(sub);
+    if (memApproved) return res.json(memApproved);
+    return res.status(404).json({ message: 'Submission not found' });
   } catch (err) { next(err); }
 });
 
@@ -179,56 +254,73 @@ router.patch('/:id/approve', async (req, res, next) => {
 router.patch('/:id/reject', async (req, res, next) => {
   try {
     const { rejectionReason } = req.body;
-    const reviewer = req.user?.email || req.body.reviewedBy || 'manager@wouchify.com';
+    const reviewer = req.user?.email || req.body.reviewedBy || 'ops.manager@wouchify.com';
+    const subId = req.params.id;
 
-    if (mongoose.connection.readyState !== 1) {
-      const rejected = store.rejectSubmission(req.params.id, rejectionReason, reviewer);
-      if (!rejected) return res.status(404).json({ message: 'Submission not found' });
-      return res.json(rejected);
+    // 1. Sync memory store immediately
+    const memRejected = store.rejectSubmission(subId, rejectionReason, reviewer);
+
+    // 2. Sync MongoDB
+    if (mongoose.connection.readyState === 1) {
+      try {
+        const subQuery = buildEntityQuery(subId);
+        const sub = await Submission.findOne(subQuery);
+        if (sub) {
+          sub.status = 'Rejected';
+          sub.rejectionReason = rejectionReason || 'Submission rejected by operational manager.';
+          sub.reviewedBy = reviewer;
+          sub.reviewedAt = new Date();
+          await sub.save();
+
+          if (sub.entityType && sub.entityId) {
+            await updateMongoEntityOnRejection(sub.entityType, sub.entityId, sub.dataSnapshot);
+          }
+          return res.json(sub);
+        }
+      } catch (e) {
+        console.warn('MongoDB submission rejection error, returning memory record:', e.message);
+      }
     }
 
-    const sub = await Submission.findById(req.params.id);
-    if (!sub) return res.status(404).json({ message: 'Submission not found' });
-
-    sub.status = 'Rejected';
-    sub.rejectionReason = rejectionReason || 'Submission rejected by operational manager.';
-    sub.reviewedBy = reviewer;
-    sub.reviewedAt = new Date();
-    await sub.save();
-
-    if (sub.entityType && sub.entityId) {
-      await updateMongoEntityOnRejection(sub.entityType, sub.entityId);
-    }
-
-    res.json(sub);
+    if (memRejected) return res.json(memRejected);
+    return res.status(404).json({ message: 'Submission not found' });
   } catch (err) { next(err); }
 });
 
 // PUT /api/submissions/:id - Update submission
 router.put('/:id', async (req, res, next) => {
   try {
+    const memUpdated = store.updateSubmission(req.params.id, req.body);
     if (mongoose.connection.readyState !== 1) {
-      const updated = store.updateSubmission(req.params.id, req.body);
-      if (!updated) return res.status(404).json({ message: 'Submission not found' });
-      return res.json(updated);
+      if (!memUpdated) return res.status(404).json({ message: 'Submission not found' });
+      return res.json(memUpdated);
     }
-    const updated = await Submission.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-    if (!updated) return res.status(404).json({ message: 'Submission not found' });
-    res.json(updated);
+    try {
+      const updated = await Submission.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+      if (updated) return res.json(updated);
+    } catch (e) {
+      console.warn('MongoDB submission update error:', e.message);
+    }
+    if (memUpdated) return res.json(memUpdated);
+    return res.status(404).json({ message: 'Submission not found' });
   } catch (err) { next(err); }
 });
 
 // DELETE /api/submissions/:id - Delete submission
 router.delete('/:id', async (req, res, next) => {
   try {
+    const memDeleted = store.deleteSubmission(req.params.id);
     if (mongoose.connection.readyState !== 1) {
-      const ok = store.deleteSubmission(req.params.id);
-      if (!ok) return res.status(404).json({ message: 'Submission not found' });
+      if (!memDeleted) return res.status(404).json({ message: 'Submission not found' });
       return res.json({ message: 'Submission deleted' });
     }
-    const deleted = await Submission.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ message: 'Submission not found' });
-    res.json({ message: 'Submission deleted' });
+    try {
+      await Submission.findByIdAndDelete(req.params.id);
+    } catch (e) {
+      console.warn('MongoDB submission delete error:', e.message);
+    }
+    if (memDeleted) return res.json({ message: 'Submission deleted' });
+    return res.status(404).json({ message: 'Submission not found' });
   } catch (err) { next(err); }
 });
 

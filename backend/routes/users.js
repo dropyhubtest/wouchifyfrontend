@@ -15,7 +15,10 @@ router.get('/', async (req, res, next) => {
     }
     const users = await User.find().sort({ createdAt: -1 });
     res.json(users);
-  } catch (err) { next(err); }
+  } catch (err) { 
+    console.warn('Users route fallback to in-memory store:', err.message);
+    return res.json(store.getUsers());
+  }
 });
 
 // Create user

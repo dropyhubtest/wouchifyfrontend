@@ -82,7 +82,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
-  margin-top: -85px;
+  margin-top: -92px;
   padding: 0 8px;
   box-sizing: border-box;
   position: relative;

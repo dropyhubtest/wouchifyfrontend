@@ -77,8 +77,8 @@ export const adminApi = {
       const query = new URLSearchParams();
       if (params?.category && params.category !== 'All') query.append('category', params.category);
       if (params?.status && params.status !== 'All') query.append('status', params.status);
-      if (params?.all !== undefined) query.append('all', String(params.all));
-      const qs = query.toString() ? `?${query.toString()}` : '';
+      query.append('all', params?.all !== undefined ? String(params.all) : 'true');
+      const qs = `?${query.toString()}`;
       const res = await fetch(`${API_BASE}/deals${qs}`, {
         headers: getAuthHeaders()
       });
@@ -116,7 +116,9 @@ export const adminApi = {
       body: JSON.stringify(dealData)
     });
     const data = await handleResponse<any>(res);
+    try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
     window.dispatchEvent(new CustomEvent('wouchify_deals_updated', { detail: data }));
+    window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: data }));
     return data;
   },
 
@@ -138,7 +140,9 @@ export const adminApi = {
       body: JSON.stringify(dealData)
     });
     const data = await handleResponse<any>(res);
+    try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
     window.dispatchEvent(new CustomEvent('wouchify_deals_updated', { detail: { id, ...dealData } }));
+    window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, ...dealData } }));
     return data;
   },
 
@@ -148,7 +152,9 @@ export const adminApi = {
       headers: getAuthHeaders()
     });
     const result = await handleResponse<{ message: string }>(res);
+    try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
     window.dispatchEvent(new CustomEvent('wouchify_deals_updated', { detail: { id, deleted: true } }));
+    window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, deleted: true } }));
     return result;
   },
 
@@ -158,7 +164,9 @@ export const adminApi = {
       headers: getAuthHeaders()
     });
     const result = await handleResponse<any>(res);
+    try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
     window.dispatchEvent(new CustomEvent('wouchify_deals_updated', { detail: { id, toggled: true } }));
+    window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, toggled: true } }));
     return result;
   },
 
@@ -213,7 +221,9 @@ export const adminApi = {
       body: JSON.stringify(payload)
     });
     const data = await handleResponse<any>(res);
+    try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
     window.dispatchEvent(new CustomEvent('wouchify_coupons_updated', { detail: data }));
+    window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: data }));
     return data;
   },
 
@@ -235,7 +245,9 @@ export const adminApi = {
       body: JSON.stringify(couponData)
     });
     const data = await handleResponse<any>(res);
+    try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
     window.dispatchEvent(new CustomEvent('wouchify_coupons_updated', { detail: { id, ...couponData } }));
+    window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, ...couponData } }));
     return data;
   },
 
@@ -246,7 +258,9 @@ export const adminApi = {
       headers: getAuthHeaders()
     });
     const result = await handleResponse<{ message: string }>(res);
+    try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
     window.dispatchEvent(new CustomEvent('wouchify_coupons_updated', { detail: { id: target, deleted: true } }));
+    window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id: target, deleted: true } }));
     return result;
   },
 
@@ -295,7 +309,9 @@ export const adminApi = {
       body: JSON.stringify(lootData)
     });
     const data = await handleResponse<any>(res);
+    try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
     window.dispatchEvent(new CustomEvent('wouchify_loot_deals_updated', { detail: data }));
+    window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: data }));
     return data;
   },
 
@@ -317,7 +333,9 @@ export const adminApi = {
       body: JSON.stringify(lootData)
     });
     const data = await handleResponse<any>(res);
+    try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
     window.dispatchEvent(new CustomEvent('wouchify_loot_deals_updated', { detail: { id, ...lootData } }));
+    window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, ...lootData } }));
     return data;
   },
 
@@ -327,7 +345,9 @@ export const adminApi = {
       headers: getAuthHeaders()
     });
     const result = await handleResponse<{ message: string }>(res);
+    try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
     window.dispatchEvent(new CustomEvent('wouchify_loot_deals_updated', { detail: { id, deleted: true } }));
+    window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, deleted: true } }));
     return result;
   },
 
@@ -606,7 +626,9 @@ export const adminApi = {
       body: JSON.stringify(cardData)
     });
     const data = await handleResponse<any>(res);
+    try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
     window.dispatchEvent(new CustomEvent('wouchify_credit_cards_updated', { detail: data }));
+    window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: data }));
     return data;
   },
 
@@ -617,7 +639,9 @@ export const adminApi = {
       body: JSON.stringify(cardData)
     });
     const data = await handleResponse<any>(res);
+    try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
     window.dispatchEvent(new CustomEvent('wouchify_credit_cards_updated', { detail: { id, ...cardData } }));
+    window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, ...cardData } }));
     return data;
   },
 
@@ -627,7 +651,9 @@ export const adminApi = {
       headers: getAuthHeaders()
     });
     const result = await handleResponse<{ message: string }>(res);
+    try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
     window.dispatchEvent(new CustomEvent('wouchify_credit_cards_updated', { detail: { id, deleted: true } }));
+    window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, deleted: true } }));
     return result;
   },
 
@@ -637,7 +663,9 @@ export const adminApi = {
       headers: getAuthHeaders()
     });
     const result = await handleResponse<any>(res);
+    try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
     window.dispatchEvent(new CustomEvent('wouchify_credit_cards_updated', { detail: { id, toggled: true } }));
+    window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, toggled: true } }));
     return result;
   },
 
@@ -706,6 +734,7 @@ export const adminApi = {
       body: JSON.stringify(data)
     });
     const created = await handleResponse<any>(res);
+    try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
     window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: created }));
     return created;
   },
@@ -717,6 +746,7 @@ export const adminApi = {
       body: JSON.stringify({ reviewedBy })
     });
     const result = await handleResponse<any>(res);
+    try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
     window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, status: 'Approved' } }));
     return result;
   },
@@ -728,6 +758,7 @@ export const adminApi = {
       body: JSON.stringify({ rejectionReason, reviewedBy })
     });
     const result = await handleResponse<any>(res);
+    try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
     window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, status: 'Rejected' } }));
     return result;
   },

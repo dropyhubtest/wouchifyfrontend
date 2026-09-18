@@ -30,8 +30,22 @@ router.get('/', async (req, res, next) => {
     }
 
     const banners = await Banner.find(query).sort({ priority: 1, createdAt: -1 });
+    if (!banners || banners.length === 0) {
+      let memoryBanners = store.getBanners(req.query);
+      if (all !== 'true') {
+        memoryBanners = memoryBanners.filter(b => b.submissionStatus !== 'pending_approval' && (b.status || 'active') === 'active');
+      }
+      return res.json(memoryBanners);
+    }
     res.json(banners);
-  } catch (err) { next(err); }
+  } catch (err) {
+    console.warn('Banners route fallback to in-memory store:', err.message);
+    let memoryBanners = store.getBanners(req.query);
+    if (all !== 'true') {
+      memoryBanners = memoryBanners.filter(b => b.submissionStatus !== 'pending_approval' && (b.status || 'active') === 'active');
+    }
+    return res.json(memoryBanners);
+  }
 });
 
 // GET /api/banners/:id

@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 
 const creditCardSchema = new mongoose.Schema({
+  id: { type: String },
+  name: { type: String },
   cardName: { type: String, required: true },
   bank: { type: String, required: true },
   network: { 

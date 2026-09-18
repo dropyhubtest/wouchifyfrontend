@@ -38,114 +38,10 @@ export interface AuditLogEvent {
   details: string
 }
 
-const mockStaffMembers: StaffMember[] = [
-  {
-    id: 'stf-balaji',
-    name: 'Balaji',
-    email: 'balaji@wouchify.com',
-    role: 'Content Executive',
-    domain: 'Deals & Loot Deals',
-    submissionsToday: 12,
-    totalSubmissions: 145,
-    approvalRate: 98.0,
-    rejectionsCount: 3,
-    avgTurnaround: '10 mins',
-    status: 'Online'
-  },
-  {
-    id: 'stf-jayanth',
-    name: 'Jayanth',
-    email: 'jayanth@wouchify.com',
-    role: 'Content Executive',
-    domain: 'Coupons & Credit Cards',
-    submissionsToday: 9,
-    totalSubmissions: 120,
-    approvalRate: 97.0,
-    rejectionsCount: 4,
-    avgTurnaround: '12 mins',
-    status: 'Online'
-  },
-  {
-    id: 'stf-ops-manager',
-    name: 'Operational Manager',
-    email: 'ops.manager@wouchify.com',
-    role: 'Ops Manager',
-    domain: 'Approvals & Quality Assurance',
-    submissionsToday: 21,
-    totalSubmissions: 580,
-    approvalRate: 99.0,
-    rejectionsCount: 7,
-    avgTurnaround: '8 mins',
-    status: 'Online'
-  }
-]
-
-const mockAuditLogs: AuditLogEvent[] = [
-  {
-    id: 'log-101',
-    timestamp: '12 mins ago',
-    staffEmail: 'balaji@wouchify.com',
-    staffName: 'Balaji',
-    action: 'Created',
-    entityType: 'Loot Deal',
-    entityTitle: 'Sony WH-1000XM5 Wireless Headphones at ₹4,999',
-    details: 'Submitted for operational review (83% Price Glitch).'
-  },
-  {
-    id: 'log-102',
-    timestamp: '25 mins ago',
-    staffEmail: 'ops.manager@wouchify.com',
-    staffName: 'Operational Manager',
-    action: 'Approved',
-    entityType: 'Deal',
-    entityTitle: 'iPhone 15 Pro Max (Natural Titanium 256GB)',
-    details: 'Published to live storefront and Telegram channel.'
-  },
-  {
-    id: 'log-103',
-    timestamp: '45 mins ago',
-    staffEmail: 'jayanth@wouchify.com',
-    staffName: 'Jayanth',
-    action: 'Created',
-    entityType: 'Coupon',
-    entityTitle: 'Myntra Flat ₹500 OFF (Code: MYNTRAPRO)',
-    details: 'Added coupon code with expiry date 30-Sep-2026.'
-  },
-  {
-    id: 'log-104',
-    timestamp: '1 hour ago',
-    staffEmail: 'balaji@wouchify.com',
-    staffName: 'Balaji',
-    action: 'Modified',
-    entityType: 'Deal',
-    entityTitle: 'Samsung Galaxy S24 Ultra 5G pricing math',
-    details: 'Updated bank offer to ₹5,000 instant HDFC discount.'
-  },
-  {
-    id: 'log-105',
-    timestamp: '2 hours ago',
-    staffEmail: 'ops.manager@wouchify.com',
-    staffName: 'Operational Manager',
-    action: 'Approved',
-    entityType: 'Cashback',
-    entityTitle: 'Claim #CB-9023 (₹3,250 Flipkart Cashback)',
-    details: 'Authorized for batch banking payout disbursement.'
-  },
-  {
-    id: 'log-106',
-    timestamp: '3 hours ago',
-    staffEmail: 'jayanth@wouchify.com',
-    staffName: 'Jayanth',
-    action: 'Created',
-    entityType: 'Banner',
-    entityTitle: 'Diwali Mega Cashback Bonanza Hero Banner',
-    details: 'Uploaded creative asset for Home page.'
-  }
-]
-
 export const OperationsStaffActivityPage: React.FC = () => {
-  const [staff, setStaff] = useState<StaffMember[]>(mockStaffMembers)
-  const [auditLogs] = useState<AuditLogEvent[]>(mockAuditLogs)
+  const [staff, setStaff] = useState<StaffMember[]>([])
+  const [auditLogs, setAuditLogs] = useState<AuditLogEvent[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [toastMessage, setToastMessage] = useState<string | null>(null)
 
@@ -154,30 +50,125 @@ export const OperationsStaffActivityPage: React.FC = () => {
     setTimeout(() => setToastMessage(null), 3000)
   }
 
-  // Load staff members from backend API
-  useEffect(() => {
-    adminApi.getStaffMembers()
-      .then((res: any[]) => {
-        if (Array.isArray(res) && res.length > 0) {
-          const mapped: StaffMember[] = res.map((s: any, idx: number) => ({
-            id: s._id || s.id || `stf-0${idx + 1}`,
-            name: s.name || 'Staff Member',
-            email: s.email || 'staff@wouchify.com',
-            role: s.role === 'executive' ? 'Content Executive' : (s.role === 'operational_manager' ? 'Ops Manager' : 'Staff'),
-            domain: s.domain || 'All Categories',
-            submissionsToday: typeof s.submissionsToday === 'number' ? s.submissionsToday : 10,
-            totalSubmissions: typeof s.totalSubmissions === 'number' ? s.totalSubmissions : 250,
-            approvalRate: typeof s.approvalRate === 'number' ? s.approvalRate : 95.5,
-            rejectionsCount: typeof s.rejectionsCount === 'number' ? s.rejectionsCount : 5,
-            avgTurnaround: s.avgTurnaround || '15 mins',
-            status: s.status || 'Online'
-          }))
-          setStaff(mapped)
+  const loadStaffData = async () => {
+    try {
+      setLoading(true)
+      const [staffRes, subsRes] = await Promise.all([
+        adminApi.getStaffMembers().catch(() => []),
+        adminApi.getSubmissions({ status: 'all' }).catch(() => [])
+      ])
+
+      const rawStaff = Array.isArray(staffRes) ? staffRes : []
+      const subs = Array.isArray(subsRes) ? subsRes : []
+
+      // If no staff members in DB, extract unique submitters from submissions
+      let staffList = [...rawStaff]
+      if (staffList.length === 0 && subs.length > 0) {
+        const emailMap = new Map<string, string>()
+        subs.forEach(s => {
+          if (s.submittedBy) emailMap.set(s.submittedBy.toLowerCase(), s.submittedByName || s.submittedBy.split('@')[0])
+        })
+        staffList = Array.from(emailMap.entries()).map(([email, name], idx) => ({
+          _id: `stf-gen-${idx + 1}`,
+          name: name.charAt(0).toUpperCase() + name.slice(1),
+          email,
+          role: 'executive',
+          domain: 'Deals & Coupons',
+          status: 'Online'
+        }))
+      }
+
+      // Compute live staff statistics from actual submissions
+      const computedStaff: StaffMember[] = staffList.map((s: any, idx: number) => {
+        const userEmail = (s.email || '').toLowerCase()
+        const userSubs = subs.filter(sub => (sub.submittedBy || '').toLowerCase() === userEmail)
+        const approvedCount = userSubs.filter(sub => sub.status === 'Approved').length
+        const rejectedCount = userSubs.filter(sub => sub.status === 'Rejected').length
+        const total = userSubs.length
+        const rate = total > 0 ? Math.round((approvedCount / total) * 100) : 100
+
+        return {
+          id: s._id || s.id || `stf-0${idx + 1}`,
+          name: s.name || s.email.split('@')[0],
+          email: s.email,
+          role: s.role === 'executive' ? 'Content Executive' : (s.role === 'operational_manager' ? 'Ops Manager' : 'Staff'),
+          domain: s.domain || 'All Categories',
+          submissionsToday: total,
+          totalSubmissions: total,
+          approvalRate: rate,
+          rejectionsCount: rejectedCount,
+          avgTurnaround: '10 mins',
+          status: s.status || 'Online'
         }
       })
-      .catch((err: unknown) => {
-        console.warn('API error, using mock staff members:', err)
+      setStaff(computedStaff)
+
+      // Compute live immutable audit logs from real submissions & reviews
+      const dynamicLogs: AuditLogEvent[] = []
+      subs.forEach((s: any, idx: number) => {
+        const snap = s.dataSnapshot || {}
+        const title = s.title || snap.title || snap.name || 'Submitted Item'
+        const typeLabel = s.entityType === 'loot_deal' ? 'Loot Deal' :
+                          s.entityType === 'deal' ? 'Deal' :
+                          s.entityType === 'coupon' ? 'Coupon' :
+                          s.entityType === 'banner' ? 'Banner' :
+                          s.entityType === 'store' ? 'Store' : 'Deal'
+
+        const dateStr = s.submittedAt ? new Date(s.submittedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : 'Recently'
+
+        // Log 1: Creation
+        dynamicLogs.push({
+          id: `log-sub-${s._id || idx}-create`,
+          timestamp: dateStr,
+          staffEmail: s.submittedBy || 'executive@wouchify.com',
+          staffName: s.submittedByName || (s.submittedBy ? s.submittedBy.split('@')[0] : 'Content Executive'),
+          action: 'Created',
+          entityType: typeLabel as any,
+          entityTitle: title,
+          details: `Submitted for operational review (${s.priority || 'Normal'} priority).`
+        })
+
+        // Log 2: Approval
+        if (s.status === 'Approved') {
+          dynamicLogs.push({
+            id: `log-sub-${s._id || idx}-appr`,
+            timestamp: s.reviewedAt ? new Date(s.reviewedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : dateStr,
+            staffEmail: s.reviewedBy || 'ops.manager@wouchify.com',
+            staffName: 'Operational Manager',
+            action: 'Approved',
+            entityType: typeLabel as any,
+            entityTitle: title,
+            details: 'Approved & published to live storefront.'
+          })
+        }
+
+        // Log 3: Rejection
+        if (s.status === 'Rejected') {
+          dynamicLogs.push({
+            id: `log-sub-${s._id || idx}-rej`,
+            timestamp: s.reviewedAt ? new Date(s.reviewedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : dateStr,
+            staffEmail: s.reviewedBy || 'ops.manager@wouchify.com',
+            staffName: 'Operational Manager',
+            action: 'Rejected',
+            entityType: typeLabel as any,
+            entityTitle: title,
+            details: `Rejected: ${s.rejectionReason || 'Requires revision'}`
+          })
+        }
       })
+
+      setAuditLogs(dynamicLogs)
+    } catch (err) {
+      console.warn('Error loading staff activity:', err)
+      setStaff([])
+      setAuditLogs([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadStaffData()
   }, [])
 
   // KPIs
@@ -304,69 +295,84 @@ export const OperationsStaffActivityPage: React.FC = () => {
             </h3>
           </div>
 
-          <div className="crud-table-wrapper">
-            <table className="crud-table">
-              <thead>
-                <tr>
-                  <th>Executive Name & Email</th>
-                  <th>Assigned Domain</th>
-                  <th>Today's Output</th>
-                  <th>Total Submissions</th>
-                  <th>Approval Accuracy</th>
-                  <th>Avg SLA</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {staff.map((member) => (
-                  <tr key={member.id}>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div className="submitter-avatar-xs" style={{ width: '28px', height: '28px', fontSize: '0.82rem', background: '#2563eb' }}>
-                          {member.name.charAt(0)}
-                        </div>
-                        <div>
-                          <strong style={{ fontSize: '0.88rem', color: '#0f172a', display: 'block' }}>{member.name}</strong>
-                          <span style={{ fontSize: '0.74rem', color: '#64748b' }}>{member.email}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#334155' }}>
-                        {member.domain}
-                      </span>
-                    </td>
-                    <td>
-                      <strong style={{ fontSize: '0.92rem', color: '#2563eb' }}>{member.submissionsToday}</strong>
-                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}> items today</span>
-                    </td>
-                    <td>
-                      <span style={{ fontSize: '0.84rem', color: '#0f172a' }}>{member.totalSubmissions}</span>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <strong style={{ color: member.approvalRate >= 95 ? '#16a34a' : '#ea580c', fontSize: '0.88rem' }}>
-                          {member.approvalRate}%
-                        </strong>
-                        <span style={{ fontSize: '0.72rem', color: '#64748b' }}>({member.rejectionsCount} rejections)</span>
-                      </div>
-                    </td>
-                    <td>
-                      <span style={{ fontSize: '0.82rem', color: '#475569', fontWeight: 600 }}>
-                        {member.avgTurnaround}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`status-badge ${member.status.toLowerCase()}`}>
-                        {member.status === 'Online' && <span className="health-dot online" style={{ marginRight: '4px' }}></span>}
-                        {member.status}
-                      </span>
-                    </td>
+          {loading ? (
+            <div style={{ padding: '48px 20px', textAlign: 'center', color: '#64748b' }}>
+              <Clock size={36} style={{ color: '#2563eb', margin: '0 auto 12px', display: 'block', animation: 'spin 1.5s linear infinite' }} />
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>Loading Executive Staff…</h3>
+            </div>
+          ) : staff.length === 0 ? (
+            <div style={{ padding: '48px 20px', textAlign: 'center', color: '#64748b' }}>
+              <Users size={42} style={{ color: '#64748b', margin: '0 auto 12px', display: 'block' }} />
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>No Staff Profiles Recorded</h3>
+              <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '6px' }}>
+                Content executives submitting deals and coupons will appear here with automated SLA and accuracy tracking.
+              </p>
+            </div>
+          ) : (
+            <div className="crud-table-wrapper">
+              <table className="crud-table">
+                <thead>
+                  <tr>
+                    <th>Executive Name & Email</th>
+                    <th>Assigned Domain</th>
+                    <th>Today's Output</th>
+                    <th>Total Submissions</th>
+                    <th>Approval Accuracy</th>
+                    <th>Avg SLA</th>
+                    <th>Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {staff.map((member) => (
+                    <tr key={member.id}>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div className="submitter-avatar-xs" style={{ width: '28px', height: '28px', fontSize: '0.82rem', background: '#2563eb' }}>
+                            {member.name.charAt(0)}
+                          </div>
+                          <div>
+                            <strong style={{ fontSize: '0.88rem', color: '#0f172a', display: 'block' }}>{member.name}</strong>
+                            <span style={{ fontSize: '0.74rem', color: '#64748b' }}>{member.email}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#334155' }}>
+                          {member.domain}
+                        </span>
+                      </td>
+                      <td>
+                        <strong style={{ fontSize: '0.92rem', color: '#2563eb' }}>{member.submissionsToday}</strong>
+                        <span style={{ fontSize: '0.72rem', color: '#64748b' }}> items today</span>
+                      </td>
+                      <td>
+                        <span style={{ fontSize: '0.84rem', color: '#0f172a' }}>{member.totalSubmissions}</span>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <strong style={{ color: member.approvalRate >= 95 ? '#16a34a' : '#ea580c', fontSize: '0.88rem' }}>
+                            {member.approvalRate}%
+                          </strong>
+                          <span style={{ fontSize: '0.72rem', color: '#64748b' }}>({member.rejectionsCount} rejections)</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span style={{ fontSize: '0.82rem', color: '#475569', fontWeight: 600 }}>
+                          {member.avgTurnaround}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`status-badge ${member.status.toLowerCase()}`}>
+                          {member.status === 'Online' && <span className="health-dot online" style={{ marginRight: '4px' }}></span>}
+                          {member.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
         {/* ── CHRONOLOGICAL AUDIT TRAIL ── */}
@@ -390,63 +396,78 @@ export const OperationsStaffActivityPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="crud-table-wrapper">
-            <table className="crud-table">
-              <thead>
-                <tr>
-                  <th>Timestamp</th>
-                  <th>Staff Member</th>
-                  <th>Action</th>
-                  <th>Entity Type</th>
-                  <th>Target Headline / Item</th>
-                  <th>Action Details</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredLogs.map((log) => (
-                  <tr key={log.id}>
-                    <td>
-                      <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>{log.timestamp}</span>
-                    </td>
-                    <td>
-                      <div className="submitter-chip">
-                        <span className="submitter-avatar-xs">{log.staffName.charAt(0)}</span>
-                        <span>{log.staffName}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <span style={{ 
-                        fontSize: '0.74rem', 
-                        fontWeight: 700, 
-                        textTransform: 'uppercase',
-                        padding: '2px 8px', 
-                        borderRadius: '4px',
-                        background: log.action === 'Approved' ? '#ecfdf5' : log.action === 'Created' ? '#eff6ff' : '#f8fafc',
-                        color: log.action === 'Approved' ? '#15803d' : log.action === 'Created' ? '#1d4ed8' : '#334155'
-                      }}>
-                        {log.action}
-                      </span>
-                    </td>
-                    <td>
-                      <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0f172a' }}>
-                        {log.entityType}
-                      </span>
-                    </td>
-                    <td>
-                      <strong style={{ fontSize: '0.84rem', color: '#0f172a', maxWidth: '300px', display: 'block' }}>
-                        {log.entityTitle}
-                      </strong>
-                    </td>
-                    <td>
-                      <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                        {log.details}
-                      </span>
-                    </td>
+          {loading ? (
+            <div style={{ padding: '48px 20px', textAlign: 'center', color: '#64748b' }}>
+              <Clock size={36} style={{ color: '#2563eb', margin: '0 auto 12px', display: 'block', animation: 'spin 1.5s linear infinite' }} />
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>Loading System Audit Log…</h3>
+            </div>
+          ) : filteredLogs.length === 0 ? (
+            <div style={{ padding: '48px 20px', textAlign: 'center', color: '#64748b' }}>
+              <CheckCircle2 size={42} style={{ color: '#16a34a', margin: '0 auto 12px', display: 'block' }} />
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>No Audit Trail Entries Found</h3>
+              <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '6px' }}>
+                {searchTerm ? 'No audit logs match your search filter.' : 'New submissions, approvals, and actions will be logged here in real time.'}
+              </p>
+            </div>
+          ) : (
+            <div className="crud-table-wrapper">
+              <table className="crud-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Staff Member</th>
+                    <th>Action</th>
+                    <th>Entity Type</th>
+                    <th>Target Headline / Item</th>
+                    <th>Action Details</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filteredLogs.map((log) => (
+                    <tr key={log.id}>
+                      <td>
+                        <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>{log.timestamp}</span>
+                      </td>
+                      <td>
+                        <div className="submitter-chip">
+                          <span className="submitter-avatar-xs">{log.staffName.charAt(0)}</span>
+                          <span>{log.staffName}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span style={{ 
+                          fontSize: '0.74rem', 
+                          fontWeight: 700, 
+                          textTransform: 'uppercase',
+                          padding: '2px 8px', 
+                          borderRadius: '4px',
+                          background: log.action === 'Approved' ? '#ecfdf5' : log.action === 'Created' ? '#eff6ff' : '#f8fafc',
+                          color: log.action === 'Approved' ? '#15803d' : log.action === 'Created' ? '#1d4ed8' : '#334155'
+                        }}>
+                          {log.action}
+                        </span>
+                      </td>
+                      <td>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0f172a' }}>
+                          {log.entityType}
+                        </span>
+                      </td>
+                      <td>
+                        <strong style={{ fontSize: '0.84rem', color: '#0f172a', maxWidth: '300px', display: 'block' }}>
+                          {log.entityTitle}
+                        </strong>
+                      </td>
+                      <td>
+                        <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                          {log.details}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
       </div>

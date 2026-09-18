@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useCallback, useMemo } from 'react'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { WatermarkAnimation } from '../hero/WatermarkAnimation'
 import watermarkMain from '../../assets/hero/hero-watermark-main.png'
 import watermarkMainState2 from '../../assets/hero/hero-watermark-main-state-2.png'
@@ -36,6 +37,7 @@ export const ProfileHero: React.FC<ProfileHeroProps> = ({
   email = 'aarushi123@gmail.com',
   onEditClick,
 }) => {
+  const isMobile = useMediaQuery('(max-width: 768px)')
   // Animation DOM Refs
   const fullBarsGroupRef = useRef<SVGGElement | null>(null)
   const whiteBarsGroupRef = useRef<SVGGElement | null>(null)
@@ -199,6 +201,55 @@ export const ProfileHero: React.FC<ProfileHeroProps> = ({
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
     }
   }, [runAnimation])
+
+  if (isMobile) {
+    return (
+      <section className={styles.mobileHeroSection} aria-label="Profile Header">
+        <div className={styles.mobileHeroLeft}>
+          <h1 className={styles.mobileGreetingTitle}>Hi {name}!</h1>
+          <div className={styles.mobileEmailSubtitle}>
+            <svg
+              className={styles.mobileEmailIcon}
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+            </svg>
+            <span>{email}</span>
+          </div>
+          <button
+            type="button"
+            className={styles.mobileEditBtn}
+            onClick={onEditClick}
+            aria-label="Edit Profile"
+          >
+            <img src={editIcon} alt="" className={styles.mobileEditIcon} />
+            <span>Edit Profile&gt;&gt;</span>
+          </button>
+        </div>
+
+        <div className={styles.mobileHeroRight}>
+          {/* Official animated big W Watermark */}
+          <WatermarkAnimation
+            state1Src={watermarkMain}
+            state2Src={watermarkMainState2}
+            className={styles.mobileWatermarkWrap}
+            width={140}
+            height={95}
+          />
+
+          <div className={styles.mobileAvatarWrap}>
+            <img
+              src={profileAvatarImg}
+              alt="Profile Avatar"
+              className={styles.mobileAvatarImg}
+            />
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section className={styles.heroSection} aria-label="Profile Hero Banner">

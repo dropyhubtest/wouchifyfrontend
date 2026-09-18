@@ -29,13 +29,17 @@
   background-color: var(--color-peach);
   border-radius: 20px;
   overflow: visible;
-  box-shadow: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   box-sizing: border-box;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .brand-reward-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+.brand-reward-card:hover .brand-reward-card__design {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
 }
 
 .brand-reward-card:focus-visible {

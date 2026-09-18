@@ -26,7 +26,10 @@ router.get('/', async (req, res, next) => {
 
     const tickets = await SupportTicket.find(query).sort({ createdAt: -1 });
     res.json(tickets);
-  } catch (err) { next(err); }
+  } catch (err) { 
+    console.warn('Support tickets route fallback to in-memory store:', err.message);
+    return res.json(store.getSupportTickets(req.query));
+  }
 });
 
 // GET /api/support-tickets/:id

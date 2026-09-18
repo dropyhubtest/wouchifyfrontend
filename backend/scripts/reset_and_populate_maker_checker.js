@@ -1,0 +1,1475 @@
+const mongoose = require('mongoose');
+const fs = require('fs');
+const path = require('path');
+const dotenv = require('dotenv');
+
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
+dotenv.config();
+
+const { connectDB } = require('../config/db');
+
+// Models
+const Deal = require('../models/Deal');
+const LootDeal = require('../models/LootDeal');
+const Coupon = require('../models/Coupon');
+const CreditCard = require('../models/CreditCard');
+const Store = require('../models/Store');
+const Banner = require('../models/Banner');
+const Advertisement = require('../models/Advertisement');
+const Submission = require('../models/Submission');
+
+// ==========================================
+// 1. DATA DEFINITIONS (5 Approved + 1 Pending)
+// ==========================================
+
+const DEALS = [
+  // 5 Approved
+  {
+    id: 'deal-1',
+    _id: '67a000000000000000000001',
+    name: 'Xiaomi 138 cm (55 inch) FX Pro QLED Ultra HD 4K Smart Fire TV',
+    title: 'Xiaomi 138 cm (55 inch) FX Pro QLED Ultra HD 4K Smart Fire TV',
+    brand: 'Xiaomi',
+    store: 'Amazon',
+    category: 'Electronics',
+    subCategory: 'Smart Televisions',
+    price: '₹37,998',
+    originalPrice: '₹62,999',
+    discount: '40% OFF',
+    discountLabel: '40% OFF',
+    discountValue: 40,
+    code: 'XIAOMI1500',
+    cashback: '+ 5% Wouchify Cashback',
+    productImage: '/src/assets/deals/deal1.png',
+    image: '/src/assets/deals/deal1.png',
+    link: '/stores#amazon',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 1420
+  },
+  {
+    id: 'deal-2',
+    _id: '67a000000000000000000002',
+    name: 'Apple iPhone 16 Pro (128 GB) - Natural Titanium',
+    title: 'Apple iPhone 16 Pro (128 GB) - Natural Titanium',
+    brand: 'Apple',
+    store: 'Amazon',
+    category: 'Electronics',
+    subCategory: 'Smartphones',
+    price: '₹1,19,900',
+    originalPrice: '₹1,34,900',
+    discount: '11% OFF',
+    discountLabel: '11% OFF',
+    discountValue: 11,
+    code: 'IPHONE5K',
+    cashback: '+ ₹1,200 Wouchify Cash',
+    productImage: '/src/assets/deals/deal2.png',
+    image: '/src/assets/deals/deal2.png',
+    link: '/stores#amazon',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 3200
+  },
+  {
+    id: 'deal-3',
+    _id: '67a000000000000000000003',
+    name: 'Sony WH-1000XM5 Wireless Noise Cancelling Headphones',
+    title: 'Sony WH-1000XM5 Wireless Noise Cancelling Headphones',
+    brand: 'Sony',
+    store: 'Flipkart',
+    category: 'Electronics',
+    subCategory: 'Audio',
+    price: '₹26,990',
+    originalPrice: '₹34,990',
+    discount: '23% OFF',
+    discountLabel: '23% OFF',
+    discountValue: 23,
+    code: 'SONY2K',
+    cashback: '+ 6% Wouchify Cashback',
+    productImage: '/src/assets/deals/deal1.png',
+    image: '/src/assets/deals/deal1.png',
+    link: '/stores#flipkart',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 890
+  },
+  {
+    id: 'deal-4',
+    _id: '67a000000000000000000004',
+    name: "Nike Air Max Pulse Roam Men's Premium Running Shoes",
+    title: "Nike Air Max Pulse Roam Men's Premium Running Shoes",
+    brand: 'Nike',
+    store: 'Myntra',
+    category: 'Fashion',
+    subCategory: 'Footwear',
+    price: '₹7,495',
+    originalPrice: '₹14,995',
+    discount: '50% OFF',
+    discountLabel: '50% OFF',
+    discountValue: 50,
+    code: 'NIKE50',
+    cashback: '+ 8% Wouchify Cashback',
+    productImage: '/src/assets/deals/deal2.png',
+    image: '/src/assets/deals/deal2.png',
+    link: '/stores#myntra',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 2150
+  },
+  {
+    id: 'deal-5',
+    _id: '67a000000000000000000005',
+    name: 'Samsung Galaxy S24 Ultra 5G AI Smartphone (256 GB Titanium Gray)',
+    title: 'Samsung Galaxy S24 Ultra 5G AI Smartphone (256 GB Titanium Gray)',
+    brand: 'Samsung',
+    store: 'Amazon',
+    category: 'Electronics',
+    subCategory: 'Smartphones',
+    price: '₹1,09,999',
+    originalPrice: '₹1,34,999',
+    discount: '18% OFF',
+    discountLabel: '18% OFF',
+    discountValue: 18,
+    code: 'S24ULTRA',
+    cashback: '+ ₹2,500 Wouchify Cashback',
+    productImage: '/src/assets/deals/deal1.png',
+    image: '/src/assets/deals/deal1.png',
+    link: '/stores#amazon',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 1780
+  },
+  // 1 PENDING SUBMISSION
+  {
+    id: 'deal-pending-1',
+    _id: '67a000000000000000000006',
+    name: 'Asus ROG Zephyrus G16 OLED Gaming Laptop (Intel Core Ultra 9, RTX 4070)',
+    title: 'Asus ROG Zephyrus G16 OLED Gaming Laptop (Intel Core Ultra 9, RTX 4070)',
+    brand: 'Asus',
+    store: 'Flipkart',
+    category: 'Electronics',
+    subCategory: 'Gaming Laptops',
+    price: '₹1,69,990',
+    originalPrice: '₹2,14,990',
+    discount: '21% OFF',
+    discountLabel: '21% OFF',
+    discountValue: 21,
+    code: 'ROGEXCLUSIVE',
+    cashback: '+ ₹4,000 Wouchify Cashback',
+    productImage: '/src/assets/deals/deal2.png',
+    image: '/src/assets/deals/deal2.png',
+    link: '/stores#flipkart',
+    status: 'pending',
+    submissionStatus: 'pending_approval',
+    opsManagerApproval: 'Pending',
+    managerApproval: 'Pending',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    notes: 'High-margin gaming laptop offer verified on Flipkart VIP Deals page.',
+    clicks: 0
+  }
+];
+
+const LOOT_DEALS = [
+  // 5 Approved
+  {
+    id: 'loot-1',
+    _id: '67a100000000000000000001',
+    title: 'Portronics Hydra 10 RGB Mechanical Gaming Keyboard',
+    name: 'Portronics Hydra 10 RGB Mechanical Gaming Keyboard',
+    storeName: 'Amazon',
+    store: 'Amazon',
+    category: 'Electronics',
+    currentPrice: '₹1,999',
+    price: '₹1,999',
+    originalPrice: '₹4,999',
+    discount: '60% OFF',
+    dealType: 'flash',
+    href: '/stores#amazon',
+    link: '/stores#amazon',
+    image: '/src/assets/deals/deal1.png',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 840
+  },
+  {
+    id: 'loot-2',
+    _id: '67a100000000000000000002',
+    title: 'Puma Softride Rift Tech Unisex Running Shoes',
+    name: 'Puma Softride Rift Tech Unisex Running Shoes',
+    storeName: 'Myntra',
+    store: 'Myntra',
+    category: 'Fashion',
+    currentPrice: '₹1,799',
+    price: '₹1,799',
+    originalPrice: '₹5,999',
+    discount: '70% OFF',
+    dealType: 'flash',
+    href: '/stores#myntra',
+    link: '/stores#myntra',
+    image: '/src/assets/deals/deal2.png',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 1220
+  },
+  {
+    id: 'loot-3',
+    _id: '67a100000000000000000003',
+    title: 'Philips Smart Wi-Fi 9W LED Color Changing Bulb',
+    name: 'Philips Smart Wi-Fi 9W LED Color Changing Bulb',
+    storeName: 'Flipkart',
+    store: 'Flipkart',
+    category: 'Home & Kitchen',
+    currentPrice: '₹499',
+    price: '₹499',
+    originalPrice: '₹1,499',
+    discount: '67% OFF',
+    dealType: 'exclusive',
+    href: '/stores#flipkart',
+    link: '/stores#flipkart',
+    image: '/src/assets/deals/deal1.png',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 610
+  },
+  {
+    id: 'loot-4',
+    _id: '67a100000000000000000004',
+    title: 'OnePlus Nord Buds 2r Wireless Earbuds',
+    name: 'OnePlus Nord Buds 2r Wireless Earbuds',
+    storeName: 'Amazon',
+    store: 'Amazon',
+    category: 'Electronics',
+    currentPrice: '₹1,499',
+    price: '₹1,499',
+    originalPrice: '₹2,999',
+    discount: '50% OFF',
+    dealType: 'flash',
+    href: '/stores#amazon',
+    link: '/stores#amazon',
+    image: '/src/assets/deals/deal2.png',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 1450
+  },
+  {
+    id: 'loot-5',
+    _id: '67a100000000000000000005',
+    title: 'Wildcraft 45L Casual Waterproof Travel Backpack',
+    name: 'Wildcraft 45L Casual Waterproof Travel Backpack',
+    storeName: 'Flipkart',
+    store: 'Flipkart',
+    category: 'Travel & Luggage',
+    currentPrice: '₹1,299',
+    price: '₹1,299',
+    originalPrice: '₹3,499',
+    discount: '63% OFF',
+    dealType: 'exclusive',
+    href: '/stores#flipkart',
+    link: '/stores#flipkart',
+    image: '/src/assets/deals/deal1.png',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 930
+  },
+  // 1 PENDING SUBMISSION
+  {
+    id: 'loot-pending-1',
+    _id: '67a100000000000000000006',
+    title: 'boAt Airdopes 141 ANC with 42H Playtime & Beast Mode',
+    name: 'boAt Airdopes 141 ANC with 42H Playtime & Beast Mode',
+    storeName: 'Amazon',
+    store: 'Amazon',
+    category: 'Electronics',
+    currentPrice: '₹899',
+    price: '₹899',
+    originalPrice: '₹4,490',
+    discount: '80% OFF',
+    dealType: 'flash',
+    href: '/stores#amazon',
+    link: '/stores#amazon',
+    image: '/src/assets/deals/deal2.png',
+    status: 'pending',
+    submissionStatus: 'pending_approval',
+    opsManagerApproval: 'Pending',
+    managerApproval: 'Pending',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    notes: 'Flash price drop for 12 hours on Amazon Lightning deals.',
+    clicks: 0
+  }
+];
+
+const COUPONS = [
+  // 5 Approved
+  {
+    id: 'coup-1',
+    _id: '67a200000000000000000001',
+    code: 'FLAT500',
+    store: 'Amazon',
+    discount: 'Flat ₹500 OFF',
+    category: 'Electronics',
+    usageCount: 412,
+    usageLimit: 2000,
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    expiry: '2026-12-31T23:59:59.000Z',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma'
+  },
+  {
+    id: 'coup-2',
+    _id: '67a200000000000000000002',
+    code: 'MYNTRA200',
+    store: 'Myntra',
+    discount: 'Flat 20% OFF',
+    category: 'Fashion',
+    usageCount: 890,
+    usageLimit: 5000,
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    expiry: '2026-12-31T23:59:59.000Z',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma'
+  },
+  {
+    id: 'coup-3',
+    _id: '67a200000000000000000003',
+    code: 'FLIPKART10',
+    store: 'Flipkart',
+    discount: '10% Instant Off',
+    category: 'Electronics',
+    usageCount: 654,
+    usageLimit: 3000,
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    expiry: '2026-12-31T23:59:59.000Z',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma'
+  },
+  {
+    id: 'coup-4',
+    _id: '67a200000000000000000004',
+    code: 'SWIGGY120',
+    store: 'Swiggy',
+    discount: 'Flat ₹120 OFF',
+    category: 'Food & Dining',
+    usageCount: 1420,
+    usageLimit: 10000,
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    expiry: '2026-12-31T23:59:59.000Z',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma'
+  },
+  {
+    id: 'coup-5',
+    _id: '67a200000000000000000005',
+    code: 'AJIOEXTRA',
+    store: 'Ajio',
+    discount: 'Extra ₹500 OFF',
+    category: 'Fashion',
+    usageCount: 310,
+    usageLimit: 1500,
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    expiry: '2026-12-31T23:59:59.000Z',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma'
+  },
+  // 1 PENDING SUBMISSION
+  {
+    id: 'coup-pending-1',
+    _id: '67a200000000000000000006',
+    code: 'ZOMATOFEAST',
+    store: 'Zomato',
+    discount: '50% OFF up to ₹150',
+    category: 'Food & Dining',
+    usageCount: 0,
+    usageLimit: 5000,
+    status: 'pending',
+    submissionStatus: 'pending_approval',
+    opsManagerApproval: 'Pending',
+    managerApproval: 'Pending',
+    expiry: '2026-12-31T23:59:59.000Z',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    notes: 'New verified voucher code for weekend dinner orders on Zomato.'
+  }
+];
+
+const CREDIT_CARDS = [
+  // 3 Premium Cards (section: 'premium')
+  {
+    id: 'card-1',
+    _id: '67a300000000000000000001',
+    cardName: 'HDFC Regalia Gold Credit Card',
+    name: 'HDFC Regalia Gold Credit Card',
+    bank: 'HDFC Bank',
+    section: 'premium',
+    cardTheme: 'white-blue',
+    network: 'Visa',
+    tier: 'Premium',
+    welcomeOffer: 'Club Vistara Silver Tier & MMT Black Elite Membership',
+    annualFee: '₹2,500 + GST',
+    rewardRate: '4 Reward Points per ₹150 spent',
+    isFeatured: true,
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    imageUrl: '/src/assets/deals/deal1.png',
+    affiliateLink: 'https://hdfcbank.com',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma'
+  },
+  {
+    id: 'card-2',
+    _id: '67a300000000000000000002',
+    cardName: 'Tata Neu Infinity HDFC Credit Card',
+    name: 'Tata Neu Infinity HDFC Credit Card',
+    bank: 'HDFC Bank',
+    section: 'premium',
+    cardTheme: 'white-red',
+    network: 'Rupay',
+    tier: 'Premium',
+    welcomeOffer: '1,499 NeuCoins on 1st Transaction',
+    annualFee: '₹1,499 + GST',
+    rewardRate: '10% NeuCoins on Tata Neu App',
+    isFeatured: true,
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    imageUrl: '/src/assets/deals/deal2.png',
+    affiliateLink: 'https://hdfcbank.com',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma'
+  },
+  {
+    id: 'card-3',
+    _id: '67a300000000000000000003',
+    cardName: 'American Express Platinum Travel Credit Card',
+    name: 'American Express Platinum Travel Credit Card',
+    bank: 'American Express',
+    section: 'premium',
+    cardTheme: 'white-blue',
+    network: 'Amex',
+    tier: 'Super Premium',
+    welcomeOffer: '15,000 Membership Rewards Points + ₹4,000 Taj Voucher',
+    annualFee: '₹3,500 + GST',
+    rewardRate: 'Up to 8% Value Back on Annual Travel Milestones',
+    isFeatured: true,
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    imageUrl: '/src/assets/deals/deal1.png',
+    affiliateLink: 'https://americanexpress.com/in',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma'
+  },
+  // 3 Lifetime Free Cards (section: 'lifetime-free')
+  {
+    id: 'card-4',
+    _id: '67a300000000000000000004',
+    cardName: 'Amazon Pay ICICI Credit Card',
+    name: 'Amazon Pay ICICI Credit Card',
+    bank: 'ICICI Bank',
+    section: 'lifetime-free',
+    cardTheme: 'navy-card',
+    network: 'Visa',
+    tier: 'Classic',
+    welcomeOffer: '₹2,000 Amazon Pay Balance on Approval',
+    annualFee: '₹0 (Lifetime Free)',
+    rewardRate: '5% Unlimited Cashback on Amazon for Prime',
+    isFeatured: true,
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    imageUrl: '/src/assets/deals/deal2.png',
+    affiliateLink: 'https://icicibank.com',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma'
+  },
+  {
+    id: 'card-5',
+    _id: '67a300000000000000000005',
+    cardName: 'SBI Cashback Credit Card',
+    name: 'SBI Cashback Credit Card',
+    bank: 'SBI Card',
+    section: 'lifetime-free',
+    cardTheme: 'red-card',
+    network: 'Mastercard',
+    tier: 'Classic',
+    welcomeOffer: '₹500 Cashback on first transaction',
+    annualFee: 'Lifetime Free / Fee Waived',
+    rewardRate: '5% Cashback on All Online Spends',
+    isFeatured: true,
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    imageUrl: '/src/assets/deals/deal1.png',
+    affiliateLink: 'https://sbicard.com',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma'
+  },
+  {
+    id: 'card-6',
+    _id: '67a300000000000000000006',
+    cardName: 'Airtel Axis Bank Credit Card',
+    name: 'Airtel Axis Bank Credit Card',
+    bank: 'Axis Bank',
+    section: 'lifetime-free',
+    cardTheme: 'navy-card',
+    network: 'Mastercard',
+    tier: 'Entry',
+    welcomeOffer: '₹500 Amazon Voucher on activation',
+    annualFee: 'Lifetime Free on Partner Promo',
+    rewardRate: '25% Cashback on Airtel Mobile & DTH bills',
+    isFeatured: false,
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    imageUrl: '/src/assets/deals/deal2.png',
+    affiliateLink: 'https://axisbank.com',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma'
+  },
+  // 1 PENDING SUBMISSION
+  {
+    id: 'card-pending-1',
+    _id: '67a300000000000000000007',
+    cardName: 'IndusInd Legend Credit Card',
+    name: 'IndusInd Legend Credit Card',
+    bank: 'IndusInd Bank',
+    section: 'lifetime-free',
+    cardTheme: 'red-card',
+    network: 'Visa',
+    tier: 'Premium',
+    welcomeOffer: 'Complimentary EazyDiner Prime & Oberoi Stay Vouchers',
+    annualFee: '₹0 (Lifetime Free)',
+    rewardRate: '2 Reward Points per ₹100 spent on Weekends',
+    isFeatured: true,
+    status: 'pending',
+    submissionStatus: 'pending_approval',
+    opsManagerApproval: 'Pending',
+    managerApproval: 'Pending',
+    imageUrl: '/src/assets/deals/deal1.png',
+    affiliateLink: 'https://indusind.com',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    notes: 'Premium lifetime free credit card listing request.'
+  }
+];
+
+const STORES = [
+  {
+    id: 'ajio',
+    _id: '67a400000000000000000001',
+    name: 'Ajio',
+    slug: 'ajio',
+    logo: '',
+    category: 'Fashion',
+    reward: 'Upto 5% rewards',
+    description: 'Trending fashion Collections',
+    cardBg: '#ECF4FF',
+    badgeBg: '#D3E0F2',
+    href: '/stores#ajio',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 2100
+  },
+  {
+    id: 'amazon',
+    _id: '67a400000000000000000002',
+    name: 'Amazon',
+    slug: 'amazon',
+    logo: '',
+    category: 'Electronics',
+    reward: 'Upto 6.8% rewards',
+    description: '5000+ Live deals & Coupons',
+    cardBg: '#FFE6D3',
+    badgeBg: '#FFB67C',
+    href: '/stores#amazon',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 5200
+  },
+  {
+    id: 'bigbasket',
+    _id: '67a400000000000000000003',
+    name: 'Big Basket',
+    slug: 'bigbasket',
+    logo: '',
+    category: 'Grocery',
+    reward: 'Upto 20% off',
+    description: 'Daily Fresh groceries',
+    cardBg: '#EFFFBF',
+    badgeBg: '#D1F170',
+    href: '/stores#bigbasket',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 1450
+  },
+  {
+    id: 'firstcry',
+    _id: '67a400000000000000000004',
+    name: 'Firstcry',
+    slug: 'firstcry',
+    logo: '',
+    category: 'Fashion',
+    reward: 'Upto 5% rewards',
+    description: 'Trending fashion Collections',
+    cardBg: '#FFEDF8',
+    badgeBg: '#FCA7E1',
+    href: '/stores#firstcry',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 980
+  },
+  {
+    id: 'flipkart',
+    _id: '67a400000000000000000005',
+    name: 'Flipkart',
+    slug: 'flipkart',
+    logo: '',
+    category: 'Fashion',
+    reward: 'Upto 15% rewards',
+    description: 'Trending fashion Collections',
+    cardBg: '#E8F5FF',
+    badgeBg: '#B3DCFA',
+    href: '/stores#flipkart',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 4300
+  },
+  {
+    id: 'jiomart',
+    _id: '67a400000000000000000006',
+    name: 'Jio Mart',
+    slug: 'jiomart',
+    logo: '',
+    category: 'Grocery',
+    reward: 'Upto 15% rewards',
+    description: 'Trending fashion Collections',
+    cardBg: '#FFDCDE',
+    badgeBg: '#FFB0B4',
+    href: '/stores#jiomart',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 1250
+  },
+  {
+    id: 'meesho',
+    _id: '67a400000000000000000007',
+    name: 'Meesho',
+    slug: 'meesho',
+    logo: '',
+    category: 'Fashion',
+    reward: 'Upto 20% off',
+    description: 'Trending fashion Collections',
+    cardBg: '#FFE3F9',
+    badgeBg: '#FFB0EA',
+    logoPanelBg: '#580A46',
+    href: '/stores#meesho',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 2800
+  },
+  {
+    id: 'myntra',
+    _id: '67a400000000000000000008',
+    name: 'Myntra',
+    slug: 'myntra',
+    logo: '',
+    category: 'Fashion',
+    reward: 'Upto 6.8% rewards',
+    description: '5000+ Live deals & Coupons',
+    cardBg: '#E8F5FF',
+    badgeBg: '#B3DCFA',
+    href: '/stores#myntra',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 3100
+  },
+  {
+    id: 'nykaa',
+    _id: '67a400000000000000000009',
+    name: 'Nykaa',
+    slug: 'nykaa',
+    logo: '',
+    category: 'Beauty',
+    reward: 'Upto 6% rewards',
+    description: 'Trending fashion Collections',
+    cardBg: '#FFD9E8',
+    badgeBg: '#FFB0C8',
+    href: '/stores#nykaa',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 1800
+  },
+  {
+    id: 'pepperfry',
+    _id: '67a400000000000000000010',
+    name: 'Pepperfry',
+    slug: 'pepperfry',
+    logo: '',
+    category: 'Home',
+    reward: 'Upto 15% rewards',
+    description: 'Trending fashion Collections',
+    cardBg: '#FFDED9',
+    badgeBg: '#FFB5AB',
+    href: '/stores#pepperfry',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 670
+  },
+  {
+    id: 'reliance-digital',
+    _id: '67a400000000000000000011',
+    name: 'Reliance Digital',
+    slug: 'reliance-digital',
+    logo: '',
+    category: 'Electronics',
+    reward: 'Upto 20% off',
+    description: 'Trending fashion Collections',
+    cardBg: '#DFF4FF',
+    badgeBg: '#A8E0FF',
+    href: '/stores#reliance-digital',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 1540
+  },
+  {
+    id: 'snapdeal',
+    _id: '67a400000000000000000012',
+    name: 'Snapdeal',
+    slug: 'snapdeal',
+    logo: '',
+    category: 'Electronics',
+    reward: 'Upto 6.8% rewards',
+    description: '5000+ Live deals & Coupons',
+    cardBg: '#E8F5FF',
+    badgeBg: '#B3DCFA',
+    href: '/stores#snapdeal',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 920
+  },
+  {
+    id: 'swiggy',
+    _id: '67a400000000000000000013',
+    name: 'Swiggy',
+    slug: 'swiggy',
+    logo: '',
+    category: 'Food',
+    reward: 'Upto 20% off',
+    description: 'Trending fashion Collections',
+    cardBg: '#FFF0BF',
+    badgeBg: '#FFE07A',
+    href: '/stores#swiggy',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 4800
+  },
+  {
+    id: 'tata-cliq',
+    _id: '67a400000000000000000014',
+    name: 'Tata Cliq',
+    slug: 'tata-cliq',
+    logo: '',
+    category: 'Fashion',
+    reward: 'Upto 9.2% rewards',
+    description: 'Trending fashion Collections',
+    cardBg: '#E7D2D7',
+    badgeBg: '#D4B0B9',
+    href: '/stores#tata-cliq',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 860
+  },
+  {
+    id: 'udaan',
+    _id: '67a400000000000000000015',
+    name: 'Udaan',
+    slug: 'udaan',
+    logo: '',
+    category: 'B2B',
+    reward: 'Upto 9% rewards',
+    description: 'Bulk Discounts',
+    cardBg: '#FFE7E8',
+    badgeBg: '#FFC0C2',
+    href: '/stores#udaan',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 430
+  },
+  {
+    id: 'voonik',
+    _id: '67a400000000000000000016',
+    name: 'Voonik',
+    slug: 'voonik',
+    logo: '',
+    category: 'Fashion',
+    reward: 'Upto 15% off',
+    description: 'Trending fashion Collections',
+    cardBg: '#D5D3D7',
+    badgeBg: '#B8B5BC',
+    href: '/stores#voonik',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 310
+  },
+  {
+    id: 'yepme',
+    _id: '67a400000000000000000017',
+    name: 'Yep Me',
+    slug: 'yepme',
+    logo: '',
+    category: 'Grocery',
+    reward: 'Upto 20% off',
+    description: 'Trending fashion Collections',
+    cardBg: '#DFF4FF',
+    badgeBg: '#A8E0FF',
+    href: '/stores#yepme',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 290
+  },
+  {
+    id: 'zepto',
+    _id: '67a400000000000000000018',
+    name: 'Zepto',
+    slug: 'zepto',
+    logo: '',
+    category: 'Food',
+    reward: 'Upto 9% rewards',
+    description: '5000+ Live deals & Coupons',
+    cardBg: '#F0D3FF',
+    badgeBg: '#DCA8FF',
+    href: '/stores#zepto',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 3800
+  },
+  {
+    id: 'zivame',
+    _id: '67a400000000000000000019',
+    name: 'Zivame',
+    slug: 'zivame',
+    logo: '',
+    category: 'Fashion',
+    reward: 'Upto 15% rewards',
+    description: 'Trending fashion Collections',
+    cardBg: '#FFCFC8',
+    badgeBg: '#FFA89D',
+    href: '/stores#zivame',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 1100
+  },
+  {
+    id: 'zomato',
+    _id: '67a400000000000000000020',
+    name: 'Zomato',
+    slug: 'zomato',
+    logo: '',
+    category: 'Food',
+    reward: 'Upto 15% rewards',
+    description: 'Trending fashion Collections',
+    cardBg: '#FFD5E1',
+    badgeBg: '#FFAAC0',
+    href: '/stores#zomato',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    clicks: 4500
+  },
+  // 1 PENDING SUBMISSION
+  {
+    id: 'store-pending-1',
+    _id: '67a400000000000000000021',
+    name: 'Croma',
+    slug: 'croma',
+    logo: '',
+    category: 'Electronics',
+    reward: 'Upto 7.5% cashback',
+    description: 'Consumer Electronics & Appliances',
+    cardBg: '#E8F5FF',
+    badgeBg: '#B3DCFA',
+    href: '/stores#croma',
+    status: 'pending',
+    submissionStatus: 'pending_approval',
+    opsManagerApproval: 'Pending',
+    managerApproval: 'Pending',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    notes: 'Direct API affiliate partner integration for electronics.',
+    clicks: 0
+  }
+];
+
+const BANNERS = [
+  // 5 Approved
+  {
+    id: 'banner-1',
+    _id: '67a500000000000000000001',
+    title: 'Big Summer Electronics Festival',
+    name: 'Big Summer Electronics Festival',
+    targetPage: 'home',
+    primaryImage: '/src/assets/deals/deal1.png',
+    targetLink: '/deals',
+    priority: 1,
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma'
+  },
+  {
+    id: 'banner-2',
+    _id: '67a500000000000000000002',
+    title: 'Super Cashback Carnival',
+    name: 'Super Cashback Carnival',
+    targetPage: 'stores',
+    primaryImage: '/src/assets/deals/deal2.png',
+    targetLink: '/stores',
+    priority: 2,
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma'
+  },
+  {
+    id: 'banner-3',
+    _id: '67a500000000000000000003',
+    title: 'Premium Credit Cards Mega Showcase',
+    name: 'Premium Credit Cards Mega Showcase',
+    targetPage: 'credit-cards',
+    primaryImage: '/src/assets/deals/deal1.png',
+    targetLink: '/credit-cards',
+    priority: 3,
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma'
+  },
+  {
+    id: 'banner-4',
+    _id: '67a500000000000000000004',
+    title: 'Fashion Weekend Loot',
+    name: 'Fashion Weekend Loot',
+    targetPage: 'categories',
+    primaryImage: '/src/assets/deals/deal2.png',
+    targetLink: '/category/clothing',
+    priority: 4,
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma'
+  },
+  {
+    id: 'banner-5',
+    _id: '67a500000000000000000005',
+    title: 'Flash Deals Golden Hour',
+    name: 'Flash Deals Golden Hour',
+    targetPage: 'deals',
+    primaryImage: '/src/assets/deals/deal1.png',
+    targetLink: '/deals',
+    priority: 5,
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma'
+  },
+  // 1 PENDING SUBMISSION
+  {
+    id: 'banner-pending-1',
+    _id: '67a500000000000000000006',
+    title: 'Monsoon Travel Bonanza 2026',
+    name: 'Monsoon Travel Bonanza 2026',
+    targetPage: 'home',
+    primaryImage: '/src/assets/deals/deal2.png',
+    targetLink: '/categories',
+    priority: 1,
+    status: 'pending',
+    submissionStatus: 'pending_approval',
+    opsManagerApproval: 'Pending',
+    managerApproval: 'Pending',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    notes: 'Seasonal travel banner for flight and stay discounts.'
+  }
+];
+
+const ADVERTISEMENTS = [
+  // 5 Approved
+  {
+    id: 'ad-1',
+    _id: '67a600000000000000000001',
+    title: 'Samsung Galaxy Book4 Pro Showcase',
+    name: 'Samsung Galaxy Book4 Pro Showcase',
+    advertiser: 'Samsung India',
+    placement: 'home_top',
+    budgetOrRate: '₹45,000/mo',
+    pricingModel: 'Flat Monthly',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    imageUrl: '/src/assets/deals/deal1.png',
+    image: '/src/assets/deals/deal1.png',
+    targetLink: 'https://samsung.com/in',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma'
+  },
+  {
+    id: 'ad-2',
+    _id: '67a600000000000000000002',
+    title: 'Nike Air Zoom Running Campaign',
+    name: 'Nike Air Zoom Running Campaign',
+    advertiser: 'Nike India',
+    placement: 'stores_sidebar',
+    budgetOrRate: '₹35,000/mo',
+    pricingModel: 'Flat Monthly',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    imageUrl: '/src/assets/deals/deal2.png',
+    image: '/src/assets/deals/deal2.png',
+    targetLink: 'https://nike.com/in',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma'
+  },
+  {
+    id: 'ad-3',
+    _id: '67a600000000000000000003',
+    title: 'HDFC SmartBuy Exclusive Points',
+    name: 'HDFC SmartBuy Exclusive Points',
+    advertiser: 'HDFC Bank',
+    placement: 'credit_cards_header',
+    budgetOrRate: '₹50,000/mo',
+    pricingModel: 'CPM',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    imageUrl: '/src/assets/deals/deal1.png',
+    image: '/src/assets/deals/deal1.png',
+    targetLink: 'https://smartbuy.hdfcbank.com',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma'
+  },
+  {
+    id: 'ad-4',
+    _id: '67a600000000000000000004',
+    title: 'Swiggy One Mega Membership Pass',
+    name: 'Swiggy One Mega Membership Pass',
+    advertiser: 'Bundl Technologies',
+    placement: 'deals_feed',
+    budgetOrRate: '₹30,000/mo',
+    pricingModel: 'Flat Monthly',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    imageUrl: '/src/assets/deals/deal2.png',
+    image: '/src/assets/deals/deal2.png',
+    targetLink: 'https://swiggy.com',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma'
+  },
+  {
+    id: 'ad-5',
+    _id: '67a600000000000000000005',
+    title: 'Tata CliQ Luxury Watch Showcase',
+    name: 'Tata CliQ Luxury Watch Showcase',
+    advertiser: 'Tata Digital',
+    placement: 'categories_spotlight',
+    budgetOrRate: '₹40,000/mo',
+    pricingModel: 'Flat Monthly',
+    status: 'active',
+    submissionStatus: 'approved',
+    opsManagerApproval: 'Approved',
+    managerApproval: 'Approved',
+    imageUrl: '/src/assets/deals/deal1.png',
+    image: '/src/assets/deals/deal1.png',
+    targetLink: 'https://tatacliq.com',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma'
+  },
+  // 1 PENDING SUBMISSION
+  {
+    id: 'ad-pending-1',
+    _id: '67a600000000000000000006',
+    title: 'OnePlus Open Foldable Phone Launch Campaign',
+    name: 'OnePlus Open Foldable Phone Launch Campaign',
+    advertiser: 'OnePlus India',
+    placement: 'deals_header',
+    budgetOrRate: '₹60,000/mo',
+    pricingModel: 'CPM',
+    status: 'pending',
+    submissionStatus: 'pending_approval',
+    opsManagerApproval: 'Pending',
+    managerApproval: 'Pending',
+    imageUrl: '/src/assets/deals/deal2.png',
+    image: '/src/assets/deals/deal2.png',
+    targetLink: 'https://oneplus.in',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    notes: 'Brand campaign for flagship foldable launch with dedicated hero placement.'
+  }
+];
+
+// ==========================================
+// 2. SUBMISSIONS QUEUE (7 Pending Items for Operational Manager Approval)
+// ==========================================
+
+const SUBMISSIONS = [
+  {
+    id: 'sub-deal-1',
+    _id: '67b000000000000000000001',
+    entityType: 'deal',
+    entityId: 'deal-pending-1',
+    action: 'create',
+    title: 'Asus ROG Zephyrus G16 OLED Gaming Laptop (Intel Core Ultra 9, RTX 4070)',
+    store: 'Flipkart',
+    category: 'Electronics',
+    priority: 'High',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    submittedAt: new Date(Date.now() - 15 * 60000), // 15 mins ago
+    status: 'Pending Approval',
+    notes: 'High-margin gaming laptop offer verified on Flipkart VIP Deals page. Requires Operational Manager approval.',
+    dataSnapshot: DEALS[5]
+  },
+  {
+    id: 'sub-loot-1',
+    _id: '67b000000000000000000002',
+    entityType: 'loot_deal',
+    entityId: 'loot-pending-1',
+    action: 'create',
+    title: 'boAt Airdopes 141 ANC with 42H Playtime & Beast Mode',
+    store: 'Amazon',
+    category: 'Electronics',
+    priority: 'High',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    submittedAt: new Date(Date.now() - 25 * 60000), // 25 mins ago
+    status: 'Pending Approval',
+    notes: 'Flash price drop for 12 hours on Amazon Lightning deals at 80% OFF.',
+    dataSnapshot: LOOT_DEALS[5]
+  },
+  {
+    id: 'sub-coup-1',
+    _id: '67b000000000000000000003',
+    entityType: 'coupon',
+    entityId: 'coupon-pending-1',
+    action: 'create',
+    title: 'AMAZONFEST500 - Flat ₹500 OFF on ₹2,499+',
+    store: 'Amazon',
+    category: 'Electronics',
+    priority: 'Normal',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    submittedAt: new Date(Date.now() - 40 * 60000), // 40 mins ago
+    status: 'Pending Approval',
+    notes: 'Verified partner coupon code for Amazon festive tech sale.',
+    dataSnapshot: COUPONS[5]
+  },
+  {
+    id: 'sub-card-1',
+    _id: '67b000000000000000000004',
+    entityType: 'credit_card',
+    entityId: 'card-pending-1',
+    action: 'create',
+    title: 'IndusInd Legend Credit Card',
+    store: 'IndusInd Bank',
+    category: 'Lifetime Free',
+    priority: 'High',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    submittedAt: new Date(Date.now() - 60 * 60000), // 1 hour ago
+    status: 'Pending Approval',
+    notes: 'High-converting lifetime free credit card affiliate campaign with ₹0 annual fee.',
+    dataSnapshot: CREDIT_CARDS[6]
+  },
+  {
+    id: 'sub-store-1',
+    _id: '67b000000000000000000005',
+    entityType: 'store',
+    entityId: 'store-pending-1',
+    action: 'create',
+    title: 'Croma Retail Partner Store',
+    store: 'Croma',
+    category: 'Electronics',
+    priority: 'Normal',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    submittedAt: new Date(Date.now() - 90 * 60000), // 1.5 hours ago
+    status: 'Pending Approval',
+    notes: 'Official Croma electronics merchant affiliate integration.',
+    dataSnapshot: STORES[20]
+  },
+  {
+    id: 'sub-banner-1',
+    _id: '67b000000000000000000006',
+    entityType: 'banner',
+    entityId: 'banner-pending-1',
+    action: 'create',
+    title: 'Monsoon Travel Bonanza 2026',
+    store: 'Wouchify Travel',
+    category: 'Home Hero Banner',
+    priority: 'Normal',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    submittedAt: new Date(Date.now() - 120 * 60000), // 2 hours ago
+    status: 'Pending Approval',
+    notes: 'Seasonal travel banner for flight and stay discounts on homepage top carousel.',
+    dataSnapshot: BANNERS[5]
+  },
+  {
+    id: 'sub-ad-1',
+    _id: '67b000000000000000000007',
+    entityType: 'advertisement',
+    entityId: 'ad-pending-1',
+    action: 'create',
+    title: 'OnePlus Open Foldable Phone Launch Campaign',
+    store: 'OnePlus India',
+    category: 'Deals Header Sponsor',
+    priority: 'High',
+    submittedBy: 'executive@wouchify.com',
+    submittedByName: 'Rahul Verma',
+    submittedAt: new Date(Date.now() - 150 * 60000), // 2.5 hours ago
+    status: 'Pending Approval',
+    notes: 'Brand campaign for flagship foldable launch with dedicated hero placement @ ₹60k/mo.',
+    dataSnapshot: ADVERTISEMENTS[5]
+  }
+];
+
+// ==========================================
+// 3. EXECUTE RESET & POPULATE
+// ==========================================
+
+async function run() {
+  console.log('🔄 Updating local dev_store.json...');
+
+  const devStorePath = path.join(__dirname, '..', 'data', 'dev_store.json');
+  let currentStore = {};
+  try {
+    currentStore = JSON.parse(fs.readFileSync(devStorePath, 'utf8'));
+  } catch (e) {
+    currentStore = {};
+  }
+
+  currentStore.deals = DEALS;
+  currentStore.lootDeals = LOOT_DEALS;
+  currentStore.coupons = COUPONS;
+  currentStore.creditCards = CREDIT_CARDS;
+  currentStore.stores = STORES;
+  currentStore.banners = BANNERS;
+  currentStore.advertisements = ADVERTISEMENTS;
+  currentStore.submissions = SUBMISSIONS;
+
+  fs.writeFileSync(devStorePath, JSON.stringify(currentStore, null, 2), 'utf8');
+  console.log('✅ dev_store.json updated with 5 active + 1 pending in each section.');
+
+  console.log('🔄 Connecting to MongoDB Atlas to sync collections...');
+  try {
+    await connectDB();
+    if (mongoose.connection.readyState === 1) {
+      console.log('Connected to MongoDB. Syncing collections...');
+
+      // Replace deals
+      await Deal.deleteMany({});
+      await Deal.insertMany(DEALS);
+      console.log('✅ Deal collection synced:', DEALS.length);
+
+      // Replace lootDeals
+      await LootDeal.deleteMany({});
+      await LootDeal.insertMany(LOOT_DEALS);
+      console.log('✅ LootDeal collection synced:', LOOT_DEALS.length);
+
+      // Replace coupons
+      await Coupon.deleteMany({});
+      await Coupon.insertMany(COUPONS);
+      console.log('✅ Coupon collection synced:', COUPONS.length);
+
+      // Replace creditCards
+      await CreditCard.deleteMany({});
+      await CreditCard.insertMany(CREDIT_CARDS);
+      console.log('✅ CreditCard collection synced:', CREDIT_CARDS.length);
+
+      // Replace stores
+      await Store.deleteMany({});
+      await Store.insertMany(STORES);
+      console.log('✅ Store collection synced:', STORES.length);
+
+      // Replace banners
+      await Banner.deleteMany({});
+      await Banner.insertMany(BANNERS);
+      console.log('✅ Banner collection synced:', BANNERS.length);
+
+      // Replace advertisements
+      await Advertisement.deleteMany({});
+      await Advertisement.insertMany(ADVERTISEMENTS);
+      console.log('✅ Advertisement collection synced:', ADVERTISEMENTS.length);
+
+      // Replace submissions
+      await Submission.deleteMany({});
+      await Submission.insertMany(SUBMISSIONS);
+      console.log('✅ Submission collection synced:', SUBMISSIONS.length);
+
+      console.log('🎉 MongoDB sync finished cleanly!');
+    }
+  } catch (err) {
+    console.warn('MongoDB sync note (in-memory dev_store is ready):', err.message);
+  }
+
+  process.exit(0);
+}
+
+run();

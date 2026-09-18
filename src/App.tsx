@@ -23,7 +23,10 @@ import {
   MobileCreditCardsPage,
   MobileContactUsPage,
   MobileWishlistPage,
+  MobileWalletPage,
+  MobileReferPage,
   MobileProductPage,
+  MobileNotificationsPage,
 } from './components/mobile'
 import { StoresPage } from './pages/StoresPage'
 import { CategoriesPage } from './pages/CategoriesPage'
@@ -544,13 +547,13 @@ export default function App() {
       if (isCategoriesRoute) {
         return <MobileCategoriesPage />
       }
-      if (isWalletRoute) return <WalletPage />
+      if (isWalletRoute) return <MobileWalletPage />
       if (isProfileRoute) return <ProfilePage />
       if (isOrdersRoute) return <OrdersPage />
       if (isCartRoute) return <MobileWishlistPage />
       if (isFavoritesRoute) return <MobileWishlistPage />
-      if (isNotificationsRoute) return <NotificationsPage />
-      if (isReferRoute) return <ReferPage />
+      if (isNotificationsRoute) return <MobileNotificationsPage />
+      if (isReferRoute) return <MobileReferPage />
       if (isAdminLoginRoute) {
         return <AdminLoginPage />
       }

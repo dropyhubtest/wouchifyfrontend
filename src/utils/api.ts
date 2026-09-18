@@ -23,8 +23,40 @@ export const register = (userData: any) => API.post('/auth/register', userData)
 export const googleLogin = (token: string, isLogin: boolean) => API.post('/auth/google', { token, isLogin })
 
 // --- Data Fetching APIs ---
-export const fetchDeals = () => API.get('/data/deals')
-export const fetchPopularBrands = () => API.get('/data/brands/popular')
-export const fetchCategories = () => API.get('/data/categories')
+export const fetchDeals = async () => {
+  try {
+    return await API.get('/data/deals')
+  } catch (err) {
+    try {
+      return await API.get('/deals')
+    } catch {
+      return { data: [] }
+    }
+  }
+}
+
+export const fetchPopularBrands = async () => {
+  try {
+    return await API.get('/data/brands/popular')
+  } catch (err) {
+    try {
+      return await API.get('/stores')
+    } catch {
+      return { data: [] }
+    }
+  }
+}
+
+export const fetchCategories = async () => {
+  try {
+    return await API.get('/data/categories')
+  } catch (err) {
+    try {
+      return await API.get('/categories')
+    } catch {
+      return { data: [] }
+    }
+  }
+}
 
 export default API

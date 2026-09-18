@@ -35,117 +35,9 @@ export interface SupportTicket {
   disputeAmount?: number
 }
 
-const initialTickets: SupportTicket[] = [
-  {
-    id: 'TKT-8921',
-    userName: 'Akash Roy',
-    userEmail: 'akash.roy@gmail.com',
-    category: 'Missing Cashback',
-    subject: 'Amazon order cashback of ₹850 not tracked after 72 hours',
-    priority: 'Urgent',
-    status: 'Open',
-    createdAt: '45 mins ago',
-    orderId: '402-1829038-1928391',
-    disputeAmount: 850,
-    messages: [
-      {
-        sender: 'user',
-        senderName: 'Akash Roy',
-        time: '45 mins ago',
-        text: 'Hello, I ordered a boAt Soundbar on Amazon using the Wouchify Grab Deal link. It has been 72 hours and the ₹850 cashback is still not showing in my pending wallet.'
-      }
-    ]
-  },
-  {
-    id: 'TKT-8922',
-    userName: 'Meera Iyer',
-    userEmail: 'meera.iyer@yahoo.com',
-    category: 'Wallet Withdrawal',
-    subject: 'Bank transfer failed but ₹1,200 deducted from wallet',
-    priority: 'Urgent',
-    status: 'Open',
-    createdAt: '2 hours ago',
-    disputeAmount: 1200,
-    messages: [
-      {
-        sender: 'user',
-        senderName: 'Meera Iyer',
-        time: '2 hours ago',
-        text: 'Hi team, I requested ₹1,200 UPI withdrawal to my HDFC VPA. The app says failed but balance was debited from my Wouchify wallet. Please refund or re-trigger.'
-      }
-    ]
-  },
-  {
-    id: 'TKT-8923',
-    userName: 'Gaurav Kulkarni',
-    userEmail: 'gaurav.k@gmail.com',
-    category: 'Broken Deal/Coupon',
-    subject: 'Coupon code MYNTRAPRO showing invalid on checkout',
-    priority: 'High',
-    status: 'In Progress',
-    createdAt: '3 hours ago',
-    messages: [
-      {
-        sender: 'user',
-        senderName: 'Gaurav Kulkarni',
-        time: '3 hours ago',
-        text: 'The coupon MYNTRAPRO listed under your coupon section is returning "Invalid Code" on Myntra app.'
-      },
-      {
-        sender: 'staff',
-        senderName: 'Wouchify Operations',
-        time: '2 hours ago',
-        text: 'Hi Gaurav, we are checking with the Myntra affiliate manager regarding coupon validity.'
-      }
-    ]
-  },
-  {
-    id: 'TKT-8924',
-    userName: 'Priya Nambiar',
-    userEmail: 'priya.n@gmail.com',
-    category: 'KYC & Account',
-    subject: 'PAN card verification for withdrawals pending over 48h',
-    priority: 'Medium',
-    status: 'In Progress',
-    createdAt: 'Yesterday',
-    messages: [
-      {
-        sender: 'user',
-        senderName: 'Priya Nambiar',
-        time: 'Yesterday',
-        text: 'I submitted my PAN card document for withdrawal verification. Please approve.'
-      }
-    ]
-  },
-  {
-    id: 'TKT-8925',
-    userName: 'Tanmay Joshi',
-    userEmail: 'tanmay.j@gmail.com',
-    category: 'Missing Cashback',
-    subject: 'Flipkart Big Billion Days extra cashback credited',
-    priority: 'Low',
-    status: 'Resolved',
-    createdAt: '08-Sep-2026',
-    disputeAmount: 450,
-    messages: [
-      {
-        sender: 'user',
-        senderName: 'Tanmay Joshi',
-        time: '08-Sep-2026',
-        text: 'Claiming ₹450 cashback on order OD1829012.'
-      },
-      {
-        sender: 'staff',
-        senderName: 'Ops Manager',
-        time: '08-Sep-2026',
-        text: 'Verified with Flipkart sub-ID. ₹450 credited to your active wallet.'
-      }
-    ]
-  }
-]
-
 export const OperationsSupportPage: React.FC = () => {
-  const [tickets, setTickets] = useState<SupportTicket[]>(initialTickets)
+  const [tickets, setTickets] = useState<SupportTicket[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [searchTerm, setSearchTerm] = useState('')
@@ -164,36 +56,45 @@ export const OperationsSupportPage: React.FC = () => {
   }
 
   // Load from backend API
+  const fetchTickets = async () => {
+    try {
+      setLoading(true)
+      const res = await adminApi.getSupportTickets()
+      if (Array.isArray(res)) {
+        const mapped: SupportTicket[] = res.map((t: any, idx: number) => ({
+          id: t.ticketId || t._id || t.id || `TKT-${8900 + idx}`,
+          userName: t.userName || 'Customer',
+          userEmail: t.userEmail || 'customer@wouchify.com',
+          category: t.category || 'Missing Cashback',
+          subject: t.subject || 'Support Ticket',
+          priority: t.priority || 'Medium',
+          status: t.status || 'Open',
+          createdAt: t.createdAt ? new Date(t.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : 'Recently',
+          orderId: t.orderId,
+          disputeAmount: t.disputeAmount,
+          messages: Array.isArray(t.messages) && t.messages.length > 0 ? t.messages : [
+            {
+              sender: 'user',
+              senderName: t.userName || 'Customer',
+              time: 'Recently',
+              text: t.subject || 'Query details'
+            }
+          ]
+        }))
+        setTickets(mapped)
+      } else {
+        setTickets([])
+      }
+    } catch (err) {
+      console.warn('API error loading support tickets:', err)
+      setTickets([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
-    adminApi.getSupportTickets()
-      .then((res: any[]) => {
-        if (Array.isArray(res) && res.length > 0) {
-          const mapped: SupportTicket[] = res.map((t: any, idx: number) => ({
-            id: t.ticketId || t._id || t.id || `TKT-${8900 + idx}`,
-            userName: t.userName || 'Customer',
-            userEmail: t.userEmail || 'customer@wouchify.com',
-            category: t.category || 'Missing Cashback',
-            subject: t.subject || 'Support Ticket',
-            priority: t.priority || 'Medium',
-            status: t.status || 'Open',
-            createdAt: t.createdAt ? new Date(t.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : 'Recently',
-            orderId: t.orderId,
-            disputeAmount: t.disputeAmount,
-            messages: Array.isArray(t.messages) && t.messages.length > 0 ? t.messages : [
-              {
-                sender: 'user',
-                senderName: t.userName || 'Customer',
-                time: 'Recently',
-                text: t.subject || 'Query details'
-              }
-            ]
-          }))
-          setTickets(mapped)
-        }
-      })
-      .catch(err => {
-        console.warn('API error, using mock tickets:', err)
-      })
+    fetchTickets()
   }, [])
 
   // KPIs
@@ -396,21 +297,38 @@ export const OperationsSupportPage: React.FC = () => {
 
         {/* Tickets Table */}
         <div className="crud-table-card">
-          <div className="crud-table-wrapper">
-            <table className="crud-table">
-              <thead>
-                <tr>
-                  <th>Ticket ID & Date</th>
-                  <th>Customer Details</th>
-                  <th>Category</th>
-                  <th>Subject & Dispute Summary</th>
-                  <th>Priority</th>
-                  <th>Status</th>
-                  <th style={{ textAlign: 'right' }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredTickets.map((t) => (
+          {loading ? (
+            <div style={{ padding: '48px 20px', textAlign: 'center', color: '#64748b' }}>
+              <Clock size={36} style={{ color: '#2563eb', margin: '0 auto 12px', display: 'block', animation: 'spin 1.5s linear infinite' }} />
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>Loading Support Tickets…</h3>
+              <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>Syncing with customer support desk</p>
+            </div>
+          ) : filteredTickets.length === 0 ? (
+            <div style={{ padding: '48px 20px', textAlign: 'center', color: '#64748b' }}>
+              <CheckCircle2 size={42} style={{ color: '#16a34a', margin: '0 auto 12px', display: 'block' }} />
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>No Support Tickets Found</h3>
+              <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '6px' }}>
+                {searchTerm || categoryFilter !== 'all' || statusFilter !== 'all'
+                  ? 'No support tickets match your search or filter criteria.' 
+                  : 'All shopper inquiries and tickets have been resolved.'}
+              </p>
+            </div>
+          ) : (
+            <div className="crud-table-wrapper">
+              <table className="crud-table">
+                <thead>
+                  <tr>
+                    <th>Ticket ID & Date</th>
+                    <th>Customer Details</th>
+                    <th>Category</th>
+                    <th>Subject & Dispute Summary</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th style={{ textAlign: 'right' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredTickets.map((t) => (
                   <tr key={t.id}>
                     <td>
                       <strong style={{ fontSize: '0.85rem', color: '#0f172a', display: 'block' }}>{t.id}</strong>
@@ -464,6 +382,7 @@ export const OperationsSupportPage: React.FC = () => {
               </tbody>
             </table>
           </div>
+          )}
         </div>
 
         {/* ── TICKET REPLY & RESOLUTION MODAL ── */}

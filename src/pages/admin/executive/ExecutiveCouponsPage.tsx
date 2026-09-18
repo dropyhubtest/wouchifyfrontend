@@ -498,9 +498,9 @@ export const ExecutiveCouponsPage: React.FC = () => {
     setLoading(true)
     try {
       const [liveCoupons, liveStores, liveDeals] = await Promise.all([
-        adminApi.getCoupons(),
-        adminApi.getStores(),
-        adminApi.getDeals()
+        adminApi.getCoupons({ all: true }),
+        adminApi.getStores({ all: true }),
+        adminApi.getDeals({ all: true })
       ])
 
       if (Array.isArray(liveCoupons)) {

@@ -1,6 +1,7 @@
 import React from 'react'
 import rewardTicketIcon from '../../assets/brands/reward-ticket-w.png'
 import type { BrandRewardItem } from '../../data/popularBrands'
+import { getStoreLogo } from '../../data/dealsPage'
 import './BrandRewardCard.css'
 
 interface BrandRewardCardProps {
@@ -51,11 +52,18 @@ export const BrandRewardCard: React.FC<BrandRewardCardProps> = ({ brand }) => {
         {/* 2. White Logo Panel (left: 21px, top: 90px, 355 x 165, overflow: hidden) */}
         <div className="brand-card__logo-panel" style={logoPanelStyle}>
           <img
-            src={brand.logoSrc}
+            src={brand.logoSrc || getStoreLogo(brand.name)}
             alt={`${brand.name} logo`}
             className="brand-card__logo-image"
             style={logoStyle}
             loading="lazy"
+            onError={(e) => {
+              const target = e.currentTarget
+              const fallback = getStoreLogo(brand.name)
+              if (target.src !== fallback) {
+                target.src = fallback
+              }
+            }}
           />
         </div>
 

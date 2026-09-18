@@ -8,22 +8,21 @@ const { handleEntityCreate, handleEntityUpdate, handleEntityDelete } = require('
 
 // Public read access for storefront & catalog consumers
 router.get('/', async (req, res, next) => {
+  const { category, status, submissionStatus, all } = req.query;
   try {
-    const { category, status, submissionStatus, all } = req.query;
     if (mongoose.connection.readyState !== 1) {
       return res.json(store.getDeals(req.query));
     }
 
     let query = {};
     if (category && category !== 'All') query.category = category;
-    
     // Default public filtering: Only approved active deals where publishAt <= now and not expired
     if (all === 'true') {
       if (status && status !== 'All') query.status = status;
       if (submissionStatus && submissionStatus !== 'All') query.submissionStatus = submissionStatus;
     } else {
-      query.submissionStatus = submissionStatus || 'approved';
       query.status = status || 'active';
+      query.submissionStatus = submissionStatus ? submissionStatus : { $in: ['approved', undefined] };
       query.publishAt = { $lte: new Date() };
       query.$or = [
         { expiresAt: { $exists: false } },
@@ -33,8 +32,14 @@ router.get('/', async (req, res, next) => {
     }
 
     const deals = await Deal.find(query).sort({ createdAt: -1 });
+    if (!deals || deals.length === 0) {
+      return res.json(store.getDeals(req.query));
+    }
     res.json(deals);
-  } catch (err) { next(err); }
+  } catch (err) {
+    console.warn('Deals route fallback to in-memory store:', err.message);
+    return res.json(store.getDeals(req.query));
+  }
 });
 
 // Public click tracking for storefront engagements

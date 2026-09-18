@@ -42,8 +42,14 @@ router.get('/', async (req, res, next) => {
     }
 
     const cards = await CreditCard.find(query).sort({ isFeatured: -1, createdAt: -1 });
+    if (!cards || cards.length === 0) {
+      return res.json(store.getCreditCards(req.query));
+    }
     res.json(cards);
-  } catch (err) { next(err); }
+  } catch (err) {
+    console.warn('Credit cards route fallback to in-memory store:', err.message);
+    return res.json(store.getCreditCards(req.query));
+  }
 });
 
 // GET /api/credit-cards/:id

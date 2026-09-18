@@ -25,7 +25,10 @@ router.get('/', async (req, res, next) => {
 
     const claims = await CashbackClaim.find(query).sort({ claimedAt: -1, createdAt: -1 });
     res.json(claims);
-  } catch (err) { next(err); }
+  } catch (err) { 
+    console.warn('Cashback claims route fallback to in-memory store:', err.message);
+    return res.json(store.getCashbackClaims(req.query));
+  }
 });
 
 // GET /api/cashback-claims/:id

@@ -122,17 +122,17 @@
   background: #EFEFEF;
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.20);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   cursor: pointer;
   text-decoration: none;
   pointer-events: auto;
   z-index: 2;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .trending-deals__card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.22);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.18);
 }
 
 .trending-deals__card:focus-visible {
@@ -151,6 +151,11 @@
   border-radius: 16px;
   pointer-events: none;
   user-select: none;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.trending-deals__card:hover .trending-deals__image {
+  transform: scale(1.04);
 }
 
 /* ==========================================================================

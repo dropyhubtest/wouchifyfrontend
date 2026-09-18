@@ -156,9 +156,9 @@ export const ExecutiveDealsPage: React.FC = () => {
     setLoading(true)
     try {
       const [liveDeals, stores, coupons] = await Promise.all([
-        adminApi.getDeals(),
-        adminApi.getStores().catch(() => []),
-        adminApi.getCoupons().catch(() => [])
+        adminApi.getDeals({ all: true }),
+        adminApi.getStores({ all: true }).catch(() => []),
+        adminApi.getCoupons({ all: true }).catch(() => [])
       ])
       setRawStores(Array.isArray(stores) ? stores : [])
       setRawCoupons(Array.isArray(coupons) ? coupons : [])

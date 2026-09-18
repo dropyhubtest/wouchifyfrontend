@@ -29,36 +29,40 @@ function isRelated(itemSlug, itemName, record) {
 
 // GET /api/categories — list all categories with optional filters
 router.get('/', async (req, res, next) => {
+  const { status, search, pillar, letter, trending, all } = req.query;
+  const getFallback = () => {
+    let list = store.getCategories();
+    if (status && status !== 'all') {
+      list = list.filter(c => (c.status || 'active').toLowerCase() === status.toLowerCase());
+    }
+    if (all !== 'true') {
+      list = list.filter(c => c.submissionStatus !== 'pending_approval' && c.opsManagerApproval !== 'Rejected');
+    }
+    if (pillar && pillar !== 'all') {
+      list = list.filter(c => (c.pillar || 'general') === pillar);
+    }
+    if (letter) {
+      list = list.filter(c => (c.letter || c.name.charAt(0)).toUpperCase() === letter.toUpperCase());
+    }
+    if (trending === 'true') {
+      list = list.filter(c => c.isTrending);
+    }
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(c => c.name.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q));
+    }
+    return list;
+  };
+
   try {
-    const { status, search, pillar, letter, trending, all } = req.query;
     if (mongoose.connection.readyState !== 1) {
-      let list = store.getCategories();
-      if (status && status !== 'all') {
-        list = list.filter(c => (c.status || 'active').toLowerCase() === status.toLowerCase());
-      }
-      if (all !== 'true') {
-        list = list.filter(c => c.submissionStatus !== 'pending_approval' && c.opsManagerApproval !== 'Rejected');
-      }
-      if (pillar && pillar !== 'all') {
-        list = list.filter(c => (c.pillar || 'general') === pillar);
-      }
-      if (letter) {
-        list = list.filter(c => (c.letter || c.name.charAt(0)).toUpperCase() === letter.toUpperCase());
-      }
-      if (trending === 'true') {
-        list = list.filter(c => c.isTrending);
-      }
-      if (search) {
-        const q = search.toLowerCase();
-        list = list.filter(c => c.name.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q));
-      }
-      return res.json(list);
+      return res.json(getFallback());
     }
 
     const query = {};
     if (status && status !== 'all') query.status = status;
     if (all !== 'true') {
-      query.status = { $ne: 'rejected', $ne: 'pending' };
+      query.status = { $nin: ['rejected', 'pending'] };
       query.opsManagerApproval = { $ne: 'Rejected' };
       query.submissionStatus = { $ne: 'pending_approval' };
     }
@@ -74,20 +78,14 @@ router.get('/', async (req, res, next) => {
     }
 
     let categories = await Category.find(query).sort({ sortOrder: 1, name: 1 });
-    if (categories.length === 0 && !search && (!status || status === 'all') && (!pillar || pillar === 'all')) {
-      const defaultCats = store.getCategories();
-      try {
-        await Category.insertMany(defaultCats);
-        categories = await Category.find(query).sort({ sortOrder: 1, name: 1 });
-      } catch {
-        return res.json(defaultCats);
-      }
-    }
-    if (categories.length === 0) {
-      return res.json(store.getCategories());
+    if (!categories || categories.length === 0) {
+      return res.json(getFallback());
     }
     res.json(categories);
-  } catch (err) { next(err); }
+  } catch (err) {
+    console.warn('Categories route fallback to in-memory store:', err.message);
+    return res.json(getFallback());
+  }
 });
 
 // GET /api/categories/summary — aggregated pillar breakdown with live counts

@@ -299,19 +299,19 @@
   transform: translateY(-2px);
 }
 
-/* Row 1: Bright Blue Border */
+/* Row 1: Soft Lavender / Grey-Blue Border (Removed prominent blue border) */
 .wallet-table-row-card--row1 {
-  border: 2px solid #0080FF;
+  border: 1.5px solid #CBD2EB;
 }
 
 /* Row 2: Warm Peach / Beige Border */
 .wallet-table-row-card--row2 {
-  border: 2px solid #E5C3A5;
+  border: 1.5px solid #E5C3A5;
 }
 
 /* Row 3: Soft Lavender / Grey-Blue Border */
 .wallet-table-row-card--row3 {
-  border: 2px solid #CBD2EB;
+  border: 1.5px solid #CBD2EB;
 }
 
 /* Left Tinted Content Area */

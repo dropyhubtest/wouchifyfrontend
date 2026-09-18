@@ -69,6 +69,7 @@ export interface ModerationItem {
 export const OperationsApprovalsPage: React.FC = () => {
   const [items, setItems] = useState<ModerationItem[]>([])
   const [loading, setLoading] = useState<boolean>(true)
+  const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected' | 'all'>('pending')
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [filterType, setFilterType] = useState<string>('all')
   const [filterExecutive, setFilterExecutive] = useState<string>('all')
@@ -89,10 +90,10 @@ export const OperationsApprovalsPage: React.FC = () => {
     setTimeout(() => setToastMessage(null), 3000)
   }
 
-  const fetchQueue = async () => {
+  const fetchQueue = async (silent = false) => {
     try {
-      setLoading(true)
-      const res = await adminApi.getSubmissions()
+      if (!silent) setLoading(true)
+      const res = await adminApi.getSubmissions({ status: 'all' })
       if (Array.isArray(res)) {
         const mapped: ModerationItem[] = res.map((s: any, idx: number) => {
           const snap = s.dataSnapshot || {}
@@ -111,7 +112,7 @@ export const OperationsApprovalsPage: React.FC = () => {
             title: s.title || snap.title || snap.name || snap.cardName || 'Submitted Item',
             brand: snap.brand || snap.bank || snap.store || s.store || 'Generic',
             store: s.store || snap.store || snap.storeName || snap.advertiser || snap.bank || 'Partner',
-            submittedBy: s.submittedBy || 'executive@wouchify.com',
+            submittedBy: s.submittedBy || 'Content Executive',
             submittedByName: s.submittedByName,
             submittedAt: s.submittedAt ? new Date(s.submittedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : 'Recently',
             price: snap.price || snap.currentPrice || snap.reward || snap.annualFee || (snap.pricingModel ? `${snap.pricingModel} • ${snap.budgetOrRate || ''}` : 'Special Offer'),
@@ -119,8 +120,8 @@ export const OperationsApprovalsPage: React.FC = () => {
             discount: snap.discount || snap.discountLabel || snap.rewardRate || '',
             code: snap.code || '',
             priority: s.priority || 'Normal',
-            link: snap.link || snap.href || snap.targetLink || snap.affiliateLink || 'https://wouchify.com',
-            image: snap.image || snap.imageUrl || snap.productImage || snap.primaryImage || snap.logo || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&auto=format&fit=crop',
+            link: snap.link || snap.href || snap.targetLink || snap.affiliateLink || '#',
+            image: snap.image || snap.imageUrl || snap.productImage || snap.primaryImage || snap.logo || PLACEHOLDER_DEAL_IMAGE,
             notes: s.notes || snap.proofNote || snap.description || '',
             category: s.category || snap.category || 'General',
             status: s.status === 'Approved' ? 'Approved' : (s.status === 'Rejected' ? 'Rejected' : 'Pending Approval'),
@@ -136,16 +137,34 @@ export const OperationsApprovalsPage: React.FC = () => {
     } catch (err) {
       console.error('Failed to load submissions queue:', err)
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchQueue()
-    const handleSubmissionsUpdated = () => fetchQueue()
+    fetchQueue(false)
+
+    // Event listener for in-window updates
+    const handleSubmissionsUpdated = () => fetchQueue(true)
     window.addEventListener('wouchify_submissions_updated', handleSubmissionsUpdated)
+
+    // Storage listener for cross-tab updates (when executive adds deal in another tab)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'wouchify_submissions_sync') {
+        fetchQueue(true)
+      }
+    }
+    window.addEventListener('storage', handleStorageChange)
+
+    // Background polling every 3.5 seconds for instant synchronisation
+    const interval = setInterval(() => {
+      fetchQueue(true)
+    }, 3500)
+
     return () => {
       window.removeEventListener('wouchify_submissions_updated', handleSubmissionsUpdated)
+      window.removeEventListener('storage', handleStorageChange)
+      clearInterval(interval)
     }
   }, [])
 
@@ -155,6 +174,7 @@ export const OperationsApprovalsPage: React.FC = () => {
       setItems(prev => prev.map(i => i.id === id ? { ...i, status: 'Approved' } : i))
       setSelectedIds(prev => prev.filter(selId => selId !== id))
       showToast(`Approved: "${title}"`)
+      try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()) } catch {}
       window.dispatchEvent(new CustomEvent('wouchify_deals_updated'))
       window.dispatchEvent(new CustomEvent('wouchify_loot_deals_updated'))
       window.dispatchEvent(new CustomEvent('wouchify_stores_updated'))
@@ -190,6 +210,7 @@ export const OperationsApprovalsPage: React.FC = () => {
       showToast(`Rejected submission with feedback note`)
       setRejectingItem(null)
       setRejectionReason('')
+      try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()) } catch {}
       window.dispatchEvent(new CustomEvent('wouchify_submissions_updated'))
     } catch (err: any) {
       console.error('Reject failed:', err)
@@ -204,6 +225,7 @@ export const OperationsApprovalsPage: React.FC = () => {
       setItems(prev => prev.map(item => selectedIds.includes(item.id) ? { ...item, status: 'Approved' } : item))
       showToast(`Bulk approved ${selectedIds.length} submissions`)
       setSelectedIds([])
+      try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()) } catch {}
       window.dispatchEvent(new CustomEvent('wouchify_submissions_updated'))
       window.dispatchEvent(new CustomEvent('wouchify_deals_updated'))
       window.dispatchEvent(new CustomEvent('wouchify_loot_deals_updated'))
@@ -231,6 +253,7 @@ export const OperationsApprovalsPage: React.FC = () => {
       showToast(`Rejected ${selectedIds.length} submissions`)
       setSelectedIds([])
       setBulkRejectOpen(false)
+      try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()) } catch {}
       window.dispatchEvent(new CustomEvent('wouchify_submissions_updated'))
     } catch (err: any) {
       console.error('Bulk reject failed:', err)
@@ -238,8 +261,13 @@ export const OperationsApprovalsPage: React.FC = () => {
     }
   }
 
-  // KPIs
+  // Counts
   const pendingCount = items.filter(i => i.status === 'Pending Approval').length
+  const approvedCount = items.filter(i => i.status === 'Approved').length
+  const rejectedCount = items.filter(i => i.status === 'Rejected').length
+  const totalCount = items.length
+
+  // KPIs (reflecting currently pending items)
   const criticalCount = items.filter(i => i.status === 'Pending Approval' && i.priority === 'Critical').length
   const dealsCount = items.filter(i => i.status === 'Pending Approval' && (i.type === 'deal' || i.type === 'loot')).length
   const couponsCount = items.filter(i => i.status === 'Pending Approval' && i.type === 'coupon').length
@@ -257,7 +285,10 @@ export const OperationsApprovalsPage: React.FC = () => {
   // Filtered List
   const filteredItems = useMemo(() => {
     return items.filter((item: ModerationItem) => {
-      if (item.status !== 'Pending Approval') return false
+      // Status Tab filter
+      if (activeTab === 'pending' && item.status !== 'Pending Approval') return false
+      if (activeTab === 'approved' && item.status !== 'Approved') return false
+      if (activeTab === 'rejected' && item.status !== 'Rejected') return false
 
       if (filterType !== 'all' && item.type !== filterType) {
         return false
@@ -278,7 +309,7 @@ export const OperationsApprovalsPage: React.FC = () => {
 
       return true
     })
-  }, [items, filterType, filterExecutive, searchTerm])
+  }, [items, activeTab, filterType, filterExecutive, searchTerm])
 
   const handleSelectAll = () => {
     const pageIds = filteredItems.map((i: ModerationItem) => i.id)
@@ -432,6 +463,137 @@ export const OperationsApprovalsPage: React.FC = () => {
 
         </div>
 
+        {/* ── Approval Navigation Tabs ── */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px' }}>
+          <button 
+            type="button"
+            onClick={() => setActiveTab('pending')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              fontWeight: activeTab === 'pending' ? 700 : 500,
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              border: 'none',
+              background: activeTab === 'pending' ? '#eff6ff' : 'transparent',
+              color: activeTab === 'pending' ? '#1d4ed8' : '#64748b',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <Clock size={16} style={{ color: activeTab === 'pending' ? '#2563eb' : '#94a3b8' }} />
+            Pending Approval
+            <span style={{
+              background: activeTab === 'pending' ? '#2563eb' : '#e2e8f0',
+              color: activeTab === 'pending' ? '#ffffff' : '#475569',
+              padding: '2px 8px',
+              borderRadius: '9999px',
+              fontSize: '0.75rem',
+              fontWeight: 700
+            }}>
+              {pendingCount}
+            </span>
+          </button>
+
+          <button 
+            type="button"
+            onClick={() => setActiveTab('approved')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              fontWeight: activeTab === 'approved' ? 700 : 500,
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              border: 'none',
+              background: activeTab === 'approved' ? '#ecfdf5' : 'transparent',
+              color: activeTab === 'approved' ? '#047857' : '#64748b',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <CheckCircle2 size={16} style={{ color: activeTab === 'approved' ? '#10b981' : '#94a3b8' }} />
+            Approved Items
+            <span style={{
+              background: activeTab === 'approved' ? '#10b981' : '#e2e8f0',
+              color: activeTab === 'approved' ? '#ffffff' : '#475569',
+              padding: '2px 8px',
+              borderRadius: '9999px',
+              fontSize: '0.75rem',
+              fontWeight: 700
+            }}>
+              {approvedCount}
+            </span>
+          </button>
+
+          <button 
+            type="button"
+            onClick={() => setActiveTab('rejected')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              fontWeight: activeTab === 'rejected' ? 700 : 500,
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              border: 'none',
+              background: activeTab === 'rejected' ? '#fef2f2' : 'transparent',
+              color: activeTab === 'rejected' ? '#b91c1c' : '#64748b',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <X size={16} style={{ color: activeTab === 'rejected' ? '#ef4444' : '#94a3b8' }} />
+            Rejected Submissions
+            <span style={{
+              background: activeTab === 'rejected' ? '#ef4444' : '#e2e8f0',
+              color: activeTab === 'rejected' ? '#ffffff' : '#475569',
+              padding: '2px 8px',
+              borderRadius: '9999px',
+              fontSize: '0.75rem',
+              fontWeight: 700
+            }}>
+              {rejectedCount}
+            </span>
+          </button>
+
+          <button 
+            type="button"
+            onClick={() => setActiveTab('all')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              fontWeight: activeTab === 'all' ? 700 : 500,
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              border: 'none',
+              background: activeTab === 'all' ? '#f1f5f9' : 'transparent',
+              color: activeTab === 'all' ? '#0f172a' : '#64748b',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <Layers size={16} style={{ color: activeTab === 'all' ? '#0f172a' : '#94a3b8' }} />
+            All History
+            <span style={{
+              background: activeTab === 'all' ? '#475569' : '#e2e8f0',
+              color: activeTab === 'all' ? '#ffffff' : '#475569',
+              padding: '2px 8px',
+              borderRadius: '9999px',
+              fontSize: '0.75rem',
+              fontWeight: 700
+            }}>
+              {totalCount}
+            </span>
+          </button>
+        </div>
+
         {/* Filter Bar */}
         <div className="crud-filter-bar">
           <div className="filter-search-wrap">
@@ -492,34 +654,68 @@ export const OperationsApprovalsPage: React.FC = () => {
             </div>
           ) : filteredItems.length === 0 ? (
             <div style={{ padding: '48px 20px', textAlign: 'center', color: '#64748b' }}>
-              <CheckCircle2 size={42} style={{ color: '#16a34a', margin: '0 auto 12px', display: 'block' }} />
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>Approval Queue is Clear!</h3>
-              <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '6px' }}>
-                {searchTerm || filterType !== 'all' 
-                  ? 'No pending items match the selected filter criteria.' 
-                  : 'All executive submissions have been processed and published.'}
-              </p>
+              {activeTab === 'pending' ? (
+                <>
+                  <CheckCircle2 size={42} style={{ color: '#16a34a', margin: '0 auto 12px', display: 'block' }} />
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>Approval Queue is Clear!</h3>
+                  <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '6px' }}>
+                    {searchTerm || filterType !== 'all' 
+                      ? 'No pending items match the selected filter criteria.' 
+                      : 'All executive submissions have been processed and published.'}
+                  </p>
+                </>
+              ) : activeTab === 'approved' ? (
+                <>
+                  <CheckCircle2 size={42} style={{ color: '#10b981', margin: '0 auto 12px', display: 'block' }} />
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>No Approved Items in History</h3>
+                  <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '6px' }}>
+                    Items approved by Operational Managers will be logged here.
+                  </p>
+                </>
+              ) : activeTab === 'rejected' ? (
+                <>
+                  <ShieldAlert size={42} style={{ color: '#ef4444', margin: '0 auto 12px', display: 'block' }} />
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>No Rejected Submissions</h3>
+                  <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '6px' }}>
+                    Any submissions rejected with feedback notes will be cataloged here.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <Layers size={42} style={{ color: '#64748b', margin: '0 auto 12px', display: 'block' }} />
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>No Submissions Found</h3>
+                  <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '6px' }}>
+                    No submission records match your search or filter filters.
+                  </p>
+                </>
+              )}
             </div>
           ) : (
             <div className="crud-table-wrapper">
               <table className="crud-table">
                 <thead>
                   <tr>
-                    <th style={{ width: '32px', textAlign: 'center' }}>
-                      <input 
-                        type="checkbox"
-                        checked={filteredItems.length > 0 && filteredItems.every(i => selectedIds.includes(i.id))}
-                        onChange={handleSelectAll}
-                      />
-                    </th>
+                    {activeTab === 'pending' && (
+                      <th style={{ width: '32px', textAlign: 'center' }}>
+                        <input 
+                          type="checkbox"
+                          checked={filteredItems.length > 0 && filteredItems.every(i => selectedIds.includes(i.id))}
+                          onChange={handleSelectAll}
+                        />
+                      </th>
+                    )}
                     <th style={{ width: '44px', textAlign: 'center' }}>Image</th>
                     <th style={{ minWidth: '190px' }}>Submission Headline & Details</th>
                     <th style={{ width: '90px' }}>Type & Priority</th>
                     <th style={{ width: '95px' }}>Store Partner</th>
                     <th style={{ width: '105px' }}>Submitted By</th>
                     <th style={{ width: '95px' }}>Price / Offer</th>
-                    <th style={{ width: '130px' }}>Executive Notes</th>
-                    <th style={{ width: '140px', textAlign: 'right' }}>Moderation Actions</th>
+                    <th style={{ width: activeTab === 'rejected' ? '180px' : '130px' }}>
+                      {activeTab === 'rejected' ? 'Rejection Feedback' : 'Executive Notes'}
+                    </th>
+                    <th style={{ width: '140px', textAlign: 'right' }}>
+                      {activeTab === 'pending' ? 'Moderation Actions' : 'Status & Action'}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -527,13 +723,15 @@ export const OperationsApprovalsPage: React.FC = () => {
                     const isSelected = selectedIds.includes(item.id)
                     return (
                       <tr key={item.id} className={isSelected ? 'row-selected' : ''}>
-                        <td style={{ textAlign: 'center' }}>
-                          <input 
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => handleToggleSelect(item.id)}
-                          />
-                        </td>
+                        {activeTab === 'pending' && (
+                          <td style={{ textAlign: 'center' }}>
+                            <input 
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => handleToggleSelect(item.id)}
+                            />
+                          </td>
+                        )}
                         <td style={{ width: '44px', textAlign: 'center' }}>
                           <div className="product-table-thumb-wrap">
                             <img 
@@ -632,9 +830,18 @@ export const OperationsApprovalsPage: React.FC = () => {
                           </div>
                         </td>
                         <td>
-                          <div className="executive-notes-bubble">
-                            "{item.notes || 'Verified for live publication'}"
-                          </div>
+                          {item.status === 'Rejected' ? (
+                            <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', padding: '6px 8px', fontSize: '0.78rem', color: '#991b1b', lineHeight: '1.3' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 700, marginBottom: '2px', color: '#b91c1c' }}>
+                                <ShieldAlert size={12} /> Rejection Note:
+                              </div>
+                              "{item.rejectionReason || 'Declined during moderation review'}"
+                            </div>
+                          ) : (
+                            <div className="executive-notes-bubble">
+                              "{item.notes || 'Verified for live publication'}"
+                            </div>
+                          )}
                         </td>
                         <td style={{ textAlign: 'right' }}>
                           <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
@@ -646,22 +853,56 @@ export const OperationsApprovalsPage: React.FC = () => {
                             >
                               <Eye size={15} />
                             </button>
-                            <button 
-                              type="button" 
-                              className="btn-approve-quick" 
-                              onClick={() => handleApproveOne(item.id, item.title)}
-                              title="Approve and push to live storefront"
-                            >
-                              <Check size={14} /> Approve
-                            </button>
-                            <button 
-                              type="button" 
-                              className="btn-reject-quick" 
-                              onClick={() => handleOpenRejectModal(item)}
-                              title="Reject submission with feedback"
-                            >
-                              <X size={14} /> Reject
-                            </button>
+
+                            {item.status === 'Pending Approval' && (
+                              <>
+                                <button 
+                                  type="button" 
+                                  className="btn-approve-quick" 
+                                  onClick={() => handleApproveOne(item.id, item.title)}
+                                  title="Approve and push to live storefront"
+                                >
+                                  <Check size={14} /> Approve
+                                </button>
+                                <button 
+                                  type="button" 
+                                  className="btn-reject-quick" 
+                                  onClick={() => handleOpenRejectModal(item)}
+                                  title="Reject submission with feedback"
+                                >
+                                  <X size={14} /> Reject
+                                </button>
+                              </>
+                            )}
+
+                            {item.status === 'Approved' && (
+                              <span style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                background: '#ecfdf5',
+                                color: '#047857',
+                                border: '1px solid #a7f3d0',
+                                padding: '4px 10px',
+                                borderRadius: '6px',
+                                fontSize: '0.78rem',
+                                fontWeight: 700
+                              }}>
+                                <Check size={13} /> Live
+                              </span>
+                            )}
+
+                            {item.status === 'Rejected' && (
+                              <button 
+                                type="button" 
+                                className="btn-approve-quick" 
+                                onClick={() => handleApproveOne(item.id, item.title)}
+                                title="Re-approve this item to push live"
+                                style={{ padding: '5px 10px', fontSize: '0.78rem' }}
+                              >
+                                <Check size={13} /> Re-Approve
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>

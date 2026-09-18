@@ -1,0 +1,491 @@
+/* ==========================================================================
+   MobileReferPage Styles (440px Max Mobile Architecture)
+   Matching Figma Reference media_1789729249025.png
+   ========================================================================== */
+
+.mobileReferPage {
+  width: 100%;
+  max-width: 440px;
+  min-height: 100vh;
+  margin: 0 auto;
+  background: #FFFFFF;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.headerWrapper {
+  position: relative;
+  z-index: 100;
+}
+
+/* Top Breadcrumb Navigation Link */
+.topNavWrap {
+  padding: 16px 16px 12px;
+  box-sizing: border-box;
+}
+
+.breadcrumbLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 15px;
+  font-weight: 700;
+  color: #1E2772;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.breadcrumbLink:hover {
+  color: #E31E25;
+}
+
+.chevron {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.breadcrumbTitle {
+  text-decoration: none;
+}
+
+/* Search Bar */
+.searchBarWrap {
+  position: relative;
+  margin: 0 16px 14px;
+  display: flex;
+  align-items: center;
+}
+
+.searchInput {
+  width: 100%;
+  height: 42px;
+  padding: 0 42px 0 16px;
+  border: 1px solid #D1D5DB;
+  border-radius: 999px;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 13.5px;
+  color: #111827;
+  background: #FFFFFF;
+  outline: none;
+  box-sizing: border-box;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.searchInput::placeholder {
+  color: #9CA3AF;
+}
+
+.searchInput:focus {
+  border-color: #1E2772;
+  box-shadow: 0 0 0 3px rgba(30, 39, 114, 0.1);
+}
+
+.searchIcon {
+  position: absolute;
+  right: 14px;
+  pointer-events: none;
+  color: #1F2937;
+}
+
+/* 2x3 Navigation Pills Grid */
+.pillsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px 10px;
+  padding: 0 16px 20px;
+  box-sizing: border-box;
+}
+
+.pillLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 38px;
+  padding: 0 6px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 11px;
+  font-weight: 400;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14);
+  transition: transform 0.15s ease, filter 0.15s ease;
+  box-sizing: border-box;
+}
+
+.pillLink:active {
+  transform: scale(0.96);
+}
+
+.pillRed {
+  background: #E31E24;
+}
+
+.pillActive {
+  background: #1E2772;
+}
+
+.pillIcon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.pillText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Refer & Earn Hero Card */
+.heroCardSection {
+  padding: 0 16px 18px;
+  box-sizing: border-box;
+}
+
+.heroCard {
+  background: #EEF2FF;
+  border-radius: 18px;
+  padding: 16px 14px 16px;
+  box-shadow:
+    inset 0 3px 6px -1px rgba(0, 0, 0, 0.16),     /* Top Inner Shadow */
+    0 10px 22px -3px rgba(36, 45, 133, 0.18),    /* Outer Drop Shadow */
+    0 4px 8px -2px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.tagBadge {
+  display: inline-flex;
+  align-items: center;
+  background: #E31E24;
+  color: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 10px;
+  font-weight: 400; /* Removed bold */
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.2px;
+  margin-bottom: 8px;
+}
+
+.heroTitle {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 15.5px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 6px 0;
+  line-height: 1.25;
+}
+
+.heroSubtitle {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 11px;
+  font-weight: 500;
+  color: #4B5563;
+  margin: 0 0 14px 0;
+  line-height: 1.35;
+}
+
+.heroActionsRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.codeCopyBtn {
+  flex: 1 1 50%;
+  min-width: 0;
+  height: 38px;
+  background: #242D85;
+  border: 1px dashed rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  color: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: clamp(10px, 2.7vw, 11.5px);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 0 6px;
+  transition: transform 0.15s ease, background 0.15s ease;
+  box-sizing: border-box;
+}
+
+.codeCopyBtn:active {
+  transform: scale(0.97);
+  background: #1A2166;
+}
+
+.codeText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+
+.copySvg {
+  flex-shrink: 0;
+}
+
+.shareBtn {
+  flex: 1 1 50%;
+  min-width: 0;
+  height: 38px;
+  background: #E31E24;
+  border: none;
+  border-radius: 8px;
+  color: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: clamp(10px, 2.7vw, 11.5px);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 0 6px;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.shareBtn:active {
+  transform: scale(0.97);
+  opacity: 0.9;
+}
+
+/* Section Header */
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 14px;
+  padding-left: 0;
+}
+
+.sectionIndicator {
+  width: 9px;
+  height: 18px;
+  border-radius: 0 9px 9px 0;
+  background: #1E2772;
+  flex-shrink: 0;
+}
+
+.sectionTitle {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+  line-height: 1.2;
+}
+
+/* Steps Section (Single continuous image + 3 cards) */
+.stepsSection {
+  width: 100%;
+  padding: 0 16px 18px;
+  box-sizing: border-box;
+}
+
+.stepsWrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.singleBannerWrap {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.singleBannerImg {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.stepCardsRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: -24px;
+  position: relative;
+  z-index: 5;
+}
+
+.stepInfoCard {
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 10px 6px;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.04),
+    0 2px 8px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-height: 78px;
+  box-sizing: border-box;
+}
+
+.stepTitle {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: clamp(9.5px, 2.7vw, 11px);
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+}
+
+.stepDesc {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: clamp(8px, 2.2vw, 9px);
+  font-weight: 500;
+  color: #4B5563;
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* Referral History Table */
+.referralsHistorySection {
+  width: 100%;
+  padding: 0 16px 16px;
+  box-sizing: border-box;
+}
+
+.tableContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tableHeaderRow {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr 1fr 0.9fr;
+  padding: 0 8px 4px;
+  box-sizing: border-box;
+  width: 100%;
+  gap: 4px;
+}
+
+.th {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: clamp(9.5px, 2.7vw, 11px);
+  font-weight: 700;
+  color: #E31E24;
+  text-align: left;
+}
+
+.thFriend {
+  text-align: left;
+}
+
+.thDate {
+  text-align: left;
+}
+
+.thStatus {
+  text-align: left;
+}
+
+.thBonus {
+  text-align: right;
+  padding-right: 4px;
+}
+
+.tableBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr 1fr 0.9fr;
+  align-items: center;
+  border-radius: 8px;
+  padding: 10px 8px;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.04),
+    0 2px 6px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+  width: 100%;
+  gap: 4px;
+}
+
+.rowBlue {
+  background: #EEF3FF;
+}
+
+.rowPeach {
+  background: #FFF0E6;
+}
+
+.td {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: clamp(9.5px, 2.7vw, 11px);
+  line-height: 1.25;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.tdFriend {
+  font-weight: 600;
+  color: #111827;
+  text-align: left;
+}
+
+.tdDate {
+  font-weight: 500;
+  color: #111827;
+  text-align: left;
+}
+
+.tdStatus {
+  font-weight: 600;
+  color: #111827;
+  text-align: left;
+}
+
+.tdBonus {
+  font-weight: 700;
+  color: #111827;
+  text-align: right;
+  padding-right: 4px;
+  white-space: nowrap;
+}
+
+/* Red Dashed Divider */
+.dashedDivider {
+  width: 100%;
+  border-top: 1.5px dashed #E31E25;
+  margin: 12px 0 0;
+  opacity: 0.85;
+}

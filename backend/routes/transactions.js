@@ -18,7 +18,10 @@ router.get('/', async (req, res, next) => {
     if (type && type !== 'All') query.type = type;
     const txns = await Transaction.find(query).sort({ createdAt: -1 });
     res.json(txns);
-  } catch (err) { next(err); }
+  } catch (err) { 
+    console.warn('Transactions route fallback to in-memory store:', err.message);
+    return res.json(store.getTransactions());
+  }
 });
 
 // Create transaction

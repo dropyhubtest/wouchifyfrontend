@@ -33,98 +33,9 @@ export interface CashbackClaim {
   notes?: string
 }
 
-const initialClaims: CashbackClaim[] = [
-  {
-    id: 'CB-9021',
-    userName: 'Vikramaditya Sharma',
-    userEmail: 'vikram.sharma@gmail.com',
-    store: 'Amazon',
-    orderId: '402-8921820-1928301',
-    orderAmount: '₹24,999',
-    cashbackAmount: 1250,
-    claimedAt: 'Today, 11:20 AM',
-    status: 'Pending',
-    payoutMethod: 'UPI',
-    payoutDetails: 'vikram.sharma@okhdfcbank',
-    receiptUrl: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600&auto=format&fit=crop',
-    notes: 'Purchased OnePlus 12 via Amazon affiliate link.'
-  },
-  {
-    id: 'CB-9022',
-    userName: 'Ananya Deshmukh',
-    userEmail: 'ananya.d@outlook.com',
-    store: 'Myntra',
-    orderId: 'MYN-89201948',
-    orderAmount: '₹5,400',
-    cashbackAmount: 432,
-    claimedAt: 'Today, 10:15 AM',
-    status: 'Pending',
-    payoutMethod: 'UPI',
-    payoutDetails: 'ananya99@paytm',
-    receiptUrl: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600&auto=format&fit=crop',
-    notes: '8% Wouchify cash on fashion order.'
-  },
-  {
-    id: 'CB-9023',
-    userName: 'Rohan Mehta',
-    userEmail: 'rohan.mehta@yahoo.com',
-    store: 'Flipkart',
-    orderId: 'OD1290384910293',
-    orderAmount: '₹64,990',
-    cashbackAmount: 3250,
-    claimedAt: 'Yesterday, 04:45 PM',
-    status: 'Approved',
-    payoutMethod: 'Bank Transfer',
-    payoutDetails: 'HDFC Bank • A/C: 5010049281920 • IFSC: HDFC0001092',
-    receiptUrl: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600&auto=format&fit=crop',
-    notes: 'Verified against Flipkart affiliate sub-ID conversion.'
-  },
-  {
-    id: 'CB-9024',
-    userName: 'Pooja Hegde',
-    userEmail: 'pooja.h@gmail.com',
-    store: 'Ajio',
-    orderId: 'AJIO-7839210',
-    orderAmount: '₹3,200',
-    cashbackAmount: 320,
-    claimedAt: 'Yesterday, 02:10 PM',
-    status: 'Approved',
-    payoutMethod: 'UPI',
-    payoutDetails: 'pooja.hegde@ibl',
-    notes: 'Instant cashback claim auto-approved.'
-  },
-  {
-    id: 'CB-9025',
-    userName: 'Karthik Subramanian',
-    userEmail: 'karthik.sub@gmail.com',
-    store: 'Tata CLiQ',
-    orderId: 'TATA-981290',
-    orderAmount: '₹14,200',
-    cashbackAmount: 710,
-    claimedAt: '08-Sep-2026',
-    status: 'Processed',
-    payoutMethod: 'UPI',
-    payoutDetails: 'karthik@ybl',
-    notes: 'Disbursed via ICICI banking batch ID #DISB-4091.'
-  },
-  {
-    id: 'CB-9026',
-    userName: 'Sneha Patel',
-    userEmail: 'sneha.patel@gmail.com',
-    store: 'Nykaa',
-    orderId: 'NYK-492019',
-    orderAmount: '₹4,890',
-    cashbackAmount: 244,
-    claimedAt: '08-Sep-2026',
-    status: 'Processed',
-    payoutMethod: 'Bank Transfer',
-    payoutDetails: 'SBI • A/C: 30918290192 • IFSC: SBIN0004921',
-    notes: 'Disbursed via batch payout.'
-  }
-]
-
 export const OperationsCashbacksPage: React.FC = () => {
-  const [claims, setClaims] = useState<CashbackClaim[]>(initialClaims)
+  const [claims, setClaims] = useState<CashbackClaim[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [toastMessage, setToastMessage] = useState<string | null>(null)
@@ -142,31 +53,40 @@ export const OperationsCashbacksPage: React.FC = () => {
   }
 
   // Load from backend API
+  const fetchClaims = async () => {
+    try {
+      setLoading(true)
+      const res = await adminApi.getCashbackClaims()
+      if (Array.isArray(res)) {
+        const mapped: CashbackClaim[] = res.map((c: any, idx: number) => ({
+          id: c.claimId || c._id || c.id || `CB-${9020 + idx}`,
+          userName: c.userName || 'User',
+          userEmail: c.userEmail || 'user@gmail.com',
+          store: c.store || 'Amazon',
+          orderId: c.orderId || 'ORD-000000',
+          orderAmount: c.orderAmount || '₹1,000',
+          cashbackAmount: typeof c.cashbackAmount === 'number' ? c.cashbackAmount : parseInt(String(c.cashbackAmount).replace(/[^0-9]/g, '')) || 100,
+          claimedAt: c.claimedAt ? (typeof c.claimedAt === 'string' && c.claimedAt.includes('T') ? new Date(c.claimedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : c.claimedAt) : 'Recently',
+          status: c.status || 'Pending',
+          payoutMethod: c.payoutMethod || 'UPI',
+          payoutDetails: c.payoutDetails || 'user@upi',
+          receiptUrl: c.receiptUrl,
+          notes: c.notes
+        }))
+        setClaims(mapped)
+      } else {
+        setClaims([])
+      }
+    } catch (err) {
+      console.warn('API error loading cashback claims:', err)
+      setClaims([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
-    adminApi.getCashbackClaims()
-      .then((res: any[]) => {
-        if (Array.isArray(res) && res.length > 0) {
-          const mapped: CashbackClaim[] = res.map((c: any, idx: number) => ({
-            id: c.claimId || c._id || c.id || `CB-${9020 + idx}`,
-            userName: c.userName || 'User',
-            userEmail: c.userEmail || 'user@gmail.com',
-            store: c.store || 'Amazon',
-            orderId: c.orderId || 'ORD-000000',
-            orderAmount: c.orderAmount || '₹1,000',
-            cashbackAmount: typeof c.cashbackAmount === 'number' ? c.cashbackAmount : parseInt(String(c.cashbackAmount).replace(/[^0-9]/g, '')) || 100,
-            claimedAt: c.claimedAt || 'Recently',
-            status: c.status || 'Pending',
-            payoutMethod: c.payoutMethod || 'UPI',
-            payoutDetails: c.payoutDetails || 'user@upi',
-            receiptUrl: c.receiptUrl,
-            notes: c.notes
-          }))
-          setClaims(mapped)
-        }
-      })
-      .catch(err => {
-        console.warn('API error, using mock cashback claims:', err)
-      })
+    fetchClaims()
   }, [])
 
   // KPIs
@@ -362,22 +282,39 @@ export const OperationsCashbacksPage: React.FC = () => {
 
         {/* Cashback Claims Table */}
         <div className="crud-table-card">
-          <div className="crud-table-wrapper">
-            <table className="crud-table">
-              <thead>
-                <tr>
-                  <th>Claim ID & Date</th>
-                  <th>Shopper Details</th>
-                  <th>Store Partner</th>
-                  <th>Order ID & Amount</th>
-                  <th>Cashback Claimed</th>
-                  <th>Payout Destination</th>
-                  <th>Status</th>
-                  <th style={{ textAlign: 'right' }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredClaims.map((claim) => (
+          {loading ? (
+            <div style={{ padding: '48px 20px', textAlign: 'center', color: '#64748b' }}>
+              <Clock size={36} style={{ color: '#2563eb', margin: '0 auto 12px', display: 'block', animation: 'spin 1.5s linear infinite' }} />
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>Loading Cashback Claims…</h3>
+              <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>Syncing with central database</p>
+            </div>
+          ) : filteredClaims.length === 0 ? (
+            <div style={{ padding: '48px 20px', textAlign: 'center', color: '#64748b' }}>
+              <CheckCircle2 size={42} style={{ color: '#16a34a', margin: '0 auto 12px', display: 'block' }} />
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>No Cashback Claims Found</h3>
+              <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '6px' }}>
+                {searchTerm || statusFilter !== 'all' 
+                  ? 'No cashback claims match your search or filter criteria.' 
+                  : 'All shopper cashback claims have been verified and processed.'}
+              </p>
+            </div>
+          ) : (
+            <div className="crud-table-wrapper">
+              <table className="crud-table">
+                <thead>
+                  <tr>
+                    <th>Claim ID & Date</th>
+                    <th>Shopper Details</th>
+                    <th>Store Partner</th>
+                    <th>Order ID & Amount</th>
+                    <th>Cashback Claimed</th>
+                    <th>Payout Destination</th>
+                    <th>Status</th>
+                    <th style={{ textAlign: 'right' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredClaims.map((claim) => (
                   <tr key={claim.id}>
                     <td>
                       <strong style={{ fontSize: '0.85rem', color: '#0f172a', display: 'block' }}>{claim.id}</strong>
@@ -460,6 +397,7 @@ export const OperationsCashbacksPage: React.FC = () => {
               </tbody>
             </table>
           </div>
+          )}
         </div>
 
         {/* ── 2-STEP CASHBACK VERIFICATION MODAL ── */}

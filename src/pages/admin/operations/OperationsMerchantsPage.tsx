@@ -13,7 +13,8 @@ import {
   X, 
   TrendingUp,
   Percent,
-  Layers
+  Layers,
+  Clock
 } from 'lucide-react'
 import './OperationsShared.css'
 import { getStoreLogo } from '../../../data/dealsPage'
@@ -32,115 +33,9 @@ export interface MerchantPartner {
   affiliateBaseUrl: string
 }
 
-const initialMerchants: MerchantPartner[] = [
-  {
-    id: 'merch-01',
-    name: 'Amazon',
-    category: 'E-Commerce & All',
-    affiliateNetwork: 'Direct API',
-    commissionRate: 'Up to 10%',
-    userCashbackRate: 'Up to 8%',
-    activeDealsCount: 420,
-    trackingSpeed: 'Instant (15 mins)',
-    healthStatus: 'Online',
-    lastVerifiedAt: '10 mins ago',
-    affiliateBaseUrl: 'https://amazon.in?tag=wouchify-21'
-  },
-  {
-    id: 'merch-02',
-    name: 'Flipkart',
-    category: 'E-Commerce & Mobiles',
-    affiliateNetwork: 'Direct API',
-    commissionRate: 'Up to 12%',
-    userCashbackRate: 'Up to 9%',
-    activeDealsCount: 380,
-    trackingSpeed: 'Within 1 hour',
-    healthStatus: 'Online',
-    lastVerifiedAt: '12 mins ago',
-    affiliateBaseUrl: 'https://flipkart.com?affid=wouchify'
-  },
-  {
-    id: 'merch-03',
-    name: 'Myntra',
-    category: 'Fashion & Apparel',
-    affiliateNetwork: 'Cuelinks',
-    commissionRate: '8.5%',
-    userCashbackRate: '6.5%',
-    activeDealsCount: 195,
-    trackingSpeed: 'Within 2 hours',
-    healthStatus: 'Online',
-    lastVerifiedAt: '25 mins ago',
-    affiliateBaseUrl: 'https://cuelinks.com/link?url=myntra'
-  },
-  {
-    id: 'merch-04',
-    name: 'Ajio',
-    category: 'Fashion & Trends',
-    affiliateNetwork: 'EarnKaro',
-    commissionRate: '9.0%',
-    userCashbackRate: '7.0%',
-    activeDealsCount: 140,
-    trackingSpeed: 'Within 4 hours',
-    healthStatus: 'Degraded',
-    lastVerifiedAt: '1 hour ago',
-    affiliateBaseUrl: 'https://earnkaro.com/ajio-deal'
-  },
-  {
-    id: 'merch-05',
-    name: 'Tata CLiQ',
-    category: 'Luxury & Electronics',
-    affiliateNetwork: 'Impact Radius',
-    commissionRate: '6.0%',
-    userCashbackRate: '4.5%',
-    activeDealsCount: 88,
-    trackingSpeed: 'Within 24 hours',
-    healthStatus: 'Online',
-    lastVerifiedAt: '40 mins ago',
-    affiliateBaseUrl: 'https://tatacliq.com?partner=wouchify'
-  },
-  {
-    id: 'merch-06',
-    name: 'Nykaa',
-    category: 'Beauty & Cosmetics',
-    affiliateNetwork: 'Admitad',
-    commissionRate: '11.0%',
-    userCashbackRate: '8.5%',
-    activeDealsCount: 110,
-    trackingSpeed: 'Within 3 hours',
-    healthStatus: 'Online',
-    lastVerifiedAt: '15 mins ago',
-    affiliateBaseUrl: 'https://nykaa.com?aff=wouchify'
-  },
-  {
-    id: 'merch-07',
-    name: 'Swiggy',
-    category: 'Food Delivery & Dineout',
-    affiliateNetwork: 'Direct API',
-    commissionRate: 'Flat ₹35/order',
-    userCashbackRate: 'Flat ₹25/order',
-    activeDealsCount: 45,
-    trackingSpeed: 'Instant',
-    healthStatus: 'Online',
-    lastVerifiedAt: '5 mins ago',
-    affiliateBaseUrl: 'https://swiggy.com?ref=wouchify'
-  },
-  {
-    id: 'merch-08',
-    name: 'Dominos',
-    category: 'Food & Pizza',
-    affiliateNetwork: 'Cuelinks',
-    commissionRate: '7.5%',
-    userCashbackRate: '5.0%',
-    activeDealsCount: 32,
-    trackingSpeed: 'Within 1 hour',
-    healthStatus: 'Online',
-    lastVerifiedAt: '30 mins ago',
-    affiliateBaseUrl: 'https://dominos.co.in'
-  }
-]
-
 export const OperationsMerchantsPage: React.FC = () => {
-  const [merchants, setMerchants] = useState<MerchantPartner[]>(initialMerchants)
+  const [merchants, setMerchants] = useState<MerchantPartner[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [networkFilter, setNetworkFilter] = useState('all')
   const [toastMessage, setToastMessage] = useState<string | null>(null)
@@ -156,29 +51,38 @@ export const OperationsMerchantsPage: React.FC = () => {
   }
 
   // Load merchants from backend API
+  const fetchMerchants = async () => {
+    try {
+      setLoading(true)
+      const res = await adminApi.getStores({ all: 'true' })
+      if (Array.isArray(res)) {
+        const mapped: MerchantPartner[] = res.map((s: any, idx: number) => ({
+          id: s._id || s.id || `merch-0${idx + 1}`,
+          name: s.name,
+          category: s.category || 'E-Commerce',
+          affiliateNetwork: (idx % 2 === 0 ? 'Direct API' : 'Cuelinks') as 'Direct API' | 'Cuelinks',
+          commissionRate: s.commissionRate || 'Up to 10%',
+          userCashbackRate: s.reward || s.userCashbackRate || 'Up to 5%',
+          activeDealsCount: typeof s.totalDeals === 'number' ? s.totalDeals : 0,
+          trackingSpeed: s.trackingSpeed || 'Instant (15 mins)',
+          healthStatus: s.status === 'inactive' || s.status === 'pending' || s.status === 'rejected' ? 'Offline' : 'Online',
+          lastVerifiedAt: 'Live',
+          affiliateBaseUrl: s.href || s.affiliateLink || `https://${(s.slug || s.name || 'store').toLowerCase().replace(/\s+/g, '')}.com/?affid=wouchify`
+        }))
+        setMerchants(mapped)
+      } else {
+        setMerchants([])
+      }
+    } catch (err) {
+      console.warn('API error loading merchants:', err)
+      setMerchants([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
-    adminApi.getStores()
-      .then((res: any[]) => {
-        if (Array.isArray(res) && res.length > 0) {
-          const mapped: MerchantPartner[] = res.map((s: any, idx: number) => ({
-            id: s._id || s.id || `merch-0${idx + 1}`,
-            name: s.name,
-            category: s.category || 'E-Commerce',
-            affiliateNetwork: (idx % 2 === 0 ? 'Direct API' : 'Cuelinks') as 'Direct API' | 'Cuelinks',
-            commissionRate: 'Up to 10%',
-            userCashbackRate: s.reward || 'Up to 5%',
-            activeDealsCount: s.totalDeals || Math.floor(Math.random() * 80) + 15,
-            trackingSpeed: 'Instant (15 mins)',
-            healthStatus: s.status === 'inactive' ? 'Offline' : 'Online',
-            lastVerifiedAt: 'Just now',
-            affiliateBaseUrl: s.href || s.affiliateLink || `https://${(s.slug || s.name).toLowerCase().replace(/\s+/g, '')}.com/?affid=wouchify`
-          }))
-          setMerchants(mapped)
-        }
-      })
-      .catch(err => {
-        console.warn('API error, using mock merchants:', err)
-      })
+    fetchMerchants()
   }, [])
 
   // KPIs
@@ -368,23 +272,39 @@ export const OperationsMerchantsPage: React.FC = () => {
 
         {/* Merchant Table */}
         <div className="crud-table-card">
-          <div className="crud-table-wrapper">
-            <table className="crud-table">
-              <thead>
-                <tr>
-                  <th>Store Partner</th>
-                  <th>Category</th>
-                  <th>Affiliate Network</th>
-                  <th>Store Commission</th>
-                  <th>Shopper Cashback</th>
-                  <th>Active Deals</th>
-                  <th>Tracking Speed</th>
-                  <th>Health Status</th>
-                  <th style={{ textAlign: 'right' }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredMerchants.map((merchant) => (
+          {loading ? (
+            <div style={{ padding: '48px 20px', textAlign: 'center', color: '#64748b' }}>
+              <Clock size={36} style={{ color: '#2563eb', margin: '0 auto 12px', display: 'block', animation: 'spin 1.5s linear infinite' }} />
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>Loading Merchant Partners…</h3>
+            </div>
+          ) : filteredMerchants.length === 0 ? (
+            <div style={{ padding: '48px 20px', textAlign: 'center', color: '#64748b' }}>
+              <Store size={42} style={{ color: '#64748b', margin: '0 auto 12px', display: 'block' }} />
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>No Merchant Partners Found</h3>
+              <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '6px' }}>
+                {searchTerm || networkFilter !== 'all' 
+                  ? 'No merchants match your search or network filter.' 
+                  : 'Stores added by the content team will appear here for link health and commission tracking.'}
+              </p>
+            </div>
+          ) : (
+            <div className="crud-table-wrapper">
+              <table className="crud-table">
+                <thead>
+                  <tr>
+                    <th>Store Partner</th>
+                    <th>Category</th>
+                    <th>Affiliate Network</th>
+                    <th>Store Commission</th>
+                    <th>Shopper Cashback</th>
+                    <th>Active Deals</th>
+                    <th>Tracking Speed</th>
+                    <th>Health Status</th>
+                    <th style={{ textAlign: 'right' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredMerchants.map((merchant) => (
                   <tr key={merchant.id}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -452,6 +372,7 @@ export const OperationsMerchantsPage: React.FC = () => {
               </tbody>
             </table>
           </div>
+          )}
         </div>
 
         {/* ── 2-STEP EDIT MERCHANT CONFIG MODAL ── */}

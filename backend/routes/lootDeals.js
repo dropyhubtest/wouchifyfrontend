@@ -8,14 +8,18 @@ const { handleEntityCreate, handleEntityUpdate, handleEntityDelete } = require('
 
 // Public read access for storefront & catalog consumers
 router.get('/', async (req, res, next) => {
+  const { dealType, status, submissionStatus, all } = req.query;
+  const getFallback = () => {
+    let memoryLoot = store.getLootDeals(req.query);
+    if (all !== 'true') {
+      memoryLoot = memoryLoot.filter(l => l.submissionStatus !== 'pending_approval' && (l.status || 'active') === 'active');
+    }
+    return memoryLoot;
+  };
+
   try {
-    const { dealType, status, submissionStatus, all } = req.query;
     if (mongoose.connection.readyState !== 1) {
-      let memoryLoot = store.getLootDeals(req.query);
-      if (all !== 'true') {
-        memoryLoot = memoryLoot.filter(l => l.submissionStatus !== 'pending_approval' && (l.status || 'active') === 'active');
-      }
-      return res.json(memoryLoot);
+      return res.json(getFallback());
     }
     
     let query = {};
@@ -36,8 +40,14 @@ router.get('/', async (req, res, next) => {
     }
 
     const lootDeals = await LootDeal.find(query).sort({ createdAt: -1 });
+    if (!lootDeals || lootDeals.length === 0) {
+      return res.json(getFallback());
+    }
     res.json(lootDeals);
-  } catch (err) { next(err); }
+  } catch (err) {
+    console.warn('Loot deals route fallback to in-memory store:', err.message);
+    return res.json(getFallback());
+  }
 });
 
 // Public click tracking for storefront engagements

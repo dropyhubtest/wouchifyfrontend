@@ -1,0 +1,623 @@
+/* ==========================================================================
+   MobileWalletPage Styles (440px Max Mobile Architecture)
+   Matching Figma Reference media_1789728267880.png
+   ========================================================================== */
+
+.mobileWalletPage {
+  width: 100%;
+  max-width: 440px;
+  min-height: 100vh;
+  margin: 0 auto;
+  background: #FFFFFF;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.headerWrapper {
+  position: relative;
+  z-index: 100;
+}
+
+/* Top Breadcrumb Navigation Link */
+.topNavWrap {
+  padding: 16px 16px 12px;
+  box-sizing: border-box;
+}
+
+.breadcrumbLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 15px;
+  font-weight: 700;
+  color: #1E2772;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.breadcrumbLink:hover {
+  color: #E31E25;
+}
+
+.chevron {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.breadcrumbTitle {
+  text-decoration: none;
+}
+
+/* Search Bar */
+.searchBarWrap {
+  position: relative;
+  margin: 0 16px 14px;
+  display: flex;
+  align-items: center;
+}
+
+.searchInput {
+  width: 100%;
+  height: 42px;
+  padding: 0 42px 0 16px;
+  border: 1px solid #D1D5DB;
+  border-radius: 999px;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 13.5px;
+  color: #111827;
+  background: #FFFFFF;
+  outline: none;
+  box-sizing: border-box;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.searchInput::placeholder {
+  color: #9CA3AF;
+}
+
+.searchInput:focus {
+  border-color: #1E2772;
+  box-shadow: 0 0 0 3px rgba(30, 39, 114, 0.1);
+}
+
+.searchIcon {
+  position: absolute;
+  right: 14px;
+  pointer-events: none;
+  color: #1F2937;
+}
+
+/* 2x3 Navigation Pills Grid */
+.pillsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px 10px;
+  padding: 0 16px 20px;
+  box-sizing: border-box;
+}
+
+.pillLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 38px;
+  padding: 0 6px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 11px;
+  font-weight: 400;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14);
+  transition: transform 0.15s ease, filter 0.15s ease;
+  box-sizing: border-box;
+}
+
+.pillLink:active {
+  transform: scale(0.96);
+}
+
+.pillRed {
+  background: #E31E24;
+}
+
+.pillActive {
+  background: #1E2772;
+}
+
+.pillIcon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.pillText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Metrics Section & Rail */
+.metricsSection {
+  width: 100%;
+  padding: 0 0 12px;
+  box-sizing: border-box;
+}
+
+.metricsRail {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 6px 20px 20px 20px;
+  scroll-padding-left: 20px;
+  scroll-padding-right: 20px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  box-sizing: border-box;
+}
+
+.metricsRail::-webkit-scrollbar {
+  display: none;
+}
+
+.metricCard {
+  position: relative;
+  flex-shrink: 0;
+  width: 275px;
+  height: 178px;
+  border-radius: 20px;
+  padding: 18px 18px 14px;
+  box-sizing: border-box;
+  scroll-snap-align: start;
+  scroll-margin-left: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #FFFFFF;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  transition: transform 0.15s ease;
+}
+
+.metricCardNavy {
+  background: linear-gradient(135deg, #242C88 0%, #1A206A 100%);
+  box-shadow:
+    inset 0 4px 6px -1px rgba(0, 0, 0, 0.22),
+    0 10px 22px -3px rgba(31, 38, 122, 0.35),
+    0 4px 8px -2px rgba(0, 0, 0, 0.12);
+}
+
+.metricCardRed {
+  background: linear-gradient(135deg, #E62229 0%, #D4151C 100%);
+  box-shadow:
+    inset 0 4px 6px -1px rgba(0, 0, 0, 0.22),
+    0 10px 22px -3px rgba(227, 30, 37, 0.35),
+    0 4px 8px -2px rgba(0, 0, 0, 0.12);
+}
+
+.metricCardInner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+}
+
+.metricIconWrap {
+  width: 86px;
+  height: 86px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.metricIcon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.metricBody {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.metricLabel {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #FFFFFF;
+  line-height: 1.25;
+}
+
+.metricAmount {
+  font-size: 30px;
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  margin: 3px 0 6px;
+}
+
+.withdrawBtn {
+  background: #FFFFFF;
+  color: #E31E24;
+  border: none;
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  transition: transform 0.15s ease, background 0.15s ease;
+  white-space: nowrap;
+}
+
+.withdrawBtn:active {
+  transform: scale(0.96);
+  background: #FEE2E2;
+}
+
+.metricNote {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.95);
+  text-align: center;
+  width: 100%;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+/* Section Header ("Your Cashback") */
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 14px;
+  padding-left: 0;
+}
+
+.sectionIndicator {
+  width: 9px;
+  height: 18px;
+  border-radius: 0 9px 9px 0;
+  background: #1E2772;
+  flex-shrink: 0;
+}
+
+.sectionTitle {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+  line-height: 1.2;
+}
+
+/* Cashback Transactions Table */
+.cashbackSection {
+  width: 100%;
+  padding: 0 16px 16px;
+  box-sizing: border-box;
+}
+
+.tableContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tableHeaderRow {
+  display: grid;
+  grid-template-columns: 72px 1fr 56px 72px;
+  padding: 0 8px 4px;
+  box-sizing: border-box;
+  gap: 4px;
+}
+
+.th {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  color: #374151;
+  text-align: left;
+}
+
+.thDate {
+  text-align: left;
+}
+
+.thDesc {
+  text-align: left;
+  padding-left: 2px;
+}
+
+.thAmount {
+  text-align: center;
+}
+
+.thStatus {
+  text-align: center;
+}
+
+.tableBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tableRow {
+  display: flex;
+  align-items: stretch;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  min-height: 42px;
+  box-sizing: border-box;
+}
+
+.rowBlue {
+  background: #EEF3FF;
+}
+
+.rowPeach {
+  background: #FFF0E6;
+}
+
+.rowLeft {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 72px 1fr 56px;
+  align-items: center;
+  padding: 8px 8px;
+  gap: 4px;
+  box-sizing: border-box;
+}
+
+.rowRight {
+  width: 76px;
+  flex-shrink: 0;
+  background: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 4px;
+  box-sizing: border-box;
+}
+
+.td {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 10.5px;
+  line-height: 1.25;
+}
+
+.tdDate {
+  color: #232B85;
+  font-weight: 600;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.tdDesc {
+  color: #E31E25;
+  font-weight: 600;
+  padding: 0 2px;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.3;
+}
+
+.tdAmount {
+  color: #10B981;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.tdStatus {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+}
+
+@media (max-width: 360px) {
+  .tableHeaderRow {
+    grid-template-columns: 65px 1fr 50px 65px;
+    padding: 0 4px 4px;
+  }
+  .rowLeft {
+    grid-template-columns: 65px 1fr 50px;
+    padding: 6px 6px;
+  }
+  .rowRight {
+    width: 68px;
+  }
+  .td, .th {
+    font-size: 9.5px;
+  }
+  .tdStatus {
+    font-size: 10px;
+  }
+}
+
+.tdAmount {
+  color: #10B981;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.tdStatus {
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 10.5px;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.statusCompleted {
+  color: #16A34A;
+}
+
+.statusPending {
+  color: #D97706;
+}
+
+/* Red Dashed Divider */
+.dashedDivider {
+  width: 100%;
+  border-top: 1.5px dashed #E31E25;
+  margin: 12px 0 0;
+  opacity: 0.85;
+}
+
+/* Bank Withdrawal Modal */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.modalCard {
+  background: #FFFFFF;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 360px;
+  padding: 24px 20px;
+  box-sizing: border-box;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.modalTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #6B7280;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.withdrawInfo {
+  font-size: 13px;
+  color: #374151;
+  margin: 0 0 16px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.inputLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.modalInput {
+  height: 42px;
+  padding: 0 14px;
+  border: 1.5px solid #D1D5DB;
+  border-radius: 8px;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 14px;
+  outline: none;
+}
+
+.modalInput:focus {
+  border-color: #1E2772;
+}
+
+.modalActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.btnCancel {
+  background: #F3F4F6;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  color: #4B5563;
+  cursor: pointer;
+}
+
+.btnConfirm {
+  background: #E31E24;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 12px;
+  font-weight: 700;
+  color: #FFFFFF;
+  cursor: pointer;
+}
+
+.btnConfirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.modalSuccess {
+  text-align: center;
+  padding: 16px 0;
+}
+
+.successIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #DCFCE7;
+  color: #16A34A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0 auto 12px;
+}

@@ -123,8 +123,10 @@
 }
 
 .flash-loot__cta:hover {
-  opacity: 0.92;
-  transform: scale(1.02);
+  opacity: 1;
+  transform: translateY(-2px) scale(1.04);
+  filter: brightness(1.08);
+  box-shadow: 0 8px 20px rgba(227, 30, 37, 0.4);
 }
 
 .flash-loot__cta:focus-visible {
@@ -152,17 +154,19 @@
   border-radius: 20px;
   overflow: hidden;
   display: flex;
-  background-color: #F9E3D8;
+  background-color: #FFF0E8;
+  border: 1.5px dashed #B8B8B8;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   cursor: pointer;
   text-decoration: none;
   box-sizing: border-box;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.3s ease;
 }
 
 .flash-loot__card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-8px) scale(1.015);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.16);
+  border-color: var(--color-red);
 }
 
 .flash-loot__card:focus-visible {
@@ -173,12 +177,11 @@
 
 .flash-loot__media {
   position: relative;
-  width: 320px;
+  width: 310px;
   height: 100%;
   flex-shrink: 0;
-  background-color: #383838;
+  background-color: #484848;
   overflow: hidden;
-  border-right: 7.5px solid #FFFFFF;
   box-sizing: border-box;
 }
 
@@ -224,67 +227,84 @@
 .flash-loot__details {
   flex: 1;
   height: 100%;
-  padding: 20px 24px 18px 24px;
+  padding: 16px 24px 18px 24px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   box-sizing: border-box;
 }
 
-.flash-loot__top-row {
+.flash-loot__store-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  height: 48px;
+  justify-content: flex-end;
+  height: 38px;
 }
 
 .flash-loot__store-logo {
-  height: 44px;
+  height: 38px;
   width: auto;
-  max-width: 180px;
+  max-width: 150px;
   object-fit: contain;
   display: block;
 }
 
 .flash-loot__card-title {
-  margin: 14px 0 4px 0;
+  margin: 4px 0 8px 0;
   font-family: var(--font-family-primary);
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 700;
   line-height: 1.35;
-  color: var(--color-black);
+  color: #111111;
+}
+
+.flash-loot__tag-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: auto;
+}
+
+.flash-loot__tag {
+  background-color: var(--color-red);
+  color: var(--color-white);
+  font-family: var(--font-family-primary);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 4px 18px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.flash-loot__bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
 }
 
 .flash-loot__price-group {
   display: flex;
   align-items: baseline;
   gap: 10px;
-  margin-top: 10px;
 }
 
 .flash-loot__price {
   font-family: var(--font-family-primary);
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--color-black);
+  font-size: 32px;
+  font-weight: 800;
+  color: #000000;
   line-height: 1;
 }
 
 .flash-loot__original-price {
   font-family: var(--font-family-primary);
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
-  color: var(--color-black);
+  color: #000000;
   text-decoration: line-through;
   text-decoration-color: var(--color-red);
   text-decoration-thickness: 2px;
   line-height: 1;
-}
-
-.flash-loot__cta-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: auto;
 }
 
 .flash-loot__grab-btn {
@@ -299,4 +319,10 @@
   align-items: center;
   justify-content: center;
   white-space: nowrap;
+  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.flash-loot__card:hover .flash-loot__grab-btn {
+  transform: scale(1.06);
+  box-shadow: 0 4px 12px rgba(227, 30, 37, 0.4);
 }

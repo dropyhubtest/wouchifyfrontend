@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 
 const advertisementSchema = new mongoose.Schema({
+  id: { type: String },
+  name: { type: String },
   title: { type: String, required: true },
   advertiser: { type: String, required: true },
   placement: { type: String, default: 'sidebar' },

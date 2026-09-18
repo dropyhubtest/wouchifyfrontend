@@ -2182,7 +2182,10 @@ module.exports = {
   getDeals: (filter = {}) => {
     let result = [...deals];
     if (filter.all !== 'true') {
-      result = result.filter(d => (d.submissionStatus === undefined || d.submissionStatus === 'approved') && d.status !== 'pending' && d.status !== 'rejected');
+      result = result.filter(d => 
+        (d.submissionStatus === undefined || d.submissionStatus === 'approved') && 
+        (d.status || 'active').toLowerCase() === 'active'
+      );
     }
     if (filter.category && filter.category !== 'All') {
       result = result.filter(d => d.category && d.category.toLowerCase() === filter.category.toLowerCase());
@@ -2193,8 +2196,18 @@ module.exports = {
     return result;
   },
   addDeal: (item) => {
-    const id = item.id ? String(item.id) : Date.now().toString();
-    const created = { _id: id, id: item.id || Date.now(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), ...item };
+    const id = item.id ? String(item.id) : (item._id ? String(item._id) : `deal-${Date.now()}`);
+    const created = { 
+      _id: id, 
+      id, 
+      status: item.status || 'pending',
+      submissionStatus: item.submissionStatus || 'pending_approval',
+      opsManagerApproval: item.opsManagerApproval || 'Pending',
+      managerApproval: item.managerApproval || 'Pending',
+      createdAt: new Date().toISOString(), 
+      updatedAt: new Date().toISOString(), 
+      ...item 
+    };
     const existingIdx = deals.findIndex(d => d._id === id || String(d.id) === String(id) || (item.name && d.name && d.name.toLowerCase().trim() === item.name.toLowerCase().trim()));
     if (existingIdx !== -1) {
       deals[existingIdx] = { ...deals[existingIdx], ...created, updatedAt: new Date().toISOString() };
@@ -2206,7 +2219,13 @@ module.exports = {
     return created;
   },
   updateDeal: (id, updates) => {
-    const idx = deals.findIndex(d => d._id === id || String(d.id) === String(id));
+    const target = String(id || '').trim();
+    const idx = deals.findIndex(d => 
+      String(d._id) === target || 
+      String(d.id) === target || 
+      (updates.name && d.name && d.name.toLowerCase().trim() === updates.name.toLowerCase().trim()) ||
+      (updates.title && d.title && d.title.toLowerCase().trim() === updates.title.toLowerCase().trim())
+    );
     if (idx === -1) return null;
     deals[idx] = { ...deals[idx], ...updates, updatedAt: new Date().toISOString() };
     saveToDisk();
@@ -3079,6 +3098,175 @@ module.exports = {
     staffMembers.splice(idx, 1);
     saveToDisk();
     return true;
+  },
+
+  // ================= Submissions Queue (Maker-Checker Approval Engine) =================
+  getSubmissions: (filter = {}) => {
+    let result = [...submissions];
+    if (filter.status && filter.status !== 'All' && filter.status !== 'all') {
+      const qStatus = filter.status.toLowerCase();
+      result = result.filter(s => s.status && s.status.toLowerCase() === qStatus);
+    }
+    if (filter.entityType && filter.entityType !== 'All' && filter.entityType !== 'all') {
+      const qType = filter.entityType.toLowerCase();
+      result = result.filter(s => s.entityType && s.entityType.toLowerCase() === qType);
+    }
+    if (filter.submittedBy && filter.submittedBy !== 'All' && filter.submittedBy !== 'all') {
+      const qUser = filter.submittedBy.toLowerCase();
+      result = result.filter(s => s.submittedBy && s.submittedBy.toLowerCase() === qUser);
+    }
+    if (filter.priority && filter.priority !== 'All' && filter.priority !== 'all') {
+      const qPri = filter.priority.toLowerCase();
+      result = result.filter(s => s.priority && s.priority.toLowerCase() === qPri);
+    }
+    return result;
+  },
+  getSubmissionById: (id) => {
+    const target = String(id).trim();
+    return submissions.find(s => String(s._id) === target || String(s.id) === target) || null;
+  },
+  addSubmission: (item) => {
+    const sid = item._id || item.id || `sub-${Date.now()}`;
+    const created = {
+      _id: sid,
+      id: sid,
+      status: item.status || 'Pending Approval',
+      submittedAt: item.submittedAt || new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      ...item
+    };
+    submissions.unshift(created);
+    saveToDisk();
+    return created;
+  },
+  updateSubmission: (id, updates) => {
+    const target = String(id).trim();
+    const idx = submissions.findIndex(s => String(s._id) === target || String(s.id) === target);
+    if (idx === -1) return null;
+    submissions[idx] = { ...submissions[idx], ...updates, updatedAt: new Date().toISOString() };
+    saveToDisk();
+    return submissions[idx];
+  },
+  deleteSubmission: (id) => {
+    const target = String(id).trim();
+    const idx = submissions.findIndex(s => String(s._id) === target || String(s.id) === target);
+    if (idx === -1) return false;
+    submissions.splice(idx, 1);
+    saveToDisk();
+    return true;
+  },
+  approveSubmission: (id, reviewer = 'ops.manager@wouchify.com') => {
+    const target = String(id).trim();
+    const sub = submissions.find(s => String(s._id) === target || String(s.id) === target);
+    if (!sub) return null;
+
+    sub.status = 'Approved';
+    sub.reviewedBy = reviewer;
+    sub.reviewedAt = new Date().toISOString();
+    sub.updatedAt = new Date().toISOString();
+
+    const entityType = sub.entityType;
+    const entityId = String(sub.entityId || '').trim();
+    const snapshot = sub.dataSnapshot || {};
+    const action = sub.action || 'create';
+
+    // Helper to find and update/create in collection
+    const updateTargetCollection = (coll, collName) => {
+      const idx = coll.findIndex(item => 
+        (entityId && (String(item._id) === entityId || String(item.id) === entityId)) ||
+        (snapshot.id && (String(item._id) === String(snapshot.id) || String(item.id) === String(snapshot.id))) ||
+        (snapshot.name && item.name && item.name.toLowerCase().trim() === snapshot.name.toLowerCase().trim()) ||
+        (snapshot.title && item.title && item.title.toLowerCase().trim() === snapshot.title.toLowerCase().trim()) ||
+        (snapshot.cardName && item.cardName && item.cardName.toLowerCase().trim() === snapshot.cardName.toLowerCase().trim()) ||
+        (snapshot.code && item.code && item.code.toUpperCase().trim() === snapshot.code.toUpperCase().trim())
+      );
+
+      if (action === 'delete') {
+        if (idx !== -1) coll.splice(idx, 1);
+      } else if (idx !== -1) {
+        coll[idx] = {
+          ...coll[idx],
+          ...snapshot,
+          status: 'active',
+          submissionStatus: 'approved',
+          opsManagerApproval: 'Approved',
+          managerApproval: 'Approved',
+          updatedAt: new Date().toISOString()
+        };
+      } else {
+        // Add as active item
+        const newId = entityId || snapshot._id || snapshot.id || `${collName}-${Date.now()}`;
+        coll.unshift({
+          _id: newId,
+          id: newId,
+          ...snapshot,
+          status: 'active',
+          submissionStatus: 'approved',
+          opsManagerApproval: 'Approved',
+          managerApproval: 'Approved',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+      }
+    };
+
+    if (entityType === 'deal') updateTargetCollection(deals, 'deal');
+    else if (entityType === 'loot_deal') updateTargetCollection(lootDeals, 'loot');
+    else if (entityType === 'coupon') updateTargetCollection(coupons, 'coupon');
+    else if (entityType === 'credit_card') updateTargetCollection(creditCards, 'card');
+    else if (entityType === 'store') updateTargetCollection(stores, 'store');
+    else if (entityType === 'banner') updateTargetCollection(banners, 'banner');
+    else if (entityType === 'advertisement') updateTargetCollection(advertisements, 'ad');
+    else if (entityType === 'category') updateTargetCollection(categories, 'cat');
+
+    saveToDisk();
+    return sub;
+  },
+  rejectSubmission: (id, reason = 'Rejected by Operational Manager', reviewer = 'ops.manager@wouchify.com') => {
+    const target = String(id).trim();
+    const sub = submissions.find(s => String(s._id) === target || String(s.id) === target);
+    if (!sub) return null;
+
+    sub.status = 'Rejected';
+    sub.rejectionReason = reason;
+    sub.reviewedBy = reviewer;
+    sub.reviewedAt = new Date().toISOString();
+    sub.updatedAt = new Date().toISOString();
+
+    const entityType = sub.entityType;
+    const entityId = String(sub.entityId || '').trim();
+    const snapshot = sub.dataSnapshot || {};
+
+    const rejectTargetCollection = (coll) => {
+      const item = coll.find(i => 
+        (entityId && (String(i._id) === entityId || String(i.id) === entityId)) ||
+        (snapshot.id && (String(i._id) === String(snapshot.id) || String(i.id) === String(snapshot.id))) ||
+        (snapshot.name && i.name && i.name.toLowerCase().trim() === snapshot.name.toLowerCase().trim()) ||
+        (snapshot.title && i.title && i.title.toLowerCase().trim() === snapshot.title.toLowerCase().trim()) ||
+        (snapshot.cardName && i.cardName && i.cardName.toLowerCase().trim() === snapshot.cardName.toLowerCase().trim()) ||
+        (snapshot.code && i.code && i.code.toUpperCase().trim() === snapshot.code.toUpperCase().trim())
+      );
+      if (item) {
+        item.status = 'inactive';
+        item.submissionStatus = 'rejected';
+        item.opsManagerApproval = 'Rejected';
+        item.managerApproval = 'Rejected';
+        item.updatedAt = new Date().toISOString();
+      }
+    };
+
+    if (entityType === 'deal') rejectTargetCollection(deals);
+    else if (entityType === 'loot_deal') rejectTargetCollection(lootDeals);
+    else if (entityType === 'coupon') rejectTargetCollection(coupons);
+    else if (entityType === 'credit_card') rejectTargetCollection(creditCards);
+    else if (entityType === 'store') rejectTargetCollection(stores);
+    else if (entityType === 'banner') rejectTargetCollection(banners);
+    else if (entityType === 'advertisement') rejectTargetCollection(advertisements);
+    else if (entityType === 'category') rejectTargetCollection(categories);
+
+    saveToDisk();
+    return sub;
   },
   // Click & Engagement Tracking
   incrementDealClicks: (id) => {

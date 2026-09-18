@@ -61,8 +61,7 @@ export const FlashLootSection: React.FC = () => {
 
               {/* Right Content Area */}
               <div className="flash-loot__details">
-                <div className="flash-loot__top-row">
-                  <span className="flash-loot__tag">{deal.category}</span>
+                <div className="flash-loot__store-row">
                   <img
                     src={deal.storeLogo}
                     alt={deal.storeName}
@@ -70,11 +69,14 @@ export const FlashLootSection: React.FC = () => {
                   />
                 </div>
                 <h3 className="flash-loot__card-title">{deal.title}</h3>
-                <div className="flash-loot__price-group">
-                  <span className="flash-loot__price">₹{deal.currentPrice}</span>
-                  <span className="flash-loot__original-price">₹{deal.originalPrice}</span>
+                <div className="flash-loot__tag-row">
+                  <span className="flash-loot__tag">{deal.category}</span>
                 </div>
-                <div className="flash-loot__cta-row">
+                <div className="flash-loot__bottom-row">
+                  <div className="flash-loot__price-group">
+                    <span className="flash-loot__price">₹{deal.currentPrice}</span>
+                    <span className="flash-loot__original-price">{deal.originalPrice}</span>
+                  </div>
                   <span className="flash-loot__grab-btn">Grab deal!!</span>
                 </div>
               </div>

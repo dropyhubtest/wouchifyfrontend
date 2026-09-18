@@ -43,7 +43,9 @@ router.get('/', async (req, res, next) => {
     const staff = await StaffMember.find(query).sort({ createdAt: -1 });
     res.json(staff);
   } catch (err) {
-    next(err);
+    console.warn('Staff route fallback to in-memory store:', err.message);
+    let results = inMemoryStore.getStaffMembers ? inMemoryStore.getStaffMembers() : [];
+    return res.json(results);
   }
 });
 

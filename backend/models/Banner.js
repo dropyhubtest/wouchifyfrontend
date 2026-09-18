@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 
 const bannerSchema = new mongoose.Schema({
+  id: { type: String },
+  name: { type: String },
   title: { type: String, required: true },
   targetPage: { type: String, default: 'home' },
   badgeText: { type: String, default: '' },

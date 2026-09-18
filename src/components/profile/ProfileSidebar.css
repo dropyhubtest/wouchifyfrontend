@@ -1,75 +1,35 @@
 /* ==========================================================================
-   Profile Desktop Page Styles (Matching Figma Reference)
-   ========================================================================== */
-
-.profile-page {
-  width: 100%;
-  min-height: 100vh;
-  background: #FFFFFF;
-  font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  overflow-x: hidden;
-  box-sizing: border-box;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* ==========================================================================
-   Main Body Container (Sidebar attached to left edge)
-   ========================================================================== */
-
-.profile-main {
-  width: 100%;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 48px 48px 60px 0;
-  box-sizing: border-box;
-}
-
-.profile-main__container {
-  width: 100%;
-  display: flex;
-  gap: 40px;
-  align-items: flex-start;
-  justify-content: flex-start;
-}
-
-/* ==========================================================================
-   Left Column: Sidebar Pills Attached to Left Viewport Edge
+   ProfileSidebar Component Styles
    ========================================================================== */
 
 .profile-sidebar {
-  width: 235px;
+  width: 245px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: 48px;
+  gap: 32px;
 }
 
 .profile-sidebar__pills {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   width: 100%;
 }
 
 .profile-sidebar__pill {
   display: flex;
   align-items: center;
-  gap: 14px;
-  height: 56px;
-  padding: 0 16px 0 20px;
-  border-radius: 0 16px 16px 0;
+  gap: 12px;
+  height: 54px;
+  padding: 0 14px 0 16px;
+  border-radius: 0 18px 18px 0;
   text-decoration: none;
   color: #FFFFFF;
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-weight: 400;
-  font-size: 16px;
-  letter-spacing: 0.3px;
+  font-weight: 500;
+  font-size: 15.5px;
+  letter-spacing: 0.2px;
   transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
   cursor: pointer;
   box-sizing: border-box;
@@ -96,225 +56,54 @@
 }
 
 .profile-sidebar__pill-img {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   object-fit: contain;
   flex-shrink: 0;
   display: block;
 }
 
 .profile-sidebar__pill-text {
-  font-weight: 400;
-  letter-spacing: 0.3px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
 }
 
-/* Quick Access Indicator (Attached to left edge) and Heading with ample spacing */
+/* Optional Quick Access Indicator in Sidebar (if used standalone) */
 .profile-sidebar__quick-access {
   display: flex;
   align-items: center;
   gap: 14px;
   margin-top: 12px;
-  padding-bottom: 32px;
 }
 
 .profile-sidebar__quick-indicator {
-  width: 14px;
-  height: 34px;
-  border-radius: 0 14px 14px 0;
+  width: 16px;
+  height: 32px;
+  border-radius: 0 16px 16px 0;
   background: #232B85;
   flex-shrink: 0;
 }
 
 .profile-sidebar__quick-title {
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 21px;
+  font-size: 22px;
   font-weight: 700;
   color: #000000;
   margin: 0;
   letter-spacing: -0.3px;
 }
 
-/* ==========================================================================
-   Right Column: Profile Fields Form
-   ========================================================================== */
-
-.profile-content {
-  flex: 1;
-  max-width: 1040px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.profile-saved-banner {
-  background-color: #ECFDF5;
-  color: #065F46;
-  border: 1px solid #A7F3D0;
-  padding: 10px 16px;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 18px;
-}
-
-.profile-form-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-  width: 100%;
-}
-
-.profile-field-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-}
-
-.profile-field-label {
-  font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 16px;
-  font-weight: 700;
-  color: #000000;
-  margin: 0;
-  letter-spacing: -0.2px;
-}
-
-.profile-field-card {
-  width: 100%;
-  height: 58px;
-  background-color: #FDF1F1;
-  border: 1px solid #E8CDCD;
-  border-radius: 12px;
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-sizing: border-box;
-  cursor: pointer;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-  box-shadow:
-    0px 2px 4px rgba(0, 0, 0, 0.03),
-    inset 0px 1px 2px rgba(255, 255, 255, 0.6);
-}
-
-.profile-field-card:hover {
-  border-color: #D4AFA8;
-  background-color: #FDECEC;
-}
-
-.profile-field-value {
-  font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 15.5px;
-  font-weight: 500;
-  color: #555555;
-  user-select: none;
-}
-
-.profile-field-input {
-  flex: 1;
-  border: none;
-  background: transparent;
-  outline: none;
-  font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 15.5px;
-  font-weight: 500;
-  color: #111827;
-  padding: 0;
-  margin-right: 12px;
-}
-
-.profile-field-edit-icon {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.75;
-  transition: opacity 0.18s ease, transform 0.18s ease;
-}
-
-.profile-field-edit-icon:hover {
-  opacity: 1;
-  transform: scale(1.1);
-}
-
-.profile-field-edit-img {
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
-  display: block;
-}
-
-.profile-form-actions {
-  display: flex;
-  gap: 14px;
-  margin-top: 10px;
-}
-
-.profile-save-btn {
-  background: #232B85;
-  color: #FFFFFF;
-  border: none;
-  padding: 10px 24px;
-  border-radius: 999px;
-  font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  box-shadow: 0 4px 10px rgba(35, 43, 133, 0.25);
-  transition: background-color 0.18s ease, transform 0.18s ease;
-}
-
-.profile-save-btn:hover {
-  background: #1B216A;
-  transform: translateY(-1px);
-}
-
-.profile-cancel-btn {
-  background: #F3F4F6;
-  color: #374151;
-  border: 1px solid #D1D5DB;
-  padding: 10px 20px;
-  border-radius: 999px;
-  font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.18s ease;
-}
-
-.profile-cancel-btn:hover {
-  background: #E5E7EB;
-}
-
-/* ==========================================================================
-   Responsive Styles
-   ========================================================================== */
-
 @media (max-width: 992px) {
-  .profile-main__container {
-    gap: 32px;
-  }
   .profile-sidebar {
-    width: 200px;
+    width: 210px;
   }
   .profile-sidebar__pill {
-    padding: 10px 18px;
-    font-size: 13.5px;
+    padding: 0 16px;
+    font-size: 14.5px;
   }
 }
 
 @media (max-width: 768px) {
-  .profile-main {
-    padding: 24px 16px 40px;
-  }
-  .profile-main__container {
-    flex-direction: column;
-    gap: 32px;
-  }
   .profile-sidebar {
     width: 100%;
   }
@@ -325,13 +114,12 @@
   }
   .profile-sidebar__pill {
     border-radius: 999px;
+    height: 48px;
   }
   .profile-sidebar__quick-indicator {
-    border-radius: 999px;
     width: 12px;
     height: 24px;
-  }
-  .profile-content {
-    max-width: 100%;
+    border-radius: 0 12px 12px 0;
   }
 }
+

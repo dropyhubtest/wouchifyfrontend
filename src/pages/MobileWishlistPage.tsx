@@ -1,12 +1,27 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { MobileHeader } from '../components/mobile/MobileHeader'
 import { MobileFooter } from '../components/mobile/MobileFooter'
 import { MobileDealCard } from '../components/mobile/MobileDealCard'
 import { DEALS_CARD_ITEMS, type DealCardItem } from '../data/dealsPage'
-import watermarkMain from '../assets/hero/hero-watermark-main.png'
+import accountCircleIcon from '../assets/profile/account_circle.png'
+import ordersIcon from '../assets/profile/orders.png'
+import favoriteIcon from '../assets/profile/favorite.png'
+import walletIcon from '../assets/profile/wallet.png'
+import notificationsIcon from '../assets/profile/notifications.png'
+import referIcon from '../assets/profile/refer.png'
 import styles from './MobileWishlistPage.module.css'
 
+const NAV_PILLS = [
+  { id: 'profile', label: 'My Profile', href: '/profile', icon: accountCircleIcon, active: false },
+  { id: 'orders', label: 'My Orders', href: '/orders', icon: ordersIcon, active: false },
+  { id: 'wishlist', label: 'Wishlist', href: '/favorites', icon: favoriteIcon, active: true },
+  { id: 'wallet', label: 'My Wallet', href: '/wallet', icon: walletIcon, active: false },
+  { id: 'notifications', label: 'Notifications', href: '/notifications', icon: notificationsIcon, active: false },
+  { id: 'refer', label: 'Refer & Earn', href: '/refer', icon: referIcon, active: false },
+]
+
 export const MobileWishlistPage: React.FC = () => {
+  const [searchQuery, setSearchQuery] = useState('')
   const [wishlistItems, setWishlistItems] = useState<DealCardItem[]>(() => {
     try {
       const saved = localStorage.getItem('wouchify_wishlist')
@@ -40,6 +55,17 @@ export const MobileWishlistPage: React.FC = () => {
     }
   }, [wishlistItems])
 
+  const filteredWishlist = useMemo(() => {
+    if (!searchQuery.trim()) return wishlistItems
+    const q = searchQuery.toLowerCase().trim()
+    return wishlistItems.filter(
+      (item) =>
+        item.title.toLowerCase().includes(q) ||
+        item.store.toLowerCase().includes(q) ||
+        item.category.toLowerCase().includes(q)
+    )
+  }, [wishlistItems, searchQuery])
+
   return (
     <div className={styles.mobileWishlistPage}>
       {/* 1. Mobile Header */}
@@ -47,41 +73,83 @@ export const MobileWishlistPage: React.FC = () => {
         <MobileHeader />
       </div>
 
-      {/* 2. Top Title & Decorative Watermark Section */}
-      <section className={styles.topSection} aria-label="Wishlist Navigation">
-        <div className={styles.breadcrumbWrap}>
-          <a href="/" className={styles.breadcrumbLink} aria-label="Back to Home">
-            <span className={styles.chevron}>&lt;&lt;</span>{' '}
-            <span className={styles.pageTitle}>Home</span>
+      {/* 2. Top Breadcrumb link */}
+      <div className={styles.topNavWrap}>
+        <a href="/" className={styles.breadcrumbLink} aria-label="Back to Home">
+          <span className={styles.chevron}>&lt;&lt;</span>{' '}
+          <span className={styles.breadcrumbTitle}>Home</span>
+        </a>
+      </div>
+
+      {/* 3. Search Bar */}
+      <div className={styles.searchBarWrap}>
+        <input
+          type="text"
+          placeholder="Search products...."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className={styles.searchInput}
+          aria-label="Search products in wishlist"
+        />
+        <svg
+          className={styles.searchIcon}
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#1F2937"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+      </div>
+
+      {/* 4. 2x3 Navigation Pills Grid */}
+      <nav className={styles.pillsGrid} aria-label="Account Navigation">
+        {NAV_PILLS.map((pill) => (
+          <a
+            key={pill.id}
+            href={pill.href}
+            className={`${styles.pillLink} ${pill.active ? styles.pillActive : styles.pillRed}`}
+          >
+            <img src={pill.icon} alt="" className={styles.pillIcon} />
+            <span className={styles.pillText}>{pill.label}</span>
           </a>
-        </div>
+        ))}
+      </nav>
 
-        {/* Faint W Watermark on Top Right */}
-        <div className={styles.watermarkWrap} aria-hidden="true">
-          <img
-            src={watermarkMain}
-            alt=""
-            className={styles.watermarkImg}
-          />
-        </div>
-      </section>
+      {/* 5. Section Header */}
+      <div className={styles.sectionHeader}>
+        <div className={styles.sectionIndicator} aria-hidden="true" />
+        <h2 className={styles.sectionTitle}>Products in Wishlist</h2>
+      </div>
 
-      {/* 3. Wishlist Cards Horizontal Scrollable Rail */}
+      {/* 6. Wishlist Cards Horizontal Scrollable Rail */}
       <section className={styles.cardsSection} aria-label="Saved Wishlist Deals">
-        {wishlistItems.length === 0 ? (
+        {filteredWishlist.length === 0 ? (
           <div className={styles.emptyState}>
             <div className={styles.emptyIcon}>❤️</div>
-            <h3 className={styles.emptyTitle}>Your wishlist is empty</h3>
+            <h3 className={styles.emptyTitle}>
+              {searchQuery.trim() ? 'No matching products found' : 'Your wishlist is empty'}
+            </h3>
             <p className={styles.emptyDesc}>
-              Discover trending deals and save your favourites here!
+              {searchQuery.trim()
+                ? 'Try a different search term.'
+                : 'Discover trending deals and save your favourites here!'}
             </p>
-            <a href="/deals" className={styles.emptyCta}>
-              Explore Deals
-            </a>
+            {!searchQuery.trim() && (
+              <a href="/deals" className={styles.emptyCta}>
+                Explore Deals
+              </a>
+            )}
           </div>
         ) : (
           <div className={styles.cardsRail}>
-            {wishlistItems.map((deal) => {
+            {filteredWishlist.map((deal) => {
               const isRemoving = removingIds.includes(deal.id)
               return (
                 <div
@@ -113,10 +181,7 @@ export const MobileWishlistPage: React.FC = () => {
         )}
       </section>
 
-      {/* 4. Dashed Red Divider Line */}
-      <div className={styles.dashedDivider} aria-hidden="true" />
-
-      {/* 5. Mobile Footer */}
+      {/* Mobile Footer */}
       <MobileFooter />
     </div>
   )
