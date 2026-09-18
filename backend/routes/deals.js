@@ -21,17 +21,28 @@ router.get('/', async (req, res, next) => {
       if (status && status !== 'All') query.status = status;
       if (submissionStatus && submissionStatus !== 'All') query.submissionStatus = submissionStatus;
     } else {
-      query.status = status || 'active';
-      query.submissionStatus = submissionStatus ? submissionStatus : { $in: ['approved', undefined] };
-      query.publishAt = { $lte: new Date() };
-      query.$or = [
-        { expiresAt: { $exists: false } },
-        { expiresAt: null },
-        { expiresAt: { $gte: new Date() } }
-      ];
+      query.status = { $nin: ['inactive', 'rejected', 'expired'] };
+      query.opsManagerApproval = { $ne: 'Rejected' };
+      query.submissionStatus = { $nin: ['pending_approval', 'rejected'] };
     }
 
-    const deals = await Deal.find(query).sort({ createdAt: -1 });
+    let deals = await Deal.find(query).sort({ createdAt: -1 });
+
+    if (all !== 'true') {
+      const now = Date.now();
+      deals = deals.filter(d => {
+        if (d.publishAt) {
+          const pubTime = new Date(d.publishAt).getTime();
+          if (!isNaN(pubTime) && pubTime > now + 60000) return false;
+        }
+        if (d.expiresAt) {
+          const expTime = new Date(d.expiresAt).getTime();
+          if (!isNaN(expTime) && expTime < now) return false;
+        }
+        return true;
+      });
+    }
+
     if (!deals || deals.length === 0) {
       return res.json(store.getDeals(req.query));
     }

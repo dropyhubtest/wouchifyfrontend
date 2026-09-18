@@ -29,13 +29,24 @@ router.get('/', async (req, res, next) => {
     if (status && status !== 'all') query.status = status;
 
     if (all !== 'true') {
-      query.status = { $nin: ['rejected', 'pending'] };
+      query.status = { $nin: ['rejected', 'pending', 'inactive'] };
       query.opsManagerApproval = { $ne: 'Rejected' };
-      query.submissionStatus = { $ne: 'pending_approval' };
-      query.publishAt = { $lte: new Date() };
+      query.submissionStatus = { $nin: ['pending_approval', 'rejected'] };
     }
 
-    const stores = await Store.find(query).sort({ name: 1 });
+    let stores = await Store.find(query).sort({ name: 1 });
+
+    if (all !== 'true') {
+      const now = Date.now();
+      stores = stores.filter(s => {
+        if (s.publishAt) {
+          const pubTime = new Date(s.publishAt).getTime();
+          if (!isNaN(pubTime) && pubTime > now + 60000) return false;
+        }
+        return true;
+      });
+    }
+
     if (!stores || stores.length === 0) {
       return res.json(getFallback());
     }

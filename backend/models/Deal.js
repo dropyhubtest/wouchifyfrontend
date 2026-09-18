@@ -30,7 +30,6 @@ const dealSchema = new mongoose.Schema({
   submissionStatus: { type: String, default: 'approved' },
   priority: { type: String, default: 'Normal' },
   expiry: { type: String, default: '' },
-  expiresAt: { type: String, default: '' },
   postedAt: { type: String, default: '' },
   productImage: { type: String, default: '' },
   image: { type: String, default: '' },

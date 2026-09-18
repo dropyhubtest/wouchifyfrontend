@@ -56,18 +56,28 @@ router.get('/', async (req, res, next) => {
       query.category = new RegExp(`^${category}$`, 'i');
     }
     if (all !== 'true') {
-      query.status = { $nin: ['rejected', 'pending'] };
+      query.status = { $nin: ['rejected', 'pending', 'inactive'] };
       query.opsManagerApproval = { $ne: 'Rejected' };
-      query.submissionStatus = { $ne: 'pending_approval' };
-      query.publishAt = { $lte: new Date() };
-      query.$or = [
-        { expiresAt: { $exists: false } },
-        { expiresAt: null },
-        { expiresAt: { $gte: new Date() } }
-      ];
+      query.submissionStatus = { $nin: ['pending_approval', 'rejected'] };
     }
 
-    const coupons = await Coupon.find(query).sort({ createdAt: -1 });
+    let coupons = await Coupon.find(query).sort({ createdAt: -1 });
+
+    if (all !== 'true') {
+      const now = Date.now();
+      coupons = coupons.filter(c => {
+        if (c.publishAt) {
+          const pubTime = new Date(c.publishAt).getTime();
+          if (!isNaN(pubTime) && pubTime > now + 60000) return false;
+        }
+        if (c.expiresAt) {
+          const expTime = new Date(c.expiresAt).getTime();
+          if (!isNaN(expTime) && expTime < now) return false;
+        }
+        return true;
+      });
+    }
+
     if (!coupons || coupons.length === 0) {
       return res.json(getFallback());
     }

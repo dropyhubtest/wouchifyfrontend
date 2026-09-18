@@ -29,17 +29,28 @@ router.get('/', async (req, res, next) => {
       if (status && status !== 'All') query.status = status;
       if (submissionStatus && submissionStatus !== 'All') query.submissionStatus = submissionStatus;
     } else {
-      query.submissionStatus = submissionStatus || 'approved';
-      query.status = status || 'active';
-      query.publishAt = { $lte: new Date() };
-      query.$or = [
-        { expiresAt: { $exists: false } },
-        { expiresAt: null },
-        { expiresAt: { $gte: new Date() } }
-      ];
+      query.status = { $nin: ['inactive', 'rejected', 'expired'] };
+      query.opsManagerApproval = { $ne: 'Rejected' };
+      query.submissionStatus = { $nin: ['pending_approval', 'rejected'] };
     }
 
-    const lootDeals = await LootDeal.find(query).sort({ createdAt: -1 });
+    let lootDeals = await LootDeal.find(query).sort({ createdAt: -1 });
+
+    if (all !== 'true') {
+      const now = Date.now();
+      lootDeals = lootDeals.filter(l => {
+        if (l.publishAt) {
+          const pubTime = new Date(l.publishAt).getTime();
+          if (!isNaN(pubTime) && pubTime > now + 60000) return false;
+        }
+        if (l.expiresAt) {
+          const expTime = new Date(l.expiresAt).getTime();
+          if (!isNaN(expTime) && expTime < now) return false;
+        }
+        return true;
+      });
+    }
+
     if (!lootDeals || lootDeals.length === 0) {
       return res.json(getFallback());
     }

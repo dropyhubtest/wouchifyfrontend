@@ -34,7 +34,6 @@ const lootDealSchema = new mongoose.Schema({
   deliveryInfo: { type: String, default: 'Fast Delivery' },
   rating: { type: String, default: '4.5 ★' },
   postedAt: { type: String, default: 'Today' },
-  expiresAt: { type: String, default: '' },
   image: { type: String, default: '' },
   images: { type: [String], default: [] },
   telegramAlert: { type: Boolean, default: false },
