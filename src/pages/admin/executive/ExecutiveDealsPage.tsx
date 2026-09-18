@@ -152,75 +152,71 @@ export const ExecutiveDealsPage: React.FC = () => {
   const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false)
   const [dealAlert, setDealAlert] = useState<{ title: string; message: string; variant?: 'warning' | 'danger' | 'info' | 'success' } | null>(null)
 
-  useEffect(() => {
-    let isMounted = true
-    const fetchLiveDeals = async () => {
-      setLoading(true)
-      try {
-        const [liveDeals, stores, coupons] = await Promise.all([
-          adminApi.getDeals(),
-          adminApi.getStores().catch(() => []),
-          adminApi.getCoupons().catch(() => [])
-        ])
-        if (isMounted) {
-          setRawStores(Array.isArray(stores) ? stores : [])
-          setRawCoupons(Array.isArray(coupons) ? coupons : [])
-        }
-        if (!isMounted) return
-        if (Array.isArray(liveDeals)) {
-          const mapped: Deal[] = liveDeals.map((d: any, idx: number) => ({
-            id: String(d._id || d.id || `deal-${idx + 1}`),
-            _id: String(d._id || d.id || `deal-${idx + 1}`),
-            title: d.name || d.title || 'Untitled Deal',
-            store: d.store || 'Amazon',
-            brand: d.brand || '',
-            category: d.category || 'Electronics',
-            subCategory: d.subCategory || '',
-            asinOrSku: d.asinOrSku || '',
-            type: (d.type || 'deal') as any,
-            status: (d.status === 'expired' || d.status === 'Expired' ? 'Expired' : d.status === 'pending' || d.status === 'Pending Approval' || d.submissionStatus === 'pending_approval' ? 'Pending Approval' : d.status === 'draft' || d.status === 'Draft' ? 'Draft' : 'Approved') as any,
-            priority: (d.priority || 'Normal') as any,
-            badge: d.dealTag || d.badge || 'Deal',
-            code: d.code || '',
-            link: d.ctaHref || d.link || '',
-            originalPrice: d.originalPrice || '',
-            price: d.price || '₹0',
-            discountLabel: d.discount || d.discountLabel || '',
-            discountValue: parseInt(String(d.discount || d.discountLabel || '0').replace(/[^0-9]/g, '')) || 0,
-            bankOffer: d.bankOffer || '',
-            effectivePrice: d.effectivePrice || d.price || '',
-            cashback: d.cashback || '',
-            stockStatus: d.stockStatus || 'In Stock',
-            rating: d.rating || '4.8',
-            deliveryInfo: d.deliveryInfo || 'Free Express Delivery',
-            warranty: d.warranty || '1 Year Brand Warranty',
-            variantNote: d.variantNote || '',
-            howToClaim: d.howToClaim || '',
-            highlights: d.highlights || ['100% Verified Deal'],
-            isBestSelling: Boolean(d.isBestSelling || d.sectionPlacement === 'best_selling' || d.sectionPlacement === 'both'),
-            sectionPlacement: (d.sectionPlacement || (d.isBestSelling ? 'best_selling' : 'favourite')) as any,
-            isFeatured: Boolean(d.isFeatured),
-            isVerified: Boolean(d.isVerified ?? true),
-            postedAt: d.createdAt ? new Date(d.createdAt).toLocaleDateString('en-IN') : (d.postedAt || 'Recently'),
-            expiresAt: d.expiry || d.expiresAt || '',
-            description: d.description || 'Handpicked verified e-commerce deal.',
-            terms: d.terms || '',
-            image: convertGoogleDriveUrl(d.productImage || d.image || ''),
-            images: d.images?.length ? d.images.map(convertGoogleDriveUrl) : [convertGoogleDriveUrl(d.productImage || d.image || '')],
-            clicks: typeof d.clicks === 'number' ? d.clicks : (parseInt(d.clicks) || 0)
-          }))
-          setDeals(mapped)
-        } else {
-          setDeals([])
-        }
-      } catch (err) {
-        console.warn('Deals fetch error:', err)
-        if (isMounted) setDeals([])
-      } finally {
-        if (isMounted) setLoading(false)
+  const fetchLiveDeals = async () => {
+    setLoading(true)
+    try {
+      const [liveDeals, stores, coupons] = await Promise.all([
+        adminApi.getDeals(),
+        adminApi.getStores().catch(() => []),
+        adminApi.getCoupons().catch(() => [])
+      ])
+      setRawStores(Array.isArray(stores) ? stores : [])
+      setRawCoupons(Array.isArray(coupons) ? coupons : [])
+      if (Array.isArray(liveDeals)) {
+        const mapped: Deal[] = liveDeals.map((d: any, idx: number) => ({
+          id: String(d._id || d.id || `deal-${idx + 1}`),
+          _id: String(d._id || d.id || `deal-${idx + 1}`),
+          title: d.name || d.title || 'Untitled Deal',
+          store: d.store || 'Amazon',
+          brand: d.brand || '',
+          category: d.category || 'Electronics',
+          subCategory: d.subCategory || '',
+          asinOrSku: d.asinOrSku || '',
+          type: (d.type || 'deal') as any,
+          status: (d.status === 'expired' || d.status === 'Expired' ? 'Expired' : d.status === 'pending' || d.status === 'Pending Approval' || d.submissionStatus === 'pending_approval' ? 'Pending Approval' : d.status === 'draft' || d.status === 'Draft' ? 'Draft' : 'Approved') as any,
+          priority: (d.priority || 'Normal') as any,
+          badge: d.dealTag || d.badge || 'Deal',
+          code: d.code || '',
+          link: d.ctaHref || d.link || '',
+          originalPrice: d.originalPrice || '',
+          price: d.price || '₹0',
+          discountLabel: d.discount || d.discountLabel || '',
+          discountValue: parseInt(String(d.discount || d.discountLabel || '0').replace(/[^0-9]/g, '')) || 0,
+          bankOffer: d.bankOffer || '',
+          effectivePrice: d.effectivePrice || d.price || '',
+          cashback: d.cashback || '',
+          stockStatus: d.stockStatus || 'In Stock',
+          rating: d.rating || '4.8',
+          deliveryInfo: d.deliveryInfo || 'Free Express Delivery',
+          warranty: d.warranty || '1 Year Brand Warranty',
+          variantNote: d.variantNote || '',
+          howToClaim: d.howToClaim || '',
+          highlights: d.highlights || ['100% Verified Deal'],
+          isBestSelling: Boolean(d.isBestSelling || d.sectionPlacement === 'best_selling' || d.sectionPlacement === 'both'),
+          sectionPlacement: (d.sectionPlacement || (d.isBestSelling ? 'best_selling' : 'favourite')) as any,
+          isFeatured: Boolean(d.isFeatured),
+          isVerified: Boolean(d.isVerified ?? true),
+          postedAt: d.createdAt ? new Date(d.createdAt).toLocaleDateString('en-IN') : (d.postedAt || 'Recently'),
+          expiresAt: d.expiry || d.expiresAt || '',
+          description: d.description || 'Handpicked verified e-commerce deal.',
+          terms: d.terms || '',
+          image: convertGoogleDriveUrl(d.productImage || d.image || ''),
+          images: d.images?.length ? d.images.map(convertGoogleDriveUrl) : [convertGoogleDriveUrl(d.productImage || d.image || '')],
+          clicks: typeof d.clicks === 'number' ? d.clicks : (parseInt(d.clicks) || 0)
+        }))
+        setDeals(mapped)
+      } else {
+        setDeals([])
       }
+    } catch (err) {
+      console.warn('Deals fetch error:', err)
+      setDeals([])
+    } finally {
+      setLoading(false)
     }
+  }
 
+  useEffect(() => {
     fetchLiveDeals()
 
     const handleSync = () => {
@@ -231,7 +227,6 @@ export const ExecutiveDealsPage: React.FC = () => {
     window.addEventListener('wouchify_deal_clicked', handleSync)
     window.addEventListener('storage', handleSync)
     return () => {
-      isMounted = false
       window.removeEventListener('wouchify_deals_updated', handleSync)
       window.removeEventListener('wouchify_deal_clicked', handleSync)
       window.removeEventListener('storage', handleSync)

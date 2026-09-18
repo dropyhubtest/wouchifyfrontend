@@ -14,7 +14,8 @@ import {
   ChevronRight,
   LogOut,
   ExternalLink,
-  Plus
+  Plus,
+  FileSpreadsheet
 } from 'lucide-react'
 import logo from '../../../assets/navbar/wouchify-logo.png'
 import './ExecutiveLayout.css'
@@ -25,37 +26,44 @@ interface ExecutiveLayoutProps {
 }
 
 export const ExecutiveLayout: React.FC<ExecutiveLayoutProps> = ({ children, activeMenu }) => {
-  const [user, setUser] = useState<{ email: string; role: string; name?: string } | null>(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [user, setUser] = useState<any>(null)
 
   useEffect(() => {
-    // Specifically load executive user profile
-    const stored = localStorage.getItem('executiveUser')
-    if (stored) {
-      try {
-        setUser(JSON.parse(stored))
-        return
-      } catch {}
+    // Check authentication
+    const staffToken = localStorage.getItem('staffToken')
+    const adminToken = localStorage.getItem('adminToken')
+    const staffUserStr = localStorage.getItem('staffUser')
+    const adminUserStr = localStorage.getItem('adminUser')
+
+    if (!staffToken && !adminToken) {
+      window.history.pushState({}, '', '/executive/login')
+      window.dispatchEvent(new PopStateEvent('popstate'))
+      return
     }
 
-    const staffUserStr = localStorage.getItem('staffUser')
     if (staffUserStr) {
       try {
-        const parsed = JSON.parse(staffUserStr)
-        if (parsed.role === 'executive' || (parsed.email && !parsed.email.includes('ops.manager') && !parsed.email.includes('admin'))) {
-          setUser(parsed)
-          return
-        }
-      } catch {}
+        setUser(JSON.parse(staffUserStr))
+        return
+      } catch (e) {
+        console.error('Failed to parse staff user', e)
+      }
+    }
+
+    if (adminUserStr) {
+      try {
+        setUser(JSON.parse(adminUserStr))
+        return
+      } catch (e) {
+        console.error('Failed to parse admin user', e)
+      }
     }
 
     // Default executive profile for Executive Panel
     const defaultExec = { name: 'Balaji', email: 'balaji@wouchify.com', role: 'Content Executive' }
-    localStorage.setItem('executiveUser', JSON.stringify(defaultExec))
-    if (!localStorage.getItem('staffToken')) {
-      localStorage.setItem('staffToken', 'dev-executive-token')
-    }
+    localStorage.setItem('staffUser', JSON.stringify(defaultExec))
     setUser(defaultExec)
   }, [])
 
@@ -74,6 +82,7 @@ export const ExecutiveLayout: React.FC<ExecutiveLayoutProps> = ({ children, acti
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', path: '/executive/dashboard', icon: <LayoutDashboard size={19} /> },
+    { id: 'bulk-upload', label: 'Bulk Data Upload', path: '/executive/bulk-upload', icon: <FileSpreadsheet size={19} /> },
     { id: 'deals', label: 'Deals', path: '/executive/deals', icon: <Zap size={19} /> },
     { id: 'loot-deals', label: 'Loot Deals', path: '/executive/loot-deals', icon: <Flame size={19} /> },
     { id: 'stores', label: 'Stores', path: '/executive/stores', icon: <Store size={19} /> },

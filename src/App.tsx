@@ -65,6 +65,7 @@ import { CreditCardsPage } from './pages/CreditCardsPage'
 import { ProductDisplayPage } from './pages/ProductDisplayPage'
 import { StaffLoginPage } from './pages/admin/StaffLoginPage'
 import { ExecutiveDashboardPage } from './pages/admin/executive/ExecutiveDashboardPage'
+import { ExecutiveBulkUploadPage } from './pages/admin/executive/ExecutiveBulkUploadPage'
 import { ExecutiveDealsPage } from './pages/admin/executive/ExecutiveDealsPage'
 import { ExecutiveLootDealsPage } from './pages/admin/executive/ExecutiveLootDealsPage'
 import { ExecutiveStoresPage } from './pages/admin/executive/ExecutiveStoresPage'
@@ -568,6 +569,7 @@ export default function App() {
         return <OperationsDashboardPage />
       }
       if (isExecutiveRoute) {
+        if (currentPath === '/executive/bulk-upload') return <ExecutiveBulkUploadPage />
         if (currentPath === '/executive/deals') return <ExecutiveDealsPage />
         if (currentPath === '/executive/loot-deals') return <ExecutiveLootDealsPage />
         if (currentPath === '/executive/stores') return <ExecutiveStoresPage />
@@ -695,6 +697,7 @@ export default function App() {
     }
 
     if (isExecutiveRoute) {
+      if (currentPath === '/executive/bulk-upload') return <ExecutiveBulkUploadPage />
       if (currentPath === '/executive/deals') return <ExecutiveDealsPage />
       if (currentPath === '/executive/loot-deals') return <ExecutiveLootDealsPage />
       if (currentPath === '/executive/stores') return <ExecutiveStoresPage />
