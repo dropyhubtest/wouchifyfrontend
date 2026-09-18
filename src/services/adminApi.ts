@@ -1048,6 +1048,23 @@ export const adminApi = {
     return handleResponse<any>(res);
   },
 
+  deleteStaffMember: async (id: string) => {
+    const res = await fetch(`${API_BASE}/staff/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    return handleResponse<any>(res);
+  },
+
+  toggleStaffStatus: async (id: string, status?: string) => {
+    const res = await fetch(`${API_BASE}/staff/${id}/status`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ status })
+    });
+    return handleResponse<any>(res);
+  },
+
   // Advertisements
   getAdvertisements: async (params?: { placement?: string; status?: string; pricingModel?: string; all?: boolean | string }) => {
     try {

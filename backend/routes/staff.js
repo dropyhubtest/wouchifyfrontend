@@ -90,6 +90,13 @@ router.post('/', async (req, res, next) => {
   }
 });
 
+const getStaffQuery = (id) => {
+  if (mongoose.Types.ObjectId.isValid(id)) {
+    return { _id: id };
+  }
+  return { $or: [{ email: id }, { id: id }] };
+};
+
 // @route   GET /api/staff/:id
 // @desc    Get single staff member by ID
 router.get('/:id', async (req, res, next) => {
@@ -100,7 +107,7 @@ router.get('/:id', async (req, res, next) => {
       return res.json(staff);
     }
 
-    const staff = await StaffMember.findById(req.params.id);
+    const staff = await StaffMember.findOne(getStaffQuery(req.params.id));
     if (!staff) return res.status(404).json({ message: 'Staff member not found' });
     res.json(staff);
   } catch (err) {
@@ -112,16 +119,14 @@ router.get('/:id', async (req, res, next) => {
 // @desc    Update a staff member
 router.put('/:id', async (req, res, next) => {
   try {
-    const { name, email, role, domain, status, password } = req.body;
-
     if (mongoose.connection.readyState !== 1) {
       const updated = inMemoryStore.updateStaffMember(req.params.id, req.body);
       if (!updated) return res.status(404).json({ message: 'Staff member not found' });
       return res.json(updated);
     }
 
-    const staff = await StaffMember.findByIdAndUpdate(
-      req.params.id,
+    const staff = await StaffMember.findOneAndUpdate(
+      getStaffQuery(req.params.id),
       { $set: req.body },
       { new: true }
     );
@@ -142,7 +147,7 @@ router.delete('/:id', async (req, res, next) => {
       return res.json({ message: 'Staff member deleted successfully' });
     }
 
-    const staff = await StaffMember.findByIdAndDelete(req.params.id);
+    const staff = await StaffMember.findOneAndDelete(getStaffQuery(req.params.id));
     if (!staff) return res.status(404).json({ message: 'Staff member not found' });
     res.json({ message: 'Staff member deleted successfully' });
   } catch (err) {
@@ -163,8 +168,8 @@ router.patch('/:id/status', async (req, res, next) => {
       return res.json(updated);
     }
 
-    const staff = await StaffMember.findByIdAndUpdate(
-      req.params.id,
+    const staff = await StaffMember.findOneAndUpdate(
+      getStaffQuery(req.params.id),
       { $set: { status } },
       { new: true }
     );

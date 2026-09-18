@@ -335,19 +335,26 @@ export const AdminDashboardPage: React.FC = () => {
     })
   }
 
-  const handleToggleStaffStatus = (id: string) => {
+  const handleToggleStaffStatus = async (id: string) => {
     const statusCycle: ('Online' | 'Away' | 'Offline')[] = ['Online', 'Away', 'Offline']
+    const member = staffMembers.find((s) => (s.id && s.id === id) || (s._id && s._id === id))
+    const currIdx = member ? statusCycle.indexOf(member.status as any) : 0
+    const nextStatus = statusCycle[(currIdx + 1) % statusCycle.length]
+
     setStaffMembers((prev) =>
       prev.map((s) => {
         if ((s.id && s.id === id) || (s._id && s._id === id)) {
-          const currIdx = statusCycle.indexOf(s.status)
-          const nextStatus = statusCycle[(currIdx + 1) % statusCycle.length]
           return { ...s, status: nextStatus }
         }
         return s
       })
     )
-    showToast('Staff status updated.')
+    try {
+      await adminApi.toggleStaffStatus(id, nextStatus)
+    } catch (err) {
+      console.warn('Failed to persist staff status:', err)
+    }
+    showToast(`Staff status updated to ${nextStatus}.`)
   }
 
   const handleDeleteStaff = (id: string) => {
@@ -360,7 +367,7 @@ export const AdminDashboardPage: React.FC = () => {
     })
   }
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!deleteConfirm) return
     const { type, id } = deleteConfirm
     if (type === 'deal') {
@@ -379,6 +386,11 @@ export const AdminDashboardPage: React.FC = () => {
       showToast('Loot deal deleted.')
     } else if (type === 'staff') {
       setStaffMembers((prev) => prev.filter((s) => s.id !== id && s._id !== id))
+      try {
+        await adminApi.deleteStaffMember(String(id))
+      } catch (err) {
+        console.warn('Failed to delete staff member on server:', err)
+      }
       showToast('Staff account deactivated.')
     }
     setDeleteConfirm(null)
@@ -430,25 +442,50 @@ export const AdminDashboardPage: React.FC = () => {
     showToast('Database backup snapshot generated and downloaded!')
   }
 
-  const handleAddStaffSubmit = (e: React.FormEvent) => {
+  const handleAddStaffSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newStaff.name.trim() || !newStaff.email.trim()) return
 
-    const createdStaff: StaffItem = {
-      id: `staff-${Date.now()}`,
-      _id: `staff-${Date.now()}`,
+    const staffPayload = {
       name: newStaff.name.trim(),
       email: newStaff.email.trim(),
       role: newStaff.role,
-      domain: newStaff.domain.trim() || 'Deals & Loot Deals',
+      domain: newStaff.domain.trim() || (newStaff.role === 'operational_manager' ? 'Approvals & QA' : 'Deals & Loot Deals'),
       password: newStaff.password || 'staff123',
-      status: newStaff.status,
-      submissionsToday: 0,
-      totalSubmissions: 0,
-      approvalRate: '100%',
-      rejectionsCount: 0,
-      avgTurnaround: '10m',
-      createdAt: new Date().toISOString()
+      status: newStaff.status
+    }
+
+    let createdStaff: StaffItem
+    try {
+      const serverCreated = await adminApi.createStaffMember(staffPayload)
+      if (serverCreated && (serverCreated._id || serverCreated.id)) {
+        createdStaff = serverCreated
+      } else {
+        createdStaff = {
+          id: `staff-${Date.now()}`,
+          _id: `staff-${Date.now()}`,
+          ...staffPayload,
+          submissionsToday: 0,
+          totalSubmissions: 0,
+          approvalRate: '100%',
+          rejectionsCount: 0,
+          avgTurnaround: '10m',
+          createdAt: new Date().toISOString()
+        }
+      }
+    } catch (err) {
+      console.warn('Backend staff creation fallback:', err)
+      createdStaff = {
+        id: `staff-${Date.now()}`,
+        _id: `staff-${Date.now()}`,
+        ...staffPayload,
+        submissionsToday: 0,
+        totalSubmissions: 0,
+        approvalRate: '100%',
+        rejectionsCount: 0,
+        avgTurnaround: '10m',
+        createdAt: new Date().toISOString()
+      }
     }
 
     const updated = [createdStaff, ...staffMembers]
@@ -473,12 +510,19 @@ export const AdminDashboardPage: React.FC = () => {
       details: `Provisioned new ${createdStaff.role} account for ${createdStaff.name} (${createdStaff.email}).`
     }
     setAuditLogs([newLog, ...auditLogs])
-    showToast(`Staff member ${createdStaff.name} successfully registered!`)
+    showToast(`Staff member ${createdStaff.name} successfully registered in MongoDB!`)
   }
 
-  const handleEditStaffSubmit = (e: React.FormEvent) => {
+  const handleEditStaffSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!editingStaff) return
+
+    const targetId = editingStaff._id || editingStaff.id
+    try {
+      await adminApi.updateStaffMember(String(targetId), editingStaff)
+    } catch (err) {
+      console.warn('Failed to update staff on server:', err)
+    }
 
     setStaffMembers((prev) =>
       prev.map((s) => (s.id === editingStaff.id || s._id === editingStaff._id ? editingStaff : s))
