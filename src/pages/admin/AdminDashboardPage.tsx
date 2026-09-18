@@ -64,6 +64,7 @@ import { AddDealModal } from './manager/modals/AddDealModal'
 import { AddCouponModal } from './manager/modals/AddCouponModal'
 import { AddStaffModal } from './manager/modals/AddStaffModal'
 import { EditStaffModal } from './manager/modals/EditStaffModal'
+import { BulkDataImportModal, type BulkImportModule } from './manager/modals/BulkDataImportModal'
 
 export const AdminDashboardPage: React.FC = () => {
   const [activeNav, setActiveNav] = useState('dashboard')
@@ -84,6 +85,36 @@ export const AdminDashboardPage: React.FC = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [isBackendConnected, setIsBackendConnected] = useState<boolean>(true)
   const [pendingApprovalsCount, setPendingApprovalsCount] = useState<number>(0)
+
+  // Bulk Import state
+  const [isBulkImportOpen, setIsBulkImportOpen] = useState(false)
+  const [bulkImportModule, setBulkImportModule] = useState<BulkImportModule>('deals')
+
+  const handleOpenBulkImport = (mod: BulkImportModule) => {
+    setBulkImportModule(mod)
+    setIsBulkImportOpen(true)
+  }
+
+  const handleBulkImportSuccess = async (mod: BulkImportModule, count: number) => {
+    showToast(`Successfully imported & scheduled ${count} ${mod.toUpperCase()} records to MongoDB Atlas! 🚀`)
+    try {
+      if (mod === 'deals') {
+        const liveDeals = await adminApi.getDeals({ all: true })
+        if (Array.isArray(liveDeals)) setDeals(liveDeals)
+      } else if (mod === 'loot') {
+        const liveLoot = await adminApi.getLootDeals({ all: true })
+        if (Array.isArray(liveLoot)) setLootDeals(liveLoot)
+      } else if (mod === 'coupons') {
+        const liveCoupons = await adminApi.getCoupons({ all: true })
+        if (Array.isArray(liveCoupons)) setCoupons(liveCoupons)
+      } else if (mod === 'stores') {
+        const liveStores = await adminApi.getStores({ all: true })
+        if (Array.isArray(liveStores)) setStores(liveStores)
+      }
+    } catch (err) {
+      console.warn('Failed to refresh data after bulk import:', err)
+    }
+  }
 
   // Load live data from Backend API on mount
   useEffect(() => {
@@ -1110,6 +1141,7 @@ export const AdminDashboardPage: React.FC = () => {
               onToggleDealStatus={handleToggleDealStatus}
               onDeleteDeal={handleDeleteDeal}
               getStoreLogo={getStoreLogo}
+              onOpenBulkImport={() => handleOpenBulkImport('deals')}
             />
           )}
 
@@ -1120,6 +1152,7 @@ export const AdminDashboardPage: React.FC = () => {
               setLootDealTypeFilter={setLootDealTypeFilter}
               onToggleLootDealStatus={handleToggleLootDealStatus}
               onDeleteLootDeal={handleDeleteLootDeal}
+              onOpenBulkImport={() => handleOpenBulkImport('loot')}
             />
           )}
 
@@ -1128,6 +1161,7 @@ export const AdminDashboardPage: React.FC = () => {
               filteredCoupons={filteredCoupons}
               copiedCode={copiedCode}
               onCopyCode={copyToClipboard}
+              onOpenBulkImport={() => handleOpenBulkImport('coupons')}
             />
           )}
 
@@ -1136,7 +1170,10 @@ export const AdminDashboardPage: React.FC = () => {
           )}
 
           {activeNav === 'stores' && (
-            <StoresView filteredStores={filteredStores} />
+            <StoresView
+              filteredStores={filteredStores}
+              onOpenBulkImport={() => handleOpenBulkImport('stores')}
+            />
           )}
 
           {activeNav === 'users' && (
@@ -1186,6 +1223,14 @@ export const AdminDashboardPage: React.FC = () => {
         onClose={() => setEditingStaff(null)}
         onSubmit={handleEditStaffSubmit}
         setEditingStaff={setEditingStaff}
+      />
+
+      {/* ── Bulk Data Import & Scheduled Publishing Modal ── */}
+      <BulkDataImportModal
+        isOpen={isBulkImportOpen}
+        onClose={() => setIsBulkImportOpen(false)}
+        initialModule={bulkImportModule}
+        onImportSuccess={handleBulkImportSuccess}
       />
 
       {/* ── CUSTOM CONFIRM DIALOG ── */}

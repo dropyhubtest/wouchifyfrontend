@@ -45,10 +45,15 @@ const dealSchema = new mongoose.Schema({
   isFeatured: { type: Boolean, default: false },
   isBestSelling: { type: Boolean, default: false },
   sectionPlacement: { type: String, enum: ['favourite', 'best_selling', 'both'], default: 'favourite' },
+  publishAt: { type: Date, default: Date.now },
+  expiresAt: { type: Date },
   description: { type: String, default: '' },
   terms: { type: String, default: '' },
   clicks: { type: Number, default: 0 }
 }, { timestamps: true });
+
+dealSchema.index({ status: 1, publishAt: 1, expiresAt: 1 });
+dealSchema.index({ category: 1, status: 1 });
 
 module.exports = mongoose.model('Deal', dealSchema);
 

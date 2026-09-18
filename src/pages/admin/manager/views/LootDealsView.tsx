@@ -9,6 +9,7 @@ interface LootDealsViewProps {
   setLootDealTypeFilter: (filter: 'All' | 'flash' | 'exclusive') => void
   onToggleLootDealStatus: (dealId: number | string) => void
   onDeleteLootDeal: (dealId: number | string) => void
+  onOpenBulkImport?: () => void
 }
 
 export const LootDealsView: React.FC<LootDealsViewProps> = ({
@@ -16,7 +17,8 @@ export const LootDealsView: React.FC<LootDealsViewProps> = ({
   lootDealTypeFilter,
   setLootDealTypeFilter,
   onToggleLootDealStatus,
-  onDeleteLootDeal
+  onDeleteLootDeal,
+  onOpenBulkImport
 }) => {
   return (
     <div className="view-loot-admin">
@@ -36,6 +38,31 @@ export const LootDealsView: React.FC<LootDealsViewProps> = ({
               variant="admin"
               size="sm"
             />
+
+            {onOpenBulkImport && (
+              <button
+                type="button"
+                className="btn-bulk-import-trigger"
+                onClick={onOpenBulkImport}
+                style={{
+                  marginLeft: '12px',
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '6px 14px',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 2px 4px rgba(16, 185, 129, 0.25)'
+                }}
+              >
+                ⚡ Bulk Import Loot (Excel / CSV)
+              </button>
+            )}
           </div>
           <span className="results-count">Showing {filteredLootDeals.length} loot promotions</span>
         </div>
@@ -56,19 +83,38 @@ export const LootDealsView: React.FC<LootDealsViewProps> = ({
               </tr>
             </thead>
             <tbody>
-              {filteredLootDeals.map((deal) => (
-                <tr key={deal.id}>
-                  <td><strong>{deal.title}</strong></td>
-                  <td><span className="table-store-pill">{deal.storeName}</span></td>
-                  <td><span className="category-chip">{deal.category}</span></td>
-                  <td><strong className="deal-price">{deal.currentPrice}</strong></td>
-                  <td><span className="deal-original-price">{deal.originalPrice}</span></td>
-                  <td><span className="discount-badge">{deal.discount}</span></td>
-                  <td>
-                    <span className={`badge-pill ${deal.dealType === 'flash' ? 'danger' : 'purple'}`}>
-                      {deal.dealType === 'flash' ? '⚡ Flash Loot' : '💎 Exclusive'}
-                    </span>
-                  </td>
+              {filteredLootDeals.map((deal) => {
+                const isScheduled = (deal as any).publishAt && new Date((deal as any).publishAt).getTime() > Date.now()
+                return (
+                  <tr key={deal.id}>
+                    <td>
+                      <strong>{deal.title}</strong>
+                      {isScheduled && (
+                        <span
+                          style={{
+                            marginLeft: '8px',
+                            background: '#fef3c7',
+                            color: '#92400e',
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            padding: '1px 6px',
+                            borderRadius: '4px'
+                          }}
+                        >
+                          ⏳ Scheduled
+                        </span>
+                      )}
+                    </td>
+                    <td><span className="table-store-pill">{deal.storeName}</span></td>
+                    <td><span className="category-chip">{deal.category}</span></td>
+                    <td><strong className="deal-price">{deal.currentPrice}</strong></td>
+                    <td><span className="deal-original-price">{deal.originalPrice}</span></td>
+                    <td><span className="discount-badge">{deal.discount}</span></td>
+                    <td>
+                      <span className={`badge-pill ${deal.dealType === 'flash' ? 'danger' : 'purple'}`}>
+                        {deal.dealType === 'flash' ? '⚡ Flash Loot' : '💎 Exclusive'}
+                      </span>
+                    </td>
                   <td>
                     <button
                       type="button"
@@ -93,7 +139,8 @@ export const LootDealsView: React.FC<LootDealsViewProps> = ({
                     </div>
                   </td>
                 </tr>
-              ))}
+              )
+            })}
             </tbody>
           </table>
         </div>

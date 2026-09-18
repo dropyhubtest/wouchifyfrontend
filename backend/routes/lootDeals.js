@@ -27,6 +27,12 @@ router.get('/', async (req, res, next) => {
     } else {
       query.submissionStatus = submissionStatus || 'approved';
       query.status = status || 'active';
+      query.publishAt = { $lte: new Date() };
+      query.$or = [
+        { expiresAt: { $exists: false } },
+        { expiresAt: null },
+        { expiresAt: { $gte: new Date() } }
+      ];
     }
 
     const lootDeals = await LootDeal.find(query).sort({ createdAt: -1 });
@@ -126,6 +132,64 @@ router.patch('/:id/status', async (req, res, next) => {
     lootDeal.status = lootDeal.status === 'active' ? 'inactive' : 'active';
     await lootDeal.save();
     res.json(lootDeal);
+  } catch (err) { next(err); }
+});
+
+// Bulk Create Loot Deals (Excel / CSV batch insert with scheduled publishing)
+router.post('/bulk', async (req, res, next) => {
+  try {
+    const { items, autoApprove } = req.body;
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ message: 'Items array is required and cannot be empty' });
+    }
+
+    const processedItems = items.map((item, idx) => {
+      const now = new Date();
+      let publishDate = item.publishAt ? new Date(item.publishAt) : now;
+      if (isNaN(publishDate.getTime())) publishDate = now;
+
+      let expireDate = item.expiresAt ? new Date(item.expiresAt) : null;
+      if (expireDate && isNaN(expireDate.getTime())) expireDate = null;
+
+      return {
+        ...item,
+        title: item.title || item.name || `Loot Drop #${idx + 1}`,
+        name: item.name || item.title || `Loot Drop #${idx + 1}`,
+        store: item.store || item.storeName || 'Amazon',
+        storeName: item.storeName || item.store || 'Amazon',
+        category: item.category || 'Electronics',
+        dealType: item.dealType || item.lootType || 'flash',
+        lootType: item.lootType || item.dealType || 'flash',
+        price: item.price ? (String(item.price).startsWith('₹') ? String(item.price) : `₹${item.price}`) : '₹499',
+        originalPrice: item.originalPrice ? (String(item.originalPrice).startsWith('₹') ? String(item.originalPrice) : `₹${item.originalPrice}`) : '',
+        discount: item.discount || '80% OFF',
+        badge: item.badge || '⚡ HOT DROP',
+        status: item.status || 'active',
+        submissionStatus: (autoApprove !== false) ? 'approved' : 'pending',
+        publishAt: publishDate,
+        expiresAt: expireDate,
+        link: item.link || item.href || '/deals',
+        href: item.href || item.link || '/deals',
+        image: item.image || item.productImage || '',
+        stockClaimedPercent: Number(item.stockClaimedPercent) || 85,
+        rating: item.rating || '4.5 ★'
+      };
+    });
+
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(201).json({
+        success: true,
+        count: processedItems.length,
+        items: processedItems
+      });
+    }
+
+    const inserted = await LootDeal.insertMany(processedItems, { ordered: false });
+    res.status(201).json({
+      success: true,
+      count: inserted.length,
+      items: inserted
+    });
   } catch (err) { next(err); }
 });
 

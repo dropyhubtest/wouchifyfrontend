@@ -120,6 +120,17 @@ export const adminApi = {
     return data;
   },
 
+  bulkImportDeals: async (items: any[], autoApprove: boolean = true) => {
+    const res = await fetch(`${API_BASE}/deals/bulk`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ items, autoApprove })
+    });
+    const data = await handleResponse<any>(res);
+    window.dispatchEvent(new CustomEvent('wouchify_deals_updated', { detail: data }));
+    return data;
+  },
+
   updateDeal: async (id: string | number, dealData: Record<string, any>) => {
     const res = await fetch(`${API_BASE}/deals/${id}`, {
       method: 'PUT',
@@ -206,6 +217,17 @@ export const adminApi = {
     return data;
   },
 
+  bulkImportCoupons: async (items: any[], autoApprove: boolean = true) => {
+    const res = await fetch(`${API_BASE}/coupons/bulk`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ items, autoApprove })
+    });
+    const data = await handleResponse<any>(res);
+    window.dispatchEvent(new CustomEvent('wouchify_coupons_updated', { detail: data }));
+    return data;
+  },
+
   updateCoupon: async (id: string | number, couponData: Record<string, any>) => {
     const res = await fetch(`${API_BASE}/coupons/${id}`, {
       method: 'PUT',
@@ -271,6 +293,17 @@ export const adminApi = {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(lootData)
+    });
+    const data = await handleResponse<any>(res);
+    window.dispatchEvent(new CustomEvent('wouchify_loot_deals_updated', { detail: data }));
+    return data;
+  },
+
+  bulkImportLootDeals: async (items: any[], autoApprove: boolean = true) => {
+    const res = await fetch(`${API_BASE}/loot-deals/bulk`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ items, autoApprove })
     });
     const data = await handleResponse<any>(res);
     window.dispatchEvent(new CustomEvent('wouchify_loot_deals_updated', { detail: data }));
@@ -371,6 +404,17 @@ export const adminApi = {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(storeData)
+    });
+    const data = await handleResponse<any>(res);
+    window.dispatchEvent(new CustomEvent('wouchify_stores_updated', { detail: data }));
+    return data;
+  },
+
+  bulkImportStores: async (items: any[], autoApprove: boolean = true) => {
+    const res = await fetch(`${API_BASE}/stores/bulk`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ items, autoApprove })
     });
     const data = await handleResponse<any>(res);
     window.dispatchEvent(new CustomEvent('wouchify_stores_updated', { detail: data }));

@@ -28,6 +28,7 @@ router.get('/', async (req, res, next) => {
       query.status = { $ne: 'rejected', $ne: 'pending' };
       query.opsManagerApproval = { $ne: 'Rejected' };
       query.submissionStatus = { $ne: 'pending_approval' };
+      query.publishAt = { $lte: new Date() };
     }
 
     const stores = await Store.find(query).sort({ name: 1 });
@@ -128,6 +129,69 @@ router.delete('/:id', async (req, res, next) => {
       storeGetMethod: store.getStoreById
     });
     res.json(result);
+  } catch (err) { next(err); }
+});
+
+// Bulk Create Stores (Excel / CSV batch insert with scheduled publishing)
+router.post('/bulk', async (req, res, next) => {
+  try {
+    const { items, autoApprove } = req.body;
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ message: 'Items array is required and cannot be empty' });
+    }
+
+    const processedItems = items.map((item, idx) => {
+      const now = new Date();
+      let publishDate = item.publishAt ? new Date(item.publishAt) : now;
+      if (isNaN(publishDate.getTime())) publishDate = now;
+
+      let expireDate = item.expiresAt ? new Date(item.expiresAt) : null;
+      if (expireDate && isNaN(expireDate.getTime())) expireDate = null;
+
+      const storeName = (item.name || item.storeName || `Store ${idx + 1}`).trim();
+
+      return {
+        ...item,
+        name: storeName,
+        category: item.category || 'Shopping',
+        reward: item.reward || item.cashbackRate || 'Up to 5% Cashback',
+        logo: item.logo || '',
+        href: item.href || item.affiliateUrl || `/stores#${storeName.toLowerCase().replace(/\s+/g, '-')}`,
+        status: item.status || 'active',
+        opsManagerApproval: (autoApprove !== false) ? 'Approved' : 'Pending',
+        managerApproval: (autoApprove !== false) ? 'Approved' : 'Pending',
+        publishAt: publishDate,
+        expiresAt: expireDate
+      };
+    });
+
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(201).json({
+        success: true,
+        count: processedItems.length,
+        items: processedItems
+      });
+    }
+
+    const results = [];
+    for (const item of processedItems) {
+      try {
+        const storeDoc = await Store.findOneAndUpdate(
+          { name: new RegExp(`^${item.name}$`, 'i') },
+          { $set: item },
+          { upsert: true, new: true }
+        );
+        results.push(storeDoc);
+      } catch (e) {
+        console.warn('Store bulk upsert error for', item.name, e.message);
+      }
+    }
+
+    res.status(201).json({
+      success: true,
+      count: results.length,
+      items: results
+    });
   } catch (err) { next(err); }
 });
 

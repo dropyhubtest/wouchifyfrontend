@@ -43,7 +43,12 @@ const lootDealSchema = new mongoose.Schema({
   isVerified: { type: Boolean, default: true },
   isBestSelling: { type: Boolean, default: false },
   sectionPlacement: { type: String, enum: ['favourite', 'best_selling', 'both'], default: 'favourite' },
+  publishAt: { type: Date, default: Date.now },
+  expiresAt: { type: Date },
   clicks: { type: Number, default: 0 }
 }, { timestamps: true });
+
+lootDealSchema.index({ status: 1, publishAt: 1, expiresAt: 1 });
+lootDealSchema.index({ category: 1, status: 1 });
 
 module.exports = mongoose.model('LootDeal', lootDealSchema);

@@ -17,13 +17,19 @@ router.get('/', async (req, res, next) => {
     let query = {};
     if (category && category !== 'All') query.category = category;
     
-    // Default public filtering: Only approved active deals unless explicitly requested by staff (all=true)
+    // Default public filtering: Only approved active deals where publishAt <= now and not expired
     if (all === 'true') {
       if (status && status !== 'All') query.status = status;
       if (submissionStatus && submissionStatus !== 'All') query.submissionStatus = submissionStatus;
     } else {
       query.submissionStatus = submissionStatus || 'approved';
       query.status = status || 'active';
+      query.publishAt = { $lte: new Date() };
+      query.$or = [
+        { expiresAt: { $exists: false } },
+        { expiresAt: null },
+        { expiresAt: { $gte: new Date() } }
+      ];
     }
 
     const deals = await Deal.find(query).sort({ createdAt: -1 });
@@ -128,6 +134,61 @@ router.patch('/:id/status', async (req, res, next) => {
     deal.status = deal.status === 'active' ? 'pending' : 'active';
     await deal.save();
     res.json(deal);
+  } catch (err) { next(err); }
+});
+
+// Bulk Create Deals (Excel / CSV batch insert with scheduled publishing)
+router.post('/bulk', async (req, res, next) => {
+  try {
+    const { items, autoApprove } = req.body;
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ message: 'Items array is required and cannot be empty' });
+    }
+
+    const processedItems = items.map((item, idx) => {
+      const now = new Date();
+      let publishDate = item.publishAt ? new Date(item.publishAt) : now;
+      if (isNaN(publishDate.getTime())) publishDate = now;
+
+      let expireDate = item.expiresAt ? new Date(item.expiresAt) : null;
+      if (expireDate && isNaN(expireDate.getTime())) expireDate = null;
+
+      return {
+        ...item,
+        name: item.name || item.title || `Bulk Deal #${idx + 1}`,
+        title: item.title || item.name || `Bulk Deal #${idx + 1}`,
+        store: item.store || 'Amazon',
+        category: item.category || 'Electronics',
+        price: item.price ? (String(item.price).startsWith('₹') ? String(item.price) : `₹${item.price}`) : '₹999',
+        originalPrice: item.originalPrice ? (String(item.originalPrice).startsWith('₹') ? String(item.originalPrice) : `₹${item.originalPrice}`) : '',
+        discount: item.discount || 'Special Offer',
+        status: item.status || 'active',
+        submissionStatus: (autoApprove !== false) ? 'approved' : 'pending',
+        publishAt: publishDate,
+        expiresAt: expireDate,
+        ctaText: item.ctaText || 'GRAB DEAL',
+        ctaHref: item.ctaHref || item.link || 'https://amazon.in',
+        productImage: item.productImage || item.image || '',
+        dealTag: item.dealTag || item.badge || 'Trending',
+        isBestSelling: item.isBestSelling === true || item.isBestSelling === 'true' || false,
+        sectionPlacement: item.sectionPlacement || 'favourite'
+      };
+    });
+
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(201).json({
+        success: true,
+        count: processedItems.length,
+        items: processedItems
+      });
+    }
+
+    const inserted = await Deal.insertMany(processedItems, { ordered: false });
+    res.status(201).json({
+      success: true,
+      count: inserted.length,
+      items: inserted
+    });
   } catch (err) { next(err); }
 });
 

@@ -13,6 +13,7 @@ interface DealsManagementViewProps {
   onToggleDealStatus: (dealId: number | string) => void
   onDeleteDeal: (dealId: number | string) => void
   getStoreLogo: (storeName: string) => string | null
+  onOpenBulkImport?: () => void
 }
 
 export const DealsManagementView: React.FC<DealsManagementViewProps> = ({
@@ -24,7 +25,8 @@ export const DealsManagementView: React.FC<DealsManagementViewProps> = ({
   setDealStatusFilter,
   onToggleDealStatus,
   onDeleteDeal,
-  getStoreLogo
+  getStoreLogo,
+  onOpenBulkImport
 }) => {
   return (
     <div className="view-deals-admin">
@@ -62,6 +64,31 @@ export const DealsManagementView: React.FC<DealsManagementViewProps> = ({
               variant="admin"
               size="sm"
             />
+
+            {onOpenBulkImport && (
+              <button
+                type="button"
+                className="btn-bulk-import-trigger"
+                onClick={onOpenBulkImport}
+                style={{
+                  marginLeft: '12px',
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '6px 14px',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 2px 4px rgba(16, 185, 129, 0.25)'
+                }}
+              >
+                📊 Bulk Import (Excel / CSV)
+              </button>
+            )}
           </div>
 
           <span className="results-count">
@@ -80,18 +107,35 @@ export const DealsManagementView: React.FC<DealsManagementViewProps> = ({
                 <th>Original</th>
                 <th>Discount</th>
                 <th>Status</th>
-                <th>Expiry</th>
+                <th>Expiry / Schedule</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredDeals.map((deal) => {
                 const logoUrl = getStoreLogo(deal.store)
+                const isScheduled = (deal as any).publishAt && new Date((deal as any).publishAt).getTime() > Date.now()
                 return (
                   <tr key={deal.id}>
                     <td className="deal-name-cell">
                       <span className="deal-title">{deal.name}</span>
-                      <span className="deal-sub">ID: #{deal.id}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                        <span className="deal-sub">ID: #{deal.id}</span>
+                        {isScheduled && (
+                          <span
+                            style={{
+                              background: '#fef3c7',
+                              color: '#92400e',
+                              fontSize: '0.68rem',
+                              fontWeight: 700,
+                              padding: '1px 6px',
+                              borderRadius: '4px'
+                            }}
+                          >
+                            ⏳ Scheduled
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td>
                       <div className="table-store-pill">
@@ -114,7 +158,13 @@ export const DealsManagementView: React.FC<DealsManagementViewProps> = ({
                         <span className="switch-text">{deal.status === 'active' ? 'Active' : 'Pending'}</span>
                       </button>
                     </td>
-                    <td><span className="expiry-text">{deal.expiry}</span></td>
+                    <td>
+                      <span className="expiry-text">
+                        {isScheduled
+                          ? `Live: ${new Date((deal as any).publishAt).toLocaleDateString()}`
+                          : (deal.expiry || 'No Expiry')}
+                      </span>
+                    </td>
                     <td>
                       <div className="action-btns">
                         <button

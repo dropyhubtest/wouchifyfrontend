@@ -55,6 +55,12 @@ router.get('/', async (req, res, next) => {
       query.status = { $ne: 'rejected', $ne: 'pending' };
       query.opsManagerApproval = { $ne: 'Rejected' };
       query.submissionStatus = { $ne: 'pending_approval' };
+      query.publishAt = { $lte: new Date() };
+      query.$or = [
+        { expiresAt: { $exists: false } },
+        { expiresAt: null },
+        { expiresAt: { $gte: new Date() } }
+      ];
     }
 
     const coupons = await Coupon.find(query).sort({ createdAt: -1 });
@@ -157,6 +163,67 @@ router.delete('/:id', async (req, res, next) => {
       storeGetMethod: store.getCouponById
     });
     res.json(result);
+  } catch (err) { next(err); }
+});
+
+// Bulk Create Coupons (Excel / CSV batch insert with scheduled publishing)
+router.post('/bulk', async (req, res, next) => {
+  try {
+    const { items, autoApprove } = req.body;
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ message: 'Items array is required and cannot be empty' });
+    }
+
+    const processedItems = items.map((item, idx) => {
+      const now = new Date();
+      let publishDate = item.publishAt ? new Date(item.publishAt) : now;
+      if (isNaN(publishDate.getTime())) publishDate = now;
+
+      let expireDate = item.expiresAt ? new Date(item.expiresAt) : null;
+      if (expireDate && isNaN(expireDate.getTime())) expireDate = null;
+
+      const codeStr = (item.code || `PROMO${idx + 1}`).toUpperCase().trim();
+
+      return {
+        ...item,
+        code: codeStr,
+        title: item.title || `${item.discount || '20% OFF'} at ${item.store || 'Store'}`,
+        description: item.description || `Use coupon code ${codeStr} to get ${item.discount || 'special discount'} on your order.`,
+        store: item.store || 'Amazon',
+        category: item.category || 'Electronics',
+        discount: item.discount || '20% OFF',
+        discountValue: Number(item.discountValue) || 20,
+        usageLimit: Number(item.usageLimit) || 5000,
+        totalUses: Number(item.totalUses || item.usageLimit) || 5000,
+        usageCount: Number(item.usageCount) || 0,
+        minOrder: item.minOrder || '',
+        maxDiscount: item.maxDiscount || '',
+        affiliateLink: item.affiliateLink || item.link || '',
+        status: item.status || 'active',
+        submissionStatus: (autoApprove !== false) ? 'approved' : 'pending',
+        opsManagerApproval: (autoApprove !== false) ? 'Approved' : 'Pending',
+        managerApproval: (autoApprove !== false) ? 'Approved' : 'Pending',
+        publishAt: publishDate,
+        expiresAt: expireDate,
+        isExclusive: item.isExclusive === true || item.isExclusive === 'true' || false,
+        isVerified: true
+      };
+    });
+
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(201).json({
+        success: true,
+        count: processedItems.length,
+        items: processedItems
+      });
+    }
+
+    const inserted = await Coupon.insertMany(processedItems, { ordered: false });
+    res.status(201).json({
+      success: true,
+      count: inserted.length,
+      items: inserted
+    });
   } catch (err) { next(err); }
 });
 
