@@ -30,7 +30,13 @@ const submissionSchema = new mongoose.Schema({
   },
   rejectionReason: { type: String, default: '' },
   reviewedBy: { type: String, default: '' },
+  reviewedByName: { type: String, default: '' },
+  reviewedByRole: { type: String, default: '' },
   reviewedAt: { type: Date },
+  approvedBy: { type: String, default: '' },
+  approvedByName: { type: String, default: '' },
+  approvedByRole: { type: String, default: '' },
+  approvedAt: { type: Date },
   notes: { type: String, default: '' },
   dataSnapshot: { type: mongoose.Schema.Types.Mixed, default: {} }
 }, { timestamps: true });

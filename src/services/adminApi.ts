@@ -1,3 +1,4 @@
+import { cacheWrap, clearAll as clearFrontendCache } from './dataCache';
 const API_BASE = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? '/api' : 'http://localhost:5000/api');
 
 const getAuthHeaders = (): HeadersInit => {
@@ -93,20 +94,25 @@ export const adminApi = {
   },
 
   getPublicDeals: async (params?: { category?: string; status?: string }) => {
-    try {
-      const query = new URLSearchParams();
-      if (params?.category && params.category !== 'All') query.append('category', params.category);
-      if (params?.status && params.status !== 'All') query.append('status', params.status);
-      const qs = query.toString() ? `?${query.toString()}` : '';
-      const res = await fetch(`${API_BASE}/deals${qs}`);
-      if (res.ok) {
-        const data = await res.json();
-        return Array.isArray(data) ? data : [];
+    const category = params?.category || '';
+    const status = params?.status || '';
+    const cacheKey = `public:deals:${category}:${status}`;
+    return cacheWrap(cacheKey, async () => {
+      try {
+        const query = new URLSearchParams();
+        if (params?.category && params.category !== 'All') query.append('category', params.category);
+        if (params?.status && params.status !== 'All') query.append('status', params.status);
+        const qs = query.toString() ? `?${query.toString()}` : '';
+        const res = await fetch(`${API_BASE}/deals${qs}`);
+        if (res.ok) {
+          const data = await res.json();
+          return Array.isArray(data) ? data : [];
+        }
+      } catch (err) {
+        console.warn('getPublicDeals error:', err);
       }
-    } catch (err) {
-      console.warn('getPublicDeals error:', err);
-    }
-    return [];
+      return [];
+    });
   },
 
   createDeal: async (dealData: Record<string, any>) => {
@@ -206,7 +212,10 @@ export const adminApi = {
   },
 
   getPublicCoupons: async (params?: { store?: string; category?: string }) => {
-    return adminApi.getCoupons(params);
+    const store = params?.store || '';
+    const category = params?.category || '';
+    const cacheKey = `public:coupons:${store}:${category}`;
+    return cacheWrap(cacheKey, () => adminApi.getCoupons(params));
   },
 
   createCoupon: async (couponData: Record<string, any>) => {
@@ -299,7 +308,9 @@ export const adminApi = {
   },
 
   getPublicLootDeals: async (params?: { dealType?: string }) => {
-    return adminApi.getLootDeals(params);
+    const dealType = params?.dealType || '';
+    const cacheKey = `public:loot-deals:${dealType}`;
+    return cacheWrap(cacheKey, () => adminApi.getLootDeals(params));
   },
 
   createLootDeal: async (lootData: Record<string, any>) => {
@@ -606,7 +617,10 @@ export const adminApi = {
   },
 
   getPublicCreditCards: async (params?: { bank?: string; status?: string; tier?: string }) => {
-    return adminApi.getCreditCards(params);
+    const bank = params?.bank || '';
+    const tier = params?.tier || '';
+    const cacheKey = `public:credit-cards:${bank}:${tier}`;
+    return cacheWrap(cacheKey, () => adminApi.getCreditCards(params));
   },
 
   getCreditCardById: async (id: string) => {
@@ -698,23 +712,33 @@ export const adminApi = {
   },
 
   // Submissions (Workflow queue)
+  getSubmissionCacheKey: (params?: { type?: string; status?: string }) => {
+    const type = params?.type || 'all';
+    const status = params?.status || 'all';
+    return `admin:submissions:${type}:${status}`;
+  },
+
   getSubmissions: async (params?: { type?: string; status?: string }) => {
-    try {
-      const query = new URLSearchParams();
-      if (params?.type && params.type !== 'all') query.append('type', params.type);
-      if (params?.status && params.status !== 'all') query.append('status', params.status);
-      const qs = query.toString() ? `?${query.toString()}` : '';
-      const res = await fetch(`${API_BASE}/submissions${qs}`, {
-        headers: getAuthHeaders()
-      });
-      if (res.ok) {
-        const data = await res.json();
-        return Array.isArray(data) ? data : [];
+    const cacheKey = adminApi.getSubmissionCacheKey(params);
+    // 10 second TTL for admin queue to prevent layout flash on quick navigation
+    return cacheWrap(cacheKey, async () => {
+      try {
+        const query = new URLSearchParams();
+        if (params?.type && params.type !== 'all') query.append('type', params.type);
+        if (params?.status && params.status !== 'all') query.append('status', params.status);
+        const qs = query.toString() ? `?${query.toString()}` : '';
+        const res = await fetch(`${API_BASE}/submissions${qs}`, {
+          headers: getAuthHeaders()
+        });
+        if (res.ok) {
+          const data = await res.json();
+          return Array.isArray(data) ? data : [];
+        }
+      } catch (err) {
+        console.warn('getSubmissions error:', err);
       }
-    } catch (err) {
-      console.warn('getSubmissions error:', err);
-    }
-    return [];
+      return [];
+    }, 10000);
   },
 
   getSubmissionById: async (id: string) => {
@@ -739,26 +763,45 @@ export const adminApi = {
     return created;
   },
 
-  approveSubmission: async (id: string, reviewedBy?: string) => {
+  approveSubmission: async (id: string, reviewerMeta?: string | { reviewedBy?: string; reviewedByName?: string; reviewedByRole?: string }) => {
+    const bodyPayload = typeof reviewerMeta === 'object' ? reviewerMeta : { reviewedBy: reviewerMeta };
     const res = await fetch(`${API_BASE}/submissions/${id}/approve`, {
       method: 'PATCH',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ reviewedBy })
+      body: JSON.stringify(bodyPayload)
     });
     const result = await handleResponse<any>(res);
     try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
+    // Clear frontend cache so approved item appears on live pages instantly
+    clearFrontendCache();
     window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, status: 'Approved' } }));
     return result;
   },
 
-  rejectSubmission: async (id: string, rejectionReason: string, reviewedBy?: string) => {
-    const res = await fetch(`${API_BASE}/submissions/${id}/reject`, {
-      method: 'PATCH',
+  bulkApproveSubmissions: async (ids: string[], reviewerMeta?: { reviewedBy?: string; reviewedByName?: string; reviewedByRole?: string }) => {
+    const res = await fetch(`${API_BASE}/submissions/bulk-approve`, {
+      method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ rejectionReason, reviewedBy })
+      body: JSON.stringify({ ids, ...(reviewerMeta || {}) })
     });
     const result = await handleResponse<any>(res);
     try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
+    clearFrontendCache();
+    window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { ids, status: 'Approved' } }));
+    return result;
+  },
+
+  rejectSubmission: async (id: string, rejectionReason: string, reviewerMeta?: string | { reviewedBy?: string; reviewedByName?: string; reviewedByRole?: string }) => {
+    const bodyPayload = typeof reviewerMeta === 'object' ? { rejectionReason, ...reviewerMeta } : { rejectionReason, reviewedBy: reviewerMeta };
+    const res = await fetch(`${API_BASE}/submissions/${id}/reject`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(bodyPayload)
+    });
+    const result = await handleResponse<any>(res);
+    try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
+    // Clear frontend cache so rejected item is removed from live pages instantly
+    clearFrontendCache();
     window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, status: 'Rejected' } }));
     return result;
   },

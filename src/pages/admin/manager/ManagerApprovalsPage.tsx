@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { OperationsLayout } from './OperationsLayout'
+import { ManagerLayout } from './ManagerLayout'
 import { adminApi } from '../../../services/adminApi'
 import { 
   CheckCircle2, 
@@ -20,7 +20,7 @@ import {
   CreditCard,
   Layers
 } from 'lucide-react'
-import './OperationsShared.css'
+import '../operations/OperationsShared.css'
 import { getStoreLogo, PLACEHOLDER_DEAL_IMAGE, PLACEHOLDER_STORE_LOGO } from '../../../data/dealsPage'
 import { AdminPromptDialog, AdminAlertDialog } from '../../../components/common/AdminDialog'
 
@@ -75,7 +75,7 @@ export interface ModerationItem {
 
 import { getCached } from '../../../services/dataCache'
 
-export const OperationsApprovalsPage: React.FC = () => {
+export const ManagerApprovalsPage: React.FC = () => {
   // Synchronously check cache to prevent skeleton flash when navigating back
   const cachedData = getCached<any[]>(adminApi.getSubmissionCacheKey({ status: 'all' }))
   
@@ -211,21 +211,21 @@ export const OperationsApprovalsPage: React.FC = () => {
     }
   }, [])
 
-  const opsReviewerMeta = {
-    reviewedBy: 'ops.manager@wouchify.com',
-    reviewedByName: 'Operations Manager',
-    reviewedByRole: 'Operational Manager'
+  const managerReviewerMeta = {
+    reviewedBy: 'manager@wouchify.com',
+    reviewedByName: 'System Manager',
+    reviewedByRole: 'Manager'
   }
 
   const handleApproveOne = async (id: string, title: string) => {
     try {
-      await adminApi.approveSubmission(id, opsReviewerMeta)
+      await adminApi.approveSubmission(id, managerReviewerMeta)
       setItems(prev => prev.map(i => i.id === id ? { 
         ...i, 
         status: 'Approved',
-        approvedBy: opsReviewerMeta.reviewedBy,
-        approvedByName: opsReviewerMeta.reviewedByName,
-        approvedByRole: opsReviewerMeta.reviewedByRole,
+        approvedBy: managerReviewerMeta.reviewedBy,
+        approvedByName: managerReviewerMeta.reviewedByName,
+        approvedByRole: managerReviewerMeta.reviewedByRole,
         approvedAt: new Date().toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })
       } : i))
       setSelectedIds(prev => prev.filter(selId => selId !== id))
@@ -277,13 +277,13 @@ export const OperationsApprovalsPage: React.FC = () => {
   const handleBulkApprove = async () => {
     if (selectedIds.length === 0) return
     try {
-      await adminApi.bulkApproveSubmissions(selectedIds, opsReviewerMeta)
+      await adminApi.bulkApproveSubmissions(selectedIds, managerReviewerMeta)
       setItems(prev => prev.map(item => selectedIds.includes(item.id) ? { 
         ...item, 
         status: 'Approved',
-        approvedBy: opsReviewerMeta.reviewedBy,
-        approvedByName: opsReviewerMeta.reviewedByName,
-        approvedByRole: opsReviewerMeta.reviewedByRole,
+        approvedBy: managerReviewerMeta.reviewedBy,
+        approvedByName: managerReviewerMeta.reviewedByName,
+        approvedByRole: managerReviewerMeta.reviewedByRole,
         approvedAt: new Date().toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })
       } : item))
       showToast(`Bulk approved ${selectedIds.length} submissions`)
@@ -418,7 +418,7 @@ export const OperationsApprovalsPage: React.FC = () => {
   }
 
   return (
-    <OperationsLayout activeMenu="approvals" pendingCounts={{ approvals: pendingCount }}>
+    <ManagerLayout activeMenu="approvals" pendingCounts={{ approvals: pendingCount }}>
       <div className="executive-crud-page">
         
         {/* Toast */}
@@ -658,52 +658,60 @@ export const OperationsApprovalsPage: React.FC = () => {
         </div>
 
         {/* Filter Bar */}
-        <div className="crud-filter-bar">
-          <div className="filter-search-wrap">
-            <Search size={16} className="search-icon" />
+        <div className="crud-filter-bar" style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' }}>
+          <div className="filter-search-wrap" style={{ flex: 1, minWidth: '280px', position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <Search size={16} className="search-icon" style={{ position: 'absolute', left: '14px', color: '#64748b' }} />
             <input 
               type="text" 
-              placeholder="Search by title, store, code or executive email…" 
+              placeholder="Search by Title, Store, Deal Code, or Executive Email..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ width: '100%', padding: '10px 14px 10px 40px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '0.9rem', outline: 'none' }}
             />
             {searchTerm && (
-              <button className="search-clear-btn" onClick={() => setSearchTerm('')}>
+              <button className="search-clear-btn" onClick={() => setSearchTerm('')} style={{ position: 'absolute', right: '12px', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}>
                 <X size={14} />
               </button>
             )}
           </div>
 
-          <div className="filter-dropdown-wrap">
-            <select 
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="filter-select"
-            >
-              <option value="all">All Content Types</option>
-              <option value="loot">Loot Deals (Price Errors)</option>
-              <option value="deal">Standard Deals</option>
-              <option value="coupon">Coupons</option>
-              <option value="store">Stores</option>
-              <option value="credit_card">Credit Cards</option>
-              <option value="banner">Hero Banners</option>
-              <option value="ad">Advertisements</option>
-              <option value="category">Categories</option>
-            </select>
+          <div className="filter-dropdown-wrap" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f8fafc', padding: '6px 12px', borderRadius: '10px', border: '1.5px solid #e2e8f0' }}>
+              <Tag size={15} color="#64748b" />
+              <select 
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="filter-select"
+                style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: '0.88rem', fontWeight: 600, color: '#334155', cursor: 'pointer' }}
+              >
+                <option value="all">All Content Types</option>
+                <option value="loot">Loot Deals</option>
+                <option value="deal">Standard Deals</option>
+                <option value="coupon">Coupons</option>
+                <option value="store">Stores</option>
+                <option value="credit_card">Credit Cards</option>
+                <option value="banner">Hero Banners</option>
+                <option value="ad">Advertisements</option>
+                <option value="category">Categories</option>
+              </select>
+            </div>
 
-            <select 
-              value={filterExecutive}
-              onChange={(e) => setFilterExecutive(e.target.value)}
-              className="filter-select"
-              aria-label="Filter by Executive"
-            >
-              <option value="all">👥 All Executives</option>
-              {executiveOptions.filter(e => e !== 'all').map(email => (
-                <option key={email} value={email}>
-                  {email}
-                </option>
-              ))}
-            </select>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f8fafc', padding: '6px 12px', borderRadius: '10px', border: '1.5px solid #e2e8f0' }}>
+              <select 
+                value={filterExecutive}
+                onChange={(e) => setFilterExecutive(e.target.value)}
+                className="filter-select"
+                aria-label="Filter by Executive"
+                style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: '0.88rem', fontWeight: 600, color: '#334155', cursor: 'pointer' }}
+              >
+                <option value="all">👥 All Executives</option>
+                {executiveOptions.filter(e => e !== 'all').map(email => (
+                  <option key={email} value={email}>
+                    {email}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -1225,6 +1233,6 @@ export const OperationsApprovalsPage: React.FC = () => {
         )}
 
       </div>
-    </OperationsLayout>
+    </ManagerLayout>
   )
 }

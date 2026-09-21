@@ -39,8 +39,14 @@ async function handleEntityCreate({
   let createdEntity = null;
 
   if (mongoose.connection.readyState === 1 && Model) {
-    const doc = new Model(entityData);
-    createdEntity = await doc.save();
+    try {
+      const doc = new Model(entityData);
+      createdEntity = await doc.save();
+    } catch (err) {
+      console.warn('Mongoose save failed, falling back to memory store:', err.message);
+      if (storeAddMethod) createdEntity = storeAddMethod(entityData);
+      else createdEntity = { _id: 'temp-' + Date.now(), ...entityData };
+    }
   } else if (storeAddMethod) {
     createdEntity = storeAddMethod(entityData);
   } else {
@@ -66,8 +72,13 @@ async function handleEntityCreate({
     };
 
     if (mongoose.connection.readyState === 1) {
-      const sub = new Submission(submissionPayload);
-      await sub.save();
+      try {
+        const sub = new Submission(submissionPayload);
+        await sub.save();
+      } catch (err) {
+        console.warn('Mongoose submission save failed, falling back to memory store:', err.message);
+        inMemoryStore.addSubmission(submissionPayload);
+      }
     } else {
       inMemoryStore.addSubmission(submissionPayload);
     }
@@ -107,8 +118,13 @@ async function handleEntityUpdate({
     const patch = { ...updates, submissionStatus: 'approved' };
     let updatedDoc = null;
     if (mongoose.connection.readyState === 1 && Model) {
-      const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { $or: [{ _id: id }, { id: id }, { code: id }] };
-      updatedDoc = await Model.findOneAndUpdate(query, patch, { new: true, runValidators: true });
+      try {
+        const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { $or: [{ _id: id }, { id: id }, { code: id }] };
+        updatedDoc = await Model.findOneAndUpdate(query, patch, { new: true, runValidators: true });
+      } catch (err) {
+        console.warn('Mongoose update failed, falling back to memory store:', err.message);
+        if (storeUpdateMethod) updatedDoc = storeUpdateMethod(id, patch);
+      }
     } else if (storeUpdateMethod) {
       updatedDoc = storeUpdateMethod(id, patch);
     }
@@ -118,8 +134,16 @@ async function handleEntityUpdate({
   // Staged update for Executive:
   let existingEntity = null;
   if (mongoose.connection.readyState === 1 && Model) {
-    const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { $or: [{ _id: id }, { id: id }, { code: id }] };
-    existingEntity = await Model.findOneAndUpdate(query, { submissionStatus: 'pending_approval' }, { new: true });
+    try {
+      const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { $or: [{ _id: id }, { id: id }, { code: id }] };
+      existingEntity = await Model.findOneAndUpdate(query, { submissionStatus: 'pending_approval' }, { new: true });
+    } catch (err) {
+      console.warn('Mongoose staged update failed, falling back to memory store:', err.message);
+      if (storeGetMethod) {
+        existingEntity = storeGetMethod(id);
+        if (existingEntity && storeUpdateMethod) storeUpdateMethod(id, { submissionStatus: 'pending_approval' });
+      }
+    }
   } else if (storeGetMethod) {
     existingEntity = storeGetMethod(id);
     if (existingEntity && storeUpdateMethod) {
@@ -145,8 +169,13 @@ async function handleEntityUpdate({
   };
 
   if (mongoose.connection.readyState === 1) {
-    const sub = new Submission(submissionPayload);
-    await sub.save();
+    try {
+      const sub = new Submission(submissionPayload);
+      await sub.save();
+    } catch (err) {
+      console.warn('Mongoose submission update save failed, falling back to memory store:', err.message);
+      inMemoryStore.addSubmission(submissionPayload);
+    }
   } else {
     inMemoryStore.addSubmission(submissionPayload);
   }
@@ -175,8 +204,13 @@ async function handleEntityDelete({
 
   if (!isExecutive) {
     if (mongoose.connection.readyState === 1 && Model) {
-      const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { $or: [{ _id: id }, { id: id }, { code: id }] };
-      await Model.findOneAndDelete(query);
+      try {
+        const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { $or: [{ _id: id }, { id: id }, { code: id }] };
+        await Model.findOneAndDelete(query);
+      } catch (err) {
+        console.warn('Mongoose delete failed, falling back to memory store:', err.message);
+        if (storeDeleteMethod) storeDeleteMethod(id);
+      }
     } else if (storeDeleteMethod) {
       storeDeleteMethod(id);
     }
@@ -187,8 +221,13 @@ async function handleEntityDelete({
   const entityId = String(id);
   let existingEntity = null;
   if (mongoose.connection.readyState === 1 && Model) {
-    const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { $or: [{ _id: id }, { id: id }, { code: id }] };
-    existingEntity = await Model.findOneAndUpdate(query, { submissionStatus: 'pending_approval' }, { new: true });
+    try {
+      const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { $or: [{ _id: id }, { id: id }, { code: id }] };
+      existingEntity = await Model.findOneAndUpdate(query, { submissionStatus: 'pending_approval' }, { new: true });
+    } catch (err) {
+      console.warn('Mongoose staged delete failed, falling back to memory store:', err.message);
+      if (storeGetMethod) existingEntity = storeGetMethod(id);
+    }
   } else if (storeGetMethod) {
     existingEntity = storeGetMethod(id);
   }
@@ -207,8 +246,13 @@ async function handleEntityDelete({
   };
 
   if (mongoose.connection.readyState === 1) {
-    const sub = new Submission(submissionPayload);
-    await sub.save();
+    try {
+      const sub = new Submission(submissionPayload);
+      await sub.save();
+    } catch (err) {
+      console.warn('Mongoose submission delete save failed, falling back to memory store:', err.message);
+      inMemoryStore.addSubmission(submissionPayload);
+    }
   } else {
     inMemoryStore.addSubmission(submissionPayload);
   }

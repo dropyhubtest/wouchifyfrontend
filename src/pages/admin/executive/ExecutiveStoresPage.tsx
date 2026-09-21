@@ -1131,6 +1131,11 @@ export const ExecutiveStoresPage: React.FC = () => {
                       <span className={statusClass(store.status)} style={{ fontSize: '0.72rem' }}>
                         {statusLabel(store.status)}
                       </span>
+                      {store.status === 'active' && ((store as any).approvedByName || (store as any).approvedBy || (store as any).approvedByRole) && (
+                        <div style={{ fontSize: '0.68rem', color: '#16a34a', marginTop: 3, fontWeight: 600 }}>
+                          ✓ by {((store as any).approvedByName || (store as any).approvedByRole || (store as any).approvedBy).split('@')[0]}
+                        </div>
+                      )}
                     </td>
                     <td style={{ fontSize: '0.8rem', color: '#64748b' }}>{store.addedOn}</td>
                     <td onClick={e => e.stopPropagation()}>

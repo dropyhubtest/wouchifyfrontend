@@ -3156,15 +3156,26 @@ module.exports = {
     saveToDisk();
     return true;
   },
-  approveSubmission: (id, reviewer = 'ops.manager@wouchify.com') => {
+  approveSubmission: (id, reviewer = 'ops.manager@wouchify.com', reviewerName = 'Operational Manager', reviewerRole = 'Operational Manager') => {
     const target = String(id).trim();
     const sub = submissions.find(s => String(s._id) === target || String(s.id) === target);
     if (!sub) return null;
 
+    const email = typeof reviewer === 'object' ? (reviewer.email || 'ops.manager@wouchify.com') : String(reviewer);
+    const name = typeof reviewer === 'object' ? (reviewer.name || 'Operational Manager') : String(reviewerName || 'Operational Manager');
+    const role = typeof reviewer === 'object' ? (reviewer.role || 'Operational Manager') : String(reviewerRole || (email.includes('manager@') && !email.includes('ops') ? 'Manager' : 'Operational Manager'));
+    const nowIso = new Date().toISOString();
+
     sub.status = 'Approved';
-    sub.reviewedBy = reviewer;
-    sub.reviewedAt = new Date().toISOString();
-    sub.updatedAt = new Date().toISOString();
+    sub.reviewedBy = email;
+    sub.reviewedByName = name;
+    sub.reviewedByRole = role;
+    sub.approvedBy = email;
+    sub.approvedByName = name;
+    sub.approvedByRole = role;
+    sub.reviewedAt = nowIso;
+    sub.approvedAt = nowIso;
+    sub.updatedAt = nowIso;
 
     const entityType = sub.entityType;
     const entityId = String(sub.entityId || '').trim();
@@ -3182,17 +3193,25 @@ module.exports = {
         (snapshot.code && item.code && item.code.toUpperCase().trim() === snapshot.code.toUpperCase().trim())
       );
 
+      const approvalMeta = {
+        approvedBy: email,
+        approvedByName: name,
+        approvedByRole: role,
+        approvedAt: nowIso,
+        opsManagerApproval: 'Approved',
+        managerApproval: 'Approved',
+        submissionStatus: 'approved',
+        status: 'active',
+        updatedAt: nowIso
+      };
+
       if (action === 'delete') {
         if (idx !== -1) coll.splice(idx, 1);
       } else if (idx !== -1) {
         coll[idx] = {
           ...coll[idx],
           ...snapshot,
-          status: 'active',
-          submissionStatus: 'approved',
-          opsManagerApproval: 'Approved',
-          managerApproval: 'Approved',
-          updatedAt: new Date().toISOString()
+          ...approvalMeta
         };
       } else {
         // Add as active item
@@ -3201,12 +3220,8 @@ module.exports = {
           _id: newId,
           id: newId,
           ...snapshot,
-          status: 'active',
-          submissionStatus: 'approved',
-          opsManagerApproval: 'Approved',
-          managerApproval: 'Approved',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          ...approvalMeta,
+          createdAt: nowIso
         });
       }
     };
@@ -3223,16 +3238,23 @@ module.exports = {
     saveToDisk();
     return sub;
   },
-  rejectSubmission: (id, reason = 'Rejected by Operational Manager', reviewer = 'ops.manager@wouchify.com') => {
+  rejectSubmission: (id, reason = 'Rejected', reviewer = 'ops.manager@wouchify.com', reviewerName = 'Operational Manager', reviewerRole = 'Operational Manager') => {
     const target = String(id).trim();
     const sub = submissions.find(s => String(s._id) === target || String(s.id) === target);
     if (!sub) return null;
 
+    const email = typeof reviewer === 'object' ? (reviewer.email || 'ops.manager@wouchify.com') : String(reviewer);
+    const name = typeof reviewer === 'object' ? (reviewer.name || 'Operational Manager') : String(reviewerName || 'Operational Manager');
+    const role = typeof reviewer === 'object' ? (reviewer.role || 'Operational Manager') : String(reviewerRole || (email.includes('manager@') && !email.includes('ops') ? 'Manager' : 'Operational Manager'));
+    const nowIso = new Date().toISOString();
+
     sub.status = 'Rejected';
     sub.rejectionReason = reason;
-    sub.reviewedBy = reviewer;
-    sub.reviewedAt = new Date().toISOString();
-    sub.updatedAt = new Date().toISOString();
+    sub.reviewedBy = email;
+    sub.reviewedByName = name;
+    sub.reviewedByRole = role;
+    sub.reviewedAt = nowIso;
+    sub.updatedAt = nowIso;
 
     const entityType = sub.entityType;
     const entityId = String(sub.entityId || '').trim();

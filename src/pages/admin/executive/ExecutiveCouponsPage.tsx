@@ -915,6 +915,11 @@ export const ExecutiveCouponsPage: React.FC = () => {
                       }}>
                         {sc.label}
                       </span>
+                      {coupon.status === 'active' && ((coupon as any).approvedByName || (coupon as any).approvedBy || (coupon as any).approvedByRole) && (
+                        <div style={{ fontSize: '0.68rem', color: '#16a34a', marginTop: 3, fontWeight: 600 }}>
+                          ✓ by {((coupon as any).approvedByName || (coupon as any).approvedByRole || (coupon as any).approvedBy).split('@')[0]}
+                        </div>
+                      )}
                     </td>
 
                     {/* Actions */}

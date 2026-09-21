@@ -27,8 +27,8 @@ export const UsersView: React.FC<UsersViewProps> = ({ filteredUsers }) => {
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map((user) => (
-                <tr key={user.id}>
+              {filteredUsers.map((user, index) => (
+                <tr key={user.id || user._id || index}>
                   <td><strong>{user.name}</strong></td>
                   <td>{user.email}</td>
                   <td><strong style={{ color: '#16A34A' }}>{user.walletBalance}</strong></td>

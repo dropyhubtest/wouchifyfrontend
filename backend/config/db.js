@@ -37,11 +37,11 @@ async function connectDB() {
 
   isConnecting = true;
   cachedConnection = mongoose.connect(MONGO_URI, {
-    serverSelectionTimeoutMS: 8000,
-    connectTimeoutMS: 10000,
+    serverSelectionTimeoutMS: 1500,
+    connectTimeoutMS: 1500,
     maxPoolSize: 10,
     minPoolSize: 1,
-    socketTimeoutMS: 45000,
+    socketTimeoutMS: 1500,
   });
 
   try {

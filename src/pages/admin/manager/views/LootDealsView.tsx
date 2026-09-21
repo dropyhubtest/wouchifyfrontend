@@ -78,6 +78,7 @@ export const LootDealsView: React.FC<LootDealsViewProps> = ({
                 <th>Original</th>
                 <th>Discount</th>
                 <th>Type</th>
+                <th>Approval & Workflow</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
@@ -85,6 +86,10 @@ export const LootDealsView: React.FC<LootDealsViewProps> = ({
             <tbody>
               {filteredLootDeals.map((deal) => {
                 const isScheduled = (deal as any).publishAt && new Date((deal as any).publishAt).getTime() > Date.now()
+                const approver = (deal as any).approvedByName || (deal as any).approvedBy || ((deal as any).opsManagerApproval === 'Approved' ? 'Operational Manager' : ((deal as any).managerApproval === 'Approved' ? 'Manager' : (deal.status === 'active' ? 'Verified Catalog' : null)))
+                const approverRole = (deal as any).approvedByRole || (approver?.includes('manager@') && !approver?.includes('ops') ? 'Manager' : 'Operations')
+                const approvedTime = (deal as any).approvedAt ? new Date((deal as any).approvedAt).toLocaleDateString() : null
+
                 return (
                   <tr key={deal.id}>
                     <td>
@@ -115,17 +120,35 @@ export const LootDealsView: React.FC<LootDealsViewProps> = ({
                         {deal.dealType === 'flash' ? '⚡ Flash Loot' : '💎 Exclusive'}
                       </span>
                     </td>
-                  <td>
-                    <button
-                      type="button"
-                      className={`status-switch ${deal.status === 'active' ? 'active' : 'paused'}`}
-                      onClick={() => onToggleLootDealStatus(deal.id)}
-                      title="Click to toggle status"
-                    >
-                      <span className="switch-track"><span className="switch-thumb" /></span>
-                      <span className="switch-text">{deal.status === 'active' ? 'Active' : 'Inactive'}</span>
-                    </button>
-                  </td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        {approver ? (
+                          <>
+                            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#15803d' }}>
+                              ✓ Approved by {approverRole}
+                            </span>
+                            <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                              {approver} {approvedTime ? `(${approvedTime})` : ''}
+                            </span>
+                          </>
+                        ) : (
+                          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#ea580c' }}>
+                            ⏳ Pending Review
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        className={`status-switch ${deal.status === 'active' ? 'active' : 'paused'}`}
+                        onClick={() => onToggleLootDealStatus(deal.id)}
+                        title="Click to toggle status"
+                      >
+                        <span className="switch-track"><span className="switch-thumb" /></span>
+                        <span className="switch-text">{deal.status === 'active' ? 'Active' : 'Inactive'}</span>
+                      </button>
+                    </td>
                   <td>
                     <div className="action-btns">
                       <button

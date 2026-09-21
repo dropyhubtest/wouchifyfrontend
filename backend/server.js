@@ -48,6 +48,8 @@ const { connectDB } = require('./config/db');
 const app = express();
 
 // Middleware
+// gzip compression: reduces JSON payload by 60-80%, must be first middleware
+app.use(require('compression')());
 app.use(cors({
   origin: function (origin, callback) {
     // Allow localhost and Vercel connections

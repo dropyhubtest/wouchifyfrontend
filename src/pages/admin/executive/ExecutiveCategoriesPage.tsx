@@ -546,14 +546,16 @@ export const ExecutiveCategoriesPage: React.FC = () => {
               <RefreshCw size={16} className={loading ? 'exec-cat-hub__spin' : ''} />
               <span>Sync Live</span>
             </button>
-            <button
-              type="button"
-              className="exec-cat-hub__btn exec-cat-hub__btn--primary"
-              onClick={handleOpenCreateModal}
-            >
-              <Plus size={16} />
-              <span>Add New Taxonomy Item</span>
-            </button>
+            <div className="exec-cat-hub__actions">
+              <button
+                type="button"
+                className="exec-cat-hub__btn exec-cat-hub__btn--primary"
+                onClick={handleOpenCreateModal}
+              >
+                <Plus size={16} />
+                <span>Add Category</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -896,7 +898,7 @@ export const ExecutiveCategoriesPage: React.FC = () => {
                           <button
                             type="button"
                             className="exec-cat-hub__action-btn"
-                            title="Edit Taxonomy Item"
+                            title="Edit Category"
                             onClick={() => handleOpenEditModal(item)}
                           >
                             <Edit2 size={15} />
@@ -1297,7 +1299,7 @@ export const ExecutiveCategoriesPage: React.FC = () => {
           <div className="exec-cat-modal-overlay">
             <div className="exec-cat-modal">
               <div className="exec-cat-modal__header">
-                <h2>Add New Taxonomy Item</h2>
+                <h2>Add New Category</h2>
                 <button type="button" onClick={() => setIsCreateModalOpen(false)}>
                   <X size={20} />
                 </button>
@@ -1374,7 +1376,7 @@ export const ExecutiveCategoriesPage: React.FC = () => {
           <div className="exec-cat-modal-overlay">
             <div className="exec-cat-modal">
               <div className="exec-cat-modal__header">
-                <h2>Edit Taxonomy Item</h2>
+                <h2>Edit Category</h2>
                 <button type="button" onClick={() => setIsEditModalOpen(false)}>
                   <X size={20} />
                 </button>

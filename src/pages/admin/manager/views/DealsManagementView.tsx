@@ -106,6 +106,7 @@ export const DealsManagementView: React.FC<DealsManagementViewProps> = ({
                 <th>Price</th>
                 <th>Original</th>
                 <th>Discount</th>
+                <th>Approval & Workflow</th>
                 <th>Status</th>
                 <th>Expiry / Schedule</th>
                 <th>Actions</th>
@@ -115,6 +116,10 @@ export const DealsManagementView: React.FC<DealsManagementViewProps> = ({
               {filteredDeals.map((deal) => {
                 const logoUrl = getStoreLogo(deal.store)
                 const isScheduled = (deal as any).publishAt && new Date((deal as any).publishAt).getTime() > Date.now()
+                const approver = (deal as any).approvedByName || (deal as any).approvedBy || ((deal as any).opsManagerApproval === 'Approved' ? 'Operational Manager' : ((deal as any).managerApproval === 'Approved' ? 'Manager' : (deal.status === 'active' ? 'Verified Catalog' : null)))
+                const approverRole = (deal as any).approvedByRole || (approver?.includes('manager@') && !approver?.includes('ops') ? 'Manager' : 'Operations')
+                const approvedTime = (deal as any).approvedAt ? new Date((deal as any).approvedAt).toLocaleDateString() : null
+
                 return (
                   <tr key={deal.id}>
                     <td className="deal-name-cell">
@@ -147,6 +152,24 @@ export const DealsManagementView: React.FC<DealsManagementViewProps> = ({
                     <td><strong className="deal-price">{deal.price}</strong></td>
                     <td><span className="deal-original-price">{deal.originalPrice || '—'}</span></td>
                     <td><span className="discount-badge">{deal.discount}</span></td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        {approver ? (
+                          <>
+                            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#15803d' }}>
+                              ✓ Approved by {approverRole}
+                            </span>
+                            <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                              {approver} {approvedTime ? `(${approvedTime})` : ''}
+                            </span>
+                          </>
+                        ) : (
+                          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#ea580c' }}>
+                            ⏳ Pending Review
+                          </span>
+                        )}
+                      </div>
+                    </td>
                     <td>
                       <button
                         type="button"
