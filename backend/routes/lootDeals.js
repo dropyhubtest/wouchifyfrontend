@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const LootDeal = require('../models/LootDeal');
+const Submission = require('../models/Submission');
 const auth = require('../middleware/authMiddleware');
 const store = require('../services/inMemoryStore');
 const { handleEntityCreate, handleEntityUpdate, handleEntityDelete } = require('../middleware/approvalHelper');
+const { fastQuery, safeBackground } = require('../utils/mongoFastQuery');
 
 // Public read access for storefront & catalog consumers
 router.get('/', async (req, res, next) => {
@@ -18,10 +20,6 @@ router.get('/', async (req, res, next) => {
   };
 
   try {
-    if (mongoose.connection.readyState !== 1) {
-      return res.json(getFallback());
-    }
-    
     let query = {};
     if (dealType && dealType !== 'All') query.dealType = dealType;
 
@@ -34,29 +32,27 @@ router.get('/', async (req, res, next) => {
       query.submissionStatus = { $nin: ['pending_approval', 'rejected'] };
     }
 
-    let lootDeals = await LootDeal.find(query).sort({ createdAt: -1 });
+    const mongoQueryFn = () => LootDeal.find(query).sort({ createdAt: -1 }).lean().then(lootDeals => {
+      if (all !== 'true') {
+        const now = Date.now();
+        return lootDeals.filter(l => {
+          if (l.publishAt) {
+            const pubTime = new Date(l.publishAt).getTime();
+            if (!isNaN(pubTime) && pubTime > now + 60000) return false;
+          }
+          if (l.expiresAt) {
+            const expTime = new Date(l.expiresAt).getTime();
+            if (!isNaN(expTime) && expTime < now) return false;
+          }
+          return true;
+        });
+      }
+      return lootDeals;
+    });
 
-    if (all !== 'true') {
-      const now = Date.now();
-      lootDeals = lootDeals.filter(l => {
-        if (l.publishAt) {
-          const pubTime = new Date(l.publishAt).getTime();
-          if (!isNaN(pubTime) && pubTime > now + 60000) return false;
-        }
-        if (l.expiresAt) {
-          const expTime = new Date(l.expiresAt).getTime();
-          if (!isNaN(expTime) && expTime < now) return false;
-        }
-        return true;
-      });
-    }
-
-    if (!lootDeals || lootDeals.length === 0) {
-      return res.json(getFallback());
-    }
+    const lootDeals = await fastQuery(mongoQueryFn, getFallback, 200);
     res.json(lootDeals);
   } catch (err) {
-    console.warn('Loot deals route fallback to in-memory store:', err.message);
     return res.json(getFallback());
   }
 });
@@ -164,6 +160,12 @@ router.post('/bulk', async (req, res, next) => {
       return res.status(400).json({ message: 'Items array is required and cannot be empty' });
     }
 
+    const isExecutive = req.user?.role === 'executive' || autoApprove === false;
+    const submissionStatus = isExecutive ? 'pending_approval' : 'approved';
+    const status = isExecutive ? 'pending' : 'active';
+    const opsManagerApproval = isExecutive ? 'Pending' : 'Approved';
+    const managerApproval = isExecutive ? 'Pending' : 'Approved';
+
     const processedItems = items.map((item, idx) => {
       const now = new Date();
       let publishDate = item.publishAt ? new Date(item.publishAt) : now;
@@ -185,8 +187,12 @@ router.post('/bulk', async (req, res, next) => {
         originalPrice: item.originalPrice ? (String(item.originalPrice).startsWith('₹') ? String(item.originalPrice) : `₹${item.originalPrice}`) : '',
         discount: item.discount || '80% OFF',
         badge: item.badge || '⚡ HOT DROP',
-        status: item.status || 'active',
-        submissionStatus: (autoApprove !== false) ? 'approved' : 'pending',
+        status: isExecutive ? 'pending' : (item.status || 'active'),
+        submissionStatus,
+        opsManagerApproval,
+        managerApproval,
+        submittedBy: req.user?.email || 'executive@wouchify.com',
+        submittedByName: req.user?.name || 'Content Executive',
         publishAt: publishDate,
         expiresAt: expireDate,
         link: item.link || item.href || '/deals',
@@ -197,20 +203,68 @@ router.post('/bulk', async (req, res, next) => {
       };
     });
 
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(201).json({
-        success: true,
-        count: processedItems.length,
-        items: processedItems
-      });
-    }
+    // 1. Always record in in-memory store immediately (<1ms)
+    processedItems.forEach(item => {
+      const createdLoot = store.addLootDeal(item);
+      const entityId = String(createdLoot._id || createdLoot.id || item._id || item.id);
+      item._id = entityId;
+      item.id = entityId;
+      if (isExecutive) {
+        store.addSubmission({
+          entityType: 'loot_deal',
+          entityId,
+          action: 'create',
+          title: item.title || item.name,
+          store: item.store || item.storeName,
+          category: item.category,
+          priority: item.priority || 'Normal',
+          submittedBy: req.user?.email || 'executive@wouchify.com',
+          submittedByName: req.user?.name || 'Content Executive',
+          status: 'Pending Approval',
+          notes: 'Bulk imported loot deal submitted for Manager approval.',
+          dataSnapshot: { ...item, _id: entityId, id: entityId }
+        });
+      }
+    });
 
-    const inserted = await LootDeal.insertMany(processedItems, { ordered: false });
+    // 2. Respond immediately to user so UI never hangs
     res.status(201).json({
       success: true,
-      count: inserted.length,
-      items: inserted
+      staged: isExecutive,
+      count: processedItems.length,
+      items: processedItems
     });
+
+    // 3. Persist to MongoDB in background
+    safeBackground(async () => {
+      if (mongoose.connection.readyState === 1) {
+        const mongoDocs = processedItems.map(item => {
+          const doc = { ...item };
+          if (doc._id && !mongoose.Types.ObjectId.isValid(doc._id)) {
+            delete doc._id;
+          }
+          return doc;
+        });
+        const inserted = await LootDeal.insertMany(mongoDocs, { ordered: false });
+        if (isExecutive && inserted && inserted.length > 0) {
+          const submissions = inserted.map(doc => ({
+            entityType: 'loot_deal',
+            entityId: String(doc._id || doc.id),
+            action: 'create',
+            title: doc.title || doc.name,
+            store: doc.store || doc.storeName || '',
+            category: doc.category || '',
+            priority: doc.priority || 'Normal',
+            submittedBy: req.user?.email || 'executive@wouchify.com',
+            submittedByName: req.user?.name || 'Content Executive',
+            status: 'Pending Approval',
+            notes: 'Bulk imported loot deal submitted for Manager approval.',
+            dataSnapshot: doc.toObject ? doc.toObject() : doc
+          }));
+          await Submission.insertMany(submissions, { ordered: false });
+        }
+      }
+    }, 'Loot Deals Bulk Mongo Insert');
   } catch (err) { next(err); }
 });
 

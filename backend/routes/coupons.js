@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const Coupon = require('../models/Coupon');
+const Submission = require('../models/Submission');
 const auth = require('../middleware/authMiddleware');
 const store = require('../services/inMemoryStore');
 const { handleEntityCreate, handleEntityUpdate, handleEntityDelete } = require('../middleware/approvalHelper');
+const { fastQuery, safeBackground } = require('../utils/mongoFastQuery');
 
 // Helper to build flexible query matching ObjectId, string id, or coupon code
 function buildCouponQuery(identifier) {
@@ -41,10 +43,6 @@ router.get('/', async (req, res, next) => {
   };
 
   try {
-    if (mongoose.connection.readyState !== 1) {
-      return res.json(getFallback());
-    }
-
     const query = {};
     if (status && status !== 'all') {
       query.status = status;
@@ -61,29 +59,27 @@ router.get('/', async (req, res, next) => {
       query.submissionStatus = { $nin: ['pending_approval', 'rejected'] };
     }
 
-    let coupons = await Coupon.find(query).sort({ createdAt: -1 });
+    const mongoQueryFn = () => Coupon.find(query).sort({ createdAt: -1 }).lean().then(coupons => {
+      if (all !== 'true') {
+        const now = Date.now();
+        return coupons.filter(c => {
+          if (c.publishAt) {
+            const pubTime = new Date(c.publishAt).getTime();
+            if (!isNaN(pubTime) && pubTime > now + 60000) return false;
+          }
+          if (c.expiresAt) {
+            const expTime = new Date(c.expiresAt).getTime();
+            if (!isNaN(expTime) && expTime < now) return false;
+          }
+          return true;
+        });
+      }
+      return coupons;
+    });
 
-    if (all !== 'true') {
-      const now = Date.now();
-      coupons = coupons.filter(c => {
-        if (c.publishAt) {
-          const pubTime = new Date(c.publishAt).getTime();
-          if (!isNaN(pubTime) && pubTime > now + 60000) return false;
-        }
-        if (c.expiresAt) {
-          const expTime = new Date(c.expiresAt).getTime();
-          if (!isNaN(expTime) && expTime < now) return false;
-        }
-        return true;
-      });
-    }
-
-    if (!coupons || coupons.length === 0) {
-      return res.json(getFallback());
-    }
+    const coupons = await fastQuery(mongoQueryFn, getFallback, 200);
     res.json(coupons);
   } catch (err) {
-    console.warn('Coupons route fallback to in-memory store:', err.message);
     return res.json(getFallback());
   }
 });
@@ -194,6 +190,12 @@ router.post('/bulk', async (req, res, next) => {
       return res.status(400).json({ message: 'Items array is required and cannot be empty' });
     }
 
+    const isExecutive = req.user?.role === 'executive' || autoApprove === false;
+    const submissionStatus = isExecutive ? 'pending_approval' : 'approved';
+    const status = isExecutive ? 'pending' : 'active';
+    const opsManagerApproval = isExecutive ? 'Pending' : 'Approved';
+    const managerApproval = isExecutive ? 'Pending' : 'Approved';
+
     const processedItems = items.map((item, idx) => {
       const now = new Date();
       let publishDate = item.publishAt ? new Date(item.publishAt) : now;
@@ -219,10 +221,12 @@ router.post('/bulk', async (req, res, next) => {
         minOrder: item.minOrder || '',
         maxDiscount: item.maxDiscount || '',
         affiliateLink: item.affiliateLink || item.link || '',
-        status: item.status || 'active',
-        submissionStatus: (autoApprove !== false) ? 'approved' : 'pending',
-        opsManagerApproval: (autoApprove !== false) ? 'Approved' : 'Pending',
-        managerApproval: (autoApprove !== false) ? 'Approved' : 'Pending',
+        status: isExecutive ? 'pending' : (item.status || 'active'),
+        submissionStatus,
+        opsManagerApproval,
+        managerApproval,
+        submittedBy: req.user?.email || 'executive@wouchify.com',
+        submittedByName: req.user?.name || 'Content Executive',
         publishAt: publishDate,
         expiresAt: expireDate,
         isExclusive: item.isExclusive === true || item.isExclusive === 'true' || false,
@@ -230,20 +234,68 @@ router.post('/bulk', async (req, res, next) => {
       };
     });
 
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(201).json({
-        success: true,
-        count: processedItems.length,
-        items: processedItems
-      });
-    }
+    // 1. Always record in in-memory store immediately (<1ms)
+    processedItems.forEach(item => {
+      const createdCoupon = store.addCoupon(item);
+      const entityId = String(createdCoupon._id || createdCoupon.id || item._id || item.id);
+      item._id = entityId;
+      item.id = entityId;
+      if (isExecutive) {
+        store.addSubmission({
+          entityType: 'coupon',
+          entityId,
+          action: 'create',
+          title: item.title || item.code,
+          store: item.store,
+          category: item.category,
+          priority: item.priority || 'Normal',
+          submittedBy: req.user?.email || 'executive@wouchify.com',
+          submittedByName: req.user?.name || 'Content Executive',
+          status: 'Pending Approval',
+          notes: 'Bulk imported coupon submitted for Manager approval.',
+          dataSnapshot: { ...item, _id: entityId, id: entityId }
+        });
+      }
+    });
 
-    const inserted = await Coupon.insertMany(processedItems, { ordered: false });
+    // 2. Respond immediately to user so UI never hangs
     res.status(201).json({
       success: true,
-      count: inserted.length,
-      items: inserted
+      staged: isExecutive,
+      count: processedItems.length,
+      items: processedItems
     });
+
+    // 3. Persist to MongoDB in background
+    safeBackground(async () => {
+      if (mongoose.connection.readyState === 1) {
+        const mongoDocs = processedItems.map(item => {
+          const doc = { ...item };
+          if (doc._id && !mongoose.Types.ObjectId.isValid(doc._id)) {
+            delete doc._id;
+          }
+          return doc;
+        });
+        const inserted = await Coupon.insertMany(mongoDocs, { ordered: false });
+        if (isExecutive && inserted && inserted.length > 0) {
+          const submissions = inserted.map(doc => ({
+            entityType: 'coupon',
+            entityId: String(doc._id || doc.id),
+            action: 'create',
+            title: doc.title || doc.code,
+            store: doc.store || '',
+            category: doc.category || '',
+            priority: doc.priority || 'Normal',
+            submittedBy: req.user?.email || 'executive@wouchify.com',
+            submittedByName: req.user?.name || 'Content Executive',
+            status: 'Pending Approval',
+            notes: 'Bulk imported coupon submitted for Manager approval.',
+            dataSnapshot: doc.toObject ? doc.toObject() : doc
+          }));
+          await Submission.insertMany(submissions, { ordered: false });
+        }
+      }
+    }, 'Coupons Bulk Mongo Insert');
   } catch (err) { next(err); }
 });
 

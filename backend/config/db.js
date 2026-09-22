@@ -6,10 +6,6 @@ const dotenv = require('dotenv');
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
 dotenv.config();
 
-try {
-  dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
-} catch (e) {}
-
 // Disable command buffering so queries instantly fallback to in-memory store if DB is disconnected/offline
 mongoose.set('bufferCommands', false);
 
@@ -37,11 +33,13 @@ async function connectDB() {
 
   isConnecting = true;
   cachedConnection = mongoose.connect(MONGO_URI, {
-    serverSelectionTimeoutMS: 8000,
-    connectTimeoutMS: 10000,
-    maxPoolSize: 10,
-    minPoolSize: 1,
-    socketTimeoutMS: 45000,
+    serverSelectionTimeoutMS: 5000,
+    connectTimeoutMS: 5000,
+    maxPoolSize: 20,
+    minPoolSize: 2,
+    socketTimeoutMS: 15000,
+    heartbeatFrequencyMS: 10000,
+    readPreference: 'primaryPreferred',
   });
 
   try {

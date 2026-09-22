@@ -5,16 +5,14 @@ const CreditCard = require('../models/CreditCard');
 const auth = require('../middleware/authMiddleware');
 const store = require('../services/inMemoryStore');
 const { handleEntityCreate, handleEntityUpdate, handleEntityDelete } = require('../middleware/approvalHelper');
+const { fastQuery, safeBackground } = require('../utils/mongoFastQuery');
 
 // GET /api/credit-cards - Public read access
 router.get('/', async (req, res, next) => {
-  try {
-    const { bank, network, tier, status, submissionStatus, isFeatured, q, all } = req.query;
-    if (mongoose.connection.readyState !== 1) {
-      let memoryCards = store.getCreditCards(req.query);
-      return res.json(memoryCards);
-    }
+  const { bank, network, tier, status, submissionStatus, isFeatured, q, all } = req.query;
+  const getFallback = () => store.getCreditCards(req.query);
 
+  try {
     let query = {};
     if (bank && bank !== 'All') query.bank = bank;
     if (network && network !== 'All') query.network = network;
@@ -41,14 +39,14 @@ router.get('/', async (req, res, next) => {
       ];
     }
 
-    const cards = await CreditCard.find(query).sort({ isFeatured: -1, createdAt: -1 });
-    if (!cards || cards.length === 0) {
-      return res.json(store.getCreditCards(req.query));
-    }
+    const cards = await fastQuery(
+      () => CreditCard.find(query).sort({ isFeatured: -1, createdAt: -1 }).lean(),
+      getFallback,
+      200
+    );
     res.json(cards);
   } catch (err) {
-    console.warn('Credit cards route fallback to in-memory store:', err.message);
-    return res.json(store.getCreditCards(req.query));
+    return res.json(getFallback());
   }
 });
 

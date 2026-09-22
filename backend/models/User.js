@@ -11,7 +11,9 @@ const userSchema = new mongoose.Schema({
   walletBalance: { type: String, default: '₹0' },
   totalCashback: { type: String, default: '₹0' },
   joinedDate: { type: String, default: () => new Date().toISOString().split('T')[0] },
-  status: { type: String, enum: ['active', 'verified', 'suspended'], default: 'active' }
+  status: { type: String, enum: ['active', 'verified', 'suspended'], default: 'active' },
+  otp: { type: String },
+  otpExpiry: { type: Date }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

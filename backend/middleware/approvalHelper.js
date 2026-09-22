@@ -1,11 +1,13 @@
 const mongoose = require('mongoose');
 const Submission = require('../models/Submission');
 const inMemoryStore = require('../services/inMemoryStore');
+const { safeBackground } = require('../utils/mongoFastQuery');
 
 /**
  * Helper to handle Maker-Checker workflow on entity creation.
  * If user is an Executive, stage entity as pending_approval and queue a Submission.
  * If user is Manager / Ops Manager, directly approve and activate.
+ * Always records in inMemoryStore immediately (<1ms) and persists to MongoDB asynchronously.
  */
 async function handleEntityCreate({
   entityType,
@@ -36,15 +38,12 @@ async function handleEntityCreate({
     submittedByName: user.name || 'Content Executive',
   };
 
+  // 1. Always record in memory store immediately (<1ms)
   let createdEntity = null;
-
-  if (mongoose.connection.readyState === 1 && Model) {
-    const doc = new Model(entityData);
-    createdEntity = await doc.save();
-  } else if (storeAddMethod) {
+  if (storeAddMethod) {
     createdEntity = storeAddMethod(entityData);
   } else {
-    createdEntity = { _id: 'temp-' + Date.now(), ...entityData };
+    createdEntity = { _id: 'entity-' + Date.now(), ...entityData };
   }
 
   const entityId = createdEntity._id ? String(createdEntity._id) : String(createdEntity.id || Date.now());
@@ -65,12 +64,28 @@ async function handleEntityCreate({
       dataSnapshot: entityData
     };
 
-    if (mongoose.connection.readyState === 1) {
-      const sub = new Submission(submissionPayload);
-      await sub.save();
-    } else {
-      inMemoryStore.addSubmission(submissionPayload);
-    }
+    inMemoryStore.addSubmission(submissionPayload);
+
+    // 2. Persist to MongoDB in background
+    safeBackground(async () => {
+      if (mongoose.connection.readyState === 1 && Model) {
+        const doc = new Model(entityData);
+        await doc.save();
+        const sub = new Submission({
+          ...submissionPayload,
+          entityId: String(doc._id)
+        });
+        await sub.save();
+      }
+    }, 'ApprovalHelper Create');
+  } else {
+    // Non-executive direct publish
+    safeBackground(async () => {
+      if (mongoose.connection.readyState === 1 && Model) {
+        const doc = new Model(entityData);
+        await doc.save();
+      }
+    }, 'ApprovalHelper Direct Publish');
   }
 
   return {
@@ -106,28 +121,26 @@ async function handleEntityUpdate({
     // Direct update for Manager / Ops Manager
     const patch = { ...updates, submissionStatus: 'approved' };
     let updatedDoc = null;
-    if (mongoose.connection.readyState === 1 && Model) {
-      const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { $or: [{ _id: id }, { id: id }, { code: id }] };
-      updatedDoc = await Model.findOneAndUpdate(query, patch, { new: true, runValidators: true });
-    } else if (storeUpdateMethod) {
+    if (storeUpdateMethod) {
       updatedDoc = storeUpdateMethod(id, patch);
     }
-    return { entity: updatedDoc, staged: false, message: 'Updated and published successfully.' };
+
+    safeBackground(async () => {
+      if (mongoose.connection.readyState === 1 && Model) {
+        const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { $or: [{ _id: id }, { id: id }, { code: id }] };
+        await Model.findOneAndUpdate(query, patch, { new: true, runValidators: true });
+      }
+    }, 'ApprovalHelper Direct Update');
+
+    return { entity: updatedDoc || patch, staged: false, message: 'Updated and published successfully.' };
   }
 
   // Staged update for Executive:
-  let existingEntity = null;
-  if (mongoose.connection.readyState === 1 && Model) {
-    const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { $or: [{ _id: id }, { id: id }, { code: id }] };
-    existingEntity = await Model.findOneAndUpdate(query, { submissionStatus: 'pending_approval' }, { new: true });
-  } else if (storeGetMethod) {
-    existingEntity = storeGetMethod(id);
-    if (existingEntity && storeUpdateMethod) {
-      storeUpdateMethod(id, { submissionStatus: 'pending_approval' });
-    }
+  let existingEntity = storeGetMethod ? storeGetMethod(id) : null;
+  if (storeUpdateMethod) {
+    storeUpdateMethod(id, { submissionStatus: 'pending_approval' });
   }
 
-  // Queue submission with the proposed snapshot
   const entityId = String(id);
   const submissionPayload = {
     entityType,
@@ -141,15 +154,19 @@ async function handleEntityUpdate({
     submittedByName: user.name || 'Content Executive',
     status: 'Pending Approval',
     notes: updates.notes || ('Proposed edits to ' + entityType + ' by ' + (user.name || 'Executive') + '.'),
-    dataSnapshot: { ...(existingEntity ? (existingEntity.toObject ? existingEntity.toObject() : existingEntity) : {}), ...updates }
+    dataSnapshot: { ...(existingEntity || {}), ...updates }
   };
 
-  if (mongoose.connection.readyState === 1) {
-    const sub = new Submission(submissionPayload);
-    await sub.save();
-  } else {
-    inMemoryStore.addSubmission(submissionPayload);
-  }
+  inMemoryStore.addSubmission(submissionPayload);
+
+  safeBackground(async () => {
+    if (mongoose.connection.readyState === 1 && Model) {
+      const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { $or: [{ _id: id }, { id: id }, { code: id }] };
+      await Model.findOneAndUpdate(query, { submissionStatus: 'pending_approval' }, { new: true });
+      const sub = new Submission(submissionPayload);
+      await sub.save();
+    }
+  }, 'ApprovalHelper Executive Update');
 
   return {
     entity: existingEntity || updates,
@@ -174,24 +191,19 @@ async function handleEntityDelete({
   const isExecutive = user.role === 'executive';
 
   if (!isExecutive) {
-    if (mongoose.connection.readyState === 1 && Model) {
-      const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { $or: [{ _id: id }, { id: id }, { code: id }] };
-      await Model.findOneAndDelete(query);
-    } else if (storeDeleteMethod) {
-      storeDeleteMethod(id);
-    }
+    if (storeDeleteMethod) storeDeleteMethod(id);
+    safeBackground(async () => {
+      if (mongoose.connection.readyState === 1 && Model) {
+        const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { $or: [{ _id: id }, { id: id }, { code: id }] };
+        await Model.findOneAndDelete(query);
+      }
+    }, 'ApprovalHelper Direct Delete');
     return { deleted: true, staged: false, message: 'Deleted successfully.' };
   }
 
   // Executive deletion request -> queue submission
   const entityId = String(id);
-  let existingEntity = null;
-  if (mongoose.connection.readyState === 1 && Model) {
-    const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { $or: [{ _id: id }, { id: id }, { code: id }] };
-    existingEntity = await Model.findOneAndUpdate(query, { submissionStatus: 'pending_approval' }, { new: true });
-  } else if (storeGetMethod) {
-    existingEntity = storeGetMethod(id);
-  }
+  let existingEntity = storeGetMethod ? storeGetMethod(id) : null;
 
   const submissionPayload = {
     entityType,
@@ -206,12 +218,16 @@ async function handleEntityDelete({
     dataSnapshot: existingEntity || {}
   };
 
-  if (mongoose.connection.readyState === 1) {
-    const sub = new Submission(submissionPayload);
-    await sub.save();
-  } else {
-    inMemoryStore.addSubmission(submissionPayload);
-  }
+  inMemoryStore.addSubmission(submissionPayload);
+
+  safeBackground(async () => {
+    if (mongoose.connection.readyState === 1 && Model) {
+      const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { $or: [{ _id: id }, { id: id }, { code: id }] };
+      await Model.findOneAndUpdate(query, { submissionStatus: 'pending_approval' }, { new: true });
+      const sub = new Submission(submissionPayload);
+      await sub.save();
+    }
+  }, 'ApprovalHelper Executive Delete');
 
   return {
     staged: true,

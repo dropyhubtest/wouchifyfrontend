@@ -5,19 +5,20 @@ const Banner = require('../models/Banner');
 const auth = require('../middleware/authMiddleware');
 const store = require('../services/inMemoryStore');
 const { handleEntityCreate, handleEntityUpdate, handleEntityDelete } = require('../middleware/approvalHelper');
+const { fastQuery, safeBackground } = require('../utils/mongoFastQuery');
 
 // GET /api/banners - Public read access
 router.get('/', async (req, res, next) => {
-  try {
-    const { targetPage, status, submissionStatus, all } = req.query;
-    if (mongoose.connection.readyState !== 1) {
-      let memoryBanners = store.getBanners(req.query);
-      if (all !== 'true') {
-        memoryBanners = memoryBanners.filter(b => b.submissionStatus !== 'pending_approval' && (b.status || 'active') === 'active');
-      }
-      return res.json(memoryBanners);
+  const { targetPage, status, submissionStatus, all } = req.query;
+  const getFallback = () => {
+    let memoryBanners = store.getBanners(req.query);
+    if (all !== 'true') {
+      memoryBanners = memoryBanners.filter(b => b.submissionStatus !== 'pending_approval' && (b.status || 'active') === 'active');
     }
+    return memoryBanners;
+  };
 
+  try {
     let query = {};
     if (targetPage && targetPage !== 'All') query.targetPage = targetPage;
 
@@ -29,22 +30,14 @@ router.get('/', async (req, res, next) => {
       query.status = status || 'active';
     }
 
-    const banners = await Banner.find(query).sort({ priority: 1, createdAt: -1 });
-    if (!banners || banners.length === 0) {
-      let memoryBanners = store.getBanners(req.query);
-      if (all !== 'true') {
-        memoryBanners = memoryBanners.filter(b => b.submissionStatus !== 'pending_approval' && (b.status || 'active') === 'active');
-      }
-      return res.json(memoryBanners);
-    }
+    const banners = await fastQuery(
+      () => Banner.find(query).sort({ priority: 1, createdAt: -1 }).lean(),
+      getFallback,
+      200
+    );
     res.json(banners);
   } catch (err) {
-    console.warn('Banners route fallback to in-memory store:', err.message);
-    let memoryBanners = store.getBanners(req.query);
-    if (all !== 'true') {
-      memoryBanners = memoryBanners.filter(b => b.submissionStatus !== 'pending_approval' && (b.status || 'active') === 'active');
-    }
-    return res.json(memoryBanners);
+    return res.json(getFallback());
   }
 });
 

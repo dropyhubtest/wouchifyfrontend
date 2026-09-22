@@ -21,6 +21,8 @@ API.interceptors.request.use((req) => {
 export const login = (credentials: any) => API.post('/auth/login', credentials)
 export const register = (userData: any) => API.post('/auth/register', userData)
 export const googleLogin = (token: string, isLogin: boolean) => API.post('/auth/google', { token, isLogin })
+export const sendOtp = (email: string) => API.post('/auth/send-otp', { email })
+export const verifyOtp = (email: string, otp: string) => API.post('/auth/verify-otp', { email, otp })
 
 // --- Data Fetching APIs ---
 export const fetchDeals = async () => {

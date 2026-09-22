@@ -12,6 +12,7 @@ const Store = require('../models/Store');
 const Category = require('../models/Category');
 const auth = require('../middleware/authMiddleware');
 const store = require('../services/inMemoryStore');
+const { fastQuery, safeBackground } = require('../utils/mongoFastQuery');
 
 function getEntityModel(entityType) {
   switch (entityType) {
@@ -32,7 +33,6 @@ function buildEntityQuery(entityId, dataSnapshot = null) {
   if (entityId) {
     const str = String(entityId).trim();
     conditions.push({ id: str });
-    conditions.push({ _id: str });
     if (mongoose.Types.ObjectId.isValid(str)) {
       try {
         conditions.push({ _id: new mongoose.Types.ObjectId(str) });
@@ -45,11 +45,12 @@ function buildEntityQuery(entityId, dataSnapshot = null) {
     }
     if (dataSnapshot._id && String(dataSnapshot._id) !== String(entityId)) {
       const snapId = String(dataSnapshot._id).trim();
-      conditions.push({ _id: snapId });
       if (mongoose.Types.ObjectId.isValid(snapId)) {
         try {
           conditions.push({ _id: new mongoose.Types.ObjectId(snapId) });
         } catch {}
+      } else {
+        conditions.push({ id: snapId });
       }
     }
     if (dataSnapshot.name) conditions.push({ name: dataSnapshot.name });
@@ -139,10 +140,6 @@ router.use(auth);
 // GET /api/submissions - List all submissions with filters
 router.get('/', async (req, res, next) => {
   try {
-    if (mongoose.connection.readyState !== 1) {
-      return res.json(store.getSubmissions(req.query));
-    }
-
     const { status, entityType, submittedBy, priority } = req.query;
     let query = {};
 
@@ -151,10 +148,10 @@ router.get('/', async (req, res, next) => {
     if (submittedBy && submittedBy !== 'All' && submittedBy !== 'all') query.submittedBy = submittedBy;
     if (priority && priority !== 'All' && priority !== 'all') query.priority = priority;
 
-    const submissions = await Submission.find(query).sort({ submittedAt: -1, createdAt: -1 });
+    const getFallback = () => store.getSubmissions(req.query);
+    const submissions = await fastQuery(() => Submission.find(query).sort({ submittedAt: -1, createdAt: -1 }).lean(), getFallback, 200);
     res.json(submissions);
   } catch (err) { 
-    console.warn('Submissions GET fallback to in-memory store:', err.message);
     return res.json(store.getSubmissions(req.query));
   }
 });
@@ -163,17 +160,16 @@ router.get('/', async (req, res, next) => {
 router.get('/:id', async (req, res, next) => {
   try {
     const subQuery = buildEntityQuery(req.params.id);
+    const getFallback = () => store.getSubmissionById(req.params.id);
+
     if (mongoose.connection.readyState !== 1) {
-      const sub = store.getSubmissionById(req.params.id);
+      const sub = getFallback();
       if (!sub) return res.status(404).json({ message: 'Submission not found' });
       return res.json(sub);
     }
-    const sub = await Submission.findOne(subQuery);
-    if (!sub) {
-      const mem = store.getSubmissionById(req.params.id);
-      if (mem) return res.json(mem);
-      return res.status(404).json({ message: 'Submission not found' });
-    }
+
+    const sub = await fastQuery(() => Submission.findOne(subQuery).lean(), getFallback, 200);
+    if (!sub) return res.status(404).json({ message: 'Submission not found' });
     res.json(sub);
   } catch (err) {
     const mem = store.getSubmissionById(req.params.id);
@@ -192,26 +188,91 @@ router.post('/', async (req, res, next) => {
       ...req.body
     };
 
-    // Always record in in-memory store
+    // Always record in in-memory store (<1ms)
     const memCreated = store.addSubmission(payload);
 
-    if (mongoose.connection.readyState === 1) {
-      try {
+    // Background MongoDB persistence without blocking client
+    safeBackground(async () => {
+      if (mongoose.connection.readyState === 1) {
         const sub = new Submission(payload);
         await sub.save();
-
-        // Mark corresponding entity as pending_approval in Mongo
         if (sub.entityType && sub.entityId) {
           await updateMongoEntityOnPending(sub.entityType, sub.entityId, sub.dataSnapshot);
         }
-        return res.status(201).json(sub);
-      } catch (e) {
-        console.warn('MongoDB submission save error, returning memory record:', e.message);
-        return res.status(201).json(memCreated);
       }
-    }
+    }, 'Mongo Submission Create');
 
     res.status(201).json(memCreated);
+  } catch (err) { next(err); }
+});
+
+// POST /api/submissions/bulk-approve - Bulk approve multiple submissions
+router.post('/bulk-approve', async (req, res, next) => {
+  try {
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ message: 'ids array is required' });
+    }
+    const reviewer = req.user?.email || req.body.reviewedBy || 'ops.manager@wouchify.com';
+
+    const results = ids.map(id => store.approveSubmission(id, reviewer)).filter(Boolean);
+    res.json({ success: true, count: results.length, items: results });
+
+    safeBackground(async () => {
+      if (mongoose.connection.readyState === 1) {
+        for (const subId of ids) {
+          try {
+            const subQuery = buildEntityQuery(subId);
+            const sub = await Submission.findOne(subQuery);
+            if (sub) {
+              sub.status = 'Approved';
+              sub.reviewedBy = reviewer;
+              sub.reviewedAt = new Date();
+              await sub.save();
+              if (sub.entityType) {
+                await updateMongoEntityOnApproval(sub.entityType, sub.entityId, sub.action, sub.dataSnapshot);
+              }
+            }
+          } catch (e) {}
+        }
+      }
+    }, 'Bulk Mongo Approve');
+  } catch (err) { next(err); }
+});
+
+// POST /api/submissions/bulk-reject - Bulk reject multiple submissions
+router.post('/bulk-reject', async (req, res, next) => {
+  try {
+    const { ids, rejectionReason } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ message: 'ids array is required' });
+    }
+    const reviewer = req.user?.email || req.body.reviewedBy || 'ops.manager@wouchify.com';
+    const reason = rejectionReason || 'Bulk rejected by operational manager.';
+
+    const results = ids.map(id => store.rejectSubmission(id, reason, reviewer)).filter(Boolean);
+    res.json({ success: true, count: results.length });
+
+    safeBackground(async () => {
+      if (mongoose.connection.readyState === 1) {
+        for (const subId of ids) {
+          try {
+            const subQuery = buildEntityQuery(subId);
+            const sub = await Submission.findOne(subQuery);
+            if (sub) {
+              sub.status = 'Rejected';
+              sub.rejectionReason = reason;
+              sub.reviewedBy = reviewer;
+              sub.reviewedAt = new Date();
+              await sub.save();
+              if (sub.entityType) {
+                await updateMongoEntityOnRejection(sub.entityType, sub.entityId, sub.dataSnapshot);
+              }
+            }
+          } catch (e) {}
+        }
+      }
+    }, 'Bulk Mongo Reject');
   } catch (err) { next(err); }
 });
 
@@ -221,32 +282,50 @@ router.patch('/:id/approve', async (req, res, next) => {
     const reviewer = req.user?.email || req.body.reviewedBy || 'ops.manager@wouchify.com';
     const subId = req.params.id;
 
-    // 1. Sync memory store immediately
+    // 1. Sync in-memory store immediately (<1ms)
     const memApproved = store.approveSubmission(subId, reviewer);
 
-    // 2. Sync MongoDB
-    if (mongoose.connection.readyState === 1) {
-      try {
+    // 2. Respond immediately to user for instant UI responsiveness
+    if (memApproved) {
+      res.json(memApproved);
+    } else {
+      const subQuery = buildEntityQuery(subId);
+      const sub = await Submission.findOne(subQuery);
+      if (!sub) return res.status(404).json({ message: 'Submission not found' });
+      sub.status = 'Approved';
+      sub.reviewedBy = reviewer;
+      sub.reviewedAt = new Date();
+      await sub.save();
+      await updateMongoEntityOnApproval(sub.entityType, sub.entityId, sub.action, sub.dataSnapshot);
+      return res.json(sub);
+    }
+
+    // 3. Background MongoDB update without blocking client
+    safeBackground(async () => {
+      if (mongoose.connection.readyState === 1) {
         const subQuery = buildEntityQuery(subId);
         const sub = await Submission.findOne(subQuery);
+        let targetEntityType = memApproved?.entityType;
+        let targetEntityId = memApproved?.entityId;
+        let targetAction = memApproved?.action || 'create';
+        let targetDataSnapshot = memApproved?.dataSnapshot;
+
         if (sub) {
           sub.status = 'Approved';
           sub.reviewedBy = reviewer;
           sub.reviewedAt = new Date();
           await sub.save();
-
-          if (sub.entityType && sub.entityId) {
-            await updateMongoEntityOnApproval(sub.entityType, sub.entityId, sub.action, sub.dataSnapshot);
-          }
-          return res.json(sub);
+          targetEntityType = sub.entityType || targetEntityType;
+          targetEntityId = sub.entityId || targetEntityId;
+          targetAction = sub.action || targetAction;
+          targetDataSnapshot = sub.dataSnapshot || targetDataSnapshot;
         }
-      } catch (e) {
-        console.warn('MongoDB submission approval error, returning memory record:', e.message);
-      }
-    }
 
-    if (memApproved) return res.json(memApproved);
-    return res.status(404).json({ message: 'Submission not found' });
+        if (targetEntityType) {
+          await updateMongoEntityOnApproval(targetEntityType, targetEntityId, targetAction, targetDataSnapshot);
+        }
+      }
+    }, 'Mongo Submission Approve');
   } catch (err) { next(err); }
 });
 
@@ -257,33 +336,50 @@ router.patch('/:id/reject', async (req, res, next) => {
     const reviewer = req.user?.email || req.body.reviewedBy || 'ops.manager@wouchify.com';
     const subId = req.params.id;
 
-    // 1. Sync memory store immediately
+    // 1. Sync in-memory store immediately
     const memRejected = store.rejectSubmission(subId, rejectionReason, reviewer);
 
-    // 2. Sync MongoDB
-    if (mongoose.connection.readyState === 1) {
-      try {
+    // 2. Respond immediately to user
+    if (memRejected) {
+      res.json(memRejected);
+    } else {
+      const subQuery = buildEntityQuery(subId);
+      const sub = await Submission.findOne(subQuery);
+      if (!sub) return res.status(404).json({ message: 'Submission not found' });
+      sub.status = 'Rejected';
+      sub.rejectionReason = rejectionReason || 'Submission rejected by operational manager.';
+      sub.reviewedBy = reviewer;
+      sub.reviewedAt = new Date();
+      await sub.save();
+      await updateMongoEntityOnRejection(sub.entityType, sub.entityId, sub.dataSnapshot);
+      return res.json(sub);
+    }
+
+    // 3. Background MongoDB update without blocking client
+    safeBackground(async () => {
+      if (mongoose.connection.readyState === 1) {
         const subQuery = buildEntityQuery(subId);
         const sub = await Submission.findOne(subQuery);
+        let targetEntityType = memRejected?.entityType;
+        let targetEntityId = memRejected?.entityId;
+        let targetDataSnapshot = memRejected?.dataSnapshot;
+
         if (sub) {
           sub.status = 'Rejected';
           sub.rejectionReason = rejectionReason || 'Submission rejected by operational manager.';
           sub.reviewedBy = reviewer;
           sub.reviewedAt = new Date();
           await sub.save();
-
-          if (sub.entityType && sub.entityId) {
-            await updateMongoEntityOnRejection(sub.entityType, sub.entityId, sub.dataSnapshot);
-          }
-          return res.json(sub);
+          targetEntityType = sub.entityType || targetEntityType;
+          targetEntityId = sub.entityId || targetEntityId;
+          targetDataSnapshot = sub.dataSnapshot || targetDataSnapshot;
         }
-      } catch (e) {
-        console.warn('MongoDB submission rejection error, returning memory record:', e.message);
-      }
-    }
 
-    if (memRejected) return res.json(memRejected);
-    return res.status(404).json({ message: 'Submission not found' });
+        if (targetEntityType) {
+          await updateMongoEntityOnRejection(targetEntityType, targetEntityId, targetDataSnapshot);
+        }
+      }
+    }, 'Mongo Submission Reject');
   } catch (err) { next(err); }
 });
 

@@ -10,7 +10,8 @@ import {
   ChevronRight, 
   LogOut, 
   ShieldCheck,
-  Bell
+  Bell,
+  Database
 } from 'lucide-react'
 import logo from '../../../assets/navbar/wouchify-logo.png'
 import './OperationsLayout.css'
@@ -132,6 +133,12 @@ export const OperationsLayout: React.FC<OperationsLayoutProps> = ({
       label: 'Affiliate Health', 
       path: '/operational-manager/merchants', 
       icon: <Store size={20} /> 
+    },
+    {
+      id: 'approved-data',
+      label: 'Live Data',
+      path: '/operational-manager/approved-data',
+      icon: <Database size={20} />
     }
   ]
 

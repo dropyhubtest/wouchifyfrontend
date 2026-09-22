@@ -609,7 +609,10 @@ export const ExecutiveBulkUploadPage: React.FC = () => {
               howToClaim: cleanData.howToClaim || '',
               description: cleanData.description || 'Verified e-commerce deal.',
               terms: cleanData.terms || '',
-              status: cleanData.status || 'active',
+              status: 'pending',
+              submissionStatus: 'pending_approval',
+              opsManagerApproval: 'Pending',
+              managerApproval: 'Pending',
               publishAt: publishIso || new Date().toISOString(),
               expiresAt: expiryIso || null
             }
@@ -651,7 +654,10 @@ export const ExecutiveBulkUploadPage: React.FC = () => {
               isBestSelling: String(cleanData.isBestSelling).toLowerCase() === 'true',
               sectionPlacement: cleanData.sectionPlacement || (String(cleanData.isBestSelling).toLowerCase() === 'true' ? 'best_selling' : 'both'),
               terms: cleanData.terms || 'Valid until stocks last.',
-              status: cleanData.status || 'active',
+              status: 'pending',
+              submissionStatus: 'pending_approval',
+              opsManagerApproval: 'Pending',
+              managerApproval: 'Pending',
               publishAt: publishIso || new Date().toISOString(),
               expiresAt: expiryIso || null
             }
@@ -674,7 +680,10 @@ export const ExecutiveBulkUploadPage: React.FC = () => {
               isVerified: cleanData.isVerified === undefined || String(cleanData.isVerified).toLowerCase() === 'true',
               telegramAlert: String(cleanData.telegramAlert).toLowerCase() === 'true',
               usageLimit: parseInt(cleanData.totalUses || cleanData.usageLimit) || 5000,
-              status: cleanData.status || 'active',
+              status: 'pending',
+              submissionStatus: 'pending_approval',
+              opsManagerApproval: 'Pending',
+              managerApproval: 'Pending',
               publishAt: publishIso || new Date().toISOString(),
               expiry: expiryIso || null,
               expiresAt: expiryIso || null
@@ -692,7 +701,10 @@ export const ExecutiveBulkUploadPage: React.FC = () => {
             logoUrl: cleanData.logoUrl || cleanData.logo || '',
             cardBg: cleanData.cardBg || '#E8F5FF',
             badgeBg: cleanData.badgeBg || '#B3DCFA',
-            status: cleanData.status || 'active',
+            status: 'pending',
+            submissionStatus: 'pending_approval',
+            opsManagerApproval: 'Pending',
+            managerApproval: 'Pending',
             isFeatured: String(cleanData.isFeatured).toLowerCase() === 'true',
             publishAt: publishIso || new Date().toISOString(),
             expiresAt: expiryIso || null
@@ -700,17 +712,17 @@ export const ExecutiveBulkUploadPage: React.FC = () => {
         })
 
         if (activeModule === 'deals') {
-          const res = await adminApi.bulkImportDeals(batch)
-          totalSuccess += res.insertedCount || batch.length
+          const res = await adminApi.bulkImportDeals(batch, false)
+          totalSuccess += res.insertedCount || res.count || batch.length
         } else if (activeModule === 'loot-deals') {
-          const res = await adminApi.bulkImportLootDeals(batch)
-          totalSuccess += res.insertedCount || batch.length
+          const res = await adminApi.bulkImportLootDeals(batch, false)
+          totalSuccess += res.insertedCount || res.count || batch.length
         } else if (activeModule === 'coupons') {
-          const res = await adminApi.bulkImportCoupons(batch)
-          totalSuccess += res.insertedCount || batch.length
+          const res = await adminApi.bulkImportCoupons(batch, false)
+          totalSuccess += res.insertedCount || res.count || batch.length
         } else if (activeModule === 'stores') {
-          const res = await adminApi.bulkImportStores(batch)
-          totalSuccess += res.insertedCount || batch.length
+          const res = await adminApi.bulkImportStores(batch, false)
+          totalSuccess += res.insertedCount || res.count || batch.length
         }
 
         setImportProgress({
@@ -721,7 +733,7 @@ export const ExecutiveBulkUploadPage: React.FC = () => {
         })
       }
 
-      setImportSuccess(`Successfully imported ${totalSuccess} ${moduleConfig[activeModule].name} into MongoDB Atlas!`)
+      setImportSuccess(`Submitted ${totalSuccess} ${moduleConfig[activeModule].name} for Manager & Operational Manager approval! They will appear on the live website once approved.`)
       setParsedRows([])
       setFileName(null)
     } catch (err: any) {

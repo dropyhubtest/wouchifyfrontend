@@ -84,6 +84,7 @@ import { OperationsCashbacksPage } from './pages/admin/operations/OperationsCash
 import { OperationsSupportPage } from './pages/admin/operations/OperationsSupportPage'
 import { OperationsStaffActivityPage } from './pages/admin/operations/OperationsStaffActivityPage'
 import { OperationsMerchantsPage } from './pages/admin/operations/OperationsMerchantsPage'
+import { OperationsApprovedDataPage } from './pages/admin/operations/OperationsApprovedDataPage'
 import { WelcomeToast } from './components/auth/WelcomeToast'
 
 function resolveCurrentPath(): string {
@@ -569,6 +570,7 @@ export default function App() {
         if (currentPath === '/operational-manager/support') return <OperationsSupportPage />
         if (currentPath === '/operational-manager/staff-activity') return <OperationsStaffActivityPage />
         if (currentPath === '/operational-manager/merchants') return <OperationsMerchantsPage />
+        if (currentPath === '/operational-manager/approved-data') return <OperationsApprovedDataPage />
         return <OperationsDashboardPage />
       }
       if (isExecutiveRoute) {
@@ -696,6 +698,7 @@ export default function App() {
       if (currentPath === '/operational-manager/support') return <OperationsSupportPage />
       if (currentPath === '/operational-manager/staff-activity') return <OperationsStaffActivityPage />
       if (currentPath === '/operational-manager/merchants') return <OperationsMerchantsPage />
+      if (currentPath === '/operational-manager/approved-data') return <OperationsApprovedDataPage />
       return <OperationsDashboardPage />
     }
 

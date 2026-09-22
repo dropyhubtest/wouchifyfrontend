@@ -1,9 +1,18 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const compression = require('compression');
 const dotenv = require('dotenv');
 
 dotenv.config();
+
+// Global process exception traps to ensure high-availability and prevent unexpected server exit
+process.on('uncaughtException', (err) => {
+  console.error('[Server uncaughtException]', err && err.message ? err.message : err);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[Server unhandledRejection]', reason && reason.message ? reason.message : reason);
+});
 
 // Import existing routes
 const adminAuthRoutes = require('./routes/adminAuth');
@@ -48,6 +57,7 @@ const { connectDB } = require('./config/db');
 const app = express();
 
 // Middleware
+app.use(compression());
 app.use(cors({
   origin: function (origin, callback) {
     // Allow localhost and Vercel connections
@@ -60,13 +70,16 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Non-blocking background MongoDB Atlas connection monitor
 let lastConnectAttempt = 0;
+const { hydrateStoreFromMongo } = require('./services/mongoSyncService');
 app.use((req, res, next) => {
   const now = Date.now();
   if (mongoose.connection.readyState === 0 && now - lastConnectAttempt > 30000) {
     lastConnectAttempt = now;
-    connectDB().catch((err) => {
-      console.warn('Background MongoDB connection retry note:', err.message);
-    });
+    connectDB()
+      .then(() => hydrateStoreFromMongo().catch(() => {}))
+      .catch((err) => {
+        console.warn('Background MongoDB connection retry note:', err.message);
+      });
   }
   next();
 });
@@ -1730,14 +1743,11 @@ const PORT = process.env.PORT || 5000;
 // Connect to MongoDB & ensure base seed exists
 connectDB()
   .then(async () => {
+    hydrateStoreFromMongo().catch(() => {});
     try {
       const dealCount = await Deal.countDocuments();
       if (dealCount === 0) {
         console.log('Database empty on startup. Triggering auto-seed...');
-        // In-memory or internal seed will populate MongoDB
-        const reqMock = {};
-        const resMock = { json: () => {} };
-        // Trigger seed endpoint handler internally
       }
     } catch (e) {}
   })

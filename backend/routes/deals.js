@@ -2,18 +2,18 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const Deal = require('../models/Deal');
+const Submission = require('../models/Submission');
 const auth = require('../middleware/authMiddleware');
 const store = require('../services/inMemoryStore');
 const { handleEntityCreate, handleEntityUpdate, handleEntityDelete } = require('../middleware/approvalHelper');
+const { fastQuery, safeBackground } = require('../utils/mongoFastQuery');
 
 // Public read access for storefront & catalog consumers
 router.get('/', async (req, res, next) => {
   const { category, status, submissionStatus, all } = req.query;
-  try {
-    if (mongoose.connection.readyState !== 1) {
-      return res.json(store.getDeals(req.query));
-    }
+  const getFallback = () => store.getDeals(req.query);
 
+  try {
     let query = {};
     if (category && category !== 'All') query.category = category;
     // Default public filtering: Only approved active deals where publishAt <= now and not expired
@@ -26,30 +26,28 @@ router.get('/', async (req, res, next) => {
       query.submissionStatus = { $nin: ['pending_approval', 'rejected'] };
     }
 
-    let deals = await Deal.find(query).sort({ createdAt: -1 });
+    const mongoQueryFn = () => Deal.find(query).sort({ createdAt: -1 }).lean().then(deals => {
+      if (all !== 'true') {
+        const now = Date.now();
+        return deals.filter(d => {
+          if (d.publishAt) {
+            const pubTime = new Date(d.publishAt).getTime();
+            if (!isNaN(pubTime) && pubTime > now + 60000) return false;
+          }
+          if (d.expiresAt) {
+            const expTime = new Date(d.expiresAt).getTime();
+            if (!isNaN(expTime) && expTime < now) return false;
+          }
+          return true;
+        });
+      }
+      return deals;
+    });
 
-    if (all !== 'true') {
-      const now = Date.now();
-      deals = deals.filter(d => {
-        if (d.publishAt) {
-          const pubTime = new Date(d.publishAt).getTime();
-          if (!isNaN(pubTime) && pubTime > now + 60000) return false;
-        }
-        if (d.expiresAt) {
-          const expTime = new Date(d.expiresAt).getTime();
-          if (!isNaN(expTime) && expTime < now) return false;
-        }
-        return true;
-      });
-    }
-
-    if (!deals || deals.length === 0) {
-      return res.json(store.getDeals(req.query));
-    }
+    const deals = await fastQuery(mongoQueryFn, getFallback, 200);
     res.json(deals);
   } catch (err) {
-    console.warn('Deals route fallback to in-memory store:', err.message);
-    return res.json(store.getDeals(req.query));
+    return res.json(getFallback());
   }
 });
 
@@ -161,6 +159,12 @@ router.post('/bulk', async (req, res, next) => {
       return res.status(400).json({ message: 'Items array is required and cannot be empty' });
     }
 
+    const isExecutive = req.user?.role === 'executive' || autoApprove === false;
+    const submissionStatus = isExecutive ? 'pending_approval' : 'approved';
+    const status = isExecutive ? 'pending' : 'active';
+    const opsManagerApproval = isExecutive ? 'Pending' : 'Approved';
+    const managerApproval = isExecutive ? 'Pending' : 'Approved';
+
     const processedItems = items.map((item, idx) => {
       const now = new Date();
       let publishDate = item.publishAt ? new Date(item.publishAt) : now;
@@ -178,8 +182,12 @@ router.post('/bulk', async (req, res, next) => {
         price: item.price ? (String(item.price).startsWith('₹') ? String(item.price) : `₹${item.price}`) : '₹999',
         originalPrice: item.originalPrice ? (String(item.originalPrice).startsWith('₹') ? String(item.originalPrice) : `₹${item.originalPrice}`) : '',
         discount: item.discount || 'Special Offer',
-        status: item.status || 'active',
-        submissionStatus: (autoApprove !== false) ? 'approved' : 'pending',
+        status: isExecutive ? 'pending' : (item.status || 'active'),
+        submissionStatus,
+        opsManagerApproval,
+        managerApproval,
+        submittedBy: req.user?.email || 'executive@wouchify.com',
+        submittedByName: req.user?.name || 'Content Executive',
         publishAt: publishDate,
         expiresAt: expireDate,
         ctaText: item.ctaText || 'GRAB DEAL',
@@ -191,20 +199,68 @@ router.post('/bulk', async (req, res, next) => {
       };
     });
 
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(201).json({
-        success: true,
-        count: processedItems.length,
-        items: processedItems
-      });
-    }
+    // 1. Always record in in-memory store immediately (<1ms)
+    processedItems.forEach(item => {
+      const createdDeal = store.addDeal(item);
+      const entityId = String(createdDeal._id || createdDeal.id || item._id || item.id);
+      item._id = entityId;
+      item.id = entityId;
+      if (isExecutive) {
+        store.addSubmission({
+          entityType: 'deal',
+          entityId,
+          action: 'create',
+          title: item.title || item.name,
+          store: item.store,
+          category: item.category,
+          priority: item.priority || 'Normal',
+          submittedBy: req.user?.email || 'executive@wouchify.com',
+          submittedByName: req.user?.name || 'Content Executive',
+          status: 'Pending Approval',
+          notes: 'Bulk imported deal submitted for Manager approval.',
+          dataSnapshot: { ...item, _id: entityId, id: entityId }
+        });
+      }
+    });
 
-    const inserted = await Deal.insertMany(processedItems, { ordered: false });
+    // 2. Respond immediately to user so UI never hangs
     res.status(201).json({
       success: true,
-      count: inserted.length,
-      items: inserted
+      staged: isExecutive,
+      count: processedItems.length,
+      items: processedItems
     });
+
+    // 3. Persist to MongoDB in background
+    safeBackground(async () => {
+      if (mongoose.connection.readyState === 1) {
+        const mongoDocs = processedItems.map(item => {
+          const doc = { ...item };
+          if (doc._id && !mongoose.Types.ObjectId.isValid(doc._id)) {
+            delete doc._id;
+          }
+          return doc;
+        });
+        const inserted = await Deal.insertMany(mongoDocs, { ordered: false });
+        if (isExecutive && inserted && inserted.length > 0) {
+          const submissions = inserted.map(doc => ({
+            entityType: 'deal',
+            entityId: String(doc._id || doc.id),
+            action: 'create',
+            title: doc.title || doc.name,
+            store: doc.store || '',
+            category: doc.category || '',
+            priority: doc.priority || 'Normal',
+            submittedBy: req.user?.email || 'executive@wouchify.com',
+            submittedByName: req.user?.name || 'Content Executive',
+            status: 'Pending Approval',
+            notes: 'Bulk imported deal submitted for Manager approval.',
+            dataSnapshot: doc.toObject ? doc.toObject() : doc
+          }));
+          await Submission.insertMany(submissions, { ordered: false });
+        }
+      }
+    }, 'Deals Bulk Mongo Insert');
   } catch (err) { next(err); }
 });
 

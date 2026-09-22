@@ -156,24 +156,20 @@ export const OperationsApprovalsPage: React.FC = () => {
     }
     window.addEventListener('storage', handleStorageChange)
 
-    // Background polling every 3.5 seconds for instant synchronisation
-    const interval = setInterval(() => {
-      fetchQueue(true)
-    }, 3500)
-
     return () => {
       window.removeEventListener('wouchify_submissions_updated', handleSubmissionsUpdated)
       window.removeEventListener('storage', handleStorageChange)
-      clearInterval(interval)
     }
   }, [])
 
   const handleApproveOne = async (id: string, title: string) => {
+    // Optimistic UI update: change state immediately for instant feedback
+    setItems(prev => prev.map(i => i.id === id ? { ...i, status: 'Approved' } : i))
+    setSelectedIds(prev => prev.filter(selId => selId !== id))
+    showToast(`Approved: "${title}"`)
+
     try {
       await adminApi.approveSubmission(id)
-      setItems(prev => prev.map(i => i.id === id ? { ...i, status: 'Approved' } : i))
-      setSelectedIds(prev => prev.filter(selId => selId !== id))
-      showToast(`Approved: "${title}"`)
       try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()) } catch {}
       window.dispatchEvent(new CustomEvent('wouchify_deals_updated'))
       window.dispatchEvent(new CustomEvent('wouchify_loot_deals_updated'))
@@ -186,6 +182,7 @@ export const OperationsApprovalsPage: React.FC = () => {
     } catch (err: any) {
       console.error('Approve failed:', err)
       showToast(`Error approving item: ${err?.message || 'Unknown error'}`)
+      fetchQueue(true)
     }
   }
 
@@ -201,30 +198,38 @@ export const OperationsApprovalsPage: React.FC = () => {
       return
     }
 
+    const targetId = rejectingItem.id
+    const note = rejectionReason
+
+    // Optimistic UI update: update local status immediately
+    setItems(prev => prev.map(item => 
+      item.id === targetId ? { ...item, status: 'Rejected', rejectionReason: note } : item
+    ))
+    setSelectedIds(prev => prev.filter(id => id !== targetId))
+    showToast(`Rejected submission with feedback note`)
+    setRejectingItem(null)
+    setRejectionReason('')
+
     try {
-      await adminApi.rejectSubmission(rejectingItem.id, rejectionReason)
-      setItems(prev => prev.map(item => 
-        item.id === rejectingItem.id ? { ...item, status: 'Rejected', rejectionReason } : item
-      ))
-      setSelectedIds(prev => prev.filter(id => id !== rejectingItem.id))
-      showToast(`Rejected submission with feedback note`)
-      setRejectingItem(null)
-      setRejectionReason('')
+      await adminApi.rejectSubmission(targetId, note)
       try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()) } catch {}
       window.dispatchEvent(new CustomEvent('wouchify_submissions_updated'))
     } catch (err: any) {
       console.error('Reject failed:', err)
       showToast(`Error rejecting item: ${err?.message || 'Unknown error'}`)
+      fetchQueue(true)
     }
   }
 
   const handleBulkApprove = async () => {
     if (selectedIds.length === 0) return
+    const idsToApprove = [...selectedIds]
+    setItems(prev => prev.map(item => idsToApprove.includes(item.id) ? { ...item, status: 'Approved' } : item))
+    setSelectedIds([])
+    showToast(`Bulk approved ${idsToApprove.length} submissions`)
+
     try {
-      await Promise.all(selectedIds.map(id => adminApi.approveSubmission(id)))
-      setItems(prev => prev.map(item => selectedIds.includes(item.id) ? { ...item, status: 'Approved' } : item))
-      showToast(`Bulk approved ${selectedIds.length} submissions`)
-      setSelectedIds([])
+      await adminApi.bulkApproveSubmissions(idsToApprove)
       try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()) } catch {}
       window.dispatchEvent(new CustomEvent('wouchify_submissions_updated'))
       window.dispatchEvent(new CustomEvent('wouchify_deals_updated'))
@@ -238,6 +243,7 @@ export const OperationsApprovalsPage: React.FC = () => {
     } catch (err: any) {
       console.error('Bulk approve failed:', err)
       showToast(`Error during bulk approval`)
+      fetchQueue(true)
     }
   }
 
@@ -247,17 +253,20 @@ export const OperationsApprovalsPage: React.FC = () => {
   }
 
   const handleConfirmBulkReject = async (reason: string) => {
+    const idsToReject = [...selectedIds]
+    setItems(prev => prev.map(item => idsToReject.includes(item.id) ? { ...item, status: 'Rejected', rejectionReason: reason } : item))
+    setSelectedIds([])
+    setBulkRejectOpen(false)
+    showToast(`Rejected ${idsToReject.length} submissions`)
+
     try {
-      await Promise.all(selectedIds.map(id => adminApi.rejectSubmission(id, reason)))
-      setItems(prev => prev.map(item => selectedIds.includes(item.id) ? { ...item, status: 'Rejected', rejectionReason: reason } : item))
-      showToast(`Rejected ${selectedIds.length} submissions`)
-      setSelectedIds([])
-      setBulkRejectOpen(false)
+      await adminApi.bulkRejectSubmissions(idsToReject, reason)
       try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()) } catch {}
       window.dispatchEvent(new CustomEvent('wouchify_submissions_updated'))
     } catch (err: any) {
       console.error('Bulk reject failed:', err)
       showToast(`Error during bulk rejection`)
+      fetchQueue(true)
     }
   }
 

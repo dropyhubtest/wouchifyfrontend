@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const Store = require('../models/Store');
+const Submission = require('../models/Submission');
 const auth = require('../middleware/authMiddleware');
 const store = require('../services/inMemoryStore');
 const { handleEntityCreate, handleEntityUpdate, handleEntityDelete } = require('../middleware/approvalHelper');
+const { fastQuery, safeBackground } = require('../utils/mongoFastQuery');
 
 // 1. PUBLIC: Get all stores (with optional status filter)
 router.get('/', async (req, res, next) => {
@@ -21,10 +23,6 @@ router.get('/', async (req, res, next) => {
   };
 
   try {
-    if (mongoose.connection.readyState !== 1) {
-      return res.json(getFallback());
-    }
-
     let query = {};
     if (status && status !== 'all') query.status = status;
 
@@ -34,25 +32,23 @@ router.get('/', async (req, res, next) => {
       query.submissionStatus = { $nin: ['pending_approval', 'rejected'] };
     }
 
-    let stores = await Store.find(query).sort({ name: 1 });
+    const mongoQueryFn = () => Store.find(query).sort({ name: 1 }).lean().then(stores => {
+      if (all !== 'true') {
+        const now = Date.now();
+        return stores.filter(s => {
+          if (s.publishAt) {
+            const pubTime = new Date(s.publishAt).getTime();
+            if (!isNaN(pubTime) && pubTime > now + 60000) return false;
+          }
+          return true;
+        });
+      }
+      return stores;
+    });
 
-    if (all !== 'true') {
-      const now = Date.now();
-      stores = stores.filter(s => {
-        if (s.publishAt) {
-          const pubTime = new Date(s.publishAt).getTime();
-          if (!isNaN(pubTime) && pubTime > now + 60000) return false;
-        }
-        return true;
-      });
-    }
-
-    if (!stores || stores.length === 0) {
-      return res.json(getFallback());
-    }
+    const stores = await fastQuery(mongoQueryFn, getFallback, 200);
     res.json(stores);
   } catch (err) {
-    console.warn('Stores route fallback to in-memory store:', err.message);
     return res.json(getFallback());
   }
 });
@@ -161,6 +157,12 @@ router.post('/bulk', async (req, res, next) => {
       return res.status(400).json({ message: 'Items array is required and cannot be empty' });
     }
 
+    const isExecutive = req.user?.role === 'executive' || autoApprove === false;
+    const submissionStatus = isExecutive ? 'pending_approval' : 'approved';
+    const status = isExecutive ? 'pending' : 'active';
+    const opsManagerApproval = isExecutive ? 'Pending' : 'Approved';
+    const managerApproval = isExecutive ? 'Pending' : 'Approved';
+
     const processedItems = items.map((item, idx) => {
       const now = new Date();
       let publishDate = item.publishAt ? new Date(item.publishAt) : now;
@@ -178,41 +180,86 @@ router.post('/bulk', async (req, res, next) => {
         reward: item.reward || item.cashbackRate || 'Up to 5% Cashback',
         logo: item.logo || '',
         href: item.href || item.affiliateUrl || `/stores#${storeName.toLowerCase().replace(/\s+/g, '-')}`,
-        status: item.status || 'active',
-        opsManagerApproval: (autoApprove !== false) ? 'Approved' : 'Pending',
-        managerApproval: (autoApprove !== false) ? 'Approved' : 'Pending',
+        status: isExecutive ? 'pending' : (item.status || 'active'),
+        submissionStatus,
+        opsManagerApproval,
+        managerApproval,
+        submittedBy: req.user?.email || 'executive@wouchify.com',
+        submittedByName: req.user?.name || 'Content Executive',
         publishAt: publishDate,
         expiresAt: expireDate
       };
     });
 
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(201).json({
-        success: true,
-        count: processedItems.length,
-        items: processedItems
-      });
-    }
-
-    const results = [];
-    for (const item of processedItems) {
-      try {
-        const storeDoc = await Store.findOneAndUpdate(
-          { name: new RegExp(`^${item.name}$`, 'i') },
-          { $set: item },
-          { upsert: true, new: true }
-        );
-        results.push(storeDoc);
-      } catch (e) {
-        console.warn('Store bulk upsert error for', item.name, e.message);
+    // 1. Always record in in-memory store immediately (<1ms)
+    processedItems.forEach(item => {
+      const createdStore = store.addStore(item);
+      const entityId = String(createdStore._id || createdStore.id || item._id || item.id);
+      item._id = entityId;
+      item.id = entityId;
+      if (isExecutive) {
+        store.addSubmission({
+          entityType: 'store',
+          entityId,
+          action: 'create',
+          title: item.name,
+          store: item.name,
+          category: item.category,
+          priority: item.priority || 'Normal',
+          submittedBy: req.user?.email || 'executive@wouchify.com',
+          submittedByName: req.user?.name || 'Content Executive',
+          status: 'Pending Approval',
+          notes: 'Bulk imported store submitted for Manager approval.',
+          dataSnapshot: { ...item, _id: entityId, id: entityId }
+        });
       }
-    }
+    });
 
+    // 2. Respond immediately to user so UI never hangs
     res.status(201).json({
       success: true,
-      count: results.length,
-      items: results
+      staged: isExecutive,
+      count: processedItems.length,
+      items: processedItems
     });
+
+    // 3. Persist to MongoDB in background
+    safeBackground(async () => {
+      if (mongoose.connection.readyState === 1) {
+        const results = [];
+        for (const item of processedItems) {
+          try {
+            const mongoItem = { ...item };
+            if (mongoItem._id && !mongoose.Types.ObjectId.isValid(mongoItem._id)) {
+              delete mongoItem._id;
+            }
+            const storeDoc = await Store.findOneAndUpdate(
+              { name: new RegExp(`^${item.name}$`, 'i') },
+              { $set: mongoItem },
+              { upsert: true, new: true }
+            );
+            results.push(storeDoc);
+          } catch (e) {}
+        }
+        if (isExecutive && results.length > 0) {
+          const submissions = results.map(doc => ({
+            entityType: 'store',
+            entityId: String(doc._id || doc.id),
+            action: 'create',
+            title: doc.name,
+            store: doc.name || '',
+            category: doc.category || '',
+            priority: doc.priority || 'Normal',
+            submittedBy: req.user?.email || 'executive@wouchify.com',
+            submittedByName: req.user?.name || 'Content Executive',
+            status: 'Pending Approval',
+            notes: 'Bulk imported store submitted for Manager approval.',
+            dataSnapshot: doc.toObject ? doc.toObject() : doc
+          }));
+          await Submission.insertMany(submissions, { ordered: false });
+        }
+      }
+    }, 'Stores Bulk Mongo Upsert');
   } catch (err) { next(err); }
 });
 

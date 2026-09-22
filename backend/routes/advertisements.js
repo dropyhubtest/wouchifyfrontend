@@ -5,19 +5,20 @@ const Advertisement = require('../models/Advertisement');
 const auth = require('../middleware/authMiddleware');
 const store = require('../services/inMemoryStore');
 const { handleEntityCreate, handleEntityUpdate, handleEntityDelete } = require('../middleware/approvalHelper');
+const { fastQuery, safeBackground } = require('../utils/mongoFastQuery');
 
 // GET /api/advertisements - Public read access
 router.get('/', async (req, res, next) => {
-  try {
-    const { placement, status, submissionStatus, pricingModel, all } = req.query;
-    if (mongoose.connection.readyState !== 1) {
-      let memoryAds = store.getAdvertisements(req.query);
-      if (all !== 'true') {
-        memoryAds = memoryAds.filter(a => a.submissionStatus !== 'pending_approval' && (a.status || 'active') === 'active');
-      }
-      return res.json(memoryAds);
+  const { placement, status, submissionStatus, pricingModel, all } = req.query;
+  const getFallback = () => {
+    let memoryAds = store.getAdvertisements(req.query);
+    if (all !== 'true') {
+      memoryAds = memoryAds.filter(a => a.submissionStatus !== 'pending_approval' && (a.status || 'active') === 'active');
     }
+    return memoryAds;
+  };
 
+  try {
     let query = {};
     if (placement && placement !== 'All') query.placement = placement;
     if (pricingModel && pricingModel !== 'All') query.pricingModel = pricingModel;
@@ -30,22 +31,14 @@ router.get('/', async (req, res, next) => {
       query.status = status || 'active';
     }
 
-    const ads = await Advertisement.find(query).sort({ createdAt: -1 });
-    if (!ads || ads.length === 0) {
-      let memoryAds = store.getAdvertisements(req.query);
-      if (all !== 'true') {
-        memoryAds = memoryAds.filter(a => a.submissionStatus !== 'pending_approval' && (a.status || 'active') === 'active');
-      }
-      return res.json(memoryAds);
-    }
+    const ads = await fastQuery(
+      () => Advertisement.find(query).sort({ createdAt: -1 }).lean(),
+      getFallback,
+      200
+    );
     res.json(ads);
   } catch (err) {
-    console.warn('Advertisements route fallback to in-memory store:', err.message);
-    let memoryAds = store.getAdvertisements(req.query);
-    if (all !== 'true') {
-      memoryAds = memoryAds.filter(a => a.submissionStatus !== 'pending_approval' && (a.status || 'active') === 'active');
-    }
-    return res.json(memoryAds);
+    return res.json(getFallback());
   }
 });
 

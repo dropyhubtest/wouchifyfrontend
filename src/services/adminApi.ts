@@ -52,6 +52,43 @@ async function handleResponse<T>(res: Response): Promise<T> {
   return res.json();
 }
 
+const inFlightRequests = new Map<string, Promise<any>>();
+const cacheStore = new Map<string, { timestamp: number; data: any }>();
+const CACHE_TTL_MS = 2500;
+
+async function cachedFetch<T>(url: string, options?: RequestInit, ttlMs: number = CACHE_TTL_MS): Promise<T> {
+  const cacheKey = `${url}_${JSON.stringify(options?.headers || {})}`;
+  const now = Date.now();
+
+  const cached = cacheStore.get(cacheKey);
+  if (cached && (now - cached.timestamp < ttlMs)) {
+    return cached.data as T;
+  }
+
+  if (inFlightRequests.has(cacheKey)) {
+    return inFlightRequests.get(cacheKey)! as Promise<T>;
+  }
+
+  const promise = (async () => {
+    try {
+      const res = await fetch(url, options);
+      const data = await handleResponse<T>(res);
+      cacheStore.set(cacheKey, { timestamp: Date.now(), data });
+      return data;
+    } finally {
+      inFlightRequests.delete(cacheKey);
+    }
+  })();
+
+  inFlightRequests.set(cacheKey, promise);
+  return promise;
+}
+
+export function invalidateApiCache() {
+  cacheStore.clear();
+  inFlightRequests.clear();
+}
+
 export const adminApi = {
   // Health & Seed
   checkHealth: async () => {
@@ -79,13 +116,10 @@ export const adminApi = {
       if (params?.status && params.status !== 'All') query.append('status', params.status);
       query.append('all', params?.all !== undefined ? String(params.all) : 'true');
       const qs = `?${query.toString()}`;
-      const res = await fetch(`${API_BASE}/deals${qs}`, {
+      const data = await cachedFetch<any[]>(`${API_BASE}/deals${qs}`, {
         headers: getAuthHeaders()
       });
-      if (res.ok) {
-        const data = await res.json();
-        return Array.isArray(data) ? data : [];
-      }
+      return Array.isArray(data) ? data : [];
     } catch (err) {
       console.warn('getDeals error:', err);
     }
@@ -129,7 +163,9 @@ export const adminApi = {
       body: JSON.stringify({ items, autoApprove })
     });
     const data = await handleResponse<any>(res);
+    try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
     window.dispatchEvent(new CustomEvent('wouchify_deals_updated', { detail: data }));
+    window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: data }));
     return data;
   },
 
@@ -192,13 +228,10 @@ export const adminApi = {
       if (params?.status && params.status !== 'All') query.append('status', params.status);
       if (params?.all !== undefined) query.append('all', String(params.all));
       const qs = query.toString() ? `?${query.toString()}` : '';
-      const res = await fetch(`${API_BASE}/coupons${qs}`, {
+      const data = await cachedFetch<any[]>(`${API_BASE}/coupons${qs}`, {
         headers: getAuthHeaders()
       });
-      if (res.ok) {
-        const data = await res.json();
-        return Array.isArray(data) ? data : [];
-      }
+      return Array.isArray(data) ? data : [];
     } catch (err) {
       console.warn('getCoupons error:', err);
     }
@@ -234,7 +267,9 @@ export const adminApi = {
       body: JSON.stringify({ items, autoApprove })
     });
     const data = await handleResponse<any>(res);
+    try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
     window.dispatchEvent(new CustomEvent('wouchify_coupons_updated', { detail: data }));
+    window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: data }));
     return data;
   },
 
@@ -285,13 +320,10 @@ export const adminApi = {
       if (params?.status && params.status !== 'All') query.append('status', params.status);
       if (params?.all !== undefined) query.append('all', String(params.all));
       const qs = query.toString() ? `?${query.toString()}` : '';
-      const res = await fetch(`${API_BASE}/loot-deals${qs}`, {
+      const data = await cachedFetch<any[]>(`${API_BASE}/loot-deals${qs}`, {
         headers: getAuthHeaders()
       });
-      if (res.ok) {
-        const data = await res.json();
-        return Array.isArray(data) ? data : [];
-      }
+      return Array.isArray(data) ? data : [];
     } catch (err) {
       console.warn('getLootDeals error:', err);
     }
@@ -322,7 +354,9 @@ export const adminApi = {
       body: JSON.stringify({ items, autoApprove })
     });
     const data = await handleResponse<any>(res);
+    try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
     window.dispatchEvent(new CustomEvent('wouchify_loot_deals_updated', { detail: data }));
+    window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: data }));
     return data;
   },
 
@@ -381,11 +415,8 @@ export const adminApi = {
       if (params?.status && params.status !== 'all') query.append('status', params.status);
       if (params?.all !== undefined) query.append('all', String(params.all));
       const qs = query.toString() ? `?${query.toString()}` : '';
-      const res = await fetch(`${API_BASE}/stores${qs}`, { headers: getAuthHeaders() });
-      if (res.ok) {
-        const data = await res.json();
-        return Array.isArray(data) ? data : [];
-      }
+      const data = await cachedFetch<any[]>(`${API_BASE}/stores${qs}`, { headers: getAuthHeaders() });
+      return Array.isArray(data) ? data : [];
     } catch (err) {
       console.warn('getStores error:', err);
     }
@@ -437,7 +468,9 @@ export const adminApi = {
       body: JSON.stringify({ items, autoApprove })
     });
     const data = await handleResponse<any>(res);
+    try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
     window.dispatchEvent(new CustomEvent('wouchify_stores_updated', { detail: data }));
+    window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: data }));
     return data;
   },
 
@@ -704,13 +737,10 @@ export const adminApi = {
       if (params?.type && params.type !== 'all') query.append('type', params.type);
       if (params?.status && params.status !== 'all') query.append('status', params.status);
       const qs = query.toString() ? `?${query.toString()}` : '';
-      const res = await fetch(`${API_BASE}/submissions${qs}`, {
+      const data = await cachedFetch<any[]>(`${API_BASE}/submissions${qs}`, {
         headers: getAuthHeaders()
       });
-      if (res.ok) {
-        const data = await res.json();
-        return Array.isArray(data) ? data : [];
-      }
+      return Array.isArray(data) ? data : [];
     } catch (err) {
       console.warn('getSubmissions error:', err);
     }
@@ -740,6 +770,7 @@ export const adminApi = {
   },
 
   approveSubmission: async (id: string, reviewedBy?: string) => {
+    invalidateApiCache();
     const res = await fetch(`${API_BASE}/submissions/${id}/approve`, {
       method: 'PATCH',
       headers: getAuthHeaders(),
@@ -751,7 +782,21 @@ export const adminApi = {
     return result;
   },
 
-  rejectSubmission: async (id: string, rejectionReason: string, reviewedBy?: string) => {
+  bulkApproveSubmissions: async (ids: string[], reviewedBy?: string) => {
+    invalidateApiCache();
+    const res = await fetch(`${API_BASE}/submissions/bulk-approve`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ ids, reviewedBy })
+    });
+    const result = await handleResponse<any>(res);
+    try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
+    window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { ids, status: 'Approved' } }));
+    return result;
+  },
+
+  rejectSubmission: async (id: string, rejectionReason?: string, reviewedBy?: string) => {
+    invalidateApiCache();
     const res = await fetch(`${API_BASE}/submissions/${id}/reject`, {
       method: 'PATCH',
       headers: getAuthHeaders(),
@@ -760,6 +805,19 @@ export const adminApi = {
     const result = await handleResponse<any>(res);
     try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
     window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, status: 'Rejected' } }));
+    return result;
+  },
+
+  bulkRejectSubmissions: async (ids: string[], rejectionReason?: string, reviewedBy?: string) => {
+    invalidateApiCache();
+    const res = await fetch(`${API_BASE}/submissions/bulk-reject`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ ids, rejectionReason, reviewedBy })
+    });
+    const result = await handleResponse<any>(res);
+    try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
+    window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { ids, status: 'Rejected' } }));
     return result;
   },
 

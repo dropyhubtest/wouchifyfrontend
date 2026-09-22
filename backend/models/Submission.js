@@ -35,4 +35,7 @@ const submissionSchema = new mongoose.Schema({
   dataSnapshot: { type: mongoose.Schema.Types.Mixed, default: {} }
 }, { timestamps: true });
 
+submissionSchema.index({ status: 1, entityType: 1, createdAt: -1 });
+submissionSchema.index({ submittedBy: 1, createdAt: -1 });
+
 module.exports = mongoose.model('Submission', submissionSchema);
