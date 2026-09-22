@@ -45,6 +45,7 @@ export const STORES_HERO_DATA: StoresHeroData = {
 
 export interface StoreItem {
   id: string
+  _id?: string
   name: string
   slug: string
   logo: string

@@ -19,6 +19,7 @@ export interface DealItem {
   id: number | string
   _id?: string
   name: string
+  title?: string
   store: string
   category: string
   price: string
@@ -73,13 +74,26 @@ export interface TransactionItem {
 }
 
 export interface UserItem {
-  id: number
+  id: number | string
+  _id?: string
   name: string
   email: string
   walletBalance: string
   totalCashback: string
   joinedDate: string
   status: 'active' | 'verified' | 'suspended'
+}
+
+export interface StoreItem {
+  id: number | string
+  _id?: string
+  name: string
+  logo: string
+  category: string
+  description?: string
+  reward?: string
+  status?: string
+  affiliateUrl?: string
 }
 
 export interface AffiliateNetworkItem {

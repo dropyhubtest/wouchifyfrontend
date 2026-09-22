@@ -5,7 +5,7 @@ import { WatermarkAnimation } from '../components/hero'
 import { GoogleLogin } from '@react-oauth/google'
 import watermarkMain from '../assets/hero/hero-watermark-main.png'
 import watermarkMainState2 from '../assets/hero/hero-watermark-main-state-2.png'
-import { login, googleLogin as googleLoginApi, sendOtp, verifyOtp } from '../utils/api'
+import { googleLogin as googleLoginApi, sendOtp, verifyOtp } from '../utils/api'
 import styles from './MobileLoginPage.module.css'
 
 export const MobileLoginPage: React.FC = () => {

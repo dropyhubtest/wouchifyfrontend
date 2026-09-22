@@ -19,9 +19,11 @@ import '../operations/OperationsLayout.css' // Reuse operations layout styles
 interface ManagerLayoutProps {
   children: React.ReactNode
   activeMenu: string
+  onMenuChange?: (menu: string) => void
   pendingCounts?: {
     approvals?: number
   }
+  pendingApprovalsCount?: number
 }
 
 export const ManagerLayout: React.FC<ManagerLayoutProps> = ({ 
@@ -89,7 +91,7 @@ export const ManagerLayout: React.FC<ManagerLayoutProps> = ({
     setIsSidebarOpen(false)
   }
 
-  const menuItems = [
+  const menuItems: Array<{ id: string; label: string; path: string; icon: React.ReactElement; badge?: number; badgeColor?: string }> = [
     { 
       id: 'dashboard', 
       label: 'Overview', 
