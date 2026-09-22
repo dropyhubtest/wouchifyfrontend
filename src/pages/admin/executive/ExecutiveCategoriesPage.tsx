@@ -454,7 +454,7 @@ export const ExecutiveCategoriesPage: React.FC = () => {
     }
 
     try {
-      await adminApi.createCategory({
+      const payload = {
         name: formData.name.trim(),
         slug: formData.slug.trim(),
         description: formData.description.trim(),
@@ -462,9 +462,20 @@ export const ExecutiveCategoriesPage: React.FC = () => {
         color: '#2F368C',
         bgColor: '#E5E7FF',
         textColor: '#2F368C',
-        count: 0
+        count: 0,
+        submissionStatus: 'pending_approval'
+      };
+      const res = await adminApi.createCategory(payload)
+      await adminApi.createSubmission({
+        entityType: 'category',
+        entityId: res._id || res.id,
+        action: 'create',
+        title: formData.name.trim(),
+        store: 'Directory',
+        payload: payload,
+        submittedBy: typeof localStorage !== 'undefined' ? (JSON.parse(localStorage.getItem('staffUser') || '{}').email || 'executive@wouchify.com') : 'executive@wouchify.com'
       })
-      showNotification(`"${formData.name}" added to catalog successfully!`)
+      showNotification(`"${formData.name}" submitted for manager approval!`)
       setIsCreateModalOpen(false)
       loadAllData()
     } catch (err: any) {

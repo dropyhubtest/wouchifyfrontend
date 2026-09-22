@@ -19,6 +19,7 @@ import {
   UserCheck
 } from 'lucide-react'
 import './AdminDashboardPage.css'
+import './manager/ManagerApprovalsPage.css'
 
 export interface ModerationItem {
   id: string
@@ -78,7 +79,7 @@ export const AdminApprovalsView: React.FC = () => {
           store: s.store || s.dataSnapshot?.store || s.dataSnapshot?.storeName || 'Storefront',
           category: s.category || s.dataSnapshot?.category || 'General',
           submittedBy: s.submittedBy || 'executive@wouchify.com',
-          submittedByName: s.submittedByName || 'Content Executive',
+          submittedByName: s.submittedByName || (s.submittedBy?.includes('ops.manager') ? 'Operations Manager' : 'Content Executive'),
           submittedAt: s.submittedAt ? new Date(s.submittedAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Recent',
           reviewedBy: s.reviewedBy || s.approvedBy,
           reviewedByName: s.reviewedByName || s.approvedByName,
@@ -86,7 +87,7 @@ export const AdminApprovalsView: React.FC = () => {
           reviewedAt: s.reviewedAt || s.approvedAt ? new Date(s.reviewedAt || s.approvedAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : undefined,
           approvedBy: s.approvedBy || s.reviewedBy,
           approvedByName: s.approvedByName || s.reviewedByName,
-          approvedByRole: s.approvedByRole || s.reviewedByRole,
+          approvedByRole: s.approvedByRole || s.reviewedByRole || ((s.approvedBy || s.reviewedBy)?.includes('ops.manager') ? 'Operations Manager' : 'Manager'),
           approvedAt: s.approvedAt || s.reviewedAt ? new Date(s.approvedAt || s.reviewedAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : undefined,
           status: s.status || 'Pending',
           rejectionReason: s.rejectionReason,
@@ -364,23 +365,20 @@ export const AdminApprovalsView: React.FC = () => {
         </div>
 
         {/* Submissions Table */}
-        <div className="submissions-table-container">
+        <div className="crud-table-wrapper">
           {loading ? (
             <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
               Loading moderation queue...
             </div>
           ) : filtered.length === 0 ? (
-            <div style={{ padding: '48px 24px', textAlign: 'center', color: '#64748b' }}>
-              <ShieldCheck size={44} style={{ opacity: 0.25, margin: '0 auto 12px' }} />
-              <h4 style={{ margin: '0 0 6px 0', color: '#0f172a', fontWeight: 700 }}>No items in this queue</h4>
-              <p style={{ margin: 0, fontSize: '0.88rem' }}>
-                {activeTab === 'pending'
-                  ? 'All executive submissions have been processed and approved.'
-                  : 'No records matching the selected filters.'}
+            <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
+              <CheckCircle2 size={40} style={{ opacity: 0.2, marginBottom: '10px' }} />
+              <p style={{ margin: 0, fontWeight: 500 }}>
+                {activeTab === 'pending' ? 'Zero pending items. The queue is fully cleared.' : 'No items match the current filter.'}
               </p>
             </div>
           ) : (
-            <table className="submissions-table">
+            <table className="crud-table">
               <thead>
                 <tr>
                   {activeTab === 'pending' && (

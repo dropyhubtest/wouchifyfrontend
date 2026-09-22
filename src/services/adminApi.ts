@@ -157,6 +157,7 @@ export const adminApi = {
     });
     const data = await handleResponse<any>(res);
     try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
+      clearFrontendCache();
     window.dispatchEvent(new CustomEvent('wouchify_deals_updated', { detail: data }));
     window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: data }));
     return data;
@@ -183,19 +184,23 @@ export const adminApi = {
     });
     const data = await handleResponse<any>(res);
     try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
+      clearFrontendCache();
     window.dispatchEvent(new CustomEvent('wouchify_deals_updated', { detail: { id, ...dealData } }));
     window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, ...dealData } }));
     return data;
   },
 
   deleteDeal: async (id: string | number) => {
+    const target = String(id).trim();
     const res = await fetch(`${API_BASE}/deals/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders()
     });
     const result = await handleResponse<{ message: string }>(res);
     try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
-    window.dispatchEvent(new CustomEvent('wouchify_deals_updated', { detail: { id, deleted: true } }));
+      clearFrontendCache();
+    clearFrontendCache();
+    window.dispatchEvent(new CustomEvent('wouchify_deals_updated', { detail: { id: target, deleted: true } }));
     window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, deleted: true } }));
     return result;
   },
@@ -207,6 +212,7 @@ export const adminApi = {
     });
     const result = await handleResponse<any>(res);
     try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
+      clearFrontendCache();
     window.dispatchEvent(new CustomEvent('wouchify_deals_updated', { detail: { id, toggled: true } }));
     window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, toggled: true } }));
     return result;
@@ -264,6 +270,7 @@ export const adminApi = {
     });
     const data = await handleResponse<any>(res);
     try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
+      clearFrontendCache();
     window.dispatchEvent(new CustomEvent('wouchify_coupons_updated', { detail: data }));
     window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: data }));
     return data;
@@ -290,6 +297,7 @@ export const adminApi = {
     });
     const data = await handleResponse<any>(res);
     try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
+      clearFrontendCache();
     window.dispatchEvent(new CustomEvent('wouchify_coupons_updated', { detail: { id, ...couponData } }));
     window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, ...couponData } }));
     return data;
@@ -303,6 +311,8 @@ export const adminApi = {
     });
     const result = await handleResponse<{ message: string }>(res);
     try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
+      clearFrontendCache();
+    clearFrontendCache();
     window.dispatchEvent(new CustomEvent('wouchify_coupons_updated', { detail: { id: target, deleted: true } }));
     window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id: target, deleted: true } }));
     return result;
@@ -353,6 +363,7 @@ export const adminApi = {
     });
     const data = await handleResponse<any>(res);
     try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
+      clearFrontendCache();
     window.dispatchEvent(new CustomEvent('wouchify_loot_deals_updated', { detail: data }));
     window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: data }));
     return data;
@@ -379,6 +390,7 @@ export const adminApi = {
     });
     const data = await handleResponse<any>(res);
     try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
+      clearFrontendCache();
     window.dispatchEvent(new CustomEvent('wouchify_loot_deals_updated', { detail: { id, ...lootData } }));
     window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, ...lootData } }));
     return data;
@@ -391,6 +403,7 @@ export const adminApi = {
     });
     const result = await handleResponse<{ message: string }>(res);
     try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
+      clearFrontendCache();
     window.dispatchEvent(new CustomEvent('wouchify_loot_deals_updated', { detail: { id, deleted: true } }));
     window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, deleted: true } }));
     return result;
@@ -674,6 +687,7 @@ export const adminApi = {
     });
     const data = await handleResponse<any>(res);
     try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
+      clearFrontendCache();
     window.dispatchEvent(new CustomEvent('wouchify_credit_cards_updated', { detail: data }));
     window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: data }));
     return data;
@@ -687,6 +701,7 @@ export const adminApi = {
     });
     const data = await handleResponse<any>(res);
     try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
+      clearFrontendCache();
     window.dispatchEvent(new CustomEvent('wouchify_credit_cards_updated', { detail: { id, ...cardData } }));
     window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, ...cardData } }));
     return data;
@@ -699,6 +714,7 @@ export const adminApi = {
     });
     const result = await handleResponse<{ message: string }>(res);
     try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
+      clearFrontendCache();
     window.dispatchEvent(new CustomEvent('wouchify_credit_cards_updated', { detail: { id, deleted: true } }));
     window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, deleted: true } }));
     return result;
@@ -711,6 +727,7 @@ export const adminApi = {
     });
     const result = await handleResponse<any>(res);
     try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
+      clearFrontendCache();
     window.dispatchEvent(new CustomEvent('wouchify_credit_cards_updated', { detail: { id, toggled: true } }));
     window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, toggled: true } }));
     return result;
@@ -792,6 +809,7 @@ export const adminApi = {
     });
     const created = await handleResponse<any>(res);
     try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
+      clearFrontendCache();
     window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: created }));
     return created;
   },
@@ -806,6 +824,7 @@ export const adminApi = {
     });
     const result = await handleResponse<any>(res);
     try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
+      clearFrontendCache();
     // Clear frontend cache so approved item appears on live pages instantly
     clearFrontendCache();
     window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, status: 'Approved' } }));
@@ -821,6 +840,7 @@ export const adminApi = {
     });
     const result = await handleResponse<any>(res);
     try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
+      clearFrontendCache();
     clearFrontendCache();
     window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { ids, status: 'Approved' } }));
     return result;
@@ -836,6 +856,7 @@ export const adminApi = {
     });
     const result = await handleResponse<any>(res);
     try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()); } catch {}
+      clearFrontendCache();
     // Clear frontend cache so rejected item is removed from live pages instantly
     clearFrontendCache();
     window.dispatchEvent(new CustomEvent('wouchify_submissions_updated', { detail: { id, status: 'Rejected' } }));

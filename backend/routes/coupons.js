@@ -78,7 +78,7 @@ router.get('/', async (req, res, next) => {
     });
 
     const coupons = await fastQuery(mongoQueryFn, getFallback, 200);
-    res.json(coupons);
+    res.json(coupons || []);
   } catch (err) {
     return res.json(getFallback());
   }

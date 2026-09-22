@@ -13,9 +13,38 @@ export const CategoriesPage: React.FC = () => {
   const [activeLetter, setActiveLetter] = useState<string | null>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
   const [canvasHeight, setCanvasHeight] = useState<number>(18000)
+  
+  const [dbCategories, setDbCategories] = useState<any[]>([])
+
+  useEffect(() => {
+    fetch('http://localhost:3001/api/data/categories')
+      .then(res => res.json())
+      .then(data => {
+        const mapped = data.filter((c: any) => c.status !== 'inactive').map((c: any) => ({
+          id: c._id || c.id || c.slug,
+          name: c.name,
+          slug: c.slug,
+          image: c.image || 'https://via.placeholder.com/80?text=Cat',
+          letter: c.letter || c.name.charAt(0).toUpperCase()
+        }))
+        setDbCategories(mapped)
+      })
+      .catch(console.error)
+  }, [])
 
   const filteredItems = useMemo(() => {
-    return CATEGORY_DIRECTORY_ITEMS.filter((item) => {
+    // Merge DB categories and hardcoded ones, preferring DB
+    const allItems = [...CATEGORY_DIRECTORY_ITEMS]
+    dbCategories.forEach(dbItem => {
+      const existingIdx = allItems.findIndex(i => i.slug === dbItem.slug)
+      if (existingIdx >= 0) {
+        allItems[existingIdx] = { ...allItems[existingIdx], ...dbItem }
+      } else {
+        allItems.push(dbItem)
+      }
+    })
+
+    return allItems.filter((item) => {
       // Letter filter
       if (activeLetter && item.letter.toUpperCase() !== activeLetter.toUpperCase()) {
         return false
@@ -27,7 +56,7 @@ export const CategoriesPage: React.FC = () => {
       }
       return true
     })
-  }, [searchQuery, activeLetter])
+  }, [searchQuery, activeLetter, dbCategories])
 
   // Update canvas height dynamically based on filtered items
   useEffect(() => {

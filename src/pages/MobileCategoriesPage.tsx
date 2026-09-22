@@ -16,6 +16,26 @@ export const MobileCategoriesPage: React.FC = () => {
   const [searchInput, setSearchInput] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [activeLetter, setActiveLetter] = useState<string | null>(null)
+  
+  const [dbCategories, setDbCategories] = useState<any[]>([])
+
+  useEffect(() => {
+    fetch('http://localhost:3001/api/data/categories')
+      .then(res => res.json())
+      .then(data => {
+        const mapped = data.filter((c: any) => c.status !== 'inactive').map((c: any) => ({
+          id: c._id || c.id || c.slug,
+          name: c.name,
+          slug: c.slug,
+          logo: c.image || c.logo || 'https://via.placeholder.com/80?text=Cat',
+          href: `/categories/${c.slug}`,
+          letter: c.letter || c.name.charAt(0).toUpperCase(),
+          type: (c.pillar as any) || 'categories'
+        }))
+        setDbCategories(mapped)
+      })
+      .catch(console.error)
+  }, [])
 
   // Debounce search input by 120ms to prevent layout thrashing
   useEffect(() => {
@@ -27,8 +47,18 @@ export const MobileCategoriesPage: React.FC = () => {
 
   // Build the complete 351-item unified directory once and memoize
   const allUnifiedItems = useMemo(() => {
-    return buildUnifiedDirectory()
-  }, [])
+    const all = buildUnifiedDirectory()
+    // Merge DB categories
+    dbCategories.forEach(dbItem => {
+      const existingIdx = all.findIndex(i => i.slug === dbItem.slug)
+      if (existingIdx >= 0) {
+        all[existingIdx] = { ...all[existingIdx], ...dbItem }
+      } else {
+        all.push(dbItem as any)
+      }
+    })
+    return all
+  }, [dbCategories])
 
   // Filter items by search query
   const filteredItems = useMemo(() => {

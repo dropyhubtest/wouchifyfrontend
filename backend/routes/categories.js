@@ -78,8 +78,8 @@ router.get('/', async (req, res, next) => {
     }
 
     let categories = await Category.find(query).sort({ sortOrder: 1, name: 1 });
-    if (!categories || categories.length === 0) {
-      return res.json(getFallback());
+    if (!) {
+      return res.json([]);
     }
     res.json(categories);
   } catch (err) {

@@ -47,7 +47,7 @@ router.get('/', async (req, res, next) => {
     });
 
     const stores = await fastQuery(mongoQueryFn, getFallback, 200);
-    res.json(stores);
+    res.json(stores || []);
   } catch (err) {
     return res.json(getFallback());
   }
