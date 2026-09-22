@@ -204,6 +204,7 @@ export const OperationsApprovalsPage: React.FC = () => {
       fetchQueue(true)
     }, 15000)
     return () => {
+      clearInterval(interval)
       window.removeEventListener('wouchify_submissions_updated', handleSubmissionsUpdated)
       window.removeEventListener('storage', handleStorageChange)
     }
