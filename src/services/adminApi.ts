@@ -1427,5 +1427,58 @@ export const adminApi = {
     const deleted = await handleResponse<any>(res);
     window.dispatchEvent(new CustomEvent('wouchify_banners_updated', { detail: { id, deleted: true } }));
     return deleted;
+  },
+
+  // Staff Management API Methods
+  getStaffMembers: async (params?: { role?: string; status?: string; search?: string }) => {
+    try {
+      const query = new URLSearchParams();
+      if (params?.role && params.role !== 'all') query.append('role', params.role);
+      if (params?.status && params.status !== 'all') query.append('status', params.status);
+      if (params?.search) query.append('search', params.search);
+      const qs = query.toString() ? `?${query.toString()}` : '';
+      const res = await fetch(`${API_BASE}/staff${qs}`, {
+        headers: getAuthHeaders()
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return Array.isArray(data) ? data : [];
+      }
+    } catch (err) {
+      console.warn('getStaffMembers error:', err);
+    }
+    return [];
+  },
+
+  createStaffMember: async (data: Record<string, any>) => {
+    const res = await fetch(`${API_BASE}/staff`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data)
+    });
+    const created = await handleResponse<any>(res);
+    window.dispatchEvent(new CustomEvent('wouchify_staff_updated', { detail: created }));
+    return created;
+  },
+
+  updateStaffMember: async (id: string, updates: Record<string, any>) => {
+    const res = await fetch(`${API_BASE}/staff/${id}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(updates)
+    });
+    const updated = await handleResponse<any>(res);
+    window.dispatchEvent(new CustomEvent('wouchify_staff_updated', { detail: updated }));
+    return updated;
+  },
+
+  deleteStaffMember: async (id: string) => {
+    const res = await fetch(`${API_BASE}/staff/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    const result = await handleResponse<any>(res);
+    window.dispatchEvent(new CustomEvent('wouchify_staff_updated', { detail: { id, deleted: true } }));
+    return result;
   }
 };
