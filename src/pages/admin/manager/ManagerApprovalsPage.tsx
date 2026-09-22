@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { OperationsLayout } from './OperationsLayout'
+import { ManagerLayout } from './ManagerLayout'
 import { adminApi } from '../../../services/adminApi'
 import { 
   CheckCircle2, 
@@ -20,7 +20,7 @@ import {
   CreditCard,
   Layers
 } from 'lucide-react'
-import './OperationsShared.css'
+import '../operations/OperationsShared.css'
 import { getStoreLogo, PLACEHOLDER_DEAL_IMAGE, PLACEHOLDER_STORE_LOGO } from '../../../data/dealsPage'
 import { AdminPromptDialog, AdminAlertDialog } from '../../../components/common/AdminDialog'
 
@@ -75,7 +75,7 @@ export interface ModerationItem {
 
 import { getCached } from '../../../services/dataCache'
 
-export const OperationsApprovalsPage: React.FC = () => {
+export const ManagerApprovalsPage: React.FC = () => {
   // Synchronously check cache to prevent skeleton flash when navigating back
   const cachedData = getCached<any[]>(adminApi.getSubmissionCacheKey({ status: 'all' }))
   
@@ -203,37 +203,33 @@ export const OperationsApprovalsPage: React.FC = () => {
     const interval = setInterval(() => {
       fetchQueue(true)
     }, 15000)
+
     return () => {
       window.removeEventListener('wouchify_submissions_updated', handleSubmissionsUpdated)
       window.removeEventListener('storage', handleStorageChange)
+      clearInterval(interval)
     }
   }, [])
 
-  const opsReviewerMeta = {
-    reviewedBy: 'ops.manager@wouchify.com',
-    reviewedByName: 'Operations Manager',
-    reviewedByRole: 'Operational Manager'
+  const managerReviewerMeta = {
+    reviewedBy: 'manager@wouchify.com',
+    reviewedByName: 'System Manager',
+    reviewedByRole: 'Manager'
   }
 
   const handleApproveOne = async (id: string, title: string) => {
-    // Optimistic UI update: change state immediately for instant feedback
-    setItems(prev => prev.map(i => i.id === id ? { ...i, status: 'Approved' } : i))
-    setSelectedIds(prev => prev.filter(selId => selId !== id))
-    showToast(`Approved: "${title}"`)
-
     try {
-      await adminApi.approveSubmission(id, opsReviewerMeta)
+      await adminApi.approveSubmission(id, managerReviewerMeta)
       setItems(prev => prev.map(i => i.id === id ? { 
         ...i, 
         status: 'Approved',
-        approvedBy: opsReviewerMeta.reviewedBy,
-        approvedByName: opsReviewerMeta.reviewedByName,
-        approvedByRole: opsReviewerMeta.reviewedByRole,
+        approvedBy: managerReviewerMeta.reviewedBy,
+        approvedByName: managerReviewerMeta.reviewedByName,
+        approvedByRole: managerReviewerMeta.reviewedByRole,
         approvedAt: new Date().toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })
       } : i))
       setSelectedIds(prev => prev.filter(selId => selId !== id))
       showToast(`Approved: "${title}"`)
->>>>>>> origin/main
       try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()) } catch {}
       window.dispatchEvent(new CustomEvent('wouchify_deals_updated'))
       window.dispatchEvent(new CustomEvent('wouchify_loot_deals_updated'))
@@ -246,7 +242,6 @@ export const OperationsApprovalsPage: React.FC = () => {
     } catch (err: any) {
       console.error('Approve failed:', err)
       showToast(`Error approving item: ${err?.message || 'Unknown error'}`)
-      fetchQueue(true)
     }
   }
 
@@ -262,46 +257,37 @@ export const OperationsApprovalsPage: React.FC = () => {
       return
     }
 
-    const targetId = rejectingItem.id
-    const note = rejectionReason
-
-    // Optimistic UI update: update local status immediately
-    setItems(prev => prev.map(item => 
-      item.id === targetId ? { ...item, status: 'Rejected', rejectionReason: note } : item
-    ))
-    setSelectedIds(prev => prev.filter(id => id !== targetId))
-    showToast(`Rejected submission with feedback note`)
-    setRejectingItem(null)
-    setRejectionReason('')
-
     try {
-      await adminApi.rejectSubmission(targetId, note)
+      await adminApi.rejectSubmission(rejectingItem.id, rejectionReason)
+      setItems(prev => prev.map(item => 
+        item.id === rejectingItem.id ? { ...item, status: 'Rejected', rejectionReason } : item
+      ))
+      setSelectedIds(prev => prev.filter(id => id !== rejectingItem.id))
+      showToast(`Rejected submission with feedback note`)
+      setRejectingItem(null)
+      setRejectionReason('')
       try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()) } catch {}
       window.dispatchEvent(new CustomEvent('wouchify_submissions_updated'))
     } catch (err: any) {
       console.error('Reject failed:', err)
       showToast(`Error rejecting item: ${err?.message || 'Unknown error'}`)
-      fetchQueue(true)
     }
   }
 
   const handleBulkApprove = async () => {
     if (selectedIds.length === 0) return
-    const idsToApprove = [...selectedIds]
-    setItems(prev => prev.map(item => idsToApprove.includes(item.id) ? { ...item, status: 'Approved' } : item))
-    setSelectedIds([])
-    showToast(`Bulk approved ${idsToApprove.length} submissions`)
-
     try {
-      await adminApi.bulkApproveSubmissions(idsToApprove, opsReviewerMeta)
-      setItems(prev => prev.map(item => idsToApprove.includes(item.id) ? { 
+      await adminApi.bulkApproveSubmissions(selectedIds, managerReviewerMeta)
+      setItems(prev => prev.map(item => selectedIds.includes(item.id) ? { 
         ...item, 
         status: 'Approved',
-        approvedBy: opsReviewerMeta.reviewedBy,
-        approvedByName: opsReviewerMeta.reviewedByName,
-        approvedByRole: opsReviewerMeta.reviewedByRole,
+        approvedBy: managerReviewerMeta.reviewedBy,
+        approvedByName: managerReviewerMeta.reviewedByName,
+        approvedByRole: managerReviewerMeta.reviewedByRole,
         approvedAt: new Date().toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })
       } : item))
+      showToast(`Bulk approved ${selectedIds.length} submissions`)
+      setSelectedIds([])
       try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()) } catch {}
       window.dispatchEvent(new CustomEvent('wouchify_submissions_updated'))
       window.dispatchEvent(new CustomEvent('wouchify_deals_updated'))
@@ -315,7 +301,6 @@ export const OperationsApprovalsPage: React.FC = () => {
     } catch (err: any) {
       console.error('Bulk approve failed:', err)
       showToast(`Error during bulk approval`)
-      fetchQueue(true)
     }
   }
 
@@ -325,20 +310,17 @@ export const OperationsApprovalsPage: React.FC = () => {
   }
 
   const handleConfirmBulkReject = async (reason: string) => {
-    const idsToReject = [...selectedIds]
-    setItems(prev => prev.map(item => idsToReject.includes(item.id) ? { ...item, status: 'Rejected', rejectionReason: reason } : item))
-    setSelectedIds([])
-    setBulkRejectOpen(false)
-    showToast(`Rejected ${idsToReject.length} submissions`)
-
     try {
-      await adminApi.bulkRejectSubmissions(idsToReject, reason)
+      await Promise.all(selectedIds.map(id => adminApi.rejectSubmission(id, reason)))
+      setItems(prev => prev.map(item => selectedIds.includes(item.id) ? { ...item, status: 'Rejected', rejectionReason: reason } : item))
+      showToast(`Rejected ${selectedIds.length} submissions`)
+      setSelectedIds([])
+      setBulkRejectOpen(false)
       try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()) } catch {}
       window.dispatchEvent(new CustomEvent('wouchify_submissions_updated'))
     } catch (err: any) {
       console.error('Bulk reject failed:', err)
       showToast(`Error during bulk rejection`)
-      fetchQueue(true)
     }
   }
 
@@ -436,7 +418,7 @@ export const OperationsApprovalsPage: React.FC = () => {
   }
 
   return (
-    <OperationsLayout activeMenu="approvals" pendingCounts={{ approvals: pendingCount }}>
+    <ManagerLayout activeMenu="approvals" pendingCounts={{ approvals: pendingCount }}>
       <div className="executive-crud-page">
         
         {/* Toast */}
@@ -676,52 +658,60 @@ export const OperationsApprovalsPage: React.FC = () => {
         </div>
 
         {/* Filter Bar */}
-        <div className="crud-filter-bar">
-          <div className="filter-search-wrap">
-            <Search size={16} className="search-icon" />
+        <div className="crud-filter-bar" style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' }}>
+          <div className="filter-search-wrap" style={{ flex: 1, minWidth: '280px', position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <Search size={16} className="search-icon" style={{ position: 'absolute', left: '14px', color: '#64748b' }} />
             <input 
               type="text" 
-              placeholder="Search by title, store, code or executive email…" 
+              placeholder="Search by Title, Store, Deal Code, or Executive Email..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ width: '100%', padding: '10px 14px 10px 40px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '0.9rem', outline: 'none' }}
             />
             {searchTerm && (
-              <button className="search-clear-btn" onClick={() => setSearchTerm('')}>
+              <button className="search-clear-btn" onClick={() => setSearchTerm('')} style={{ position: 'absolute', right: '12px', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}>
                 <X size={14} />
               </button>
             )}
           </div>
 
-          <div className="filter-dropdown-wrap">
-            <select 
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="filter-select"
-            >
-              <option value="all">All Content Types</option>
-              <option value="loot">Loot Deals (Price Errors)</option>
-              <option value="deal">Standard Deals</option>
-              <option value="coupon">Coupons</option>
-              <option value="store">Stores</option>
-              <option value="credit_card">Credit Cards</option>
-              <option value="banner">Hero Banners</option>
-              <option value="ad">Advertisements</option>
-              <option value="category">Categories</option>
-            </select>
+          <div className="filter-dropdown-wrap" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f8fafc', padding: '6px 12px', borderRadius: '10px', border: '1.5px solid #e2e8f0' }}>
+              <Tag size={15} color="#64748b" />
+              <select 
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="filter-select"
+                style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: '0.88rem', fontWeight: 600, color: '#334155', cursor: 'pointer' }}
+              >
+                <option value="all">All Content Types</option>
+                <option value="loot">Loot Deals</option>
+                <option value="deal">Standard Deals</option>
+                <option value="coupon">Coupons</option>
+                <option value="store">Stores</option>
+                <option value="credit_card">Credit Cards</option>
+                <option value="banner">Hero Banners</option>
+                <option value="ad">Advertisements</option>
+                <option value="category">Categories</option>
+              </select>
+            </div>
 
-            <select 
-              value={filterExecutive}
-              onChange={(e) => setFilterExecutive(e.target.value)}
-              className="filter-select"
-              aria-label="Filter by Executive"
-            >
-              <option value="all">👥 All Executives</option>
-              {executiveOptions.filter(e => e !== 'all').map(email => (
-                <option key={email} value={email}>
-                  {email}
-                </option>
-              ))}
-            </select>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f8fafc', padding: '6px 12px', borderRadius: '10px', border: '1.5px solid #e2e8f0' }}>
+              <select 
+                value={filterExecutive}
+                onChange={(e) => setFilterExecutive(e.target.value)}
+                className="filter-select"
+                aria-label="Filter by Executive"
+                style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: '0.88rem', fontWeight: 600, color: '#334155', cursor: 'pointer' }}
+              >
+                <option value="all">👥 All Executives</option>
+                {executiveOptions.filter(e => e !== 'all').map(email => (
+                  <option key={email} value={email}>
+                    {email}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -1243,6 +1233,6 @@ export const OperationsApprovalsPage: React.FC = () => {
         )}
 
       </div>
-    </OperationsLayout>
+    </ManagerLayout>
   )
 }

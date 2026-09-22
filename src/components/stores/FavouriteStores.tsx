@@ -6,6 +6,7 @@ import { StoreAlphabetFilter } from './StoreAlphabetFilter'
 import { STORE_CATEGORIES, type StoreItem } from '../../data/storesHero'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
 import { adminApi } from '../../services/adminApi'
+import { getCached } from '../../services/dataCache'
 import { StoreCardSkeleton } from '../common/Skeletons'
 import './FavouriteStores.css'
 
@@ -14,8 +15,26 @@ export const FavouriteStores: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [activeLetter, setActiveLetter] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState('All Stores')
-  const [storesList, setStoresList] = useState<StoreItem[]>([])
-  const [loading, setLoading] = useState<boolean>(true)
+  
+  // Synchronously check cache
+  const cachedData = getCached<any[]>('public:stores')
+  const initialStores = cachedData && Array.isArray(cachedData) ? cachedData
+    .filter((s: any) => s.status !== 'inactive' && s.status !== 'rejected')
+    .map((s: any) => ({
+      id: s._id || s.id || `store-${s.name}`,
+      name: s.name || 'Store',
+      slug: s.slug || (s.name || '').toLowerCase().replace(/\s+/g, '-'),
+      logo: s.logo || s.logoUrl || '',
+      category: s.category || 'Fashion',
+      reward: s.reward || 'Upto 5% rewards',
+      description: s.description || `${s.name} online deals & cashback`,
+      cardBg: s.cardBg || '#ECF4FF',
+      badgeBg: s.badgeBg || '#D3E0F2',
+      logoPanelBg: s.logoPanelBg
+    })) : []
+
+  const [storesList, setStoresList] = useState<StoreItem[]>(initialStores)
+  const [loading, setLoading] = useState<boolean>(!cachedData)
   const gridRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
   const [canvasHeight, setCanvasHeight] = useState<number>(1800)

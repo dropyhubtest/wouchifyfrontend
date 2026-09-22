@@ -38,8 +38,8 @@ export const StoresView: React.FC<StoresViewProps> = ({ filteredStores, onOpenBu
       )}
 
       <div className="stores-grid">
-        {filteredStores.map((store) => (
-          <div key={store.id} className="store-admin-card">
+        {filteredStores.map((store, index) => (
+          <div key={store.id || store._id || index} className="store-admin-card">
             <div className="store-card-top">
               <div className="store-logo-wrapper">
                 <img src={store.logo} alt={store.name} className="store-admin-logo" />
@@ -52,7 +52,19 @@ export const StoresView: React.FC<StoresViewProps> = ({ filteredStores, onOpenBu
               <p className="store-admin-desc">{store.description}</p>
             </div>
             <div className="store-card-footer">
-              <span className="store-status-active">● Active Partner</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <span className="store-status-active">● Active Partner</span>
+                {(() => {
+                  const approver = (store as any).approvedByName || (store as any).approvedBy || ((store as any).opsManagerApproval === 'Approved' ? 'Operational Manager' : ((store as any).managerApproval === 'Approved' ? 'Manager' : ((store as any).status === 'active' || !(store as any).status ? 'Verified Catalog' : null)))
+                  const approverRole = (store as any).approvedByRole || (approver?.includes('manager@') && !approver?.includes('ops') ? 'Manager' : 'Operational Manager')
+                  if (!approver) return null
+                  return (
+                    <span style={{ fontSize: '0.68rem', color: '#059669', fontWeight: 600 }}>
+                      ✓ {approverRole}: {approver.split('@')[0]}
+                    </span>
+                  )
+                })()}
+              </div>
               <a href={store.slug} className="store-view-btn" target="_blank" rel="noreferrer">
                 View Deals <IconExternal />
               </a>

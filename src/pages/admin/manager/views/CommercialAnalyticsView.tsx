@@ -89,52 +89,57 @@ export const CommercialAnalyticsView: React.FC<CommercialAnalyticsViewProps> = (
 
   return (
     <div className="view-dashboard">
-      {/* Top 4 KPI Metrics */}
-      <div className="admin-stats-grid">
-        <div className="admin-stat-card">
-          <div className="admin-stat-top">
-            <span className="stat-label">Platform Gross Activity</span>
-            <span className="stat-icon-wrap navy"><IconWallet /></span>
-          </div>
-          <strong className="stat-value">{liveStats.disbursedCashback}</strong>
-          <div className="stat-footer positive">
-            <IconTrend />
-            <span>Active Financial Ledger</span>
+      <div className="dashboard-header">
+        <h2 className="dashboard-title">Commercial Performance & Analytics</h2>
+        <p className="dashboard-subtitle">Aggregated metrics, outbound CTR, revenue, and traffic analytics.</p>
+      </div>
+
+      <div className="today-spotlight-section">
+        <div className="today-spotlight-header">
+          <div className="today-spotlight-title-group">
+            <div className="spotlight-pulse"></div>
+            <div>
+              <h3 className="today-spotlight-heading">Platform Live Overview</h3>
+              <p className="today-spotlight-sub">Real-time commercial metrics across all active stores</p>
+            </div>
           </div>
         </div>
 
-        <div className="admin-stat-card">
-          <div className="admin-stat-top">
-            <span className="stat-label">Active Published Deals</span>
-            <span className="stat-icon-wrap red"><IconDeals /></span>
+        <div className="today-metrics-grid">
+          <div className="today-metric-card highlight">
+            <div className="today-metric-info">
+              <span className="today-metric-label">Gross Activity</span>
+              <span className="today-metric-value">{liveStats.disbursedCashback}</span>
+              <span className="today-metric-trend up"><IconTrend /> Active Financial Ledger</span>
+            </div>
+            <div className="today-metric-icon total"><IconWallet /></div>
           </div>
-          <strong className="stat-value">{liveStats.activeDealsCount}</strong>
-          <div className="stat-footer positive">
-            <IconTrend />
-            <span>Live across {stores.length || 20} Partner Stores</span>
-          </div>
-        </div>
 
-        <div className="admin-stat-card">
-          <div className="admin-stat-top">
-            <span className="stat-label">Average Outbound CTR</span>
-            <span className="stat-icon-wrap blue"><IconTrend /></span>
+          <div className="today-metric-card">
+            <div className="today-metric-info">
+              <span className="today-metric-label">Active Deals</span>
+              <span className="today-metric-value">{liveStats.activeDealsCount}</span>
+              <span className="today-metric-trend up"><IconTrend /> Live across {stores.length || 20} Stores</span>
+            </div>
+            <div className="today-metric-icon deals"><IconDeals /></div>
           </div>
-          <strong className="stat-value">8.42%</strong>
-          <div className="stat-footer positive">
-            <IconTrend />
-            <span>Highest in Active Categories</span>
-          </div>
-        </div>
 
-        <div className="admin-stat-card">
-          <div className="admin-stat-top">
-            <span className="stat-label">Staff Team Members</span>
-            <span className="stat-icon-wrap green"><IconStaff /></span>
+          <div className="today-metric-card">
+            <div className="today-metric-info">
+              <span className="today-metric-label">Outbound CTR</span>
+              <span className="today-metric-value">8.42%</span>
+              <span className="today-metric-trend up"><IconTrend /> Above Industry Average</span>
+            </div>
+            <div className="today-metric-icon" style={{ background: '#eff6ff', color: '#3b82f6' }}><IconTrend /></div>
           </div>
-          <strong className="stat-value">{liveStats.staffCount}</strong>
-          <div className="stat-footer positive">
-            <span>🟢 {liveStats.onlineStaffCount} Online in Portal</span>
+
+          <div className="today-metric-card">
+            <div className="today-metric-info">
+              <span className="today-metric-label">Staff Members</span>
+              <span className="today-metric-value">{liveStats.staffCount}</span>
+              <span className="today-metric-trend" style={{ color: '#10b981' }}>🟢 {liveStats.onlineStaffCount} Online Now</span>
+            </div>
+            <div className="today-metric-icon" style={{ background: '#ecfdf5', color: '#10b981' }}><IconStaff /></div>
           </div>
         </div>
       </div>

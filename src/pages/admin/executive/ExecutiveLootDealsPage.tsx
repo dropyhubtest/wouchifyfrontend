@@ -1267,15 +1267,22 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                           </select>
                         </td>
                         <td>
-                          <button 
-                            onClick={() => handleToggleStatus(deal.id)}
-                            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex' }}
-                            title="Click to toggle status"
-                          >
-                            <span className={`status-badge ${deal.status === 'Approved' ? 'active' : deal.status === 'Pending Approval' ? 'pending' : deal.status === 'Draft' ? 'draft' : 'expired'}`}>
-                              <span className="status-dot" /> {deal.status}
-                            </span>
-                          </button>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                            <button 
+                              onClick={() => handleToggleStatus(deal.id)}
+                              style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex' }}
+                              title="Click to toggle status"
+                            >
+                              <span className={`status-badge ${deal.status === 'Approved' ? 'active' : deal.status === 'Pending Approval' ? 'pending' : deal.status === 'Draft' ? 'draft' : 'expired'}`}>
+                                <span className="status-dot" /> {deal.status}
+                              </span>
+                            </button>
+                            {deal.status === 'Approved' && (
+                              <span style={{ fontSize: '0.7rem', color: '#15803d', fontWeight: 600 }}>
+                                ✓ by {(deal as any).approvedByName || (deal as any).approvedBy || ((deal as any).opsManagerApproval === 'Approved' ? 'Ops Manager' : 'Manager')}
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td onClick={(e) => e.stopPropagation()}>
                           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>

@@ -5,6 +5,7 @@ import { FooterSection } from '../components/footer'
 import { useDesktopScale } from '../hooks/useDesktopScale'
 import { PREMIUM_CARDS, LIFETIME_FREE_CARDS, type CreditCardItem } from '../data/creditCardsData'
 import { adminApi } from '../services/adminApi'
+import { CreditCardSkeleton } from '../components/common/Skeletons'
 
 import indusindLogo from '../assets/creditcardpage/indusind_bank.png'
 import iciciLogo from '../assets/creditcardpage/ICICI_bank.png'
@@ -144,6 +145,8 @@ const CreditCardTile: React.FC<{ card: CreditCardItem }> = ({ card }) => {
   )
 }
 
+import { getCached } from '../services/dataCache'
+
 /* ── Main CreditCardsPage Component ── */
 export const CreditCardsPage: React.FC = () => {
   const scale = useDesktopScale()
@@ -151,9 +154,14 @@ export const CreditCardsPage: React.FC = () => {
   const [canvasHeight, setCanvasHeight] = useState<number>(0)
   const canvasRef = useRef<HTMLDivElement | null>(null)
 
-  const [liveCards, setLiveCards] = useState<CreditCardItem[]>(() => {
-    return [...PREMIUM_CARDS, ...LIFETIME_FREE_CARDS]
-  })
+  // Synchronously check cache
+  const cachedData = getCached<any[]>(`public:credit-cards::`)
+  const initialCards = cachedData && Array.isArray(cachedData) && cachedData.length > 0 
+    ? cachedData.map(transformApiCardToItem) 
+    : []
+
+  const [liveCards, setLiveCards] = useState<CreditCardItem[]>(initialCards)
+  const [loading, setLoading] = useState(!cachedData)
 
   const fetchLive = async () => {
     try {
@@ -161,9 +169,15 @@ export const CreditCardsPage: React.FC = () => {
       if (Array.isArray(res) && res.length > 0) {
         const mapped = res.map(transformApiCardToItem)
         setLiveCards(mapped)
+      } else {
+        // Fallback to local data if API returns empty array (e.g. initial dev state)
+        setLiveCards([...PREMIUM_CARDS, ...LIFETIME_FREE_CARDS])
       }
     } catch (err) {
       console.warn('Failed to fetch public credit cards:', err)
+      setLiveCards([...PREMIUM_CARDS, ...LIFETIME_FREE_CARDS])
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -304,7 +318,7 @@ export const CreditCardsPage: React.FC = () => {
           </section>
 
           {/* ── 1. PREMIUM SHOPPING CARDS SECTION ── */}
-          {filteredPremium.length > 0 && (
+          {(loading || filteredPremium.length > 0) && (
             <section className="credit-cards-section" aria-label="Premium Shopping Cards">
               {/* Header with Red Accent */}
               <div className="credit-cards-section-header">
@@ -314,17 +328,21 @@ export const CreditCardsPage: React.FC = () => {
 
               {/* Centered 2-Column Grid */}
               <div className="credit-cards-grid">
-                {filteredPremium.map((card) => (
-                  <div key={card.id} className="credit-cards-grid-col">
-                    <CreditCardTile card={card} />
-                  </div>
-                ))}
+                {loading ? (
+                  <CreditCardSkeleton count={4} />
+                ) : (
+                  filteredPremium.map((card) => (
+                    <div key={card.id} className="credit-cards-grid-col">
+                      <CreditCardTile card={card} />
+                    </div>
+                  ))
+                )}
               </div>
             </section>
           )}
 
           {/* ── 2. UNLIMITED LIFETIME FREE SECTION ── */}
-          {filteredLifetimeFree.length > 0 && (
+          {(loading || filteredLifetimeFree.length > 0) && (
             <section className="credit-cards-section" aria-label="Unlimited Lifetime Free">
               {/* Header with Navy Accent */}
               <div className="credit-cards-section-header">
@@ -334,11 +352,15 @@ export const CreditCardsPage: React.FC = () => {
 
               {/* Centered 2-Column Grid */}
               <div className="credit-cards-grid">
-                {filteredLifetimeFree.map((card) => (
-                  <div key={card.id} className="credit-cards-grid-col">
-                    <CreditCardTile card={card} />
-                  </div>
-                ))}
+                {loading ? (
+                  <CreditCardSkeleton count={4} />
+                ) : (
+                  filteredLifetimeFree.map((card) => (
+                    <div key={card.id} className="credit-cards-grid-col">
+                      <CreditCardTile card={card} />
+                    </div>
+                  ))
+                )}
               </div>
             </section>
           )}

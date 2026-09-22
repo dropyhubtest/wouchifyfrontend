@@ -77,6 +77,43 @@ export const CouponsView: React.FC<CouponsViewProps> = ({
                 <div>Category: <span>{coupon.category}</span></div>
                 <div>Usage: <strong>{coupon.usageCount || 0} / {coupon.usageLimit || 5000}</strong></div>
                 <div>Valid Till: <span>{coupon.expiry || (coupon as any).expiresAt || 'No Expiry'}</span></div>
+                {(() => {
+                  const approver = (coupon as any).approvedByName || (coupon as any).approvedBy || ((coupon as any).opsManagerApproval === 'Approved' ? 'Operational Manager' : ((coupon as any).managerApproval === 'Approved' ? 'Manager' : (coupon.status === 'active' ? 'Verified Catalog' : null)))
+                  const approverRole = (coupon as any).approvedByRole || (approver?.includes('manager@') && !approver?.includes('ops') ? 'Manager' : 'Operational Manager')
+                  return (
+                    <div style={{ marginTop: '8px', paddingTop: '6px', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}>Workflow:</span>
+                      {approver ? (
+                        <span style={{
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          background: '#ecfdf5',
+                          color: '#059669',
+                          border: '1px solid #a7f3d0',
+                          padding: '1px 6px',
+                          borderRadius: '4px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '3px'
+                        }}>
+                          ✓ {approverRole}: {approver.split('@')[0]}
+                        </span>
+                      ) : (
+                        <span style={{
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          background: '#fef3c7',
+                          color: '#b45309',
+                          border: '1px solid #fde68a',
+                          padding: '1px 6px',
+                          borderRadius: '4px'
+                        }}>
+                          ⏳ Pending Review
+                        </span>
+                      )}
+                    </div>
+                  )
+                })()}
               </div>
             </div>
           )

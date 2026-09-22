@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { cacheWrap } from './dataCache';
 
 // Create a centralized Axios instance
 export const api = axios.create({
@@ -19,13 +20,15 @@ api.interceptors.request.use((config) => {
 });
 
 export const getPublicStores = async () => {
-  try {
-    const res = await api.get('/stores?status=active&public=true');
-    return res.data;
-  } catch (err) {
-    console.error('Failed to fetch public stores', err);
-    return [];
-  }
+  return cacheWrap('public:stores', async () => {
+    try {
+      const res = await api.get('/stores?status=active&public=true');
+      return res.data;
+    } catch (err) {
+      console.error('Failed to fetch public stores', err);
+      return [];
+    }
+  });
 };
 
 import { adminApi } from './adminApi';

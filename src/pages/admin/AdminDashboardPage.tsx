@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react'
-import wouchifyLogo from '../../assets/navbar/wouchify-logo.png'
 import { FAVOURITE_STORES, type StoreItem } from '../../data/storesHero'
 import { adminApi } from '../../services/adminApi'
 import './AdminDashboardPage.css'
+import { ManagerLayout } from './manager/ManagerLayout'
 import { AdminApprovalsView } from './AdminApprovalsView'
 import { AdminConfirmDialog } from '../../components/common/AdminDialog'
 
@@ -25,25 +25,12 @@ import {
 
 // Icons
 import {
-  IconDashboard,
-  IconDeals,
-  IconCoupons,
-  IconStores,
-  IconUsers,
-  IconWallet,
-  IconLogout,
-  IconBell,
-  IconSearch,
   IconPlus,
   IconDownload,
   IconExternal,
   IconCheck,
-  IconClose,
-  IconCategories,
-  IconFlame,
-  IconStaff,
-  IconAlgorithm,
-  IconShield
+  IconSearch,
+  IconClose
 } from './manager/icons'
 
 // Views
@@ -67,10 +54,38 @@ import { EditStaffModal } from './manager/modals/EditStaffModal'
 import { BulkDataImportModal, type BulkImportModule } from './manager/modals/BulkDataImportModal'
 
 export const AdminDashboardPage: React.FC = () => {
-  const [activeNav, setActiveNav] = useState('dashboard')
-  const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const getActiveNavFromPath = () => {
+    const path = window.location.pathname
+    if (path.includes('/manager/approvals')) return 'approvals'
+    if (path.includes('/manager/staff')) return 'staff'
+    if (path.includes('/manager/algorithms')) return 'algorithms'
+    if (path.includes('/manager/governance')) return 'governance'
+    if (path.includes('/manager/deals')) return 'deals'
+    if (path.includes('/manager/loot-deals')) return 'loot-deals'
+    if (path.includes('/manager/coupons')) return 'coupons'
+    if (path.includes('/manager/categories')) return 'categories'
+    if (path.includes('/manager/stores')) return 'stores'
+    if (path.includes('/manager/users')) return 'users'
+    if (path.includes('/manager/wallet')) return 'wallet'
+    return 'dashboard'
+  }
+  const [activeNav, setActiveNav] = useState(getActiveNavFromPath())
   const [searchQuery, setSearchQuery] = useState('')
+  
+  // Sync state when URL changes (via history API or back button)
+  useEffect(() => {
+    const handleLocationChange = () => setActiveNav(getActiveNavFromPath())
+    window.addEventListener('popstate', handleLocationChange)
+    const originalPushState = window.history.pushState
+    window.history.pushState = function(...args) {
+      originalPushState.apply(window.history, args)
+      handleLocationChange()
+    }
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange)
+      window.history.pushState = originalPushState
+    }
+  }, [])
 
   // Core Datasets
   const [deals, setDeals] = useState<DealItem[]>([])
@@ -121,7 +136,7 @@ export const AdminDashboardPage: React.FC = () => {
     let isMounted = true
     const fetchLiveData = async () => {
       try {
-        const [dealsRes, couponsRes, lootRes, txnsRes, storesRes, catsRes, usersRes, staffRes, pendingStoresRes, pendingCouponsRes] = await Promise.allSettled([
+        const [dealsRes, couponsRes, lootRes, txnsRes, storesRes, catsRes, usersRes, staffRes, submissionsRes] = await Promise.allSettled([
           adminApi.getDeals(),
           adminApi.getCoupons(),
           adminApi.getLootDeals(),
@@ -130,8 +145,7 @@ export const AdminDashboardPage: React.FC = () => {
           adminApi.getCategories(),
           adminApi.getUsers(),
           adminApi.getStaffMembers(),
-          adminApi.getManagerPendingStores(),
-          adminApi.getManagerPendingCoupons()
+          adminApi.getSubmissions({ status: 'Pending Approval' })
         ])
         if (!isMounted) return
 
@@ -160,14 +174,11 @@ export const AdminDashboardPage: React.FC = () => {
           setStaffMembers(staffRes.value)
         }
         
-        let managerCount = 0
-        if (pendingStoresRes.status === 'fulfilled' && Array.isArray(pendingStoresRes.value)) {
-          managerCount += pendingStoresRes.value.length
+        if (submissionsRes && submissionsRes.status === 'fulfilled' && Array.isArray(submissionsRes.value)) {
+          setPendingApprovalsCount(submissionsRes.value.length)
+        } else {
+          setPendingApprovalsCount(0)
         }
-        if (pendingCouponsRes.status === 'fulfilled' && Array.isArray(pendingCouponsRes.value)) {
-          managerCount += pendingCouponsRes.value.length
-        }
-        setPendingApprovalsCount(managerCount)
 
         setIsBackendConnected(true)
       } catch (err) {
@@ -201,7 +212,6 @@ export const AdminDashboardPage: React.FC = () => {
   const [isAddCouponModalOpen, setIsAddCouponModalOpen] = useState(false)
   const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false)
   const [editingStaff, setEditingStaff] = useState<StaffItem | null>(null)
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
 
   // Form states
   const [newStaff, setNewStaff] = useState({
@@ -252,15 +262,6 @@ export const AdminDashboardPage: React.FC = () => {
     category: 'Electronics',
     usageLimit: 1000,
     expiry: 'Oct 31, 2026'
-  })
-
-  const [adminUser] = useState(() => {
-    try {
-      const stored = localStorage.getItem('adminUser')
-      return stored ? JSON.parse(stored) : { email: 'manager@wouchify.com', role: 'manager' }
-    } catch {
-      return { email: 'manager@wouchify.com', role: 'manager' }
-    }
   })
 
   // Persist staff members
@@ -659,12 +660,7 @@ export const AdminDashboardPage: React.FC = () => {
     showToast('Transaction report exported as CSV.')
   }
 
-  const handleLogout = () => {
-    localStorage.removeItem('adminToken')
-    localStorage.removeItem('adminUser')
-    window.history.pushState({}, '', '/manager/login')
-    window.dispatchEvent(new PopStateEvent('popstate'))
-  }
+
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
@@ -689,9 +685,9 @@ export const AdminDashboardPage: React.FC = () => {
     return deals.filter((d) => {
       const matchesSearch =
         searchQuery.trim() === '' ||
-        d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        d.store.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesCategory = dealCategoryFilter === 'All' || d.category.toLowerCase() === dealCategoryFilter.toLowerCase()
+        (d.name || d.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (d.store || '').toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesCategory = dealCategoryFilter === 'All' || (d.category || '').toLowerCase() === dealCategoryFilter.toLowerCase()
       const matchesStatus = dealStatusFilter === 'All' || d.status.toLowerCase() === dealStatusFilter.toLowerCase()
       return matchesSearch && matchesCategory && matchesStatus
     })
@@ -701,8 +697,8 @@ export const AdminDashboardPage: React.FC = () => {
     return coupons.filter((c) => {
       return (
         searchQuery.trim() === '' ||
-        c.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.store.toLowerCase().includes(searchQuery.toLowerCase())
+        (c.code || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (c.store || '').toLowerCase().includes(searchQuery.toLowerCase())
       )
     })
   }, [coupons, searchQuery])
@@ -773,252 +769,27 @@ export const AdminDashboardPage: React.FC = () => {
     })
   }, [staffMembers, searchQuery, staffRoleFilter, staffStatusFilter])
 
-  // Navigation Items
-  const navItems = [
-    { key: 'dashboard', label: 'Commercial Analytics', icon: <IconDashboard />, badge: null },
-    { key: 'approvals', label: 'Manager Approvals', icon: <IconCheck />, badge: pendingApprovalsCount },
-    { key: 'staff', label: 'Staff & Team (RBAC)', icon: <IconStaff />, badge: staffMembers.length },
-    { key: 'algorithms', label: 'Layout & Algorithm Config', icon: <IconAlgorithm />, badge: null },
-    { key: 'governance', label: 'Data Governance & Audit', icon: <IconShield />, badge: auditLogs.length },
-    { key: 'deals', label: 'Deals Management', icon: <IconDeals />, badge: deals.length },
-    { key: 'loot-deals', label: 'Loot Deals Studio', icon: <IconFlame />, badge: lootDeals.length },
-    { key: 'coupons', label: 'Verified Coupons', icon: <IconCoupons />, badge: coupons.length },
-    { key: 'categories', label: 'Categories Studio', icon: <IconCategories />, badge: categories.length },
-    { key: 'stores', label: 'Partner Stores', icon: <IconStores />, badge: stores.length },
-    { key: 'users', label: 'Users Directory', icon: <IconUsers />, badge: users.length },
-    { key: 'wallet', label: 'Wallet & Payouts', icon: <IconWallet />, badge: null }
-  ]
+
 
   return (
-    <div className="admin-layout">
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="admin-toast" role="status">
-          <IconCheck />
-          <span>{toastMessage}</span>
-        </div>
-      )}
-
-      {/* Mobile Drawer Backdrop */}
-      {mobileMenuOpen && (
-        <div
-          className="admin-mobile-backdrop"
-          onClick={() => setMobileMenuOpen(false)}
-          aria-hidden="true"
-        />
-      )}
-
-      {/* ── Sidebar (275px wide, Deep Navy Wouchify Gradient) ── */}
-      <aside className={`admin-sidebar ${sidebarOpen ? 'open' : 'collapsed'} ${mobileMenuOpen ? 'mobile-visible' : ''}`}>
-        <div className="sidebar-header">
-          <div className="sidebar-brand-wrapper">
-            <a href="/" target="_blank" rel="noopener noreferrer" className="sidebar-logo-card" title="View Live Storefront">
-              <img src={wouchifyLogo} alt="Wouchify" className="sidebar-brand-logo" />
-            </a>
-            {sidebarOpen && (
-              <span className="sidebar-studio-badge">
-                Manager Studio
-              </span>
-            )}
+    <ManagerLayout
+      activeMenu={activeNav}
+      onMenuChange={setActiveNav}
+      pendingApprovalsCount={pendingApprovalsCount}
+    >
+      <div className="admin-content">
+        {/* Toast Notification */}
+        {toastMessage && (
+          <div className="admin-toast" role="status">
+            <IconCheck />
+            <span>{toastMessage}</span>
           </div>
-          <button
-            className="sidebar-mobile-close-btn"
-            onClick={() => setMobileMenuOpen(false)}
-            aria-label="Close navigation menu"
-          >
-            <span style={{ fontSize: '18px', lineHeight: 1 }}>✕</span>
-          </button>
-          <button
-            className="sidebar-toggle-btn"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-            title={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-          >
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              style={{
-                transform: sidebarOpen ? 'none' : 'rotate(180deg)',
-                transition: 'transform 0.2s ease'
-              }}
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </button>
-        </div>
+        )}
 
-        <nav className="sidebar-nav">
-          <div className="nav-section-label">{sidebarOpen && 'Administration & Platform'}</div>
-          {navItems.map((item) => (
-            <button
-              key={item.key}
-              className={`nav-item ${activeNav === item.key ? 'active' : ''}`}
-              onClick={() => {
-                setActiveNav(item.key)
-                setMobileMenuOpen(false)
-              }}
-              title={item.label}
-            >
-              <span className="nav-icon">{item.icon}</span>
-              {sidebarOpen && <span className="nav-label">{item.label}</span>}
-              {sidebarOpen && item.badge !== null && (
-                <span className="nav-count-badge">{item.badge}</span>
-              )}
-            </button>
-          ))}
-        </nav>
-
-        {/* Sidebar Footer with Live Store & Logout */}
-        <div className="sidebar-footer">
-          <a
-            href="/"
-            className="nav-item live-store-btn"
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Open Live Wouchify Storefront"
-          >
-            <span className="nav-icon"><IconExternal /></span>
-            {sidebarOpen && <span className="nav-label">Live Storefront</span>}
-          </a>
-
-          <button className="nav-item logout-btn" onClick={handleLogout} title="Sign out of Manager Console">
-            <span className="nav-icon"><IconLogout /></span>
-            {sidebarOpen && <span className="nav-label">Sign Out</span>}
-          </button>
-        </div>
-      </aside>
-
-      {/* ── Main Workspace ── */}
-      <div className="admin-main">
-        {/* Top Header Bar */}
-        <header className="admin-topbar">
-          <div className="topbar-left">
-            <button
-              className="mobile-hamburger-btn"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle navigation menu"
-            >
-              <span />
-              <span />
-              <span />
-            </button>
-
-            {/* Global Search Pill */}
-            <div className="topbar-search">
-              <IconSearch />
-              <input
-                type="text"
-                placeholder={
-                  activeNav === 'stores'
-                    ? 'Search partner stores by name or category...'
-                    : activeNav === 'deals'
-                    ? 'Search deals by title or store...'
-                    : activeNav === 'loot-deals'
-                    ? 'Search flash loot and exclusive deals...'
-                    : activeNav === 'categories'
-                    ? 'Search categories or subcategories...'
-                    : activeNav === 'coupons'
-                    ? 'Search coupon codes...'
-                    : activeNav === 'staff'
-                    ? 'Search staff members by name, email, or domain...'
-                    : activeNav === 'users'
-                    ? 'Search user accounts...'
-                    : 'Search across Wouchify platform...'
-                }
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              {searchQuery && (
-                <button
-                  className="search-clear-btn"
-                  onClick={() => setSearchQuery('')}
-                  aria-label="Clear search"
-                >
-                  <IconClose />
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div className="topbar-right">
-            {/* Notifications Bell */}
-            <div className="notifications-wrapper">
-              <button
-                className="topbar-btn notif-btn"
-                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                aria-label="Notifications"
-              >
-                <IconBell />
-                <span className="notif-badge">3</span>
-              </button>
-
-              {isNotificationsOpen && (
-                <div className="notifications-dropdown">
-                  <div className="notifications-header">
-                    <h4>Platform Alerts</h4>
-                    <button
-                      className="mark-read-btn"
-                      onClick={() => {
-                        setIsNotificationsOpen(false)
-                        showToast('All notifications marked as read.')
-                      }}
-                    >
-                      Clear All
-                    </button>
-                  </div>
-                  <div className="notifications-list">
-                    <div className="notif-item unread">
-                      <span className="notif-dot red" />
-                      <div className="notif-content">
-                        <strong>New Deal Submission</strong>
-                        <p>Swiggy added "Gourmet Feast Flat 50% Off"</p>
-                        <small>10 mins ago</small>
-                      </div>
-                    </div>
-                    <div className="notif-item unread">
-                      <span className="notif-dot navy" />
-                      <div className="notif-content">
-                        <strong>Cashback Payout Pending</strong>
-                        <p>Priya Patel requested ₹500 wallet withdrawal</p>
-                        <small>25 mins ago</small>
-                      </div>
-                    </div>
-                    <div className="notif-item">
-                      <span className="notif-dot green" />
-                      <div className="notif-content">
-                        <strong>Store Synced</strong>
-                        <p>20 verified stores active with zero latency</p>
-                        <small>1 hour ago</small>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* User Profile */}
-            <div className="topbar-user" onClick={handleLogout} title="Click to logout">
-              <div className="user-avatar">
-                {(adminUser.email || 'M')[0].toUpperCase()}
-              </div>
-              <div className="user-info">
-                <span className="user-name">Manager</span>
-                <span className="user-email">{adminUser.email || 'manager@wouchify.com'}</span>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* Dynamic Content View */}
-        <main className="admin-content">
-          {/* Section Breadcrumbs / Header */}
-          <div className="content-header">
-            <div className="content-heading-group">
-              <div>
+        {/* Section Breadcrumbs / Header */}
+        <div className="content-header">
+              <div className="content-heading-group">
+                <div>
                 <h1>
                   {activeNav === 'dashboard' && 'Commercial Performance & Analytics'}
                   {activeNav === 'approvals' && 'Manager Approvals Queue'}
@@ -1052,6 +823,28 @@ export const AdminDashboardPage: React.FC = () => {
 
             {/* Contextual Header Actions */}
             <div className="content-actions">
+              {activeNav !== 'dashboard' && activeNav !== 'algorithms' && activeNav !== 'governance' && (
+                <div className="topbar-search" style={{ margin: 0 }}>
+                  <IconSearch />
+                  <input
+                    type="text"
+                    placeholder={`Search ${activeNav}...`}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{ width: '220px', padding: '8px 14px 8px 36px', height: '38px' }}
+                  />
+                  {searchQuery && (
+                    <button
+                      className="search-clear-btn"
+                      onClick={() => setSearchQuery('')}
+                      aria-label="Clear search"
+                    >
+                      <IconClose />
+                    </button>
+                  )}
+                </div>
+              )}
+
               <button className="btn-secondary" onClick={exportCSVReport}>
                 <IconDownload />
                 <span>Export Report</span>
@@ -1190,8 +983,6 @@ export const AdminDashboardPage: React.FC = () => {
               onApproveTransaction={handleApproveTransaction}
             />
           )}
-        </main>
-      </div>
 
       {/* ── Subcomponent Modals ── */}
       <AddDealModal
@@ -1247,7 +1038,8 @@ export const AdminDashboardPage: React.FC = () => {
           onCancel={() => setDeleteConfirm(null)}
         />
       )}
-    </div>
+      </div>
+    </ManagerLayout>
   )
 }
 

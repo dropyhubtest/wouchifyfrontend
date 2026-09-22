@@ -63,17 +63,22 @@ function buildEntityQuery(entityId, dataSnapshot = null) {
   return { $or: conditions };
 }
 
-async function updateMongoEntityOnApproval(entityType, entityId, action, dataSnapshot) {
+async function updateMongoEntityOnApproval(entityType, entityId, action, dataSnapshot, reviewer = 'manager@wouchify.com', reviewerName = 'Manager', reviewerRole = 'Manager') {
   if (!entityId && !dataSnapshot) return;
   const Model = getEntityModel(entityType);
   if (!Model) return;
 
+  const nowIso = new Date();
   const updatePatch = { 
     ...(dataSnapshot || {}),
     submissionStatus: 'approved', 
     status: 'active',
     opsManagerApproval: 'Approved',
-    managerApproval: 'Approved'
+    managerApproval: 'Approved',
+    approvedBy: reviewer,
+    approvedByName: reviewerName,
+    approvedByRole: reviewerRole,
+    approvedAt: nowIso
   };
   delete updatePatch._id;
   delete updatePatch.id;
@@ -94,7 +99,11 @@ async function updateMongoEntityOnApproval(entityType, entityId, action, dataSna
           submissionStatus: 'approved',
           status: 'active',
           opsManagerApproval: 'Approved',
-          managerApproval: 'Approved'
+          managerApproval: 'Approved',
+          approvedBy: reviewer,
+          approvedByName: reviewerName,
+          approvedByRole: reviewerRole,
+          approvedAt: nowIso
         });
         await toCreate.save();
       }
@@ -213,30 +222,36 @@ router.post('/bulk-approve', async (req, res, next) => {
     if (!Array.isArray(ids) || ids.length === 0) {
       return res.status(400).json({ message: 'ids array is required' });
     }
-    const reviewer = req.user?.email || req.body.reviewedBy || 'ops.manager@wouchify.com';
+    const reviewer = req.user?.email || req.body.reviewedBy || req.body.approvedBy || 'ops.manager@wouchify.com';
+    const reviewerName = req.user?.name || req.body.reviewedByName || req.body.approvedByName || (reviewer.includes('manager@') && !reviewer.includes('ops') ? 'Manager' : 'Operational Manager');
+    const reviewerRole = req.user?.role || req.body.reviewedByRole || req.body.approvedByRole || (reviewer.includes('manager@') && !reviewer.includes('ops') ? 'Manager' : 'Operational Manager');
 
-    const results = ids.map(id => store.approveSubmission(id, reviewer)).filter(Boolean);
-    res.json({ success: true, count: results.length, items: results });
-
-    safeBackground(async () => {
+    const approvedList = [];
+    for (const id of ids) {
+      const approved = store.approveSubmission(id, reviewer, reviewerName, reviewerRole);
+      if (approved) approvedList.push(approved);
       if (mongoose.connection.readyState === 1) {
-        for (const subId of ids) {
-          try {
-            const subQuery = buildEntityQuery(subId);
-            const sub = await Submission.findOne(subQuery);
-            if (sub) {
-              sub.status = 'Approved';
-              sub.reviewedBy = reviewer;
-              sub.reviewedAt = new Date();
-              await sub.save();
-              if (sub.entityType) {
-                await updateMongoEntityOnApproval(sub.entityType, sub.entityId, sub.action, sub.dataSnapshot);
-              }
+        try {
+          const sub = await Submission.findOne(buildEntityQuery(id));
+          if (sub) {
+            sub.status = 'Approved';
+            sub.reviewedBy = reviewer;
+            sub.reviewedByName = reviewerName;
+            sub.reviewedByRole = reviewerRole;
+            sub.approvedBy = reviewer;
+            sub.approvedByName = reviewerName;
+            sub.approvedByRole = reviewerRole;
+            sub.reviewedAt = new Date();
+            sub.approvedAt = new Date();
+            await sub.save();
+            if (sub.entityType && sub.entityId) {
+              await updateMongoEntityOnApproval(sub.entityType, sub.entityId, sub.action, sub.dataSnapshot, reviewer, reviewerName, reviewerRole);
             }
-          } catch (e) {}
-        }
+          }
+        } catch {}
       }
-    }, 'Bulk Mongo Approve');
+    }
+    res.json({ success: true, count: approvedList.length, items: approvedList });
   } catch (err) { next(err); }
 });
 
@@ -279,11 +294,13 @@ router.post('/bulk-reject', async (req, res, next) => {
 // PATCH /api/submissions/:id/approve - Approve submission & activate entity
 router.patch('/:id/approve', async (req, res, next) => {
   try {
-    const reviewer = req.user?.email || req.body.reviewedBy || 'ops.manager@wouchify.com';
+    const reviewer = req.user?.email || req.body.reviewedBy || req.body.approvedBy || 'manager@wouchify.com';
+    const reviewerName = req.user?.name || req.body.reviewedByName || req.body.approvedByName || (reviewer.includes('manager@') && !reviewer.includes('ops') ? 'Manager' : 'Operational Manager');
+    const reviewerRole = req.user?.role || req.body.reviewedByRole || req.body.approvedByRole || (reviewer.includes('manager@') && !reviewer.includes('ops') ? 'Manager' : 'Operational Manager');
     const subId = req.params.id;
 
-    // 1. Sync in-memory store immediately (<1ms)
-    const memApproved = store.approveSubmission(subId, reviewer);
+    // 1. Sync memory store immediately
+    const memApproved = store.approveSubmission(subId, reviewer, reviewerName, reviewerRole);
 
     // 2. Respond immediately to user for instant UI responsiveness
     if (memApproved) {
@@ -294,9 +311,15 @@ router.patch('/:id/approve', async (req, res, next) => {
       if (!sub) return res.status(404).json({ message: 'Submission not found' });
       sub.status = 'Approved';
       sub.reviewedBy = reviewer;
+      sub.reviewedByName = reviewerName;
+      sub.reviewedByRole = reviewerRole;
+      sub.approvedBy = reviewer;
+      sub.approvedByName = reviewerName;
+      sub.approvedByRole = reviewerRole;
       sub.reviewedAt = new Date();
+      sub.approvedAt = new Date();
       await sub.save();
-      await updateMongoEntityOnApproval(sub.entityType, sub.entityId, sub.action, sub.dataSnapshot);
+      await updateMongoEntityOnApproval(sub.entityType, sub.entityId, sub.action, sub.dataSnapshot, reviewer, reviewerName, reviewerRole);
       return res.json(sub);
     }
 
@@ -313,7 +336,13 @@ router.patch('/:id/approve', async (req, res, next) => {
         if (sub) {
           sub.status = 'Approved';
           sub.reviewedBy = reviewer;
+          sub.reviewedByName = reviewerName;
+          sub.reviewedByRole = reviewerRole;
+          sub.approvedBy = reviewer;
+          sub.approvedByName = reviewerName;
+          sub.approvedByRole = reviewerRole;
           sub.reviewedAt = new Date();
+          sub.approvedAt = new Date();
           await sub.save();
           targetEntityType = sub.entityType || targetEntityType;
           targetEntityId = sub.entityId || targetEntityId;
@@ -322,7 +351,7 @@ router.patch('/:id/approve', async (req, res, next) => {
         }
 
         if (targetEntityType) {
-          await updateMongoEntityOnApproval(targetEntityType, targetEntityId, targetAction, targetDataSnapshot);
+          await updateMongoEntityOnApproval(targetEntityType, targetEntityId, targetAction, targetDataSnapshot, reviewer, reviewerName, reviewerRole);
         }
       }
     }, 'Mongo Submission Approve');
@@ -334,10 +363,12 @@ router.patch('/:id/reject', async (req, res, next) => {
   try {
     const { rejectionReason } = req.body;
     const reviewer = req.user?.email || req.body.reviewedBy || 'ops.manager@wouchify.com';
+    const reviewerName = req.user?.name || req.body.reviewedByName || (reviewer.includes('manager@') && !reviewer.includes('ops') ? 'Manager' : 'Operational Manager');
+    const reviewerRole = req.user?.role || req.body.reviewedByRole || (reviewer.includes('manager@') && !reviewer.includes('ops') ? 'Manager' : 'Operational Manager');
     const subId = req.params.id;
 
-    // 1. Sync in-memory store immediately
-    const memRejected = store.rejectSubmission(subId, rejectionReason, reviewer);
+    // 1. Sync memory store immediately
+    const memRejected = store.rejectSubmission(subId, rejectionReason, reviewer, reviewerName, reviewerRole);
 
     // 2. Respond immediately to user
     if (memRejected) {
@@ -366,8 +397,10 @@ router.patch('/:id/reject', async (req, res, next) => {
 
         if (sub) {
           sub.status = 'Rejected';
-          sub.rejectionReason = rejectionReason || 'Submission rejected by operational manager.';
+          sub.rejectionReason = rejectionReason || 'Submission rejected.';
           sub.reviewedBy = reviewer;
+          sub.reviewedByName = reviewerName;
+          sub.reviewedByRole = reviewerRole;
           sub.reviewedAt = new Date();
           await sub.save();
           targetEntityType = sub.entityType || targetEntityType;

@@ -1,90 +1,95 @@
 import { useState, useEffect } from 'react'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { useMediaQuery } from './hooks/useMediaQuery'
-import { DesktopHomePage } from './components/desktop/DesktopHomePage'
-import {
-  MobileHomePage,
-  MobileStoresPage,
-  MobileDealsPage,
-  MobileLootDealsPage,
-  MobileCouponsPage,
-  MobileSignUpPage,
-  MobileLoginPage,
-  MobileTermsPage,
-  MobileCategoriesPage,
-  MobileSubCategoriesPage,
-  MobileStoresDirectoryPage,
-  MobileBrandsDirectoryPage,
-  MobileFestivalsDirectoryPage,
-  MobileTravellingDirectoryPage,
-  MobileBanksDirectoryPage,
-  MobileCitiesDealsDirectoryPage,
-  MobileBrandPage,
-  MobileCreditCardsPage,
-  MobileContactUsPage,
-  MobileWishlistPage,
-  MobileWalletPage,
-  MobileReferPage,
-  MobileProductPage,
-  MobileNotificationsPage,
-} from './components/mobile'
-import { StoresPage } from './pages/StoresPage'
-import { CategoriesPage } from './pages/CategoriesPage'
-import { CategoryDetailPage } from './pages/CategoryDetailPage'
-import { SubCategoriesPage } from './pages/SubCategoriesPage'
-import { StoresDirectoryPage } from './pages/StoresDirectoryPage'
-import { BrandsDirectoryPage } from './pages/BrandsDirectoryPage'
-import { BanksDirectoryPage } from './pages/BanksDirectoryPage'
-import { FestivalsDirectoryPage } from './pages/FestivalsDirectoryPage'
-import { TravellingDirectoryPage } from './pages/TravellingDirectoryPage'
-import { CitiesDealsDirectoryPage } from './pages/CitiesDealsDirectoryPage'
-import { DealsPage } from './pages/DealsPage'
-import { LootDealsPage } from './pages/LootDealsPage'
-import { CouponsPage } from './pages/CouponsPage'
-import { SignUpPage } from './pages/SignUpPage'
-import { LoginPage } from './pages/LoginPage'
-import { TermsPage } from './pages/TermsPage'
-import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage'
-import { MobilePrivacyPolicyPage } from './pages/MobilePrivacyPolicyPage'
-import { CookiePolicyPage } from './pages/CookiePolicyPage'
-import { AdvertisePage } from './pages/AdvertisePage'
-import { MobileAdvertisePage } from './pages/MobileAdvertisePage'
-import { AboutUsPage } from './pages/AboutUsPage'
-import { FAQPage } from './pages/FAQPage'
-import { MobileFAQPage } from './pages/MobileFAQPage'
-import { HelpPage } from './pages/HelpPage'
-import { ContactUsPage } from './pages/ContactUsPage'
-import { NotFoundPage } from './pages/NotFoundPage'
-import { WalletPage } from './pages/WalletPage'
-import { ProfilePage } from './pages/ProfilePage'
-import { OrdersPage } from './pages/OrdersPage'
-import { FavoritesPage } from './pages/FavoritesPage'
-import { NotificationsPage } from './pages/NotificationsPage'
-import { ReferPage } from './pages/ReferPage'
-import { AdminLoginPage } from './pages/admin/AdminLoginPage'
-import { AdminDashboardPage } from './pages/admin/AdminDashboardPage'
-import { BrandPage } from './pages/BrandPage'
-import { CreditCardsPage } from './pages/CreditCardsPage'
-import { ProductDisplayPage } from './pages/ProductDisplayPage'
-import { StaffLoginPage } from './pages/admin/StaffLoginPage'
-import { ExecutiveDashboardPage } from './pages/admin/executive/ExecutiveDashboardPage'
-import { ExecutiveBulkUploadPage } from './pages/admin/executive/ExecutiveBulkUploadPage'
-import { ExecutiveDealsPage } from './pages/admin/executive/ExecutiveDealsPage'
-import { ExecutiveLootDealsPage } from './pages/admin/executive/ExecutiveLootDealsPage'
-import { ExecutiveStoresPage } from './pages/admin/executive/ExecutiveStoresPage'
-import { ExecutiveCouponsPage } from './pages/admin/executive/ExecutiveCouponsPage'
-import { ExecutiveCreditCardsPage } from './pages/admin/executive/ExecutiveCreditCardsPage'
-import { ExecutiveCategoriesPage } from './pages/admin/executive/ExecutiveCategoriesPage'
-import { ExecutiveAdvertisementsPage } from './pages/admin/executive/ExecutiveAdvertisementsPage'
-import { ExecutiveVerificationPage } from './pages/admin/executive/ExecutiveVerificationPage'
-import { ExecutiveTicketsPage } from './pages/admin/executive/ExecutiveTicketsPage'
-import { OperationsDashboardPage } from './pages/admin/operations/OperationsDashboardPage'
-import { OperationsApprovalsPage } from './pages/admin/operations/OperationsApprovalsPage'
-import { OperationsCashbacksPage } from './pages/admin/operations/OperationsCashbacksPage'
-import { OperationsSupportPage } from './pages/admin/operations/OperationsSupportPage'
-import { OperationsStaffActivityPage } from './pages/admin/operations/OperationsStaffActivityPage'
-import { OperationsMerchantsPage } from './pages/admin/operations/OperationsMerchantsPage'
-import { OperationsApprovedDataPage } from './pages/admin/operations/OperationsApprovedDataPage'
+import React, { Suspense } from 'react'
+
+const DesktopHomePage = React.lazy(() => import('./components/desktop/DesktopHomePage').then(module => ({ default: module.DesktopHomePage })))
+const MobileHomePage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileHomePage })))
+const MobileStoresPage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileStoresPage })))
+const MobileDealsPage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileDealsPage })))
+const MobileLootDealsPage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileLootDealsPage })))
+const MobileCouponsPage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileCouponsPage })))
+const MobileSignUpPage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileSignUpPage })))
+const MobileLoginPage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileLoginPage })))
+const MobileTermsPage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileTermsPage })))
+const MobileCategoriesPage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileCategoriesPage })))
+const MobileSubCategoriesPage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileSubCategoriesPage })))
+const MobileStoresDirectoryPage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileStoresDirectoryPage })))
+const MobileBrandsDirectoryPage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileBrandsDirectoryPage })))
+const MobileFestivalsDirectoryPage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileFestivalsDirectoryPage })))
+const MobileTravellingDirectoryPage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileTravellingDirectoryPage })))
+const MobileBanksDirectoryPage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileBanksDirectoryPage })))
+const MobileCitiesDealsDirectoryPage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileCitiesDealsDirectoryPage })))
+const MobileBrandPage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileBrandPage })))
+const MobileCreditCardsPage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileCreditCardsPage })))
+const MobileContactUsPage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileContactUsPage })))
+const MobileWishlistPage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileWishlistPage })))
+const MobileWalletPage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileWalletPage })))
+const MobileReferPage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileReferPage })))
+const MobileProductPage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileProductPage })))
+const MobileNotificationsPage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileNotificationsPage })))
+
+const StoresPage = React.lazy(() => import('./pages/StoresPage').then(module => ({ default: module.StoresPage })))
+const CategoriesPage = React.lazy(() => import('./pages/CategoriesPage').then(module => ({ default: module.CategoriesPage })))
+const CategoryDetailPage = React.lazy(() => import('./pages/CategoryDetailPage').then(module => ({ default: module.CategoryDetailPage })))
+const SubCategoriesPage = React.lazy(() => import('./pages/SubCategoriesPage').then(module => ({ default: module.SubCategoriesPage })))
+const StoresDirectoryPage = React.lazy(() => import('./pages/StoresDirectoryPage').then(module => ({ default: module.StoresDirectoryPage })))
+const BrandsDirectoryPage = React.lazy(() => import('./pages/BrandsDirectoryPage').then(module => ({ default: module.BrandsDirectoryPage })))
+const BanksDirectoryPage = React.lazy(() => import('./pages/BanksDirectoryPage').then(module => ({ default: module.BanksDirectoryPage })))
+const FestivalsDirectoryPage = React.lazy(() => import('./pages/FestivalsDirectoryPage').then(module => ({ default: module.FestivalsDirectoryPage })))
+const TravellingDirectoryPage = React.lazy(() => import('./pages/TravellingDirectoryPage').then(module => ({ default: module.TravellingDirectoryPage })))
+const CitiesDealsDirectoryPage = React.lazy(() => import('./pages/CitiesDealsDirectoryPage').then(module => ({ default: module.CitiesDealsDirectoryPage })))
+const DealsPage = React.lazy(() => import('./pages/DealsPage').then(module => ({ default: module.DealsPage })))
+const LootDealsPage = React.lazy(() => import('./pages/LootDealsPage').then(module => ({ default: module.LootDealsPage })))
+const CouponsPage = React.lazy(() => import('./pages/CouponsPage').then(module => ({ default: module.CouponsPage })))
+const SignUpPage = React.lazy(() => import('./pages/SignUpPage').then(module => ({ default: module.SignUpPage })))
+const LoginPage = React.lazy(() => import('./pages/LoginPage').then(module => ({ default: module.LoginPage })))
+const TermsPage = React.lazy(() => import('./pages/TermsPage').then(module => ({ default: module.TermsPage })))
+const PrivacyPolicyPage = React.lazy(() => import('./pages/PrivacyPolicyPage').then(module => ({ default: module.PrivacyPolicyPage })))
+const MobilePrivacyPolicyPage = React.lazy(() => import('./pages/MobilePrivacyPolicyPage').then(module => ({ default: module.MobilePrivacyPolicyPage })))
+const CookiePolicyPage = React.lazy(() => import('./pages/CookiePolicyPage').then(module => ({ default: module.CookiePolicyPage })))
+const AdvertisePage = React.lazy(() => import('./pages/AdvertisePage').then(module => ({ default: module.AdvertisePage })))
+const MobileAdvertisePage = React.lazy(() => import('./pages/MobileAdvertisePage').then(module => ({ default: module.MobileAdvertisePage })))
+const AboutUsPage = React.lazy(() => import('./pages/AboutUsPage').then(module => ({ default: module.AboutUsPage })))
+const FAQPage = React.lazy(() => import('./pages/FAQPage').then(module => ({ default: module.FAQPage })))
+const MobileFAQPage = React.lazy(() => import('./pages/MobileFAQPage').then(module => ({ default: module.MobileFAQPage })))
+const HelpPage = React.lazy(() => import('./pages/HelpPage').then(module => ({ default: module.HelpPage })))
+const ContactUsPage = React.lazy(() => import('./pages/ContactUsPage').then(module => ({ default: module.ContactUsPage })))
+const NotFoundPage = React.lazy(() => import('./pages/NotFoundPage').then(module => ({ default: module.NotFoundPage })))
+const WalletPage = React.lazy(() => import('./pages/WalletPage').then(module => ({ default: module.WalletPage })))
+const ProfilePage = React.lazy(() => import('./pages/ProfilePage').then(module => ({ default: module.ProfilePage })))
+const OrdersPage = React.lazy(() => import('./pages/OrdersPage').then(module => ({ default: module.OrdersPage })))
+const FavoritesPage = React.lazy(() => import('./pages/FavoritesPage').then(module => ({ default: module.FavoritesPage })))
+const NotificationsPage = React.lazy(() => import('./pages/NotificationsPage').then(module => ({ default: module.NotificationsPage })))
+const ReferPage = React.lazy(() => import('./pages/ReferPage').then(module => ({ default: module.ReferPage })))
+const AdminLoginPage = React.lazy(() => import('./pages/admin/AdminLoginPage').then(module => ({ default: module.AdminLoginPage })))
+const AdminDashboardPage = React.lazy(() => import('./pages/admin/AdminDashboardPage').then(module => ({ default: module.AdminDashboardPage })))
+const ManagerApprovalsPage = React.lazy(() => import('./pages/admin/manager/ManagerApprovalsPage').then(module => ({ default: module.ManagerApprovalsPage })))
+const BrandPage = React.lazy(() => import('./pages/BrandPage').then(module => ({ default: module.BrandPage })))
+const CreditCardsPage = React.lazy(() => import('./pages/CreditCardsPage').then(module => ({ default: module.CreditCardsPage })))
+const ProductDisplayPage = React.lazy(() => import('./pages/ProductDisplayPage').then(module => ({ default: module.ProductDisplayPage })))
+const StaffLoginPage = React.lazy(() => import('./pages/admin/StaffLoginPage').then(module => ({ default: module.StaffLoginPage })))
+
+const ExecutiveDashboardPage = React.lazy(() => import('./pages/admin/executive/ExecutiveDashboardPage').then(module => ({ default: module.ExecutiveDashboardPage })))
+const ExecutiveBulkUploadPage = React.lazy(() => import('./pages/admin/executive/ExecutiveBulkUploadPage').then(module => ({ default: module.ExecutiveBulkUploadPage })))
+const ExecutiveDealsPage = React.lazy(() => import('./pages/admin/executive/ExecutiveDealsPage').then(module => ({ default: module.ExecutiveDealsPage })))
+const ExecutiveLootDealsPage = React.lazy(() => import('./pages/admin/executive/ExecutiveLootDealsPage').then(module => ({ default: module.ExecutiveLootDealsPage })))
+const ExecutiveStoresPage = React.lazy(() => import('./pages/admin/executive/ExecutiveStoresPage').then(module => ({ default: module.ExecutiveStoresPage })))
+const ExecutiveCouponsPage = React.lazy(() => import('./pages/admin/executive/ExecutiveCouponsPage').then(module => ({ default: module.ExecutiveCouponsPage })))
+const ExecutiveCreditCardsPage = React.lazy(() => import('./pages/admin/executive/ExecutiveCreditCardsPage').then(module => ({ default: module.ExecutiveCreditCardsPage })))
+const ExecutiveCategoriesPage = React.lazy(() => import('./pages/admin/executive/ExecutiveCategoriesPage').then(module => ({ default: module.ExecutiveCategoriesPage })))
+const ExecutiveAdvertisementsPage = React.lazy(() => import('./pages/admin/executive/ExecutiveAdvertisementsPage').then(module => ({ default: module.ExecutiveAdvertisementsPage })))
+const ExecutiveVerificationPage = React.lazy(() => import('./pages/admin/executive/ExecutiveVerificationPage').then(module => ({ default: module.ExecutiveVerificationPage })))
+const ExecutiveTicketsPage = React.lazy(() => import('./pages/admin/executive/ExecutiveTicketsPage').then(module => ({ default: module.ExecutiveTicketsPage })))
+
+const OperationsDashboardPage = React.lazy(() => import('./pages/admin/operations/OperationsDashboardPage').then(module => ({ default: module.OperationsDashboardPage })))
+const OperationsApprovalsPage = React.lazy(() => import('./pages/admin/operations/OperationsApprovalsPage').then(module => ({ default: module.OperationsApprovalsPage })))
+const OperationsCashbacksPage = React.lazy(() => import('./pages/admin/operations/OperationsCashbacksPage').then(module => ({ default: module.OperationsCashbacksPage })))
+const OperationsSupportPage = React.lazy(() => import('./pages/admin/operations/OperationsSupportPage').then(module => ({ default: module.OperationsSupportPage })))
+const OperationsStaffActivityPage = React.lazy(() => import('./pages/admin/operations/OperationsStaffActivityPage').then(module => ({ default: module.OperationsStaffActivityPage })))
+const OperationsMerchantsPage = React.lazy(() => import('./pages/admin/operations/OperationsMerchantsPage').then(module => ({ default: module.OperationsMerchantsPage })))
+const OperationsApprovedDataPage = React.lazy(() => import('./pages/admin/operations/OperationsApprovedDataPage').then(module => ({ default: module.OperationsApprovedDataPage })))
+
 import { WelcomeToast } from './components/auth/WelcomeToast'
 
 function resolveCurrentPath(): string {
@@ -171,11 +176,8 @@ function resolveCurrentPath(): string {
     return '/loot-deals'
   }
 
-  // Admin, Manager and Staff pages
+  // Manager and Staff pages
   if (
-    pathname === '/admin/login' ||
-    pathname === '/admin/dashboard' ||
-    pathname === '/admin' ||
     pathname === '/manager/login' ||
     pathname === '/manager/dashboard' ||
     pathname === '/manager' ||
@@ -186,7 +188,6 @@ function resolveCurrentPath(): string {
     pathname.startsWith('/executive/')
   ) {
     if (pathname === '/operational-manager') return '/operational-manager/dashboard'
-    if (pathname === '/admin') return '/admin/dashboard'
     if (pathname === '/manager') return '/manager/dashboard'
     return pathname
   }
@@ -456,10 +457,8 @@ export default function App() {
   const isFavoritesRoute = currentPath === '/favorites' || currentPath === '/wishlist'
   const isNotificationsRoute = currentPath === '/notifications'
   const isReferRoute = currentPath === '/refer'
-  const isAdminLoginRoute = currentPath === '/admin/login' || currentPath === '/manager/login'
+  const isAdminLoginRoute = currentPath === '/manager/login'
   const isAdminDashboardRoute = 
-    currentPath === '/admin/dashboard' || 
-    currentPath === '/admin' || 
     currentPath === '/manager/dashboard' || 
     currentPath === '/manager' ||
     currentPath.startsWith('/manager/')
@@ -559,6 +558,7 @@ export default function App() {
         return <AdminLoginPage />
       }
       if (isAdminDashboardRoute) {
+        if (currentPath === '/manager/approvals') return <ManagerApprovalsPage />
         return <AdminDashboardPage />
       }
       if (isStaffLoginRoute) {
@@ -717,6 +717,7 @@ export default function App() {
     }
 
     if (isAdminDashboardRoute) {
+      if (currentPath === '/manager/approvals') return <ManagerApprovalsPage />
       return <AdminDashboardPage />
     }
 
@@ -758,7 +759,9 @@ export default function App() {
     <GoogleOAuthProvider clientId="938902651101-d98pjaqlcnpel7b3ig2du9s63glbsoh9.apps.googleusercontent.com">
       <WelcomeToast />
       <div className="page-transition-wrapper">
-        {renderContent()}
+        <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#F8F9FA' }}><div className="skeleton" style={{ width: '40px', height: '40px', borderRadius: '50%' }}></div></div>}>
+          {renderContent()}
+        </Suspense>
       </div>
     </GoogleOAuthProvider>
   )
