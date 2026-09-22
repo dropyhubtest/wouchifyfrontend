@@ -233,7 +233,6 @@ export const OperationsApprovalsPage: React.FC = () => {
       } : i))
       setSelectedIds(prev => prev.filter(selId => selId !== id))
       showToast(`Approved: "${title}"`)
->>>>>>> origin/main
       try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()) } catch {}
       window.dispatchEvent(new CustomEvent('wouchify_deals_updated'))
       window.dispatchEvent(new CustomEvent('wouchify_loot_deals_updated'))
