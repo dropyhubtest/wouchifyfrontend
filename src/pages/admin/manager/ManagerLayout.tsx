@@ -43,7 +43,7 @@ export const ManagerLayout: React.FC<ManagerLayoutProps> = ({
     const fetchLiveCounts = async () => {
       try {
         const [subs] = await Promise.all([
-          fetch('/api/submissions?status=pending', { headers: { Authorization: `Bearer ${localStorage.getItem('adminToken') || 'dev-manager-token'}` } }).then(r => r.ok ? r.json() : []).catch(() => [])
+          fetch('/api/submissions?status=Pending%20Approval', { headers: { Authorization: `Bearer ${localStorage.getItem('staffToken') || localStorage.getItem('adminToken') || 'dev-manager'}` } }).then(r => r.ok ? r.json() : []).catch(() => [])
         ])
         const apprs = Array.isArray(subs) ? subs.filter((s: any) => s.status === 'Pending Approval' || s.status === 'Pending Review' || s.status === 'pending').length : 0
         setLiveCounts({ approvals: apprs })

@@ -57,6 +57,8 @@ export const AdminDashboardPage: React.FC = () => {
   const getActiveNavFromPath = () => {
     const path = window.location.pathname
     if (path.includes('/manager/approvals')) return 'approvals'
+    if (path.includes('/manager/staff-activity')) return 'staff-activity'
+    if (path.includes('/manager/live-data')) return 'live-data'
     if (path.includes('/manager/staff')) return 'staff'
     if (path.includes('/manager/algorithms')) return 'algorithms'
     if (path.includes('/manager/governance')) return 'governance'

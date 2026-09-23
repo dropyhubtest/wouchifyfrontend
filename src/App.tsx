@@ -691,18 +691,22 @@ export default function App() {
     }
 
     if (isOperationsRoute) {
+      const opsToken = localStorage.getItem('staffToken')
+      if (!opsToken) { window.history.replaceState({}, '', '/operational-manager/login'); return null }
       if (currentPath === '/operational-manager/approvals') return <OperationsApprovalsPage />
       if (currentPath === '/operational-manager/cashbacks') return <OperationsCashbacksPage />
       if (currentPath === '/operational-manager/support') return <OperationsSupportPage />
       if (currentPath === '/operational-manager/staff-activity') return <OperationsStaffActivityPage />
-          if (currentPath === '/operational-manager/link-health') return <OperationsLinkHealthPage />
+      if (currentPath === '/operational-manager/link-health') return <OperationsLinkHealthPage />
       if (currentPath === '/operational-manager/merchants') return <OperationsMerchantsPage />
-          if (currentPath === '/operational-manager/users') return <OperationsUsersPage />
+      if (currentPath === '/operational-manager/users') return <OperationsUsersPage />
       if (currentPath === '/operational-manager/approved-data') return <OperationsApprovedDataPage />
       return <OperationsDashboardPage />
     }
 
     if (isExecutiveRoute) {
+      const execToken = localStorage.getItem('staffToken')
+      if (!execToken) { window.history.replaceState({}, '', '/executive/login'); return null }
       if (currentPath === '/executive/bulk-upload') return <ExecutiveBulkUploadPage />
       if (currentPath === '/executive/deals') return <ExecutiveDealsPage />
       if (currentPath === '/executive/loot-deals') return <ExecutiveLootDealsPage />
@@ -713,11 +717,13 @@ export default function App() {
       if (currentPath === '/executive/advertisements') return <ExecutiveAdvertisementsPage />
       if (currentPath === '/executive/verification') return <ExecutiveVerificationPage />
       if (currentPath === '/executive/tickets') return <ExecutiveTicketsPage />
-        if (currentPath === '/executive/rejections') return <ExecutiveRejectionsPage />
+      if (currentPath === '/executive/rejections') return <ExecutiveRejectionsPage />
       return <ExecutiveDashboardPage />
     }
 
     if (isAdminDashboardRoute) {
+      const managerToken = localStorage.getItem('adminToken') || localStorage.getItem('staffToken')
+      if (!managerToken) { window.history.replaceState({}, '', '/manager/login'); return null }
       if (currentPath === '/manager/approvals') return <ManagerApprovalsPage />
       return <AdminDashboardPage />
     }

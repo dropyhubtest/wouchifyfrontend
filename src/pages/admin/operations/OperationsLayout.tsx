@@ -43,9 +43,9 @@ export const OperationsLayout: React.FC<OperationsLayoutProps> = ({
     const fetchLiveCounts = async () => {
       try {
         const [subs, claims, tickets] = await Promise.all([
-          fetch('/api/submissions?status=pending', { headers: { Authorization: `Bearer ${localStorage.getItem('staffToken') || 'dev-ops-token'}` } }).then(r => r.ok ? r.json() : []).catch(() => []),
-          fetch('/api/cashback-claims?status=Pending', { headers: { Authorization: `Bearer ${localStorage.getItem('staffToken') || 'dev-ops-token'}` } }).then(r => r.ok ? r.json() : []).catch(() => []),
-          fetch('/api/support-tickets?status=Open', { headers: { Authorization: `Bearer ${localStorage.getItem('staffToken') || 'dev-ops-token'}` } }).then(r => r.ok ? r.json() : []).catch(() => [])
+          fetch('/api/submissions?status=Pending%20Approval', { headers: { Authorization: `Bearer ${localStorage.getItem('staffToken') || 'dev-ops'}` } }).then(r => r.ok ? r.json() : []).catch(() => []),
+          fetch('/api/cashback-claims?status=Pending', { headers: { Authorization: `Bearer ${localStorage.getItem('staffToken') || 'dev-ops'}` } }).then(r => r.ok ? r.json() : []).catch(() => []),
+          fetch('/api/support-tickets?status=Open', { headers: { Authorization: `Bearer ${localStorage.getItem('staffToken') || 'dev-ops'}` } }).then(r => r.ok ? r.json() : []).catch(() => [])
         ])
         const apprs = Array.isArray(subs) ? subs.filter((s: any) => s.status === 'Pending Approval' || s.status === 'Pending Review' || s.status === 'pending').length : 0
         const cbs = Array.isArray(claims) ? claims.filter((c: any) => c.status === 'Pending').length : 0
