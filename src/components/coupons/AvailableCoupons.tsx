@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
-import amazonLogo from '../../assets/coupons/amazon.png'
 import styles from './AvailableCoupons.module.css'
 import { getPublicCoupons } from '../../services/api'
 import { CouponCardSkeleton } from '../common/Skeletons'

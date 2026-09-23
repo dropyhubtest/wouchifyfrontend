@@ -19,7 +19,6 @@ import {
   UserCheck
 } from 'lucide-react'
 import './AdminDashboardPage.css'
-import './manager/ManagerApprovalsPage.css'
 
 export interface ModerationItem {
   id: string
