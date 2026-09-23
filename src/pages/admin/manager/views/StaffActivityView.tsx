@@ -11,7 +11,7 @@ import {
   Zap,
   UserCheck
 } from 'lucide-react'
-import '../operations/OperationsShared.css'
+import '../../operations/OperationsShared.css'
 
 export interface StaffMember {
   id: string

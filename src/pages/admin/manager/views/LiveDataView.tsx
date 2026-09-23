@@ -17,7 +17,7 @@ import {
   Plus,
   X
 } from 'lucide-react'
-import '../operations/OperationsShared.css'
+import '../../operations/OperationsShared.css'
 import { PLACEHOLDER_DEAL_IMAGE } from '../../../../data/dealsPage'
 
 export const LiveDataView: React.FC = () => {
