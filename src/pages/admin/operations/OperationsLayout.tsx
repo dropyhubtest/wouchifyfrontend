@@ -11,7 +11,7 @@ import {
   LogOut, Link, 
   ShieldCheck,
   Bell,
-  Database, Link, UserCircle
+  Database, UserCircle
 } from 'lucide-react'
 import logo from '../../../assets/navbar/wouchify-logo.png'
 import './OperationsLayout.css'
@@ -91,7 +91,7 @@ export const OperationsLayout: React.FC<OperationsLayoutProps> = ({
     setIsSidebarOpen(false)
   }
 
-  const menuItems = [
+  const menuItems: Array<{ id: string, label: string, path: string, icon: JSX.Element, badge?: number, badgeColor?: string }> = [
     { 
       id: 'dashboard', 
       label: 'Overview', 
@@ -123,6 +123,12 @@ export const OperationsLayout: React.FC<OperationsLayoutProps> = ({
       label: 'Affiliate Link Health',
       path: '/operational-manager/link-health',
       icon: <Link size={20} />
+    },
+    {
+      id: 'users',
+      label: 'Customer Accounts',
+      path: '/operational-manager/users',
+      icon: <UserCircle size={20} />
     },
     { 
       id: 'merchants', 

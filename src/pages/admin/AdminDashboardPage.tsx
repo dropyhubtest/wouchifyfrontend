@@ -190,7 +190,7 @@ export const AdminDashboardPage: React.FC = () => {
     return () => { isMounted = false }
   }, [])
 
-  const [algoConfig, setAlgoConfig] = useState<AlgorithmConfig>({
+  
     trendingWeight: 1.5,
     flashLootBoost: 2.0,
     sponsoredBoost: 1.25,

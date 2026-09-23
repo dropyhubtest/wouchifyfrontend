@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { ExecutiveLayout } from './ExecutiveLayout'
 import { adminApi } from '../../../services/adminApi'
-import { Inbox, AlertCircle, XCircle, Search, Eye } from 'lucide-react'
+import { Inbox, AlertCircle, Search, Eye } from 'lucide-react'
 import './ExecutiveShared.css'
 import { AdminAlertDialog } from '../../../components/common/AdminDialog'
 
@@ -135,7 +135,7 @@ export const ExecutiveRejectionsPage: React.FC = () => {
         isOpen={!!selectedItem}
         title="Rejection Feedback"
         message={selectedItem ? `Item: ${selectedItem.title}\n\nReason for rejection:\n${selectedItem.rejectionReason || 'No specific reason provided.'}\n\nPlease locate this item in your Deals/Coupons panel to edit and re-submit it.` : ''}
-        confirmText="Close"
+        buttonLabel="Close"
         onConfirm={() => setSelectedItem(null)}
         variant="info"
       />

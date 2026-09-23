@@ -4,7 +4,7 @@ import { adminApi } from '../../../services/adminApi'
 import {
   CheckCircle2,
   Clock,
-  Wallet,
+  
   LifeBuoy,
   Users,
   ArrowUpRight,

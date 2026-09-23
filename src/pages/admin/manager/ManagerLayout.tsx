@@ -3,15 +3,15 @@ import {
   LayoutDashboard, 
   CheckCircle2, 
   Users, UserCircle, 
-  Cpu, 
+  
   ShieldAlert, 
-  Tag, 
-  Store, 
-  Ticket,
+  
+  
+  
   ChevronLeft, 
   ChevronRight, 
   LogOut,
-  List, Activity, Database
+  Activity, Database
 } from 'lucide-react'
 import logo from '../../../assets/navbar/wouchify-logo.png'
 import '../operations/OperationsLayout.css' // Reuse operations layout styles
