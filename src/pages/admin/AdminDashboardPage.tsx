@@ -190,14 +190,6 @@ export const AdminDashboardPage: React.FC = () => {
     return () => { isMounted = false }
   }, [])
 
-  
-    trendingWeight: 1.5,
-    flashLootBoost: 2.0,
-    sponsoredBoost: 1.25,
-    minDiscountThreshold: 20,
-    activeCampaignName: 'Diwali Mega Cashback Bonanza',
-    campaignTheme: 'Diwali Bonanza'
-  })
   const [auditLogs, setAuditLogs] = useState<GovernanceAuditLog[]>(INITIAL_GOVERNANCE_LOGS)
 
   // Filters
