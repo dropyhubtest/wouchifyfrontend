@@ -365,7 +365,7 @@ export const LiveDataView: React.FC = () => {
   }
 
   return (
-    
+    <>
       <div className="executive-crud-page">
         
         {toastMessage && (
@@ -642,6 +642,6 @@ export const LiveDataView: React.FC = () => {
           </div>
         </div>
       )}
-    
+    </>
   )
 }

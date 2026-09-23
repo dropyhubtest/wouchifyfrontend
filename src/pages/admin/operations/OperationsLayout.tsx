@@ -134,7 +134,7 @@ export const OperationsLayout: React.FC<OperationsLayoutProps> = ({
       id: 'approved-data',
       label: 'Live Data',
       path: '/operational-manager/approved-data',
-      icon: <Database, Link, UserCircle size={20} />
+      icon: <Database size={20} />
     }
   ]
 
