@@ -61,18 +61,16 @@ export const ManagerLayout: React.FC<ManagerLayoutProps> = ({
     const userData = localStorage.getItem('adminUser') || localStorage.getItem('user')
     
     if (!token || !userData) {
-      // Auto-assign dev user if testing without full login session
-      const devUser = { email: 'manager@wouchify.com', role: 'manager' }
-      localStorage.setItem('adminToken', 'dev-manager-token')
-      localStorage.setItem('adminUser', JSON.stringify(devUser))
-      setUser(devUser)
+      window.history.pushState({}, '', '/admin/login')
+      window.dispatchEvent(new PopStateEvent('popstate'))
       return
     }
 
     try {
       setUser(JSON.parse(userData))
     } catch {
-      setUser({ email: 'manager@wouchify.com', role: 'manager' })
+      window.history.pushState({}, '', '/admin/login')
+      window.dispatchEvent(new PopStateEvent('popstate'))
     }
   }, [])
 

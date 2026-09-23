@@ -698,20 +698,6 @@ export const ExecutiveLootDealsPage: React.FC = () => {
         image: dealToSave.image,
         priority: dealToSave.priority,
         code: dealToSave.code
-      }).then((res: any) => {
-        if (statusToSet === 'Pending Approval') {
-          adminApi.createSubmission({
-            entityType: 'loot_deal',
-            entityId: res._id || res.id || dealToSave.id,
-            action: 'create',
-            title: dealToSave.title,
-            store: dealToSave.store,
-            category: dealToSave.category,
-            priority: dealToSave.priority,
-            submittedBy: localStorage.getItem('staffUser') ? JSON.parse(localStorage.getItem('staffUser')!).email : 'executive@wouchify.com',
-            dataSnapshot: dealToSave
-          }).catch(console.warn)
-        }
       }).catch(console.warn)
 
       setDeals([dealToSave, ...deals])

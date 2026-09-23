@@ -223,8 +223,8 @@ router.post('/bulk-approve', async (req, res, next) => {
       return res.status(400).json({ message: 'ids array is required' });
     }
     const reviewer = req.user?.email || req.body.reviewedBy || req.body.approvedBy || 'ops.manager@wouchify.com';
-    const reviewerName = req.user?.name || req.body.reviewedByName || req.body.approvedByName || (reviewer.includes('manager@') && !reviewer.includes('ops') ? 'Manager' : 'Operational Manager');
-    const reviewerRole = req.user?.role || req.body.reviewedByRole || req.body.approvedByRole || (reviewer.includes('manager@') && !reviewer.includes('ops') ? 'Manager' : 'Operational Manager');
+    const reviewerName = req.user?.name || req.body.reviewedByName || req.body.approvedByName || ((reviewer.includes('manager@') || reviewer === 'manager') && !reviewer.includes('ops') ? 'Manager' : 'Operational Manager');
+    const reviewerRole = req.user?.role || req.body.reviewedByRole || req.body.approvedByRole || ((reviewer.includes('manager@') || reviewer === 'manager') && !reviewer.includes('ops') ? 'Manager' : 'Operational Manager');
 
     const approvedList = [];
     for (const id of ids) {
@@ -295,8 +295,8 @@ router.post('/bulk-reject', async (req, res, next) => {
 router.patch('/:id/approve', async (req, res, next) => {
   try {
     const reviewer = req.user?.email || req.body.reviewedBy || req.body.approvedBy || 'manager@wouchify.com';
-    const reviewerName = req.user?.name || req.body.reviewedByName || req.body.approvedByName || (reviewer.includes('manager@') && !reviewer.includes('ops') ? 'Manager' : 'Operational Manager');
-    const reviewerRole = req.user?.role || req.body.reviewedByRole || req.body.approvedByRole || (reviewer.includes('manager@') && !reviewer.includes('ops') ? 'Manager' : 'Operational Manager');
+    const reviewerName = req.user?.name || req.body.reviewedByName || req.body.approvedByName || ((reviewer.includes('manager@') || reviewer === 'manager') && !reviewer.includes('ops') ? 'Manager' : 'Operational Manager');
+    const reviewerRole = req.user?.role || req.body.reviewedByRole || req.body.approvedByRole || ((reviewer.includes('manager@') || reviewer === 'manager') && !reviewer.includes('ops') ? 'Manager' : 'Operational Manager');
     const subId = req.params.id;
 
     // 1. Sync memory store immediately
@@ -363,8 +363,8 @@ router.patch('/:id/reject', async (req, res, next) => {
   try {
     const { rejectionReason } = req.body;
     const reviewer = req.user?.email || req.body.reviewedBy || 'ops.manager@wouchify.com';
-    const reviewerName = req.user?.name || req.body.reviewedByName || (reviewer.includes('manager@') && !reviewer.includes('ops') ? 'Manager' : 'Operational Manager');
-    const reviewerRole = req.user?.role || req.body.reviewedByRole || (reviewer.includes('manager@') && !reviewer.includes('ops') ? 'Manager' : 'Operational Manager');
+    const reviewerName = req.user?.name || req.body.reviewedByName || ((reviewer.includes('manager@') || reviewer === 'manager') && !reviewer.includes('ops') ? 'Manager' : 'Operational Manager');
+    const reviewerRole = req.user?.role || req.body.reviewedByRole || ((reviewer.includes('manager@') || reviewer === 'manager') && !reviewer.includes('ops') ? 'Manager' : 'Operational Manager');
     const subId = req.params.id;
 
     // 1. Sync memory store immediately

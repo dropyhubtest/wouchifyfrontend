@@ -65,18 +65,16 @@ export const OperationsLayout: React.FC<OperationsLayoutProps> = ({
     const userData = localStorage.getItem('staffUser')
     
     if (!token || !userData) {
-      // Auto-assign dev user if testing without full login session
-      const devUser = { email: 'ops.manager@wouchify.com', role: 'operational_manager' }
-      localStorage.setItem('staffToken', 'dev-ops-token')
-      localStorage.setItem('staffUser', JSON.stringify(devUser))
-      setUser(devUser)
+      window.history.pushState({}, '', '/operational-manager/login')
+      window.dispatchEvent(new PopStateEvent('popstate'))
       return
     }
 
     try {
       setUser(JSON.parse(userData))
     } catch {
-      setUser({ email: 'ops.manager@wouchify.com', role: 'operational_manager' })
+      window.history.pushState({}, '', '/operational-manager/login')
+      window.dispatchEvent(new PopStateEvent('popstate'))
     }
   }, [])
 

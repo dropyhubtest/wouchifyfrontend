@@ -769,20 +769,6 @@ export const ExecutiveDealsPage: React.FC = () => {
         expiresAt: dealToSave.expiresAt,
         description: dealToSave.description,
         terms: dealToSave.terms
-      }).then(res => {
-        if (statusToSet === 'Pending Approval') {
-          adminApi.createSubmission({
-            entityType: 'deal',
-            entityId: res._id || res.id || dealToSave.id,
-            action: 'create',
-            title: dealToSave.title,
-            store: dealToSave.store,
-            category: dealToSave.category,
-            priority: dealToSave.priority,
-            submittedBy: localStorage.getItem('staffUser') ? JSON.parse(localStorage.getItem('staffUser')!).email : 'executive@wouchify.com',
-            dataSnapshot: dealToSave
-          }).catch(console.warn)
-        }
       }).catch(console.warn)
 
       setDeals([dealToSave, ...deals])

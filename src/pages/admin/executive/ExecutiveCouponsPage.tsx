@@ -621,18 +621,6 @@ export const ExecutiveCouponsPage: React.FC = () => {
         description: data.description,
         minOrder: data.minOrder,
         maxDiscount: data.maxDiscount
-      }).then(res => {
-        adminApi.createSubmission({
-          entityType: 'coupon',
-          entityId: res._id || res.id || data.id,
-          action: 'create',
-          title: `Coupon ${data.code} - ${data.discount} at ${data.store}`,
-          store: data.store,
-          category: data.category,
-          priority: 'Normal',
-          submittedBy: localStorage.getItem('staffUser') ? JSON.parse(localStorage.getItem('staffUser')!).email : 'executive@wouchify.com',
-          dataSnapshot: data
-        }).catch(console.warn)
       }).catch(console.warn)
 
       setCoupons(prev => [data, ...prev])

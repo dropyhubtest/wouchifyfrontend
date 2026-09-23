@@ -238,7 +238,7 @@ export const adminApi = {
       if (params?.store && params.store !== 'All') query.append('store', params.store);
       if (params?.category && params.category !== 'All') query.append('category', params.category);
       if (params?.status && params.status !== 'All') query.append('status', params.status);
-      if (params?.all !== undefined) query.append('all', String(params.all));
+      query.append('all', params?.all !== undefined ? String(params.all) : 'true');
       const qs = query.toString() ? `?${query.toString()}` : '';
       const data = await cachedFetch<any[]>(`${API_BASE}/coupons${qs}`, {
         headers: getAuthHeaders()
@@ -337,7 +337,7 @@ export const adminApi = {
       const query = new URLSearchParams();
       if (params?.dealType && params.dealType !== 'All') query.append('dealType', params.dealType);
       if (params?.status && params.status !== 'All') query.append('status', params.status);
-      if (params?.all !== undefined) query.append('all', String(params.all));
+      query.append('all', params?.all !== undefined ? String(params.all) : 'true');
       const qs = query.toString() ? `?${query.toString()}` : '';
       const data = await cachedFetch<any[]>(`${API_BASE}/loot-deals${qs}`, {
         headers: getAuthHeaders()
@@ -437,7 +437,7 @@ export const adminApi = {
       const query = new URLSearchParams();
       if (params?.category && params.category !== 'All Stores' && params.category !== 'All') query.append('category', params.category);
       if (params?.status && params.status !== 'all') query.append('status', params.status);
-      if (params?.all !== undefined) query.append('all', String(params.all));
+      query.append('all', params?.all !== undefined ? String(params.all) : 'true');
       const qs = query.toString() ? `?${query.toString()}` : '';
       const data = await cachedFetch<any[]>(`${API_BASE}/stores${qs}`, { headers: getAuthHeaders() });
       return Array.isArray(data) ? data : [];
@@ -645,7 +645,7 @@ export const adminApi = {
       if (params?.bank && params.bank !== 'All') query.append('bank', params.bank);
       if (params?.status && params.status !== 'all') query.append('status', params.status);
       if (params?.tier && params.tier !== 'all') query.append('tier', params.tier);
-      if (params?.all !== undefined) query.append('all', String(params.all));
+      query.append('all', params?.all !== undefined ? String(params.all) : 'true');
       if (params?.isFeatured !== undefined) query.append('isFeatured', String(params.isFeatured));
       if (params?.q) query.append('q', params.q);
       const qs = query.toString() ? `?${query.toString()}` : '';
@@ -1260,7 +1260,7 @@ export const adminApi = {
       if (params?.placement && params.placement !== 'all') query.append('placement', params.placement);
       if (params?.status && params.status !== 'all') query.append('status', params.status);
       if (params?.pricingModel && params.pricingModel !== 'all') query.append('pricingModel', params.pricingModel);
-      if (params?.all !== undefined) query.append('all', String(params.all));
+      query.append('all', params?.all !== undefined ? String(params.all) : 'true');
       const qs = query.toString() ? `?${query.toString()}` : '';
 
       const res = await fetch(`${API_BASE}/advertisements${qs}`, {
@@ -1365,7 +1365,7 @@ export const adminApi = {
       const query = new URLSearchParams();
       if (params?.targetPage && params.targetPage !== 'all') query.append('targetPage', params.targetPage);
       if (params?.status && params.status !== 'all') query.append('status', params.status);
-      if (params?.all !== undefined) query.append('all', String(params.all));
+      query.append('all', params?.all !== undefined ? String(params.all) : 'true');
       const qs = query.toString() ? `?${query.toString()}` : '';
 
       const res = await fetch(`${API_BASE}/banners${qs}`, {

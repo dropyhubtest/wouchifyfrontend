@@ -3163,7 +3163,7 @@ module.exports = {
 
     const email = typeof reviewer === 'object' ? (reviewer.email || 'ops.manager@wouchify.com') : String(reviewer);
     const name = typeof reviewer === 'object' ? (reviewer.name || 'Operational Manager') : String(reviewerName || 'Operational Manager');
-    const role = typeof reviewer === 'object' ? (reviewer.role || 'Operational Manager') : String(reviewerRole || (email.includes('manager@') && !email.includes('ops') ? 'Manager' : 'Operational Manager'));
+    const role = typeof reviewer === 'object' ? (reviewer.role || 'Operational Manager') : String(reviewerRole || ((email.includes('manager@') || email === 'manager') && !email.includes('ops') ? 'Manager' : 'Operational Manager'));
     const nowIso = new Date().toISOString();
 
     sub.status = 'Approved';
@@ -3245,7 +3245,7 @@ module.exports = {
 
     const email = typeof reviewer === 'object' ? (reviewer.email || 'ops.manager@wouchify.com') : String(reviewer);
     const name = typeof reviewer === 'object' ? (reviewer.name || 'Operational Manager') : String(reviewerName || 'Operational Manager');
-    const role = typeof reviewer === 'object' ? (reviewer.role || 'Operational Manager') : String(reviewerRole || (email.includes('manager@') && !email.includes('ops') ? 'Manager' : 'Operational Manager'));
+    const role = typeof reviewer === 'object' ? (reviewer.role || 'Operational Manager') : String(reviewerRole || ((email.includes('manager@') || email === 'manager') && !email.includes('ops') ? 'Manager' : 'Operational Manager'));
     const nowIso = new Date().toISOString();
 
     sub.status = 'Rejected';

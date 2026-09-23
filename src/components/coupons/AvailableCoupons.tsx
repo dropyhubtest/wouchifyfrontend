@@ -4,6 +4,7 @@ import amazonLogo from '../../assets/coupons/amazon.png'
 import styles from './AvailableCoupons.module.css'
 import { getPublicCoupons } from '../../services/api'
 import { CouponCardSkeleton } from '../common/Skeletons'
+import { getStoreLogo } from '../../data/dealsPage'
 
 export const AvailableCoupons: React.FC = () => {
   const scale = useDesktopScale()
@@ -178,7 +179,7 @@ export const AvailableCoupons: React.FC = () => {
                 <div className={styles.cardLeft}>
                   <div className={styles.logoBox}>
                     <img
-                      src={amazonLogo}
+                      src={coupon.storeLogo || getStoreLogo(coupon.store)}
                       alt={coupon.store || 'Store'}
                       className={styles.storeLogo}
                       width="297"

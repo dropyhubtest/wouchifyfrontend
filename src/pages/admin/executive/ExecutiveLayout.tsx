@@ -60,11 +60,8 @@ export const ExecutiveLayout: React.FC<ExecutiveLayoutProps> = ({ children, acti
         console.error('Failed to parse admin user', e)
       }
     }
-
-    // Default executive profile for Executive Panel
-    const defaultExec = { name: 'Balaji', email: 'balaji@wouchify.com', role: 'Content Executive' }
-    localStorage.setItem('staffUser', JSON.stringify(defaultExec))
-    setUser(defaultExec)
+    window.history.pushState({}, '', '/executive/login')
+    window.dispatchEvent(new PopStateEvent('popstate'))
   }, [])
 
   const handleLogout = () => {

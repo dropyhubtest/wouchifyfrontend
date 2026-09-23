@@ -20,11 +20,12 @@ async function handleEntityCreate({
   Model,
   storeAddMethod
 }) {
-  const isExecutive = user.role === 'executive';
-  const submissionStatus = isExecutive ? 'pending_approval' : (data.submissionStatus || 'approved');
-  const status = isExecutive ? 'pending' : (data.status || 'active');
-  const opsManagerApproval = isExecutive ? 'Pending' : 'Approved';
-  const managerApproval = isExecutive ? 'Pending' : 'Approved';
+  // Always require approval for all roles so CRUD operations can be approved by managers
+  const requiresApproval = true;
+  const submissionStatus = requiresApproval ? 'pending_approval' : (data.submissionStatus || 'approved');
+  const status = requiresApproval ? 'pending' : (data.status || 'active');
+  const opsManagerApproval = requiresApproval ? 'Pending' : 'Approved';
+  const managerApproval = requiresApproval ? 'Pending' : 'Approved';
 
   const entityData = {
     ...data,
@@ -90,8 +91,8 @@ async function handleEntityCreate({
 
   return {
     entity: createdEntity,
-    staged: isExecutive,
-    message: isExecutive
+    staged: requiresApproval,
+    message: requiresApproval
       ? 'Submitted for Operational Manager approval. It will appear live once approved.'
       : 'Published successfully.'
   };
@@ -117,7 +118,7 @@ async function handleEntityUpdate({
 }) {
   const isExecutive = user.role === 'executive';
 
-  if (!isExecutive) {
+  if (!requiresApproval) {
     // Direct update for Manager / Ops Manager
     const patch = { ...updates, submissionStatus: 'approved' };
     let updatedDoc = null;
@@ -190,7 +191,7 @@ async function handleEntityDelete({
 }) {
   const isExecutive = user.role === 'executive';
 
-  if (!isExecutive) {
+  if (!requiresApproval) {
     if (storeDeleteMethod) storeDeleteMethod(id);
     safeBackground(async () => {
       if (mongoose.connection.readyState === 1 && Model) {
