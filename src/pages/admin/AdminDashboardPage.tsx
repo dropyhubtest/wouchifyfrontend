@@ -14,7 +14,6 @@ import type {
   LootDealAdminItem,
   TransactionItem,
   UserItem,
-  AlgorithmConfig,
   GovernanceAuditLog
 } from './manager/types'
 
@@ -439,7 +438,7 @@ export const AdminDashboardPage: React.FC = () => {
       coupons,
       lootDeals,
       staffMembers,
-      algoConfig,
+
       auditLogs,
       transactions,
       users

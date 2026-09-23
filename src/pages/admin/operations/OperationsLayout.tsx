@@ -91,7 +91,7 @@ export const OperationsLayout: React.FC<OperationsLayoutProps> = ({
     setIsSidebarOpen(false)
   }
 
-  const menuItems: Array<{ id: string, label: string, path: string, icon: JSX.Element, badge?: number, badgeColor?: string }> = [
+  const menuItems: Array<{ id: string, label: string, path: string, icon: React.ReactNode, badge?: number, badgeColor?: string }> = [
     { 
       id: 'dashboard', 
       label: 'Overview', 

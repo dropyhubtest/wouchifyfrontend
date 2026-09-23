@@ -136,7 +136,7 @@ export const ExecutiveRejectionsPage: React.FC = () => {
         title="Rejection Feedback"
         message={selectedItem ? `Item: ${selectedItem.title}\n\nReason for rejection:\n${selectedItem.rejectionReason || 'No specific reason provided.'}\n\nPlease locate this item in your Deals/Coupons panel to edit and re-submit it.` : ''}
         buttonLabel="Close"
-        onConfirm={() => setSelectedItem(null)}
+        onClose={() => setSelectedItem(null)}
         variant="info"
       />
     </ExecutiveLayout>
