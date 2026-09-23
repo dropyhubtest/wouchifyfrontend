@@ -70,7 +70,8 @@ export const AvailableCoupons: React.FC = () => {
     }
   }, [scale, coupons, loading])
 
-  const handleCopyCode = (code: string, index: number) => {
+  const handleCopyCode = (code: string, index: number, id?: string) => {
+    if (id) adminApi.trackCouponClick(id); else adminApi.trackCouponClick(code);
     navigator.clipboard.writeText(code)
     setCopiedId(index)
     setTimeout(() => {
@@ -215,7 +216,7 @@ export const AvailableCoupons: React.FC = () => {
                   <button
                     type="button"
                     className={styles.codeButton}
-                    onClick={() => handleCopyCode(coupon.code, index)}
+                    onClick={() => handleCopyCode(coupon.code, index, coupon._id || coupon.id)}
                     title={`Click to copy ${coupon.code}`}
                   >
                     {coupon.code}
@@ -223,7 +224,7 @@ export const AvailableCoupons: React.FC = () => {
                   <button
                     type="button"
                     className={styles.copyAction}
-                    onClick={() => handleCopyCode(coupon.code, index)}
+                    onClick={() => handleCopyCode(coupon.code, index, coupon._id || coupon.id)}
                     aria-label="Copy coupon code"
                   >
                     <span className={styles.copyText}>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { 
   LayoutDashboard, 
   CheckCircle2, 
-  Users, 
+  Users, UserCircle, 
   Cpu, 
   ShieldAlert, 
   Tag, 
@@ -11,7 +11,7 @@ import {
   ChevronLeft, 
   ChevronRight, 
   LogOut,
-  List
+  List, Activity, Database
 } from 'lucide-react'
 import logo from '../../../assets/navbar/wouchify-logo.png'
 import '../operations/OperationsLayout.css' // Reuse operations layout styles
@@ -61,7 +61,7 @@ export const ManagerLayout: React.FC<ManagerLayoutProps> = ({
     const userData = localStorage.getItem('adminUser') || localStorage.getItem('user')
     
     if (!token || !userData) {
-      window.history.pushState({}, '', '/admin/login')
+      window.history.pushState({}, '', '/manager/login')
       window.dispatchEvent(new PopStateEvent('popstate'))
       return
     }
@@ -69,7 +69,7 @@ export const ManagerLayout: React.FC<ManagerLayoutProps> = ({
     try {
       setUser(JSON.parse(userData))
     } catch {
-      window.history.pushState({}, '', '/admin/login')
+      window.history.pushState({}, '', '/manager/login')
       window.dispatchEvent(new PopStateEvent('popstate'))
     }
   }, [])
@@ -109,11 +109,11 @@ export const ManagerLayout: React.FC<ManagerLayoutProps> = ({
       path: '/manager/staff', 
       icon: <Users size={20} /> 
     },
-    { 
-      id: 'algorithms', 
-      label: 'Algorithms & Sorting', 
-      path: '/manager/algorithms', 
-      icon: <Cpu size={20} /> 
+    {
+      id: 'users',
+      label: 'Customer Accounts',
+      path: '/manager/users',
+      icon: <UserCircle size={20} />
     },
     { 
       id: 'governance', 
@@ -122,28 +122,16 @@ export const ManagerLayout: React.FC<ManagerLayoutProps> = ({
       icon: <ShieldAlert size={20} /> 
     },
     { 
-      id: 'deals', 
-      label: 'Deals & Loot', 
-      path: '/manager/deals', 
-      icon: <Tag size={20} /> 
+      id: 'staff-activity', 
+      label: 'Staff Activity', 
+      path: '/manager/staff-activity', 
+      icon: <Activity size={20} /> 
     },
-    { 
-      id: 'stores', 
-      label: 'Stores', 
-      path: '/manager/stores', 
-      icon: <Store size={20} /> 
-    },
-    { 
-      id: 'coupons', 
-      label: 'Coupons', 
-      path: '/manager/coupons', 
-      icon: <Ticket size={20} /> 
-    },
-    { 
-      id: 'categories', 
-      label: 'Categories', 
-      path: '/manager/categories', 
-      icon: <List size={20} /> 
+    {
+      id: 'live-data',
+      label: 'Live Data Viewer',
+      path: '/manager/live-data',
+      icon: <Database size={20} />
     }
   ]
 

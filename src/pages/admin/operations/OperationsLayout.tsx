@@ -8,10 +8,10 @@ import {
   Store, 
   ChevronLeft, 
   ChevronRight, 
-  LogOut, 
+  LogOut, Link, 
   ShieldCheck,
   Bell,
-  Database
+  Database, Link, UserCircle
 } from 'lucide-react'
 import logo from '../../../assets/navbar/wouchify-logo.png'
 import './OperationsLayout.css'
@@ -106,14 +106,6 @@ export const OperationsLayout: React.FC<OperationsLayoutProps> = ({
       badge: mergedCounts.approvals 
     },
     { 
-      id: 'cashbacks', 
-      label: 'Cashback & Payouts', 
-      path: '/operational-manager/cashbacks', 
-      icon: <Wallet size={20} />,
-      badge: mergedCounts.cashbacks,
-      badgeColor: 'blue'
-    },
-    { 
       id: 'support', 
       label: 'Support & Disputes', 
       path: '/operational-manager/support', 
@@ -126,6 +118,12 @@ export const OperationsLayout: React.FC<OperationsLayoutProps> = ({
       path: '/operational-manager/staff-activity', 
       icon: <Activity size={20} /> 
     },
+    {
+      id: 'link-health',
+      label: 'Affiliate Link Health',
+      path: '/operational-manager/link-health',
+      icon: <Link size={20} />
+    },
     { 
       id: 'merchants', 
       label: 'Affiliate Health', 
@@ -136,7 +134,7 @@ export const OperationsLayout: React.FC<OperationsLayoutProps> = ({
       id: 'approved-data',
       label: 'Live Data',
       path: '/operational-manager/approved-data',
-      icon: <Database size={20} />
+      icon: <Database, Link, UserCircle size={20} />
     }
   ]
 

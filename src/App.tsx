@@ -81,13 +81,16 @@ const ExecutiveCategoriesPage = React.lazy(() => import('./pages/admin/executive
 const ExecutiveAdvertisementsPage = React.lazy(() => import('./pages/admin/executive/ExecutiveAdvertisementsPage').then(module => ({ default: module.ExecutiveAdvertisementsPage })))
 const ExecutiveVerificationPage = React.lazy(() => import('./pages/admin/executive/ExecutiveVerificationPage').then(module => ({ default: module.ExecutiveVerificationPage })))
 const ExecutiveTicketsPage = React.lazy(() => import('./pages/admin/executive/ExecutiveTicketsPage').then(module => ({ default: module.ExecutiveTicketsPage })))
+const ExecutiveRejectionsPage = React.lazy(() => import('./pages/admin/executive/ExecutiveRejectionsPage').then(module => ({ default: module.ExecutiveRejectionsPage })))
 
 const OperationsDashboardPage = React.lazy(() => import('./pages/admin/operations/OperationsDashboardPage').then(module => ({ default: module.OperationsDashboardPage })))
 const OperationsApprovalsPage = React.lazy(() => import('./pages/admin/operations/OperationsApprovalsPage').then(module => ({ default: module.OperationsApprovalsPage })))
 const OperationsCashbacksPage = React.lazy(() => import('./pages/admin/operations/OperationsCashbacksPage').then(module => ({ default: module.OperationsCashbacksPage })))
 const OperationsSupportPage = React.lazy(() => import('./pages/admin/operations/OperationsSupportPage').then(module => ({ default: module.OperationsSupportPage })))
 const OperationsStaffActivityPage = React.lazy(() => import('./pages/admin/operations/OperationsStaffActivityPage').then(module => ({ default: module.OperationsStaffActivityPage })))
+const OperationsLinkHealthPage = React.lazy(() => import('./pages/admin/operations/OperationsLinkHealthPage').then(module => ({ default: module.OperationsLinkHealthPage })))
 const OperationsMerchantsPage = React.lazy(() => import('./pages/admin/operations/OperationsMerchantsPage').then(module => ({ default: module.OperationsMerchantsPage })))
+const OperationsUsersPage = React.lazy(() => import('./pages/admin/operations/OperationsUsersPage').then(module => ({ default: module.OperationsUsersPage })))
 const OperationsApprovedDataPage = React.lazy(() => import('./pages/admin/operations/OperationsApprovedDataPage').then(module => ({ default: module.OperationsApprovedDataPage })))
 
 import { WelcomeToast } from './components/auth/WelcomeToast'
@@ -317,15 +320,7 @@ function resolveCurrentPath(): string {
   // Refer page
   if (pathname === '/refer' || pathname === '/refer-earn' || page === 'refer') return '/refer'
 
-  // Admin login (/admin/login or /admin)
-  if (pathname === '/admin' || pathname === '/admin/login' || page === 'admin-login') {
-    return '/admin/login'
-  }
 
-  // Admin dashboard
-  if (pathname === '/admin/dashboard' || page === 'admin-dashboard') {
-    return '/admin/dashboard'
-  }
 
   // Product display internal page (/product, /products, /deal/:id, /product-display)
   if (
@@ -569,7 +564,9 @@ export default function App() {
         if (currentPath === '/operational-manager/cashbacks') return <OperationsCashbacksPage />
         if (currentPath === '/operational-manager/support') return <OperationsSupportPage />
         if (currentPath === '/operational-manager/staff-activity') return <OperationsStaffActivityPage />
+          if (currentPath === '/operational-manager/link-health') return <OperationsLinkHealthPage />
         if (currentPath === '/operational-manager/merchants') return <OperationsMerchantsPage />
+          if (currentPath === '/operational-manager/users') return <OperationsUsersPage />
         if (currentPath === '/operational-manager/approved-data') return <OperationsApprovedDataPage />
         return <OperationsDashboardPage />
       }
@@ -584,6 +581,7 @@ export default function App() {
         if (currentPath === '/executive/advertisements') return <ExecutiveAdvertisementsPage />
         if (currentPath === '/executive/verification') return <ExecutiveVerificationPage />
         if (currentPath === '/executive/tickets') return <ExecutiveTicketsPage />
+        if (currentPath === '/executive/rejections') return <ExecutiveRejectionsPage />
         return <ExecutiveDashboardPage />
       }
       if (isBrandRoute) {
@@ -697,7 +695,9 @@ export default function App() {
       if (currentPath === '/operational-manager/cashbacks') return <OperationsCashbacksPage />
       if (currentPath === '/operational-manager/support') return <OperationsSupportPage />
       if (currentPath === '/operational-manager/staff-activity') return <OperationsStaffActivityPage />
+          if (currentPath === '/operational-manager/link-health') return <OperationsLinkHealthPage />
       if (currentPath === '/operational-manager/merchants') return <OperationsMerchantsPage />
+          if (currentPath === '/operational-manager/users') return <OperationsUsersPage />
       if (currentPath === '/operational-manager/approved-data') return <OperationsApprovedDataPage />
       return <OperationsDashboardPage />
     }
@@ -713,6 +713,7 @@ export default function App() {
       if (currentPath === '/executive/advertisements') return <ExecutiveAdvertisementsPage />
       if (currentPath === '/executive/verification') return <ExecutiveVerificationPage />
       if (currentPath === '/executive/tickets') return <ExecutiveTicketsPage />
+        if (currentPath === '/executive/rejections') return <ExecutiveRejectionsPage />
       return <ExecutiveDashboardPage />
     }
 

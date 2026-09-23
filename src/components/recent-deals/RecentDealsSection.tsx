@@ -1,10 +1,14 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { getPublicDeals } from '../../services/api'
 import { RECENT_DEALS } from '../../data/recentDeals'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
+import { adminApi } from '../../services/adminApi'
 import './RecentDealsSection.css'
 
 export const RecentDealsSection: React.FC = () => {
   const sectionScale = useDesktopScale()
+  const [deals, setDeals] = useState<any[]>(RECENT_DEALS)
+  useEffect(() => { getPublicDeals().then(data => { if (data && data.length > 0) setDeals(data.slice(0, 6)) }) }, [])
 
   return (
     <section
@@ -32,10 +36,11 @@ export const RecentDealsSection: React.FC = () => {
 
         {/* Deal Cards Container */}
         <div className="recent-deals__cards-container">
-          {RECENT_DEALS.map((deal) => (
+          {deals.map((deal) => (
             <a
               key={deal.id}
-              href={deal.href}
+              onClick={() => adminApi.trackDealClick(deal.id)}
+              href={deal.ctaHref || deal.link || deal.href}
               className="recent-deals__card"
               style={{
                 left: `${deal.left}px`,

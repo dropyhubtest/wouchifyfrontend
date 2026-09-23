@@ -8,7 +8,7 @@ dotenv.config();
 
 // Global process exception traps to ensure high-availability and prevent unexpected server exit
 process.on('uncaughtException', (err) => {
-  console.error('[Server uncaughtException]', err && err.message ? err.message : err);
+  console.error('[Server uncaughtException]', err && err.stack ? err.stack : err);
 });
 process.on('unhandledRejection', (reason) => {
   console.error('[Server unhandledRejection]', reason && reason.message ? reason.message : reason);

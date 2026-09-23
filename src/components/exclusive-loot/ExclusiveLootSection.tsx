@@ -1,10 +1,14 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { getPublicLootDeals } from '../../services/api'
 import { EXCLUSIVE_LOOT_DEALS } from '../../data/exclusiveLootDeals'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
+import { adminApi } from '../../services/adminApi'
 import './ExclusiveLootSection.css'
 
 export const ExclusiveLootSection: React.FC = () => {
   const sectionScale = useDesktopScale()
+  const [deals, setDeals] = useState<any[]>(EXCLUSIVE_LOOT_DEALS)
+  useEffect(() => { getPublicLootDeals().then(data => { if (data && data.length > 0) setDeals(data.filter(d => d.type === 'exclusive').slice(0, 5)) }) }, [])
 
   return (
     <section
@@ -37,10 +41,10 @@ export const ExclusiveLootSection: React.FC = () => {
 
         {/* Exclusive Deals Track / Container */}
         <div className="exclusive-loot__track">
-          {EXCLUSIVE_LOOT_DEALS.map((deal) => (
-            <a
+          {deals.map((deal) => (
+            <a onClick={() => adminApi.trackLootClick(deal.id)}
               key={deal.id}
-              href={deal.href}
+              href={deal.ctaHref || deal.link || deal.href}
               className="exclusive-loot__card"
               aria-label={`View ${deal.title} exclusive deal`}
             >

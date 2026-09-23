@@ -42,4 +42,22 @@ export const getPublicCoupons = async () => {
   }
 };
 
+export const getPublicDeals = async () => {
+  try {
+    return await adminApi.getDeals();
+  } catch (err) {
+    console.error('Failed to fetch public deals', err);
+    return [];
+  }
+};
+
+export const getPublicLootDeals = async () => {
+  try {
+    return await adminApi.getLootDeals();
+  } catch (err) {
+    console.error('Failed to fetch public loot deals', err);
+    return [];
+  }
+};
+
 export default api;

@@ -78,7 +78,7 @@ router.get('/', async (req, res, next) => {
     }
 
     let categories = await Category.find(query).sort({ sortOrder: 1, name: 1 });
-    if (!) {
+    if (!categories) {
       return res.json([]);
     }
     res.json(categories);

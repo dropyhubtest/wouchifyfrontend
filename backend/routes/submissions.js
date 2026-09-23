@@ -63,7 +63,7 @@ function buildEntityQuery(entityId, dataSnapshot = null) {
   return { $or: conditions };
 }
 
-async function updateMongoEntityOnApproval(entityType, entityId, action, dataSnapshot, reviewer = 'manager@wouchify.com', reviewerName = 'Manager', reviewerRole = 'Manager') {
+async function updateMongoEntityOnApproval(entityType, entityId, action, dataSnapshot, reviewer = 'manager@wouchify.com', reviewerName = 'Manager', reviewerRole = 'Manager', submittedBy = null, submittedByName = null, submittedAt = null) {
   if (!entityId && !dataSnapshot) return;
   const Model = getEntityModel(entityType);
   if (!Model) return;
@@ -80,6 +80,11 @@ async function updateMongoEntityOnApproval(entityType, entityId, action, dataSna
     approvedByRole: reviewerRole,
     approvedAt: nowIso
   };
+  
+  if (submittedBy) updatePatch.submittedBy = submittedBy;
+  if (submittedByName) updatePatch.submittedByName = submittedByName;
+  if (submittedAt) updatePatch.submittedAt = submittedAt;
+
   delete updatePatch._id;
   delete updatePatch.id;
   delete updatePatch.createdAt;
@@ -103,7 +108,10 @@ async function updateMongoEntityOnApproval(entityType, entityId, action, dataSna
           approvedBy: reviewer,
           approvedByName: reviewerName,
           approvedByRole: reviewerRole,
-          approvedAt: nowIso
+          approvedAt: nowIso,
+          submittedBy: submittedBy || dataSnapshot.submittedBy,
+          submittedByName: submittedByName || dataSnapshot.submittedByName,
+          submittedAt: submittedAt || dataSnapshot.submittedAt || nowIso
         });
         await toCreate.save();
       }
@@ -245,7 +253,7 @@ router.post('/bulk-approve', async (req, res, next) => {
             sub.approvedAt = new Date();
             await sub.save();
             if (sub.entityType && sub.entityId) {
-              await updateMongoEntityOnApproval(sub.entityType, sub.entityId, sub.action, sub.dataSnapshot, reviewer, reviewerName, reviewerRole);
+              await updateMongoEntityOnApproval(sub.entityType, sub.entityId, sub.action, sub.dataSnapshot, reviewer, reviewerName, reviewerRole, sub.submittedBy, sub.submittedByName, sub.submittedAt);
             }
           }
         } catch {}
@@ -319,7 +327,7 @@ router.patch('/:id/approve', async (req, res, next) => {
       sub.reviewedAt = new Date();
       sub.approvedAt = new Date();
       await sub.save();
-      await updateMongoEntityOnApproval(sub.entityType, sub.entityId, sub.action, sub.dataSnapshot, reviewer, reviewerName, reviewerRole);
+      await updateMongoEntityOnApproval(sub.entityType, sub.entityId, sub.action, sub.dataSnapshot, reviewer, reviewerName, reviewerRole, sub.submittedBy, sub.submittedByName, sub.submittedAt);
       return res.json(sub);
     }
 
@@ -351,7 +359,7 @@ router.patch('/:id/approve', async (req, res, next) => {
         }
 
         if (targetEntityType) {
-          await updateMongoEntityOnApproval(targetEntityType, targetEntityId, targetAction, targetDataSnapshot, reviewer, reviewerName, reviewerRole);
+          await updateMongoEntityOnApproval(targetEntityType, targetEntityId, targetAction, targetDataSnapshot, reviewer, reviewerName, reviewerRole, sub?.submittedBy, sub?.submittedByName, sub?.submittedAt);
         }
       }
     }, 'Mongo Submission Approve');

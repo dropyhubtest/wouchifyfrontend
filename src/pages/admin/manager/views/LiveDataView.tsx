@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { OperationsLayout } from './OperationsLayout'
-import { adminApi } from '../../../services/adminApi'
+
+import { adminApi } from '../../../../services/adminApi'
 import { 
   CheckCircle2, 
   Clock, 
@@ -17,10 +17,10 @@ import {
   Plus,
   X
 } from 'lucide-react'
-import './OperationsShared.css'
-import { PLACEHOLDER_DEAL_IMAGE } from '../../../data/dealsPage'
+import '../operations/OperationsShared.css'
+import { PLACEHOLDER_DEAL_IMAGE } from '../../../../data/dealsPage'
 
-export const OperationsApprovedDataPage: React.FC = () => {
+export const LiveDataView: React.FC = () => {
   // Predefined Schemas for rendering all input fields even if they are empty
   const schemas = {
     deals: [
@@ -365,7 +365,7 @@ export const OperationsApprovedDataPage: React.FC = () => {
   }
 
   return (
-    <OperationsLayout activeMenu="approved-data">
+    
       <div className="executive-crud-page">
         
         {toastMessage && (
@@ -642,6 +642,6 @@ export const OperationsApprovedDataPage: React.FC = () => {
           </div>
         </div>
       )}
-    </OperationsLayout>
+    
   )
 }

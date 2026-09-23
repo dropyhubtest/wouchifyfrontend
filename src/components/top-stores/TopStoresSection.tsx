@@ -2,6 +2,7 @@ import React from 'react'
 import wouchifyIcon from '../../assets/brand/wouchify-icon.png'
 import { TOP_STORES } from '../../data/topStores'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
+import { adminApi } from '../../services/adminApi'
 import './TopStoresSection.css'
 
 export const TopStoresSection: React.FC = () => {
@@ -37,7 +38,8 @@ export const TopStoresSection: React.FC = () => {
             {TOP_STORES.map((store) => (
               <a
                 key={store.id}
-                href={store.href}
+                onClick={() => adminApi.trackStoreClick(store.id)}
+                  href={store.href}
                 className={`top-stores__tile top-stores__tile--${store.slug}`}
                 aria-label={`Shop on ${store.name}`}
               >

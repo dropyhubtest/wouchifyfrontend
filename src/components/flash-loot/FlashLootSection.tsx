@@ -1,10 +1,14 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { getPublicLootDeals } from '../../services/api'
 import { FLASH_LOOT_DEALS } from '../../data/flashLootDeals'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
+import { adminApi } from '../../services/adminApi'
 import './FlashLootSection.css'
 
 export const FlashLootSection: React.FC = () => {
   const sectionScale = useDesktopScale()
+  const [deals, setDeals] = useState<any[]>(FLASH_LOOT_DEALS)
+  useEffect(() => { getPublicLootDeals().then(data => { if (data && data.length > 0) setDeals(data.filter(d => d.type === 'flash').slice(0, 5)) }) }, [])
 
   return (
     <section
@@ -37,10 +41,11 @@ export const FlashLootSection: React.FC = () => {
 
         {/* Flash Deals Track / Container */}
         <div className="flash-loot__track">
-          {FLASH_LOOT_DEALS.map((deal) => (
+          {deals.map((deal) => (
             <a
               key={deal.id}
-              href={deal.href}
+              onClick={() => adminApi.trackLootClick(deal.id)}
+              href={deal.ctaHref || deal.link || deal.href}
               className="flash-loot__card"
               aria-label={`View ${deal.title} flash deal`}
             >

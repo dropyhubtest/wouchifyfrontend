@@ -34,9 +34,10 @@ import {
 } from './manager/icons'
 
 // Views
+import { StaffActivityView } from './manager/views/StaffActivityView'
+import { LiveDataView } from './manager/views/LiveDataView'
 import { CommercialAnalyticsView } from './manager/views/CommercialAnalyticsView'
 import { StaffManagementView } from './manager/views/StaffManagementView'
-import { AlgorithmConfigView } from './manager/views/AlgorithmConfigView'
 import { DataGovernanceView } from './manager/views/DataGovernanceView'
 import { DealsManagementView } from './manager/views/DealsManagementView'
 import { LootDealsView } from './manager/views/LootDealsView'
@@ -793,6 +794,8 @@ export const AdminDashboardPage: React.FC = () => {
                 <h1>
                   {activeNav === 'dashboard' && 'Commercial Performance & Analytics'}
                   {activeNav === 'approvals' && 'Manager Approvals Queue'}
+                  {activeNav === 'staff-activity' && 'Employee Output & SLA Monitoring'}
+                  {activeNav === 'live-data' && 'Global Content Catalog'}
                   {activeNav === 'staff' && 'Staff & Team Access Studio (RBAC)'}
                   {activeNav === 'algorithms' && 'Global Layout & Algorithm Configuration'}
                   {activeNav === 'governance' && 'Data Governance & System Security'}
@@ -807,6 +810,8 @@ export const AdminDashboardPage: React.FC = () => {
                 <p>
                   {activeNav === 'dashboard' && 'Aggregated commercial metrics, outbound click-through rates (CTR), revenue generated per merchant, and traffic analytics.'}
                   {activeNav === 'approvals' && 'Review operations-approved items and publish them to live.'}
+                  {activeNav === 'staff-activity' && 'Monitor submissions, accuracy rates, and operational SLA across the content team.'}
+                  {activeNav === 'live-data' && 'View all active deals, coupons, stores, and categories across the platform.'}
                   {activeNav === 'staff' && 'Provision, deactivate, and manage operational managers and content executives with assigned vertical permissions.'}
                   {activeNav === 'algorithms' && 'Fine-tune homepage recommendation formulas, trending deal boost multipliers, and scheduled event campaigns.'}
                   {activeNav === 'governance' && 'System-wide audit trail for high-risk actions, manual database snapshot triggering, and full catalog JSON/CSV exports.'}
@@ -823,7 +828,7 @@ export const AdminDashboardPage: React.FC = () => {
 
             {/* Contextual Header Actions */}
             <div className="content-actions">
-              {activeNav !== 'dashboard' && activeNav !== 'algorithms' && activeNav !== 'governance' && (
+              {activeNav !== 'dashboard' && activeNav !== 'governance' && (
                 <div className="topbar-search" style={{ margin: 0 }}>
                   <IconSearch />
                   <input
@@ -883,6 +888,12 @@ export const AdminDashboardPage: React.FC = () => {
           {activeNav === 'approvals' && (
             <AdminApprovalsView />
           )}
+          {activeNav === 'staff-activity' && (
+            <StaffActivityView />
+          )}
+          {activeNav === 'live-data' && (
+            <LiveDataView />
+          )}
           {activeNav === 'dashboard' && (
             <CommercialAnalyticsView
               liveStats={liveStats}
@@ -904,14 +915,6 @@ export const AdminDashboardPage: React.FC = () => {
               onToggleStaffStatus={handleToggleStaffStatus}
               onEditStaff={setEditingStaff}
               onDeleteStaff={handleDeleteStaff}
-            />
-          )}
-
-          {activeNav === 'algorithms' && (
-            <AlgorithmConfigView
-              algoConfig={algoConfig}
-              setAlgoConfig={setAlgoConfig}
-              onPublishAlgorithms={() => showToast('Algorithm weights and festival campaign published live!')}
             />
           )}
 

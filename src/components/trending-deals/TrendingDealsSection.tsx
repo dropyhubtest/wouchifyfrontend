@@ -1,10 +1,14 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { getPublicDeals } from '../../services/api'
 import { TRENDING_DEALS } from '../../data/trendingDeals'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
+import { adminApi } from '../../services/adminApi'
 import './TrendingDealsSection.css'
 
 export const TrendingDealsSection: React.FC = () => {
   const sectionScale = useDesktopScale()
+  const [deals, setDeals] = useState<any[]>(TRENDING_DEALS)
+  useEffect(() => { getPublicDeals().then(data => { if (data && data.length > 0) setDeals(data.filter(d => d.isBestSelling || true).slice(0, 6)) }) }, [])
 
   return (
     <section
@@ -33,11 +37,12 @@ export const TrendingDealsSection: React.FC = () => {
 
         {/* Ranked Deal Cards Container */}
         <div className="trending-deals__cards-container">
-          {TRENDING_DEALS.map((deal) => (
+          {deals.map((deal) => (
             <React.Fragment key={deal.id}>
               {/* Product Card */}
               <a
-                href={deal.href}
+                onClick={() => adminApi.trackDealClick(deal.id)}
+                href={deal.ctaHref || deal.link || deal.href}
                 className="trending-deals__card"
                 style={{
                   left: `${deal.left}px`,

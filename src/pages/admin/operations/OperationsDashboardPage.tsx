@@ -381,16 +381,7 @@ export const OperationsDashboardPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="kpi-card" onClick={() => navigate('/operational-manager/cashbacks')} style={{ cursor: 'pointer' }}>
-            <div className="kpi-body">
-              <span className="kpi-label">Pending Payout Claims</span>
-              <span className="kpi-value">{kpiStats.pendingPayoutsAmount}</span>
-              <span className="kpi-sub">{kpiStats.pendingPayoutsCount} user withdrawals</span>
-            </div>
-            <div className="kpi-icon ops-kpi-green">
-              <Wallet size={20} />
-            </div>
-          </div>
+
 
           <div className="kpi-card" onClick={() => navigate('/operational-manager/support')} style={{ cursor: 'pointer' }}>
             <div className="kpi-body">

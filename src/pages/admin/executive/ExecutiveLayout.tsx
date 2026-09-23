@@ -15,7 +15,7 @@ import {
   LogOut,
   ExternalLink,
   Plus,
-  FileSpreadsheet
+  FileSpreadsheet, XCircle
 } from 'lucide-react'
 import logo from '../../../assets/navbar/wouchify-logo.png'
 import './ExecutiveLayout.css'
@@ -79,7 +79,7 @@ export const ExecutiveLayout: React.FC<ExecutiveLayoutProps> = ({ children, acti
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', path: '/executive/dashboard', icon: <LayoutDashboard size={19} /> },
-    { id: 'bulk-upload', label: 'Bulk Data Upload', path: '/executive/bulk-upload', icon: <FileSpreadsheet size={19} /> },
+    { id: 'bulk-upload', label: 'Bulk Data Upload', path: '/executive/bulk-upload', icon: <FileSpreadsheet, XCircle size={19} /> },
     { id: 'deals', label: 'Deals', path: '/executive/deals', icon: <Zap size={19} /> },
     { id: 'loot-deals', label: 'Loot Deals', path: '/executive/loot-deals', icon: <Flame size={19} /> },
     { id: 'stores', label: 'Stores', path: '/executive/stores', icon: <Store size={19} /> },
@@ -88,6 +88,7 @@ export const ExecutiveLayout: React.FC<ExecutiveLayoutProps> = ({ children, acti
     { id: 'categories', label: 'Categories', path: '/executive/categories', icon: <FolderTree size={19} /> },
     { id: 'advertisements', label: 'Advertisements', path: '/executive/advertisements', icon: <Megaphone size={19} /> },
     { id: 'verification', label: 'Link & Coupon Verification', path: '/executive/verification', icon: <ShieldCheck size={19} /> },
+    { id: 'rejections', label: 'Rejection Inbox', path: '/executive/rejections', icon: <XCircle size={19} /> },
     { id: 'tickets', label: 'Flagged Issues & Tickets', path: '/executive/tickets', icon: <AlertTriangle size={19} /> },
   ]
 
