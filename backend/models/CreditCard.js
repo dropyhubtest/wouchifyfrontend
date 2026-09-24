@@ -47,6 +47,7 @@ const creditCardSchema = new mongoose.Schema({
     default: 'active' 
   },
   isFeatured: { type: Boolean, default: false },
+  showOnHome: { type: Boolean, default: true },
   isVerified: { type: Boolean, default: true },
   applyCount: { type: Number, default: 0 },
   viewCount: { type: Number, default: 0 },

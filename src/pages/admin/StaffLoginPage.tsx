@@ -42,8 +42,10 @@ export const StaffLoginPage: React.FC = () => {
       const data = await response.json()
       
       if (response.ok) {
-        localStorage.setItem('staffToken', data.token)
-        localStorage.setItem('staffUser', JSON.stringify(data.user))
+        sessionStorage.setItem('staffToken', data.token)
+        sessionStorage.setItem('staffUser', JSON.stringify(data.user))
+        localStorage.removeItem('staffToken')
+        localStorage.removeItem('staffUser')
         
         // Redirect to their respective dashboard
         const dashboardUrl = `/${role.replace('_', '-')}/dashboard`
@@ -55,8 +57,10 @@ export const StaffLoginPage: React.FC = () => {
     } catch (err: any) {
       // Temporary dev fallback if backend is down
       if (email === `${role}@wouchify.com` && password === 'staff123') {
-        localStorage.setItem('staffToken', 'dev-token')
-        localStorage.setItem('staffUser', JSON.stringify({ email, role }))
+        sessionStorage.setItem('staffToken', 'dev-token')
+        sessionStorage.setItem('staffUser', JSON.stringify({ email, role }))
+        localStorage.removeItem('staffToken')
+        localStorage.removeItem('staffUser')
         const dashboardUrl = `/${role.replace('_', '-')}/dashboard`
         window.history.pushState({}, '', dashboardUrl)
         window.dispatchEvent(new PopStateEvent('popstate'))

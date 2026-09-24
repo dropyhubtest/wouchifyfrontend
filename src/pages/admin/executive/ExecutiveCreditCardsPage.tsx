@@ -81,6 +81,7 @@ interface CreditCard {
   submissionStatus?: 'draft' | 'pending_approval' | 'approved' | 'rejected'
   isFeatured: boolean
   isVerified: boolean
+  showOnHome?: boolean
   applyCount: number
   viewCount: number
   addedOn: string
@@ -117,7 +118,7 @@ const EMPTY_FORM: Partial<CreditCard> = {
   offerStartDate: new Date().toISOString().split('T')[0],
   offerExpiryDate: '',
   lastUpdated: new Date().toISOString().split('T')[0],
-  status: 'active', isFeatured: false, isVerified: false,
+  status: 'active', isFeatured: false, isVerified: false, showOnHome: true,
   applyCount: 0, viewCount: 0,
 }
 
@@ -665,6 +666,7 @@ const CardFormModal: React.FC<CardFormProps> = ({ editing, onClose, onSave }) =>
       status: (form.status as CardStatus) ?? 'active',
       isFeatured: form.isFeatured ?? false,
       isVerified: form.isVerified ?? false,
+      showOnHome: form.showOnHome !== false,
       applyCount: editing?.applyCount ?? 0,
       viewCount: editing?.viewCount ?? 0,
       addedOn: editing?.addedOn ?? now,
@@ -1039,7 +1041,7 @@ const CardFormModal: React.FC<CardFormProps> = ({ editing, onClose, onSave }) =>
 
                 {/* Toggles */}
                 <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', background: '#f8fafc', padding: '12px 16px', borderRadius: 8, border: '1px solid #e2e8f0' }}>
-                  {([['isVerified', '✓ Verified Card'], ['isFeatured', '⭐ Featured Card']] as [keyof CreditCard, string][]).map(([key, label]) => (
+                  {([['showOnHome', '🏠 Show on Homepage'], ['isVerified', '✓ Verified Card'], ['isFeatured', '⭐ Featured Card']] as [keyof CreditCard, string][]).map(([key, label]) => (
                     <label key={key} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.88rem', fontWeight: 600, color: '#334155' }}>
                       <input type="checkbox" checked={(form[key] as boolean) ?? false} onChange={e => set(key, e.target.checked)}
                         style={{ width: 16, height: 16, accentColor: '#6366f1' }} />
@@ -1308,6 +1310,7 @@ export const ExecutiveCreditCardsPage: React.FC = () => {
             submissionStatus: (c.submissionStatus || 'approved') as any,
             isFeatured: Boolean(c.isFeatured),
             isVerified: Boolean(c.isVerified !== false),
+            showOnHome: Boolean(c.showOnHome !== false),
             applyCount: c.applyCount || (parseInt(String(c.userCount || '').replace(/[^0-9]/g, '')) * 100) || 0,
             viewCount: c.viewCount || 0,
             addedOn: c.createdAt ? new Date(c.createdAt).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10)
@@ -1376,6 +1379,19 @@ export const ExecutiveCreditCardsPage: React.FC = () => {
   const openAdd = () => { setEditing(null); setIsFormOpen(true) }
   const openEdit = (c: CreditCard) => { setEditing(c); setIsFormOpen(true) }
 
+  const handleToggleShowOnHome = async (card: CreditCard, isChecked: boolean) => {
+    const updated = cards.map(c => c.id === card.id ? { ...c, showOnHome: isChecked } : c)
+    setCards(updated)
+    try {
+      await adminApi.updateCreditCard(card.id, {
+        showOnHome: isChecked
+      })
+      window.dispatchEvent(new CustomEvent('wouchify_credit_cards_updated'))
+    } catch (err) {
+      console.warn('Failed to update showOnHome for card', err)
+    }
+  }
+
   const handleSave = (data: CreditCard) => {
     if (editing) {
       const updatedData: CreditCard = {
@@ -1405,7 +1421,8 @@ export const ExecutiveCreditCardsPage: React.FC = () => {
         offerExpiryDate: data.offerExpiryDate,
         status: data.status,
         isFeatured: data.isFeatured,
-        isVerified: data.isVerified
+        isVerified: data.isVerified,
+        showOnHome: data.showOnHome !== false
       }).then(() => {
         fetchLiveCards()
       }).catch(console.warn)
@@ -1439,7 +1456,8 @@ export const ExecutiveCreditCardsPage: React.FC = () => {
         offerExpiryDate: data.offerExpiryDate,
         status: data.status,
         isFeatured: data.isFeatured,
-        isVerified: data.isVerified
+        isVerified: data.isVerified,
+        showOnHome: data.showOnHome !== false
       }).then(res => {
         const createdId = res._id || res.id || res.entity?._id || data.id
         setCards(prev => [{ ...pendingData, id: String(createdId) }, ...prev.filter(c => c.id !== data.id)])
@@ -1577,6 +1595,7 @@ export const ExecutiveCreditCardsPage: React.FC = () => {
                 <th>Offer Expiry <span style={{ color: '#ef4444', fontSize: '0.7rem' }}>*</span></th>
                 <th>Applies / Views</th>
                 <th>Tier</th>
+                <th style={{ width: '90px', textAlign: 'center' }}>Home Page</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
@@ -1676,6 +1695,18 @@ export const ExecutiveCreditCardsPage: React.FC = () => {
                     {/* Tier */}
                     <td>
                       <span style={{ background: `${tc}18`, color: tc, borderRadius: 6, padding: '3px 10px', fontSize: '0.72rem', fontWeight: 700 }}>{card.tier}</span>
+                    </td>
+                    {/* Home Page */}
+                    <td style={{ textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+                      <label style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600, color: (card.showOnHome !== false) ? '#15803d' : '#94a3b8' }}>
+                        <input 
+                          type="checkbox"
+                          checked={card.showOnHome !== false}
+                          onChange={(e) => handleToggleShowOnHome(card, e.target.checked)}
+                          style={{ cursor: 'pointer', width: '15px', height: '15px' }}
+                        />
+                        <span>{card.showOnHome !== false ? 'Visible' : 'Hidden'}</span>
+                      </label>
                     </td>
                     {/* Status */}
                     <td>

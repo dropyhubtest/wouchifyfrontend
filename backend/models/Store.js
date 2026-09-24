@@ -11,6 +11,8 @@ const storeSchema = new mongoose.Schema({
   cardBg: { type: String, default: '#ffffff' },
   badgeBg: { type: String, default: '#f1f5f9' },
   href: { type: String, default: '' },
+  isFeatured: { type: Boolean, default: false },
+  showOnHome: { type: Boolean, default: true },
   status: { type: String, default: 'active' },
   submissionStatus: { type: String, default: 'approved' },
   opsManagerApproval: { type: String, default: 'Approved' },

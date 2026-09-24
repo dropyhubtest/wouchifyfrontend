@@ -39,9 +39,10 @@ const lootDealSchema = new mongoose.Schema({
   telegramAlert: { type: Boolean, default: false },
   pushNotification: { type: Boolean, default: false },
   isFeatured: { type: Boolean, default: false },
+  showOnHome: { type: Boolean, default: true },
   isVerified: { type: Boolean, default: true },
   isBestSelling: { type: Boolean, default: false },
-  sectionPlacement: { type: String, enum: ['favourite', 'best_selling', 'both'], default: 'favourite' },
+  sectionPlacement: { type: String, enum: ['favourite', 'best_selling', 'both', 'none'], default: 'favourite' },
   publishAt: { type: Date, default: Date.now },
   expiresAt: { type: Date },
   clicks: { type: Number, default: 0 }

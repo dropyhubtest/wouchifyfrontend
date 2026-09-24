@@ -16,6 +16,8 @@ const advertisementSchema = new mongoose.Schema({
     default: 'CPC' 
   },
   budgetOrRate: { type: String, default: '' },
+  isFeatured: { type: Boolean, default: false },
+  showOnHome: { type: Boolean, default: true },
   status: { 
     type: String, 
     enum: ['active', 'inactive', 'paused', 'scheduled', 'pending'], 

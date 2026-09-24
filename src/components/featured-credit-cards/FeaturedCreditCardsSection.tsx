@@ -1,20 +1,51 @@
 import React, { useState, useEffect } from 'react'
 import { FEATURED_CREDIT_CARDS } from '../../data/featuredCreditCards'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
+import { adminApi } from '../../services/adminApi'
+import iciciBankMark from '../../assets/credit-cards/icici-bank-mark.png'
+import iciciPlatinumCard from '../../assets/credit-cards/icici-platinum-card.png'
 import './FeaturedCreditCardsSection.css'
 
 const DOT_LEFT_POSITIONS = [695, 783, 871, 959, 1047]
 
 export const FeaturedCreditCardsSection: React.FC = () => {
   const sectionScale = useDesktopScale()
+  const [cards, setCards] = useState<any[]>(FEATURED_CREDIT_CARDS)
   const [activeIndex, setActiveIndex] = useState<number>(0)
 
   useEffect(() => {
+    adminApi.getPublicCreditCards().then(data => {
+      if (Array.isArray(data) && data.length > 0) {
+        const filtered = data.filter((c: any) => c.showOnHome !== false && (c.status === 'active' || c.status === 'featured' || !c.status))
+        if (filtered.length > 0) {
+          const merged = filtered.map((c: any, idx: number) => {
+            const staticFallback = FEATURED_CREDIT_CARDS.find(fc => fc.id === c.id || fc.heading?.toLowerCase() === (c.cardName || c.name || '').toLowerCase()) || FEATURED_CREDIT_CARDS[idx % FEATURED_CREDIT_CARDS.length]
+            const rawCardImg = c.imageUrl || c.cardImage
+            const rawBankMark = c.bankLogoUrl || c.bankMark
+            return {
+              ...staticFallback,
+              id: c._id || c.id || staticFallback.id,
+              heading: c.cardName || c.name || staticFallback.heading,
+              bank: c.bank || staticFallback.bank,
+              description: c.welcomeOffer || c.rewardRate || staticFallback.description,
+              cardImage: (rawCardImg && (rawCardImg.startsWith('http') || rawCardImg.startsWith('data:') || rawCardImg.startsWith('/'))) ? rawCardImg : staticFallback.cardImage,
+              bankMark: (rawBankMark && (rawBankMark.startsWith('http') || rawBankMark.startsWith('data:') || rawBankMark.startsWith('/'))) ? rawBankMark : staticFallback.bankMark,
+              href: c.affiliateLink || staticFallback.href
+            }
+          })
+          setCards(merged)
+        }
+      }
+    }).catch(console.warn)
+  }, [])
+
+  useEffect(() => {
+    if (cards.length <= 1) return
     const interval = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % FEATURED_CREDIT_CARDS.length)
+      setActiveIndex((prev) => (prev + 1) % cards.length)
     }, 4000)
     return () => clearInterval(interval)
-  }, [])
+  }, [cards.length])
 
   return (
     <section
@@ -45,19 +76,23 @@ export const FeaturedCreditCardsSection: React.FC = () => {
             className="featured-credit-cards__track"
             style={{ transform: `translateX(-${activeIndex * 1920}px)` }}
           >
-            {FEATURED_CREDIT_CARDS.map((card) => (
+            {cards.map((card) => (
               <div key={card.id} className="featured-credit-cards__slide">
                 {/* Active Credit Card Data Content */}
                 <img
-                  src={card.bankMark}
-                  alt={`${card.bank} logo mark`}
+                  src={card.bankMark || iciciBankMark}
+                  alt={`${card.bank || 'Bank'} logo`}
                   className="featured-credit-cards__bank-mark"
-                  width="273"
-                  height="273"
+                  onError={(e) => {
+                    const target = e.currentTarget
+                    if (target.src !== iciciBankMark) {
+                      target.src = iciciBankMark
+                    }
+                  }}
                 />
 
                 <h3 className="featured-credit-cards__bank-heading">
-                  {card.heading}
+                  {card.heading || card.bank}
                 </h3>
 
                 <p className="featured-credit-cards__offer-description">
@@ -66,16 +101,22 @@ export const FeaturedCreditCardsSection: React.FC = () => {
 
                 {/* Clickable Credit Card Anchor */}
                 <a
-                  href={card.href}
-                  aria-label={`View ${card.heading} credit card offer`}
+                  href={card.href || '/credit-cards'}
+                  aria-label={`View ${card.heading || 'credit card'} offer`}
                   className="featured-credit-cards__card-link"
                 >
                   <img
-                    src={card.cardImage}
-                    alt={`${card.heading} credit card`}
+                    src={card.cardImage || iciciPlatinumCard}
+                    alt={`${card.heading || 'Credit card'}`}
                     className="featured-credit-cards__card-image"
                     width="613"
                     height="561"
+                    onError={(e) => {
+                      const target = e.currentTarget
+                      if (target.src !== iciciPlatinumCard) {
+                        target.src = iciciPlatinumCard
+                      }
+                    }}
                   />
                 </a>
               </div>
@@ -83,10 +124,11 @@ export const FeaturedCreditCardsSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Pagination Dots (5 total matching Figma) */}
-        {DOT_LEFT_POSITIONS.map((leftPos, index) => {
+        {/* Pagination Dots */}
+        {cards.map((_, index) => {
+          if (index >= 5) return null
+          const leftPos = DOT_LEFT_POSITIONS[index] || (695 + index * 88)
           const isActive = index === activeIndex
-          const hasDataForIndex = index < FEATURED_CREDIT_CARDS.length
           return (
             <button
               key={index}
@@ -97,11 +139,7 @@ export const FeaturedCreditCardsSection: React.FC = () => {
               style={{ left: `${leftPos}px` }}
               aria-label={`Go to credit card slide ${index + 1}`}
               aria-current={isActive ? 'true' : undefined}
-              onClick={() => {
-                if (hasDataForIndex) {
-                  setActiveIndex(index)
-                }
-              }}
+              onClick={() => setActiveIndex(index)}
             />
           )
         })}

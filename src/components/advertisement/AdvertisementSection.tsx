@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { adminApi } from '../../services/adminApi'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
-import wouchifyWordmark from '../../assets/mobile/wouchify-mobile-cropped-v2.png'
 import defaultAdFallback from '../../assets/advertisement/image-7.png'
 import './AdvertisementSection.css'
 
@@ -28,18 +27,20 @@ export const AdvertisementSection: React.FC = () => {
       const res = await adminApi.getPublicAdvertisements({ status: 'active' })
       if (Array.isArray(res) && res.length > 0) {
         // Map backend advertisements
-        const liveItems: LiveAdItem[] = res.map((a: any, i: number) => ({
-          id: a._id || a.id || `live-ad-${i}`,
-          title: a.title || 'Wouchify Partner Promotion',
-          advertiser: a.advertiser || 'Sponsored',
-          imageUrl: a.imageUrl || defaultAdFallback,
-          targetLink: a.targetLink || '/offers/sale',
-          alt: a.title || 'Advertisement Banner',
-          ctaText: a.ctaText || 'Learn More',
-          badgeText: a.badgeText || 'SPONSORED',
-          placement: a.placement,
-          status: a.status
-        }))
+        const liveItems: LiveAdItem[] = res
+          .filter((a: any) => a.showOnHome !== false)
+          .map((a: any, i: number) => ({
+            id: a._id || a.id || `live-ad-${i}`,
+            title: a.title || 'Wouchify Partner Promotion',
+            advertiser: a.advertiser || 'Sponsored',
+            imageUrl: a.imageUrl || defaultAdFallback,
+            targetLink: a.targetLink || '/offers/sale',
+            alt: a.title || 'Advertisement Banner',
+            ctaText: a.ctaText || 'Learn More',
+            badgeText: a.badgeText || 'SPONSORED',
+            placement: a.placement,
+            status: a.status
+          }))
         setAds(liveItems)
       } else {
         // Fallback banner when no ads configured
@@ -139,11 +140,6 @@ export const AdvertisementSection: React.FC = () => {
               className="advertisement__banner-link"
               onClick={() => handleAdClick(currentAd)}
             >
-              <img
-                className="advertisement__brand-logo"
-                src={wouchifyWordmark}
-                alt="Wouchify"
-              />
               <img
                 src={currentAd.imageUrl}
                 alt={currentAd.alt || currentAd.title}

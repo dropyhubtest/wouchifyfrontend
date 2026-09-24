@@ -122,12 +122,15 @@
 
 .featured-credit-cards__bank-mark {
   position: absolute;
-  left: 13px;
-  top: 112px;
-  width: 273px;
-  height: 273px;
+  left: 78px;
+  top: 190px;
+  max-width: 260px;
+  max-height: 90px;
+  width: auto;
+  height: auto;
   display: block;
   object-fit: contain;
+  object-position: left center;
   z-index: 1;
   pointer-events: none;
   user-select: none;
@@ -136,27 +139,29 @@
 .featured-credit-cards__bank-heading {
   position: absolute;
   left: 78px;
-  top: 325px;
+  top: 295px;
   margin: 0;
   padding: 0;
   color: #000000;
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 50px;
+  font-size: 42px;
   font-weight: 800;
-  line-height: 50px;
+  line-height: 48px;
+  max-width: 780px;
   z-index: 2;
 }
 
 .featured-credit-cards__offer-description {
   position: absolute;
   left: 78px;
-  top: 396px;
-  width: 781px;
+  top: 365px;
+  width: 780px;
+  max-width: 780px;
   margin: 0;
   padding: 0;
   color: #2A3189;
   font-family: var(--font-family-primary, 'Poppins', sans-serif);
-  font-size: 25px;
+  font-size: 22px;
   font-weight: 600;
   line-height: 32px;
   z-index: 2;

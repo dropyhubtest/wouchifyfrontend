@@ -4,33 +4,31 @@ const API_BASE = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' 
 const getAuthHeaders = (): HeadersInit => {
   let token = '';
   const path = typeof window !== 'undefined' ? window.location.pathname : '';
+  const getItem = (key: string) => {
+    if (typeof window === 'undefined') return null;
+    return sessionStorage.getItem(key) || localStorage.getItem(key);
+  };
 
   if (path.startsWith('/executive')) {
-    const staffUserStr = typeof localStorage !== 'undefined' ? localStorage.getItem('staffUser') : null;
+    const staffUserStr = getItem('staffUser');
     const staffUser = staffUserStr ? JSON.parse(staffUserStr) : null;
-    if (staffUser?.role === 'executive' && localStorage.getItem('staffToken')) {
-      token = localStorage.getItem('staffToken') || '';
+    if (staffUser?.role === 'executive' && getItem('staffToken')) {
+      token = getItem('staffToken') || '';
     } else {
-      token = (typeof localStorage !== 'undefined' && localStorage.getItem('executiveToken')) || 'dev-executive-token';
+      token = getItem('adminToken') || getItem('executiveToken') || 'dev-executive-token';
     }
   } else if (path.startsWith('/operations') || path.startsWith('/operational-manager')) {
-    const staffUserStr = typeof localStorage !== 'undefined' ? localStorage.getItem('staffUser') : null;
+    const staffUserStr = getItem('staffUser');
     const staffUser = staffUserStr ? JSON.parse(staffUserStr) : null;
-    if (staffUser?.role === 'operational_manager' && localStorage.getItem('staffToken')) {
-      token = localStorage.getItem('staffToken') || '';
+    if (staffUser?.role === 'operational_manager' && getItem('staffToken')) {
+      token = getItem('staffToken') || '';
     } else {
-      token = (typeof localStorage !== 'undefined' && localStorage.getItem('opsToken')) || 'dev-ops-token';
+      token = getItem('adminToken') || getItem('opsToken') || 'dev-ops-token';
     }
   } else if (path.startsWith('/manager') || path.startsWith('/admin')) {
-    token = (typeof localStorage !== 'undefined' && (localStorage.getItem('adminToken') || localStorage.getItem('managerToken'))) || 'dev-admin-token';
+    token = getItem('adminToken') || getItem('staffToken') || getItem('managerToken') || 'dev-admin-token';
   } else {
-    token =
-      (typeof localStorage !== 'undefined' &&
-        (localStorage.getItem('staffToken') ||
-          localStorage.getItem('adminToken') ||
-          localStorage.getItem('managerToken') ||
-          localStorage.getItem('token'))) ||
-      'dev-ops-token';
+    token = getItem('staffToken') || getItem('adminToken') || getItem('managerToken') || '';
   }
 
   return {

@@ -53,6 +53,7 @@ interface ManagedStore {
   badgeBg: string
   status: StoreStatus
   isFeatured: boolean
+  showOnHome?: boolean
   clicks: number
   totalDeals: number
   addedOn?: string
@@ -74,6 +75,7 @@ const EMPTY_FORM: Partial<ManagedStore> = {
   badgeBg: '#B3DCFA',
   status: 'active',
   isFeatured: false,
+  showOnHome: true,
 }
 
 /* ============================================================
@@ -371,6 +373,20 @@ const StoreFormModal: React.FC<StoreFormModalProps> = ({ editing, onClose, onSav
                       />
                     ))}
                   </div>
+                </div>
+
+                {/* Show on Homepage toggle */}
+                <div className="form-group" style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 4 }}>
+                  <input
+                    type="checkbox"
+                    id="store-show-home"
+                    checked={form.showOnHome ?? true}
+                    onChange={e => set('showOnHome', e.target.checked)}
+                    style={{ width: 18, height: 18, accentColor: '#16a34a' }}
+                  />
+                  <label htmlFor="store-show-home" style={{ margin: 0, cursor: 'pointer', fontWeight: 600 }}>
+                    🏠 Show on Homepage Top Stores Section
+                  </label>
                 </div>
 
                 {/* Featured toggle */}
@@ -793,6 +809,7 @@ export const ExecutiveStoresPage: React.FC = () => {
           badgeBg: s.badgeBg || '#B3DCFA',
           status: (s.status as StoreStatus) || 'active',
           isFeatured: Boolean(s.isFeatured),
+          showOnHome: Boolean(s.showOnHome !== false),
           clicks: s.clicks || 0,
           totalDeals: s.totalDeals || 0,
           addedOn: s.createdAt ? new Date(s.createdAt).toISOString().split('T')[0] : 'Recently'
@@ -869,9 +886,22 @@ export const ExecutiveStoresPage: React.FC = () => {
   const openEdit = (s: ManagedStore) => { setEditing(s); setIsFormOpen(true) }
   const [storeAlert, setStoreAlert] = useState<{ title: string; message: string; variant?: 'warning' | 'danger' | 'info' | 'success' } | null>(null)
 
+  const handleToggleShowOnHome = async (store: ManagedStore, isChecked: boolean) => {
+    const updated = stores.map(s => s.id === store.id ? { ...s, showOnHome: isChecked } : s)
+    setStores(updated)
+    try {
+      await adminApi.updateStore(store._id || store.id, {
+        showOnHome: isChecked
+      })
+      window.dispatchEvent(new CustomEvent('wouchify_stores_updated'))
+    } catch (err) {
+      console.warn('Failed to update showOnHome for store', err)
+    }
+  }
+
   const handleSave = async (data: ManagedStore) => {
     try {
-      const payload = { ...data, logo: data.logoUrl }
+      const payload = { ...data, logo: data.logoUrl, showOnHome: data.showOnHome !== false }
       if (editing && (editing._id || editing.id)) {
         await adminApi.updateStore(editing._id || editing.id, payload)
       } else {
@@ -1063,6 +1093,7 @@ export const ExecutiveStoresPage: React.FC = () => {
                   <th>Affiliate Link</th>
                   <th>Clicks</th>
                   <th>Deals</th>
+                  <th style={{ width: '90px', textAlign: 'center' }}>Home Page</th>
                   <th>Status</th>
                   <th>Added</th>
                   <th>Actions</th>
@@ -1127,6 +1158,17 @@ export const ExecutiveStoresPage: React.FC = () => {
                     </td>
                     <td style={{ fontWeight: 600, color: '#0f172a' }}>{store.clicks.toLocaleString()}</td>
                     <td style={{ fontWeight: 600, color: '#0f172a' }}>{store.totalDeals}</td>
+                    <td style={{ textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+                      <label style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600, color: (store.showOnHome !== false) ? '#15803d' : '#94a3b8' }}>
+                        <input 
+                          type="checkbox"
+                          checked={store.showOnHome !== false}
+                          onChange={(e) => handleToggleShowOnHome(store, e.target.checked)}
+                          style={{ cursor: 'pointer', width: '15px', height: '15px' }}
+                        />
+                        <span>{store.showOnHome !== false ? 'Visible' : 'Hidden'}</span>
+                      </label>
+                    </td>
                     <td>
                       <span className={statusClass(store.status)} style={{ fontSize: '0.72rem' }}>
                         {statusLabel(store.status)}

@@ -35,6 +35,28 @@ export const BrandRewardCard: React.FC<BrandRewardCardProps> = ({ brand }) => {
     ? { backgroundColor: brand.logoBgColor }
     : {}
 
+  // Cleanly parse dynamic cashback strings (e.g. "Upto 5% rewards", "8% cashback", "15%")
+  const rawReward = (brand.rewardValue || '').trim()
+  const rawLabel = (brand.rewardLabel || '').trim()
+
+  let hasUpTo = true
+  let cleanValue = rawReward
+  let cleanLabel = rawLabel
+
+  if (rawReward.toLowerCase().includes('upto') || rawReward.toLowerCase().includes('up to')) {
+    hasUpTo = true
+    cleanValue = rawReward.replace(/up\s*to/gi, '').trim()
+  }
+
+  // If cleanValue ends with words like 'rewards' or 'cashback', extract it as the label
+  if (/rewards?$/i.test(cleanValue)) {
+    cleanLabel = cleanLabel || 'REWARDS'
+    cleanValue = cleanValue.replace(/rewards?$/i, '').trim()
+  } else if (/cashbacks?$/i.test(cleanValue)) {
+    cleanLabel = cleanLabel || 'CASHBACK'
+    cleanValue = cleanValue.replace(/cashbacks?$/i, '').trim()
+  }
+
   return (
     <a
       className="brand-reward-card"
@@ -86,10 +108,14 @@ export const BrandRewardCard: React.FC<BrandRewardCardProps> = ({ brand }) => {
           />
         </div>
 
-        {/* 6. Reward Copy Positions */}
-        <div className="brand-card__reward-upto">UP TO</div>
-        <div className="brand-card__reward-value">{brand.rewardValue}</div>
-        <div className="brand-card__reward-label">{brand.rewardLabel}</div>
+        {/* 6. Clean Reward Copy Area */}
+        <div className="brand-card__reward-content">
+          {hasUpTo && <div className="brand-card__reward-upto">UP TO</div>}
+          <div className="brand-card__reward-row">
+            <span className="brand-card__reward-value">{cleanValue}</span>
+            {cleanLabel && <span className="brand-card__reward-label">{cleanLabel}</span>}
+          </div>
+        </div>
       </div>
     </a>
   )

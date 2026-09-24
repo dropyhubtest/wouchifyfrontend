@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   MOBILE_RECENT_DEALS,
   type MobileRecentDealItem,
 } from '../../data/mobileRecentDeals'
+import { getPublicDeals } from '../../services/api'
 import './MobileRecentDeals.css'
 
 interface MobileRecentDealCardProps {
@@ -27,6 +28,29 @@ const MobileRecentDealCard: React.FC<MobileRecentDealCardProps> = ({ deal }) => 
 }
 
 export const MobileRecentDeals: React.FC = () => {
+  const [deals, setDeals] = useState<MobileRecentDealItem[]>(MOBILE_RECENT_DEALS)
+
+  useEffect(() => {
+    getPublicDeals().then(data => {
+      if (Array.isArray(data) && data.length > 0) {
+        const filtered = data.filter((d: any) => 
+          d.showOnHome !== false && 
+          d.sectionPlacement !== 'none' && 
+          (d.sectionPlacement === 'favourite' || d.sectionPlacement === 'both' || !d.sectionPlacement)
+        )
+        if (filtered.length > 0) {
+          const mapped: MobileRecentDealItem[] = filtered.map((d: any, idx: number) => ({
+            id: d._id || d.id || `mobile-recent-${idx}`,
+            image: d.productImage || d.image || (MOBILE_RECENT_DEALS[idx % MOBILE_RECENT_DEALS.length]?.image),
+            alt: d.title || d.name || 'Recent Deal',
+            href: d.ctaHref || d.link || `/deal/${d.id}`
+          }))
+          setDeals(mapped)
+        }
+      }
+    }).catch(console.warn)
+  }, [])
+
   return (
     <section className="mobile-recent-deals" aria-label="Recent Deals">
       <div className="mobile-recent-deals-heading">
@@ -36,7 +60,7 @@ export const MobileRecentDeals: React.FC = () => {
 
       <div className="mobile-recent-deals__row">
         <div className="mobile-recent-deals__track">
-          {MOBILE_RECENT_DEALS.map((deal) => (
+          {deals.map((deal) => (
             <MobileRecentDealCard key={deal.id} deal={deal} />
           ))}
         </div>

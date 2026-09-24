@@ -209,41 +209,54 @@
       Reward Label: left var(--reward-label-x), top 342px
    ========================================================================== */
 
-.brand-card__reward-upto {
+.brand-card__reward-content {
   position: absolute;
-  left: 142px;
-  top: 304px;
-  font-family: var(--font-family-primary);
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 12px;
-  color: var(--color-white);
-  white-space: nowrap;
+  left: 136px;
+  top: 298px;
+  right: 16px;
+  bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   z-index: 2;
+  pointer-events: none;
+}
+
+.brand-card__reward-upto {
+  font-family: var(--font-family-primary);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 12px;
+  letter-spacing: 0.5px;
+  color: #9498C4;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.brand-card__reward-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: nowrap;
 }
 
 .brand-card__reward-value {
-  position: absolute;
-  left: var(--percentage-x, 138px);
-  top: 322px;
   font-family: var(--font-family-primary);
-  font-size: 42px;
-  font-weight: 700;
-  line-height: 42px;
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 34px;
   color: var(--color-white);
   white-space: nowrap;
-  z-index: 2;
+  letter-spacing: -0.5px;
 }
 
 .brand-card__reward-label {
-  position: absolute;
-  left: var(--reward-label-x, 227px);
-  top: 342px;
   font-family: var(--font-family-primary);
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 700;
-  line-height: 18px;
-  color: var(--color-white);
+  line-height: 14px;
+  color: #FFFFFF;
+  text-transform: uppercase;
   white-space: nowrap;
-  z-index: 2;
+  letter-spacing: 0.5px;
 }

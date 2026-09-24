@@ -33,52 +33,85 @@ export const ManagerLayout: React.FC<ManagerLayoutProps> = ({
 }) => {
   const [liveCounts, setLiveCounts] = useState({ approvals: 0 })
   const mergedCounts = { ...liveCounts, ...pendingCounts }
-  const [user, setUser] = useState<{ email: string; role: string } | null>(null)
+  const [user, setUser] = useState<{ email: string; role: string } | null>(() => {
+    if (typeof window === 'undefined') return null
+    const adminToken = sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken')
+    const adminUser = sessionStorage.getItem('adminUser') || localStorage.getItem('adminUser')
+    if (adminToken && adminUser) {
+      try {
+        const parsed = JSON.parse(adminUser)
+        if (parsed && (parsed.role === 'manager' || parsed.role === 'admin')) {
+          return parsed
+        }
+      } catch (e) {
+        console.error('Failed to parse admin user', e)
+      }
+    }
+    const staffToken = sessionStorage.getItem('staffToken') || localStorage.getItem('staffToken')
+    const staffUser = sessionStorage.getItem('staffUser') || localStorage.getItem('staffUser')
+    if (staffToken && staffUser) {
+      try {
+        const parsed = JSON.parse(staffUser)
+        if (parsed && (parsed.role === 'manager' || parsed.role === 'admin')) {
+          return parsed
+        }
+      } catch (e) {
+        console.error('Failed to parse staff user', e)
+      }
+    }
+    return null
+  })
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(() => {
     return localStorage.getItem('manager_sidebar_collapsed') === 'true'
   })
 
   useEffect(() => {
+    if (!user) {
+      sessionStorage.removeItem('adminToken')
+      sessionStorage.removeItem('adminUser')
+      sessionStorage.removeItem('staffToken')
+      sessionStorage.removeItem('staffUser')
+      localStorage.removeItem('adminToken')
+      localStorage.removeItem('adminUser')
+      localStorage.removeItem('staffToken')
+      localStorage.removeItem('staffUser')
+      window.history.replaceState({}, '', '/manager/login')
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    }
+  }, [user])
+
+  useEffect(() => {
     const fetchLiveCounts = async () => {
       try {
         const [subs] = await Promise.all([
-          fetch('/api/submissions?status=Pending%20Approval', { headers: { Authorization: `Bearer ${localStorage.getItem('staffToken') || localStorage.getItem('adminToken') || 'dev-manager'}` } }).then(r => r.ok ? r.json() : []).catch(() => [])
+          fetch('/api/submissions?status=Pending%20Approval', { headers: { Authorization: `Bearer ${sessionStorage.getItem('staffToken') || localStorage.getItem('staffToken') || sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken') || 'dev-manager'}` } }).then(r => r.ok ? r.json() : []).catch(() => [])
         ])
         const apprs = Array.isArray(subs) ? subs.filter((s: any) => s.status === 'Pending Approval' || s.status === 'Pending Review' || s.status === 'pending').length : 0
         setLiveCounts({ approvals: apprs })
       } catch {}
     }
-    fetchLiveCounts()
-  }, [])
+    if (user) {
+      fetchLiveCounts()
+    }
+  }, [user])
 
   useEffect(() => {
     localStorage.setItem('manager_sidebar_collapsed', isCollapsed.toString())
   }, [isCollapsed])
 
-  useEffect(() => {
-    const token = localStorage.getItem('adminToken') || localStorage.getItem('token')
-    const userData = localStorage.getItem('adminUser') || localStorage.getItem('user')
-    
-    if (!token || !userData) {
-      window.history.pushState({}, '', '/manager/login')
-      window.dispatchEvent(new PopStateEvent('popstate'))
-      return
-    }
-
-    try {
-      setUser(JSON.parse(userData))
-    } catch {
-      window.history.pushState({}, '', '/manager/login')
-      window.dispatchEvent(new PopStateEvent('popstate'))
-    }
-  }, [])
-
   const handleLogout = () => {
+    sessionStorage.removeItem('adminToken')
+    sessionStorage.removeItem('adminUser')
+    sessionStorage.removeItem('staffToken')
+    sessionStorage.removeItem('staffUser')
     localStorage.removeItem('adminToken')
     localStorage.removeItem('adminUser')
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+    localStorage.removeItem('staffToken')
+    localStorage.removeItem('staffUser')
+    setUser(null)
     window.history.pushState({}, '', '/manager/login')
     window.dispatchEvent(new PopStateEvent('popstate'))
   }

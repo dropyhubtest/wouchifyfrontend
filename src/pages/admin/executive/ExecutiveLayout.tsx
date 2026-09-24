@@ -28,45 +28,54 @@ interface ExecutiveLayoutProps {
 export const ExecutiveLayout: React.FC<ExecutiveLayoutProps> = ({ children, activeMenu }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
-  const [user, setUser] = useState<any>(null)
-
-  useEffect(() => {
-    // Check authentication
-    const staffToken = localStorage.getItem('staffToken')
-    const adminToken = localStorage.getItem('adminToken')
-    const staffUserStr = localStorage.getItem('staffUser')
-    const adminUserStr = localStorage.getItem('adminUser')
-
-    if (!staffToken && !adminToken) {
-      window.history.pushState({}, '', '/executive/login')
-      window.dispatchEvent(new PopStateEvent('popstate'))
-      return
-    }
-
-    if (staffUserStr) {
+  const [user, setUser] = useState<any>(() => {
+    if (typeof window === 'undefined') return null
+    const staffToken = sessionStorage.getItem('staffToken') || localStorage.getItem('staffToken')
+    const staffUserStr = sessionStorage.getItem('staffUser') || localStorage.getItem('staffUser')
+    if (staffToken && staffUserStr) {
       try {
-        setUser(JSON.parse(staffUserStr))
-        return
+        const parsed = JSON.parse(staffUserStr)
+        if (parsed && (parsed.role === 'executive' || parsed.role === 'admin')) {
+          return parsed
+        }
       } catch (e) {
         console.error('Failed to parse staff user', e)
       }
     }
-
-    if (adminUserStr) {
+    const adminToken = sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken')
+    const adminUserStr = sessionStorage.getItem('adminUser') || localStorage.getItem('adminUser')
+    if (adminToken && adminUserStr) {
       try {
-        setUser(JSON.parse(adminUserStr))
-        return
+        const parsed = JSON.parse(adminUserStr)
+        if (parsed && parsed.role === 'admin') return parsed
       } catch (e) {
         console.error('Failed to parse admin user', e)
       }
     }
-    window.history.pushState({}, '', '/executive/login')
-    window.dispatchEvent(new PopStateEvent('popstate'))
-  }, [])
+    return null
+  })
+
+  useEffect(() => {
+    if (!user) {
+      sessionStorage.removeItem('staffToken')
+      sessionStorage.removeItem('staffUser')
+      localStorage.removeItem('staffToken')
+      localStorage.removeItem('staffUser')
+      window.history.replaceState({}, '', '/executive/login')
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    }
+  }, [user])
 
   const handleLogout = () => {
+    sessionStorage.removeItem('staffToken')
+    sessionStorage.removeItem('staffUser')
+    sessionStorage.removeItem('adminToken')
+    sessionStorage.removeItem('adminUser')
     localStorage.removeItem('staffToken')
     localStorage.removeItem('staffUser')
+    localStorage.removeItem('adminToken')
+    localStorage.removeItem('adminUser')
+    setUser(null)
     window.history.pushState({}, '', '/executive/login')
     window.dispatchEvent(new PopStateEvent('popstate'))
   }

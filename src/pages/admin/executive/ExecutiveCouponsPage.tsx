@@ -53,6 +53,7 @@ interface Coupon {
   isExclusive: boolean
   isFeatured: boolean
   isVerified: boolean
+  showOnHome?: boolean
   telegramAlert: boolean
   startDate: string
   expiryDate: string
@@ -120,7 +121,7 @@ const EMPTY_FORM: Partial<Coupon> = {
   category: 'Electronics', code: '', couponType: 'percent',
   discount: '', discountValue: 0, minOrder: '', maxDiscount: '',
   affiliateLink: '', status: 'active', isExclusive: false, isFeatured: false,
-  isVerified: true, telegramAlert: false,
+  isVerified: true, showOnHome: true, telegramAlert: false,
   startDate: new Date().toISOString().split('T')[0],
   expiryDate: '', usageCount: 0, totalUses: 0,
 }
@@ -183,10 +184,6 @@ const CodeChip: React.FC<{ code: string }> = ({ code }) => {
 }
 
 /* ============================================================
-   Customer Preview Modal Removed (Replaced by Drawer)
-   ============================================================ */
-
-/* ============================================================
    Add / Edit Modal
    ============================================================ */
 
@@ -233,6 +230,7 @@ const CouponFormModal: React.FC<CouponFormProps> = ({ editing, onClose, onSave }
       isExclusive: form.isExclusive ?? false,
       isFeatured: form.isFeatured ?? false,
       isVerified: form.isVerified ?? true,
+      showOnHome: form.showOnHome !== false,
       telegramAlert: form.telegramAlert ?? false,
       startDate: form.startDate ?? now,
       expiryDate: form.expiryDate!,
@@ -404,6 +402,7 @@ const CouponFormModal: React.FC<CouponFormProps> = ({ editing, onClose, onSave }
                 <label style={{ marginBottom: 8 }}>Badge & Visibility Tags</label>
                 <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', background: '#f8fafc', padding: '12px 16px', borderRadius: 8, border: '1px solid #e2e8f0' }}>
                   {([
+                    ['showOnHome',   '🏠 Show on Homepage'],
                     ['isVerified',   '✓ Verified'],
                     ['isExclusive',  '⭐ Exclusive'],
                     ['isFeatured',   '🔥 Featured'],
@@ -522,6 +521,7 @@ export const ExecutiveCouponsPage: React.FC = () => {
           isExclusive: Boolean(c.isExclusive !== false),
           isFeatured: Boolean(c.isFeatured !== false),
           isVerified: true,
+          showOnHome: Boolean(c.showOnHome !== false),
           telegramAlert: Boolean(c.telegramAlert),
           startDate: c.startDate || new Date().toISOString().slice(0, 10),
           expiryDate: c.expiry || c.expiryDate || new Date(Date.now() + 86400000 * 30).toISOString().slice(0, 10),
@@ -595,6 +595,19 @@ export const ExecutiveCouponsPage: React.FC = () => {
   const openAdd = () => { setEditing(null); setIsFormOpen(true) }
   const openEdit = (c: Coupon) => { setEditing(c); setIsFormOpen(true) }
 
+  const handleToggleShowOnHome = async (coupon: Coupon, isChecked: boolean) => {
+    const updated = coupons.map(c => c.id === coupon.id ? { ...c, showOnHome: isChecked } : c)
+    setCoupons(updated)
+    try {
+      await adminApi.updateCoupon(coupon.id, {
+        showOnHome: isChecked
+      })
+      window.dispatchEvent(new CustomEvent('wouchify_coupons_updated'))
+    } catch (err) {
+      console.warn('Failed to update showOnHome for coupon', err)
+    }
+  }
+
   const handleSave = (data: Coupon) => {
     if (editing) {
       adminApi.updateCoupon(data.id, {
@@ -606,7 +619,8 @@ export const ExecutiveCouponsPage: React.FC = () => {
         status: data.status,
         description: data.description,
         minOrder: data.minOrder,
-        maxDiscount: data.maxDiscount
+        maxDiscount: data.maxDiscount,
+        showOnHome: data.showOnHome !== false
       }).catch(console.warn)
 
       setCoupons(prev => prev.map(c => c.id === data.id ? data : c))
@@ -620,7 +634,8 @@ export const ExecutiveCouponsPage: React.FC = () => {
         status: data.status,
         description: data.description,
         minOrder: data.minOrder,
-        maxDiscount: data.maxDiscount
+        maxDiscount: data.maxDiscount,
+        showOnHome: data.showOnHome !== false
       }).catch(console.warn)
 
       setCoupons(prev => [data, ...prev])
@@ -789,6 +804,7 @@ export const ExecutiveCouponsPage: React.FC = () => {
                 <th>Usage</th>
                 <th>Expiry</th>
                 <th>Flags</th>
+                <th style={{ width: '90px', textAlign: 'center' }}>Home Page</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
@@ -892,6 +908,19 @@ export const ExecutiveCouponsPage: React.FC = () => {
                         {coupon.isFeatured   && <span title="Featured"  style={{ fontSize: '0.72rem', background: '#ede9fe', color: '#7c3aed', borderRadius: 4, padding: '1px 5px' }}>🔥</span>}
                         {coupon.telegramAlert && <span title="Telegram" style={{ fontSize: '0.72rem', background: '#e0f2fe', color: '#0284c7', borderRadius: 4, padding: '1px 5px' }}>📨</span>}
                       </div>
+                    </td>
+
+                    {/* Home Page */}
+                    <td style={{ textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+                      <label style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600, color: (coupon.showOnHome !== false) ? '#15803d' : '#94a3b8' }}>
+                        <input 
+                          type="checkbox"
+                          checked={coupon.showOnHome !== false}
+                          onChange={(e) => handleToggleShowOnHome(coupon, e.target.checked)}
+                          style={{ cursor: 'pointer', width: '15px', height: '15px' }}
+                        />
+                        <span>{coupon.showOnHome !== false ? 'Visible' : 'Hidden'}</span>
+                      </label>
                     </td>
 
                     {/* Status */}

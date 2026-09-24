@@ -30,7 +30,7 @@ export const LiveDataView: React.FC = () => {
       'warranty', 'variantNote', 'howToClaim', 'highlights', 'status', 'submissionStatus', 
       'priority', 'expiry', 'postedAt', 'productImage', 'image', 'images', 'storeLogo', 
       'ctaText', 'ctaHref', 'link', 'badge', 'dealTag', 'verified', 'isVerified', 
-      'isFeatured', 'isBestSelling', 'sectionPlacement', 'publishAt', 'expiresAt', 
+      'isFeatured', 'isBestSelling', 'showOnHome', 'sectionPlacement', 'publishAt', 'expiresAt', 
       'description', 'terms', 'clicks'
     ],
     loot_deals: [
@@ -40,18 +40,18 @@ export const LiveDataView: React.FC = () => {
       'effectivePrice', 'cashback', 'stockClaimedPercent', 'quantityAlert', 'proofNote', 
       'trickSteps', 'terms', 'asinOrSku', 'deliveryInfo', 'rating', 'postedAt', 'image', 
       'images', 'telegramAlert', 'pushNotification', 'isFeatured', 'isVerified', 
-      'isBestSelling', 'sectionPlacement', 'publishAt', 'expiresAt', 'clicks'
+      'isBestSelling', 'showOnHome', 'sectionPlacement', 'publishAt', 'expiresAt', 'clicks'
     ],
     stores: [
       'name', 'slug', 'category', 'logo', 'reward', 'description', 'cardBg', 'badgeBg', 
-      'href', 'status', 'submissionStatus', 'opsManagerApproval', 'managerApproval', 
+      'href', 'status', 'submissionStatus', 'isFeatured', 'showOnHome', 'opsManagerApproval', 'managerApproval', 
       'publishAt', 'expiresAt', 'submittedBy', 'clicks'
     ],
     coupons: [
       'title', 'description', 'store', 'category', 'code', 'couponType', 'discount', 
       'discountValue', 'minOrder', 'maxDiscount', 'affiliateLink', 'status', 
       'submissionStatus', 'opsManagerApproval', 'managerApproval', 'submittedBy', 
-      'isExclusive', 'isFeatured', 'isVerified', 'telegramAlert', 'startDate', 
+      'isExclusive', 'isFeatured', 'isVerified', 'showOnHome', 'telegramAlert', 'startDate', 
       'expiryDate', 'expiry', 'usageCount', 'usageLimit', 'totalUses', 'publishAt', 
       'expiresAt', 'clicks'
     ]
@@ -208,6 +208,26 @@ export const LiveDataView: React.FC = () => {
       } catch (fallbackErr: any) {
         alert(`Error toggling status: ${fallbackErr.message}`)
       }
+    }
+  }
+
+  const handleToggleShowOnHome = async (item: any, isChecked: boolean) => {
+    const id = item.id || item._id
+    try {
+      const newPlacement = isChecked ? (item.sectionPlacement === 'none' ? 'both' : (item.sectionPlacement || 'both')) : 'none'
+      const payload: any = { showOnHome: isChecked }
+      if (activeTab === 'deals' || activeTab === 'loot_deals') {
+        payload.sectionPlacement = newPlacement
+      }
+      
+      if (activeTab === 'deals') await adminApi.updateDeal(id, payload)
+      else if (activeTab === 'loot_deals') await adminApi.updateLootDeal(id, payload)
+      else if (activeTab === 'stores') await adminApi.updateStore(id, payload)
+      else if (activeTab === 'coupons') await adminApi.updateCoupon(id, payload)
+      showToast(isChecked ? 'Item visible on Homepage' : 'Item hidden from Homepage')
+      fetchData(true)
+    } catch (err: any) {
+      alert(`Error updating homepage visibility: ${err.message}`)
     }
   }
 
@@ -475,6 +495,7 @@ export const LiveDataView: React.FC = () => {
                     {activeTab === 'coupons' && <th style={{ width: '100px' }}>Code</th>}
                     {(activeTab === 'deals' || activeTab === 'loot_deals') && <th style={{ width: '100px' }}>Price</th>}
                     <th style={{ width: '180px' }}>Audit Trail</th>
+                    <th style={{ width: '90px', textAlign: 'center' }}>Home Page</th>
                     <th style={{ width: '100px' }}>Status</th>
                     <th style={{ width: '120px', textAlign: 'right' }}>Actions</th>
                   </tr>
@@ -541,6 +562,17 @@ export const LiveDataView: React.FC = () => {
                               </div>
                             ) : null}
                           </div>
+                        </td>
+                        <td style={{ textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+                          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600, color: (item.showOnHome !== false && item.sectionPlacement !== 'none') ? '#15803d' : '#94a3b8' }}>
+                            <input 
+                              type="checkbox"
+                              checked={item.showOnHome !== false && item.sectionPlacement !== 'none'}
+                              onChange={(e) => handleToggleShowOnHome(item, e.target.checked)}
+                              style={{ cursor: 'pointer', width: '15px', height: '15px' }}
+                            />
+                            <span>{item.showOnHome !== false && item.sectionPlacement !== 'none' ? 'Visible' : 'Hidden'}</span>
+                          </label>
                         </td>
                         <td>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: isActive ? '#059669' : '#94a3b8', fontWeight: 600, fontSize: '0.8rem' }}>

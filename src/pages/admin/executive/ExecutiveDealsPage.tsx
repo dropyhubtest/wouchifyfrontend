@@ -70,7 +70,8 @@ export interface Deal {
   isFeatured?: boolean
   isVerified?: boolean
   isBestSelling?: boolean
-  sectionPlacement?: 'favourite' | 'best_selling' | 'both'
+  showOnHome?: boolean
+  sectionPlacement?: 'favourite' | 'best_selling' | 'both' | 'none'
   postedAt: string
   expiresAt: string
   description: string
@@ -193,6 +194,7 @@ export const ExecutiveDealsPage: React.FC = () => {
           howToClaim: d.howToClaim || '',
           highlights: d.highlights || ['100% Verified Deal'],
           isBestSelling: Boolean(d.isBestSelling || d.sectionPlacement === 'best_selling' || d.sectionPlacement === 'both'),
+          showOnHome: Boolean(d.showOnHome !== false && d.sectionPlacement !== 'none'),
           sectionPlacement: (d.sectionPlacement || (d.isBestSelling ? 'best_selling' : 'favourite')) as any,
           isFeatured: Boolean(d.isFeatured),
           isVerified: Boolean(d.isVerified ?? true),
@@ -281,6 +283,7 @@ export const ExecutiveDealsPage: React.FC = () => {
     ],
     isFeatured: false,
     isVerified: true,
+    showOnHome: true,
     postedAt: `Today, ${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}`,
     expiresAt: new Date(Date.now() + 86400000 * 5).toISOString().slice(0, 16),
     description: '',
@@ -530,6 +533,30 @@ export const ExecutiveDealsPage: React.FC = () => {
     }).catch(console.warn)
   }
 
+  const handleToggleShowOnHome = (id: string, isChecked: boolean) => {
+    const target = deals.find(d => d.id === id)
+    if (!target) return
+    const newPlacement = isChecked ? (target.sectionPlacement === 'none' ? 'both' : (target.sectionPlacement || 'both')) : 'none'
+
+    const updated = deals.map(d => {
+      if (d.id === id) {
+        return {
+          ...d,
+          showOnHome: isChecked,
+          sectionPlacement: newPlacement as any
+        }
+      }
+      return d
+    })
+    setDeals(updated)
+    showToast(isChecked ? 'Deal enabled on Homepage' : 'Deal hidden from Homepage')
+
+    adminApi.updateDeal(id, {
+      showOnHome: isChecked,
+      sectionPlacement: newPlacement
+    }).catch(console.warn)
+  }
+
   // Bulk Actions
   const handleSelectAllOnPage = () => {
     const pageIds = paginatedDeals.map(d => d.id)
@@ -718,6 +745,7 @@ export const ExecutiveDealsPage: React.FC = () => {
         status: statusToSet === 'Pending Approval' ? 'pending' : statusToSet === 'Draft' ? 'draft' : 'active',
         submissionStatus: statusToSet === 'Pending Approval' ? 'pending_approval' : statusToSet === 'Draft' ? 'draft' : 'approved',
         isBestSelling: Boolean(dealToSave.isBestSelling),
+        showOnHome: Boolean(dealToSave.showOnHome !== false && dealToSave.sectionPlacement !== 'none'),
         sectionPlacement: dealToSave.sectionPlacement || (dealToSave.isBestSelling ? 'best_selling' : 'favourite'),
         isFeatured: Boolean(dealToSave.isFeatured),
         isVerified: Boolean(dealToSave.isVerified),
@@ -762,6 +790,7 @@ export const ExecutiveDealsPage: React.FC = () => {
         status: statusToSet === 'Pending Approval' ? 'pending' : statusToSet === 'Draft' ? 'draft' : 'active',
         submissionStatus: statusToSet === 'Pending Approval' ? 'pending_approval' : statusToSet === 'Draft' ? 'draft' : 'approved',
         isBestSelling: Boolean(dealToSave.isBestSelling),
+        showOnHome: Boolean(dealToSave.showOnHome !== false && dealToSave.sectionPlacement !== 'none'),
         sectionPlacement: dealToSave.sectionPlacement || (dealToSave.isBestSelling ? 'best_selling' : 'favourite'),
         isFeatured: Boolean(dealToSave.isFeatured),
         isVerified: Boolean(dealToSave.isVerified),
@@ -1099,6 +1128,7 @@ export const ExecutiveDealsPage: React.FC = () => {
                   <th>Pricing</th>
                   <th style={{ minWidth: '220px' }}>Discount & Offers</th>
                   <th style={{ minWidth: '150px' }}>Storefront Section</th>
+                  <th style={{ width: '100px', textAlign: 'center' }}>Home Page</th>
                   <th>Deal Posted Date</th>
                   <th>Expiry Date</th>
                   <th>Status</th>
@@ -1264,6 +1294,17 @@ export const ExecutiveDealsPage: React.FC = () => {
                           <option value="favourite">Section 1 (Main)</option>
                           <option value="best_selling">Section 2 (Best Seller)</option>
                         </select>
+                      </td>
+                      <td style={{ textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600, color: (deal.showOnHome !== false && deal.sectionPlacement !== 'none') ? '#15803d' : '#94a3b8' }}>
+                          <input 
+                            type="checkbox"
+                            checked={deal.showOnHome !== false && deal.sectionPlacement !== 'none'}
+                            onChange={(e) => handleToggleShowOnHome(deal.id, e.target.checked)}
+                            style={{ cursor: 'pointer', width: '15px', height: '15px' }}
+                          />
+                          <span>{deal.showOnHome !== false && deal.sectionPlacement !== 'none' ? 'Visible' : 'Hidden'}</span>
+                        </label>
                       </td>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', color: '#475569' }}>
@@ -2078,7 +2119,26 @@ export const ExecutiveDealsPage: React.FC = () => {
                   </div>
 
                   {/* Feature Checkbox Cards */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '14px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px', marginTop: '14px' }}>
+                    <label className="feature-checkbox-label">
+                      <input 
+                        type="checkbox" 
+                        checked={form.showOnHome !== false && form.sectionPlacement !== 'none'} 
+                        onChange={(e) => {
+                          const checked = e.target.checked
+                          setForm({
+                            ...form,
+                            showOnHome: checked,
+                            sectionPlacement: checked ? (form.sectionPlacement === 'none' ? 'both' : (form.sectionPlacement || 'both')) : 'none'
+                          })
+                        }} 
+                      />
+                      <div>
+                        <div>Show on Homepage Deals</div>
+                        <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 400 }}>Display in Homepage Deals section</div>
+                      </div>
+                    </label>
+
                     <label className="feature-checkbox-label">
                       <input 
                         type="checkbox" 
@@ -2086,7 +2146,7 @@ export const ExecutiveDealsPage: React.FC = () => {
                         onChange={(e) => setForm({ ...form, isFeatured: e.target.checked })} 
                       />
                       <div>
-                        <div>Feature on Homepage Hero Carousel</div>
+                        <div>Feature on Homepage Hero</div>
                         <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 400 }}>Pinned to top storefront banners</div>
                       </div>
                     </label>
@@ -2098,8 +2158,8 @@ export const ExecutiveDealsPage: React.FC = () => {
                         onChange={(e) => setForm({ ...form, isVerified: e.target.checked })} 
                       />
                       <div>
-                        <div>Verified Executive Deal (Blue Tick)</div>
-                        <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 400 }}>Shows verified authentic seal to users</div>
+                        <div>Verified Executive Deal</div>
+                        <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 400 }}>Shows verified authentic seal</div>
                       </div>
                     </label>
                   </div>

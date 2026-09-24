@@ -20,6 +20,7 @@ const couponSchema = new mongoose.Schema({
   submittedBy: { type: String, default: '' },
   isExclusive: { type: Boolean, default: false },
   isFeatured: { type: Boolean, default: false },
+  showOnHome: { type: Boolean, default: true },
   isVerified: { type: Boolean, default: true },
   telegramAlert: { type: Boolean, default: false },
   startDate: { type: String, default: '' },

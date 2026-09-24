@@ -74,7 +74,8 @@ export interface LootDeal {
   isFeatured: boolean
   isVerified: boolean
   isBestSelling?: boolean
-  sectionPlacement?: 'favourite' | 'best_selling' | 'both'
+  showOnHome?: boolean
+  sectionPlacement?: 'favourite' | 'best_selling' | 'both' | 'none'
   clicks: number
 }
 
@@ -193,6 +194,7 @@ export const ExecutiveLootDealsPage: React.FC = () => {
             isFeatured: Boolean(d.isFeatured),
             isVerified: Boolean(d.isVerified ?? true),
             isBestSelling: Boolean(d.isBestSelling || d.sectionPlacement === 'best_selling' || d.sectionPlacement === 'both'),
+            showOnHome: Boolean(d.showOnHome !== false && d.sectionPlacement !== 'none'),
             sectionPlacement: (d.sectionPlacement || (d.isBestSelling ? 'best_selling' : 'both')) as any,
             clicks: typeof d.clicks === 'number' ? d.clicks : (parseInt(d.clicks) || 0)
           }))
@@ -304,6 +306,7 @@ export const ExecutiveLootDealsPage: React.FC = () => {
     pushNotification: true,
     isFeatured: true,
     isVerified: true,
+    showOnHome: true,
     clicks: 0
   }
   const [form, setForm] = useState<LootDeal>(emptyLootDeal)
@@ -524,6 +527,32 @@ export const ExecutiveLootDealsPage: React.FC = () => {
     }).catch(console.warn)
   }
 
+  const handleToggleShowOnHome = (id: string, isChecked: boolean) => {
+    const target = deals.find(d => d.id === id)
+    if (!target) return
+    const newPlacement = isChecked ? (target.sectionPlacement === 'none' ? 'both' : (target.sectionPlacement || 'both')) : 'none'
+
+    const updated = deals.map(d => {
+      if (d.id === id) {
+        return {
+          ...d,
+          showOnHome: isChecked,
+          sectionPlacement: newPlacement as any
+        }
+      }
+      return d
+    })
+    setDeals(updated)
+    showToast(isChecked ? 'Loot deal enabled on Homepage' : 'Loot deal hidden from Homepage')
+
+    window.dispatchEvent(new CustomEvent('wouchify_loot_deals_updated', { detail: { id, showOnHome: isChecked, sectionPlacement: newPlacement } }))
+
+    adminApi.updateLootDeal(id, {
+      showOnHome: isChecked,
+      sectionPlacement: newPlacement
+    }).catch(console.warn)
+  }
+
   // Bulk Actions
   const handleSelectAllOnPage = () => {
     const pageIds = paginatedDeals.map(d => d.id)
@@ -676,6 +705,9 @@ export const ExecutiveLootDealsPage: React.FC = () => {
         status: statusToSet === 'Approved' ? 'active' : 'inactive',
         href: dealToSave.link,
         submissionStatus: statusToSet === 'Pending Approval' ? 'pending_approval' : 'approved',
+        isBestSelling: Boolean(dealToSave.isBestSelling),
+        showOnHome: Boolean(dealToSave.showOnHome !== false && dealToSave.sectionPlacement !== 'none'),
+        sectionPlacement: dealToSave.sectionPlacement || (dealToSave.isBestSelling ? 'best_selling' : 'both'),
         image: dealToSave.image,
         priority: dealToSave.priority,
         code: dealToSave.code
@@ -695,6 +727,9 @@ export const ExecutiveLootDealsPage: React.FC = () => {
         status: statusToSet === 'Approved' ? 'active' : 'inactive',
         href: dealToSave.link,
         submissionStatus: statusToSet === 'Pending Approval' ? 'pending_approval' : 'approved',
+        isBestSelling: Boolean(dealToSave.isBestSelling),
+        showOnHome: Boolean(dealToSave.showOnHome !== false && dealToSave.sectionPlacement !== 'none'),
+        sectionPlacement: dealToSave.sectionPlacement || (dealToSave.isBestSelling ? 'best_selling' : 'both'),
         image: dealToSave.image,
         priority: dealToSave.priority,
         code: dealToSave.code
@@ -1041,6 +1076,7 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                     <th>Expiry Date</th>
                     <th>Channels</th>
                     <th style={{ minWidth: '150px' }}>Storefront Section</th>
+                    <th style={{ width: '100px', textAlign: 'center' }}>Home Page</th>
                     <th>Status</th>
                     <th>Actions</th>
                   </tr>
@@ -1251,6 +1287,17 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                             <option value="favourite">Section 1 (Main)</option>
                             <option value="best_selling">Section 2 (Best Seller)</option>
                           </select>
+                        </td>
+                        <td style={{ textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+                          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600, color: (deal.showOnHome !== false && deal.sectionPlacement !== 'none') ? '#15803d' : '#94a3b8' }}>
+                            <input 
+                              type="checkbox"
+                              checked={deal.showOnHome !== false && deal.sectionPlacement !== 'none'}
+                              onChange={(e) => handleToggleShowOnHome(deal.id, e.target.checked)}
+                              style={{ cursor: 'pointer', width: '15px', height: '15px' }}
+                            />
+                            <span>{deal.showOnHome !== false && deal.sectionPlacement !== 'none' ? 'Visible' : 'Hidden'}</span>
+                          </label>
                         </td>
                         <td>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
@@ -1959,6 +2006,25 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                       </div>
 
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <label className="feature-checkbox-label">
+                          <input 
+                            type="checkbox" 
+                            checked={form.showOnHome !== false && form.sectionPlacement !== 'none'} 
+                            onChange={(e) => {
+                              const checked = e.target.checked
+                              setForm({
+                                ...form,
+                                showOnHome: checked,
+                                sectionPlacement: checked ? (form.sectionPlacement === 'none' ? 'both' : (form.sectionPlacement || 'both')) : 'none'
+                              })
+                            }} 
+                          />
+                          <div>
+                            <div>🏠 Show on Homepage Loot Section</div>
+                            <div style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 400 }}>Display in Homepage Flash / Exclusive Loot</div>
+                          </div>
+                        </label>
+
                         <label className="feature-checkbox-label">
                           <input 
                             type="checkbox" 

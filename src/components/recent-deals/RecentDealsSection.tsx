@@ -5,10 +5,32 @@ import { useDesktopScale } from '../../hooks/useDesktopScale'
 import { adminApi } from '../../services/adminApi'
 import './RecentDealsSection.css'
 
+const DEFAULT_CARD_POSITIONS = [
+  { left: 88, top: 122 },
+  { left: 530, top: 122 },
+  { left: 972, top: 122 },
+  { left: 1414, top: 122 }
+]
+
 export const RecentDealsSection: React.FC = () => {
   const sectionScale = useDesktopScale()
   const [deals, setDeals] = useState<any[]>(RECENT_DEALS)
-  useEffect(() => { getPublicDeals().then(data => { if (data && data.length > 0) setDeals(data.slice(0, 6)) }) }, [])
+
+  useEffect(() => { 
+    getPublicDeals().then(data => { 
+      if (data && data.length > 0) {
+        const filtered = data.filter((d: any) => 
+          d.showOnHome !== false && 
+          d.sectionPlacement !== 'none' && 
+          (d.sectionPlacement === 'favourite' || d.sectionPlacement === 'both' || !d.sectionPlacement)
+        )
+        if (filtered.length > 0) {
+          // Take top 4 deals to maintain exact 1-row reference canvas layout
+          setDeals(filtered.slice(0, 4))
+        }
+      } 
+    }).catch(console.warn)
+  }, [])
 
   return (
     <section
@@ -36,27 +58,41 @@ export const RecentDealsSection: React.FC = () => {
 
         {/* Deal Cards Container */}
         <div className="recent-deals__cards-container">
-          {deals.map((deal) => (
-            <a
-              key={deal.id}
-              onClick={() => adminApi.trackDealClick(deal.id)}
-              href={deal.ctaHref || deal.link || deal.href}
-              className="recent-deals__card"
-              style={{
-                left: `${deal.left}px`,
-                top: `${deal.top}px`,
-              }}
-              aria-label={`View ${deal.name} deal`}
-            >
-              <img
-                src={deal.image}
-                alt={deal.alt}
-                className="recent-deals__image"
-                width="422"
-                height="261"
-              />
-            </a>
-          ))}
+          {deals.slice(0, 4).map((deal, idx) => {
+            const pos = DEFAULT_CARD_POSITIONS[idx] || DEFAULT_CARD_POSITIONS[0]
+            const calculatedLeft = deal.left !== undefined ? deal.left : pos.left
+            const calculatedTop = deal.top !== undefined ? deal.top : pos.top
+            const imageSrc = deal.image || deal.imageUrl || deal.thumbnail || 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600&auto=format&fit=crop&q=80'
+
+            return (
+              <a
+                key={deal.id || `recent-deal-${idx}`}
+                onClick={() => adminApi.trackDealClick(deal.id)}
+                href={deal.ctaHref || deal.link || deal.href || `/deal/${deal.id || ''}`}
+                className="recent-deals__card"
+                style={{
+                  left: `${calculatedLeft}px`,
+                  top: `${calculatedTop}px`,
+                }}
+                aria-label={`View ${deal.name || deal.title || 'deal'}`}
+              >
+                <img
+                  src={imageSrc}
+                  alt={deal.alt || deal.name || deal.title || 'Deal'}
+                  className="recent-deals__image"
+                  width="422"
+                  height="261"
+                  onError={(e) => {
+                    const target = e.currentTarget
+                    const fallback = 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600&auto=format&fit=crop&q=80'
+                    if (target.src !== fallback) {
+                      target.src = fallback
+                    }
+                  }}
+                />
+              </a>
+            )
+          })}
         </div>
       </div>
     </section>

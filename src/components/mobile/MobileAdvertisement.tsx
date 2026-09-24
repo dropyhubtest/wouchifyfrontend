@@ -55,13 +55,15 @@ export const MobileAdvertisement: React.FC = () => {
     try {
       const res = await adminApi.getPublicAdvertisements({ status: 'active' })
       if (Array.isArray(res) && res.length > 0) {
-        const mapped: MobileAdItem[] = res.map((a: any, i: number) => ({
-          id: a._id || a.id || `mob-ad-${i}`,
-          title: a.title || 'Wouchify Sale',
-          image: a.imageUrl || defaultMobileAdFallback,
-          alt: a.title || 'Advertisement banner',
-          href: a.targetLink || '/offers/sale',
-        }))
+        const mapped: MobileAdItem[] = res
+          .filter((a: any) => a.showOnHome !== false)
+          .map((a: any, i: number) => ({
+            id: a._id || a.id || `mob-ad-${i}`,
+            title: a.title || 'Wouchify Sale',
+            image: a.imageUrl || defaultMobileAdFallback,
+            alt: a.title || 'Advertisement banner',
+            href: a.targetLink || '/offers/sale',
+          }))
         setAds(mapped)
       } else {
         setAds([

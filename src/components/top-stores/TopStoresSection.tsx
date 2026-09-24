@@ -1,12 +1,37 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import wouchifyIcon from '../../assets/brand/wouchify-icon.png'
 import { TOP_STORES } from '../../data/topStores'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
 import { adminApi } from '../../services/adminApi'
+import { getPublicStores } from '../../services/api'
+import { getStoreLogo } from '../../data/dealsPage'
 import './TopStoresSection.css'
 
 export const TopStoresSection: React.FC = () => {
   const sectionScale = useDesktopScale()
+  const [stores, setStores] = useState<any[]>(TOP_STORES)
+
+  useEffect(() => {
+    getPublicStores().then(data => {
+      if (Array.isArray(data) && data.length > 0) {
+        const filtered = data.filter((s: any) => s.showOnHome !== false && (s.status === 'active' || !s.status))
+        if (filtered.length > 0) {
+          const merged = filtered.map((s: any, idx: number) => {
+            const staticFallback = TOP_STORES.find(ts => ts.id === s.id || ts.slug === s.slug) || TOP_STORES[idx % TOP_STORES.length]
+            return {
+              ...staticFallback,
+              id: s._id || s.id || staticFallback.id,
+              name: s.name || staticFallback.name,
+              rewardBadge: s.reward || staticFallback.rewardBadge,
+              logo: s.logo || staticFallback.logo,
+              href: s.href || staticFallback.href
+            }
+          })
+          setStores(merged)
+        }
+      }
+    }).catch(console.warn)
+  }, [])
 
   return (
     <section
@@ -35,11 +60,11 @@ export const TopStoresSection: React.FC = () => {
         {/* Promo Carousel Viewport */}
         <div className="top-stores__viewport">
           <div className="top-stores__track">
-            {TOP_STORES.map((store) => (
+            {stores.map((store) => (
               <a
                 key={store.id}
                 onClick={() => adminApi.trackStoreClick(store.id)}
-                  href={store.href}
+                href={store.href}
                 className={`top-stores__tile top-stores__tile--${store.slug}`}
                 aria-label={`Shop on ${store.name}`}
               >
@@ -98,6 +123,21 @@ export const TopStoresSection: React.FC = () => {
                         className="top-stores__logo-img top-stores__logo-img--firstcry"
                       />
                     </div>
+                  )}
+                  {!['ajio', 'amazon', 'flipkart', 'firstcry'].includes(store.slug) && (
+                    <img
+                      src={store.logo || getStoreLogo(store.name)}
+                      alt={store.name}
+                      className="top-stores__logo-img"
+                      style={{ maxHeight: '48px', maxWidth: '140px', objectFit: 'contain' }}
+                      onError={(e) => {
+                        const target = e.currentTarget
+                        const fallback = getStoreLogo(store.name)
+                        if (target.src !== fallback) {
+                          target.src = fallback
+                        }
+                      }}
+                    />
                   )}
                 </div>
 

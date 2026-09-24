@@ -185,13 +185,23 @@ function resolveCurrentPath(): string {
     pathname === '/manager/dashboard' ||
     pathname === '/manager' ||
     pathname.startsWith('/manager/') ||
+    pathname === '/admin/login' ||
+    pathname === '/admin/dashboard' ||
+    pathname === '/admin' ||
+    pathname.startsWith('/admin/') ||
     pathname === '/operational-manager/login' ||
     pathname === '/operational-manager' ||
     pathname.startsWith('/operational-manager/') ||
+    pathname === '/executive/login' ||
+    pathname === '/executive' ||
     pathname.startsWith('/executive/')
   ) {
+    if (pathname === '/admin/login') return '/manager/login'
+    if (pathname === '/admin' || pathname === '/admin/dashboard') return '/manager/dashboard'
+    if (pathname.startsWith('/admin/')) return pathname.replace('/admin', '/manager')
     if (pathname === '/operational-manager') return '/operational-manager/dashboard'
     if (pathname === '/manager') return '/manager/dashboard'
+    if (pathname === '/executive') return '/executive/dashboard'
     return pathname
   }
 
@@ -463,12 +473,141 @@ export default function App() {
   const isOperationsRoute = 
     (currentPath.startsWith('/operational-manager/') || currentPath === '/operational-manager') && 
     currentPath !== '/operational-manager/login'
-  const isExecutiveRoute = currentPath.startsWith('/executive/') && currentPath !== '/executive/login'
+  const isExecutiveRoute = (currentPath.startsWith('/executive/') || currentPath === '/executive') && currentPath !== '/executive/login'
   const isBrandRoute = currentPath.startsWith('/brands/')
   const isNotFoundRoute = currentPath === '/404'
   const brandSlug = isBrandRoute ? currentPath.replace('/brands/', '') : ''
 
+  const checkExecutiveAuth = (): boolean => {
+    if (typeof window === 'undefined') return false
+    const staffToken = sessionStorage.getItem('staffToken') || localStorage.getItem('staffToken')
+    const staffUserStr = sessionStorage.getItem('staffUser') || localStorage.getItem('staffUser')
+    if (staffToken && staffUserStr) {
+      try {
+        const parsed = JSON.parse(staffUserStr)
+        if (parsed && (parsed.role === 'executive' || parsed.role === 'admin')) {
+          return true
+        }
+      } catch {}
+    }
+    const adminToken = sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken')
+    const adminUserStr = sessionStorage.getItem('adminUser') || localStorage.getItem('adminUser')
+    if (adminToken && adminUserStr) {
+      try {
+        const parsed = JSON.parse(adminUserStr)
+        if (parsed && parsed.role === 'admin') return true
+      } catch {}
+    }
+    return false
+  }
+
+  const checkOperationsAuth = (): boolean => {
+    if (typeof window === 'undefined') return false
+    const staffToken = sessionStorage.getItem('staffToken') || localStorage.getItem('staffToken')
+    const staffUserStr = sessionStorage.getItem('staffUser') || localStorage.getItem('staffUser')
+    if (staffToken && staffUserStr) {
+      try {
+        const parsed = JSON.parse(staffUserStr)
+        if (parsed && (parsed.role === 'operational_manager' || parsed.role === 'admin')) {
+          return true
+        }
+      } catch {}
+    }
+    const adminToken = sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken')
+    const adminUserStr = sessionStorage.getItem('adminUser') || localStorage.getItem('adminUser')
+    if (adminToken && adminUserStr) {
+      try {
+        const parsed = JSON.parse(adminUserStr)
+        if (parsed && parsed.role === 'admin') return true
+      } catch {}
+    }
+    return false
+  }
+
+  const checkManagerAuth = (): boolean => {
+    if (typeof window === 'undefined') return false
+    const adminToken = sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken')
+    const adminUserStr = sessionStorage.getItem('adminUser') || localStorage.getItem('adminUser')
+    if (adminToken && adminUserStr) {
+      try {
+        const parsed = JSON.parse(adminUserStr)
+        if (parsed && (parsed.role === 'admin' || parsed.role === 'manager')) return true
+      } catch {}
+    }
+    const staffToken = sessionStorage.getItem('staffToken') || localStorage.getItem('staffToken')
+    const staffUserStr = sessionStorage.getItem('staffUser') || localStorage.getItem('staffUser')
+    if (staffToken && staffUserStr) {
+      try {
+        const parsed = JSON.parse(staffUserStr)
+        if (parsed && (parsed.role === 'manager' || parsed.role === 'admin')) {
+          return true
+        }
+      } catch {}
+    }
+    return false
+  }
+
   const renderContent = () => {
+    // --- 1. ADMIN, MANAGER & STAFF PORTALS (Universal Desktop & Mobile Auth Gate) ---
+    if (isAdminLoginRoute) {
+      return <AdminLoginPage />
+    }
+
+    if (isStaffLoginRoute) {
+      return <StaffLoginPage />
+    }
+
+    if (isExecutiveRoute) {
+      if (!checkExecutiveAuth()) {
+        if (typeof window !== 'undefined' && window.location.pathname !== '/executive/login') {
+          window.history.replaceState({}, '', '/executive/login')
+        }
+        return <StaffLoginPage />
+      }
+      if (currentPath === '/executive/bulk-upload') return <ExecutiveBulkUploadPage />
+      if (currentPath === '/executive/deals') return <ExecutiveDealsPage />
+      if (currentPath === '/executive/loot-deals') return <ExecutiveLootDealsPage />
+      if (currentPath === '/executive/stores') return <ExecutiveStoresPage />
+      if (currentPath === '/executive/coupons') return <ExecutiveCouponsPage />
+      if (currentPath === '/executive/credit-cards') return <ExecutiveCreditCardsPage />
+      if (currentPath === '/executive/categories') return <ExecutiveCategoriesPage />
+      if (currentPath === '/executive/advertisements') return <ExecutiveAdvertisementsPage />
+      if (currentPath === '/executive/verification') return <ExecutiveVerificationPage />
+      if (currentPath === '/executive/tickets') return <ExecutiveTicketsPage />
+      if (currentPath === '/executive/rejections') return <ExecutiveRejectionsPage />
+      return <ExecutiveDashboardPage />
+    }
+
+    if (isOperationsRoute) {
+      if (!checkOperationsAuth()) {
+        if (typeof window !== 'undefined' && window.location.pathname !== '/operational-manager/login') {
+          window.history.replaceState({}, '', '/operational-manager/login')
+        }
+        return <StaffLoginPage />
+      }
+      if (currentPath === '/operational-manager/approvals') return <OperationsApprovalsPage />
+      if (currentPath === '/operational-manager/cashbacks') return <OperationsCashbacksPage />
+      if (currentPath === '/operational-manager/support') return <OperationsSupportPage />
+      if (currentPath === '/operational-manager/staff-activity') return <OperationsStaffActivityPage />
+      if (currentPath === '/operational-manager/link-health') return <OperationsLinkHealthPage />
+      if (currentPath === '/operational-manager/merchants') return <OperationsMerchantsPage />
+      if (currentPath === '/operational-manager/users') return <OperationsUsersPage />
+      if (currentPath === '/operational-manager/approved-data') return <OperationsApprovedDataPage />
+      return <OperationsDashboardPage />
+    }
+
+    if (isAdminDashboardRoute) {
+      if (!checkManagerAuth()) {
+        if (typeof window !== 'undefined' && window.location.pathname !== '/manager/login' && window.location.pathname !== '/admin/login') {
+          window.history.replaceState({}, '', '/manager/login')
+        }
+        return <AdminLoginPage />
+      }
+      if (currentPath === '/manager/approvals') return <ManagerApprovalsPage />
+      return <AdminDashboardPage />
+    }
+
+    // --- 2. MOBILE CONSUMER APP ROUTES ---
     if (isMobile) {
       if (isCitiesDealsDirectoryRoute) {
         return <MobileCitiesDealsDirectoryPage />
@@ -549,41 +688,6 @@ export default function App() {
       if (isFavoritesRoute) return <MobileWishlistPage />
       if (isNotificationsRoute) return <MobileNotificationsPage />
       if (isReferRoute) return <MobileReferPage />
-      if (isAdminLoginRoute) {
-        return <AdminLoginPage />
-      }
-      if (isAdminDashboardRoute) {
-        if (currentPath === '/manager/approvals') return <ManagerApprovalsPage />
-        return <AdminDashboardPage />
-      }
-      if (isStaffLoginRoute) {
-        return <StaffLoginPage />
-      }
-      if (isOperationsRoute) {
-        if (currentPath === '/operational-manager/approvals') return <OperationsApprovalsPage />
-        if (currentPath === '/operational-manager/cashbacks') return <OperationsCashbacksPage />
-        if (currentPath === '/operational-manager/support') return <OperationsSupportPage />
-        if (currentPath === '/operational-manager/staff-activity') return <OperationsStaffActivityPage />
-          if (currentPath === '/operational-manager/link-health') return <OperationsLinkHealthPage />
-        if (currentPath === '/operational-manager/merchants') return <OperationsMerchantsPage />
-          if (currentPath === '/operational-manager/users') return <OperationsUsersPage />
-        if (currentPath === '/operational-manager/approved-data') return <OperationsApprovedDataPage />
-        return <OperationsDashboardPage />
-      }
-      if (isExecutiveRoute) {
-        if (currentPath === '/executive/bulk-upload') return <ExecutiveBulkUploadPage />
-        if (currentPath === '/executive/deals') return <ExecutiveDealsPage />
-        if (currentPath === '/executive/loot-deals') return <ExecutiveLootDealsPage />
-        if (currentPath === '/executive/stores') return <ExecutiveStoresPage />
-        if (currentPath === '/executive/coupons') return <ExecutiveCouponsPage />
-        if (currentPath === '/executive/credit-cards') return <ExecutiveCreditCardsPage />
-        if (currentPath === '/executive/categories') return <ExecutiveCategoriesPage />
-        if (currentPath === '/executive/advertisements') return <ExecutiveAdvertisementsPage />
-        if (currentPath === '/executive/verification') return <ExecutiveVerificationPage />
-        if (currentPath === '/executive/tickets') return <ExecutiveTicketsPage />
-        if (currentPath === '/executive/rejections') return <ExecutiveRejectionsPage />
-        return <ExecutiveDashboardPage />
-      }
       if (isBrandRoute) {
         return <MobileBrandPage brandSlug={brandSlug} />
       }
@@ -593,6 +697,7 @@ export default function App() {
       return <MobileHomePage />
     }
 
+    // --- 3. DESKTOP CONSUMER APP ROUTES ---
     if (isCitiesDealsDirectoryRoute) {
       return <CitiesDealsDirectoryPage />
     }
@@ -681,52 +786,6 @@ export default function App() {
     if (isFavoritesRoute) return <FavoritesPage />
     if (isNotificationsRoute) return <NotificationsPage />
     if (isReferRoute) return <ReferPage />
-
-    if (isAdminLoginRoute) {
-      return <AdminLoginPage />
-    }
-
-    if (isStaffLoginRoute) {
-      return <StaffLoginPage />
-    }
-
-    if (isOperationsRoute) {
-      const opsToken = localStorage.getItem('staffToken')
-      if (!opsToken) { window.history.replaceState({}, '', '/operational-manager/login'); return null }
-      if (currentPath === '/operational-manager/approvals') return <OperationsApprovalsPage />
-      if (currentPath === '/operational-manager/cashbacks') return <OperationsCashbacksPage />
-      if (currentPath === '/operational-manager/support') return <OperationsSupportPage />
-      if (currentPath === '/operational-manager/staff-activity') return <OperationsStaffActivityPage />
-      if (currentPath === '/operational-manager/link-health') return <OperationsLinkHealthPage />
-      if (currentPath === '/operational-manager/merchants') return <OperationsMerchantsPage />
-      if (currentPath === '/operational-manager/users') return <OperationsUsersPage />
-      if (currentPath === '/operational-manager/approved-data') return <OperationsApprovedDataPage />
-      return <OperationsDashboardPage />
-    }
-
-    if (isExecutiveRoute) {
-      const execToken = localStorage.getItem('staffToken')
-      if (!execToken) { window.history.replaceState({}, '', '/executive/login'); return null }
-      if (currentPath === '/executive/bulk-upload') return <ExecutiveBulkUploadPage />
-      if (currentPath === '/executive/deals') return <ExecutiveDealsPage />
-      if (currentPath === '/executive/loot-deals') return <ExecutiveLootDealsPage />
-      if (currentPath === '/executive/stores') return <ExecutiveStoresPage />
-      if (currentPath === '/executive/coupons') return <ExecutiveCouponsPage />
-      if (currentPath === '/executive/credit-cards') return <ExecutiveCreditCardsPage />
-      if (currentPath === '/executive/categories') return <ExecutiveCategoriesPage />
-      if (currentPath === '/executive/advertisements') return <ExecutiveAdvertisementsPage />
-      if (currentPath === '/executive/verification') return <ExecutiveVerificationPage />
-      if (currentPath === '/executive/tickets') return <ExecutiveTicketsPage />
-      if (currentPath === '/executive/rejections') return <ExecutiveRejectionsPage />
-      return <ExecutiveDashboardPage />
-    }
-
-    if (isAdminDashboardRoute) {
-      const managerToken = localStorage.getItem('adminToken') || localStorage.getItem('staffToken')
-      if (!managerToken) { window.history.replaceState({}, '', '/manager/login'); return null }
-      if (currentPath === '/manager/approvals') return <ManagerApprovalsPage />
-      return <AdminDashboardPage />
-    }
 
     if (isBrandRoute) {
       return <BrandPage brandSlug={brandSlug} />

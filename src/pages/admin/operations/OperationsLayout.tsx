@@ -33,19 +33,57 @@ export const OperationsLayout: React.FC<OperationsLayoutProps> = ({
 }) => {
   const [liveCounts, setLiveCounts] = useState({ approvals: 0, cashbacks: 0, support: 0 })
   const mergedCounts = { ...liveCounts, ...pendingCounts }
-  const [user, setUser] = useState<{ email: string; role: string } | null>(null)
+  const [user, setUser] = useState<{ email: string; role: string } | null>(() => {
+    if (typeof window === 'undefined') return null
+    const staffToken = sessionStorage.getItem('staffToken') || localStorage.getItem('staffToken')
+    const staffUserData = sessionStorage.getItem('staffUser') || localStorage.getItem('staffUser')
+    if (staffToken && staffUserData) {
+      try {
+        const parsed = JSON.parse(staffUserData)
+        if (parsed && (parsed.role === 'operational_manager' || parsed.role === 'admin')) {
+          return parsed
+        }
+      } catch (e) {
+        console.error('Failed to parse operations user', e)
+      }
+    }
+    const adminToken = sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken')
+    const adminUserData = sessionStorage.getItem('adminUser') || localStorage.getItem('adminUser')
+    if (adminToken && adminUserData) {
+      try {
+        const parsed = JSON.parse(adminUserData)
+        if (parsed && parsed.role === 'admin') {
+          return parsed
+        }
+      } catch (e) {
+        console.error('Failed to parse admin user', e)
+      }
+    }
+    return null
+  })
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(() => {
     return localStorage.getItem('ops_sidebar_collapsed') === 'true'
   })
 
   useEffect(() => {
+    if (!user) {
+      sessionStorage.removeItem('staffToken')
+      sessionStorage.removeItem('staffUser')
+      localStorage.removeItem('staffToken')
+      localStorage.removeItem('staffUser')
+      window.history.replaceState({}, '', '/operational-manager/login')
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    }
+  }, [user])
+
+  useEffect(() => {
     const fetchLiveCounts = async () => {
       try {
         const [subs, claims, tickets] = await Promise.all([
-          fetch('/api/submissions?status=Pending%20Approval', { headers: { Authorization: `Bearer ${localStorage.getItem('staffToken') || 'dev-ops'}` } }).then(r => r.ok ? r.json() : []).catch(() => []),
-          fetch('/api/cashback-claims?status=Pending', { headers: { Authorization: `Bearer ${localStorage.getItem('staffToken') || 'dev-ops'}` } }).then(r => r.ok ? r.json() : []).catch(() => []),
-          fetch('/api/support-tickets?status=Open', { headers: { Authorization: `Bearer ${localStorage.getItem('staffToken') || 'dev-ops'}` } }).then(r => r.ok ? r.json() : []).catch(() => [])
+          fetch('/api/submissions?status=Pending%20Approval', { headers: { Authorization: `Bearer ${sessionStorage.getItem('staffToken') || localStorage.getItem('staffToken') || 'dev-ops'}` } }).then(r => r.ok ? r.json() : []).catch(() => []),
+          fetch('/api/cashback-claims?status=Pending', { headers: { Authorization: `Bearer ${sessionStorage.getItem('staffToken') || localStorage.getItem('staffToken') || 'dev-ops'}` } }).then(r => r.ok ? r.json() : []).catch(() => []),
+          fetch('/api/support-tickets?status=Open', { headers: { Authorization: `Bearer ${sessionStorage.getItem('staffToken') || localStorage.getItem('staffToken') || 'dev-ops'}` } }).then(r => r.ok ? r.json() : []).catch(() => [])
         ])
         const apprs = Array.isArray(subs) ? subs.filter((s: any) => s.status === 'Pending Approval' || s.status === 'Pending Review' || s.status === 'pending').length : 0
         const cbs = Array.isArray(claims) ? claims.filter((c: any) => c.status === 'Pending').length : 0
@@ -53,34 +91,25 @@ export const OperationsLayout: React.FC<OperationsLayoutProps> = ({
         setLiveCounts({ approvals: apprs, cashbacks: cbs, support: supps })
       } catch {}
     }
-    fetchLiveCounts()
-  }, [])
+    if (user) {
+      fetchLiveCounts()
+    }
+  }, [user])
 
   useEffect(() => {
     localStorage.setItem('ops_sidebar_collapsed', isCollapsed.toString())
   }, [isCollapsed])
 
-  useEffect(() => {
-    const token = localStorage.getItem('staffToken')
-    const userData = localStorage.getItem('staffUser')
-    
-    if (!token || !userData) {
-      window.history.pushState({}, '', '/operational-manager/login')
-      window.dispatchEvent(new PopStateEvent('popstate'))
-      return
-    }
-
-    try {
-      setUser(JSON.parse(userData))
-    } catch {
-      window.history.pushState({}, '', '/operational-manager/login')
-      window.dispatchEvent(new PopStateEvent('popstate'))
-    }
-  }, [])
-
   const handleLogout = () => {
+    sessionStorage.removeItem('staffToken')
+    sessionStorage.removeItem('staffUser')
+    sessionStorage.removeItem('adminToken')
+    sessionStorage.removeItem('adminUser')
     localStorage.removeItem('staffToken')
     localStorage.removeItem('staffUser')
+    localStorage.removeItem('adminToken')
+    localStorage.removeItem('adminUser')
+    setUser(null)
     window.history.pushState({}, '', '/operational-manager/login')
     window.dispatchEvent(new PopStateEvent('popstate'))
   }

@@ -36,6 +36,7 @@ const categorySchema = new mongoose.Schema({
   destinationHref: String,
   isTrending: { type: Boolean, default: false },
   isFeatured: { type: Boolean, default: false },
+  showOnHome: { type: Boolean, default: true },
   tags: [String],
   sortOrder: { type: Number, default: 0 },
   submissionStatus: { type: String, enum: ['draft', 'pending_approval', 'approved', 'rejected'], default: 'approved' },
