@@ -117,6 +117,7 @@ export const FeaturedCreditCardsSection: React.FC = () => {
                   className="featured-credit-cards__bank-mark"
                   onError={(e) => {
                     const target = e.currentTarget
+                    target.onerror = null
                     if (target.src !== iciciBankMark) {
                       target.src = iciciBankMark
                     }
@@ -145,6 +146,7 @@ export const FeaturedCreditCardsSection: React.FC = () => {
                     height="561"
                     onError={(e) => {
                       const target = e.currentTarget
+                      target.onerror = null
                       if (target.src !== iciciPlatinumCard) {
                         target.src = iciciPlatinumCard
                       }

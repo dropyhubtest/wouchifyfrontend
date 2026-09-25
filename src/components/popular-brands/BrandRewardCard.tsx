@@ -86,6 +86,7 @@ export const BrandRewardCard: React.FC<BrandRewardCardProps> = ({ brand }) => {
             loading="lazy"
             onError={(e) => {
               const target = e.currentTarget
+              target.onerror = null
               const fallback = getStoreLogo(brand.name)
               if (target.src !== fallback) {
                 target.src = fallback

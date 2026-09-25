@@ -100,6 +100,7 @@ export const FlashLootSection: React.FC = () => {
                       loading="lazy"
                       onError={(e) => {
                         const target = e.currentTarget
+                        target.onerror = null
                         const fallback = 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80'
                         if (target.src !== fallback) {
                           target.src = fallback
@@ -121,6 +122,7 @@ export const FlashLootSection: React.FC = () => {
                         className="flash-loot__store-logo"
                         onError={(e) => {
                           const target = e.currentTarget
+                          target.onerror = null
                           target.src = getStoreLogo('Amazon')
                         }}
                       />

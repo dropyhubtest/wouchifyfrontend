@@ -20,7 +20,7 @@ export const RECENT_DEALS: RecentDealItem[] = [
   {
     id: 'kettle-604',
     title: 'Milton Rapid Electric Kettle 1.8L | 1500 Watts | Stainless Steel Hot Water portable...',
-    productImage: 'https://m.media-amazon.com/images/I/51Q15648oYL._SL1000_.jpg',
+    productImage: 'https://images.unsplash.com/photo-1570222094114-d054a817e56b?w=600&auto=format&fit=crop&q=80',
     store: 'Amazon',
     currentPrice: '604',
     originalPrice: '1499',
@@ -34,7 +34,7 @@ export const RECENT_DEALS: RecentDealItem[] = [
   {
     id: 'kettle-700',
     title: 'Milton Rapid Electric Kettle 1.8L | 1500 Watts | Stainless Steel Hot Water portable...',
-    productImage: 'https://m.media-amazon.com/images/I/51Q15648oYL._SL1000_.jpg',
+    productImage: 'https://images.unsplash.com/photo-1570222094114-d054a817e56b?w=600&auto=format&fit=crop&q=80',
     store: 'Amazon',
     currentPrice: '700',
     originalPrice: '1499',

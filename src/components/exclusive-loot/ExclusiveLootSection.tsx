@@ -100,6 +100,7 @@ export const ExclusiveLootSection: React.FC = () => {
                       loading="lazy"
                       onError={(e) => {
                         const target = e.currentTarget
+                        target.onerror = null
                         const fallback = 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=600&auto=format&fit=crop&q=80'
                         if (target.src !== fallback) {
                           target.src = fallback
@@ -121,6 +122,7 @@ export const ExclusiveLootSection: React.FC = () => {
                         className="exclusive-loot__store-logo"
                         onError={(e) => {
                           const target = e.currentTarget
+                          target.onerror = null
                           target.src = getStoreLogo('Amazon')
                         }}
                       />

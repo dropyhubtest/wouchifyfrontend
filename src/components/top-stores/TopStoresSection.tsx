@@ -154,6 +154,7 @@ export const TopStoresSection: React.FC = () => {
                       style={{ maxHeight: '48px', maxWidth: '140px', objectFit: 'contain' }}
                       onError={(e) => {
                         const target = e.currentTarget
+                        target.onerror = null
                         const fallback = getStoreLogo(store.name)
                         if (target.src !== fallback) {
                           target.src = fallback

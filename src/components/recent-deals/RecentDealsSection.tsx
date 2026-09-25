@@ -57,9 +57,7 @@ export const RecentDealsSection: React.FC = () => {
               const rawImg = deal.productImage || deal.image || deal.imageUrl || deal.thumbnail
               const imageSrc = (rawImg && (rawImg.startsWith('http') || rawImg.startsWith('data:') || rawImg.startsWith('/')) && !rawImg.includes('banner_1') && !rawImg.includes('banner_2'))
                 ? rawImg 
-                : (idx === 0 
-                    ? 'https://m.media-amazon.com/images/I/51Q15648oYL._SL1000_.jpg' 
-                    : 'https://m.media-amazon.com/images/I/51Q15648oYL._SL1000_.jpg')
+                : 'https://images.unsplash.com/photo-1570222094114-d054a817e56b?w=600&auto=format&fit=crop&q=80'
 
               const storeName = deal.store || deal.storeName || deal.merchant || 'Amazon'
               const rawStoreLogo = deal.storeLogo || deal.logoUrl
@@ -100,7 +98,8 @@ export const RecentDealsSection: React.FC = () => {
                         loading="lazy"
                         onError={(e) => {
                           const target = e.currentTarget
-                          target.src = 'https://m.media-amazon.com/images/I/51Q15648oYL._SL1000_.jpg'
+                          target.onerror = null
+                          target.src = 'https://images.unsplash.com/photo-1570222094114-d054a817e56b?w=600&auto=format&fit=crop&q=80'
                         }}
                       />
                     </div>
@@ -114,6 +113,7 @@ export const RecentDealsSection: React.FC = () => {
                           className="recent-deals__store-logo"
                           onError={(e) => {
                             const target = e.currentTarget
+                            target.onerror = null
                             target.src = getStoreLogo('Amazon')
                           }}
                         />

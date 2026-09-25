@@ -77,7 +77,9 @@ export const StoreCard: React.FC<StoreCardProps> = ({ store }) => {
           className={`store-card__logo-img store-card__logo-img--${storeId}`}
           loading="lazy"
           onError={(e) => {
-            (e.currentTarget as HTMLImageElement).src = getStoreLogo(slug || name)
+            const img = e.currentTarget as HTMLImageElement
+            img.onerror = null
+            img.src = getStoreLogo(slug || name)
           }}
         />
       </div>

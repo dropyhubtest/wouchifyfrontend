@@ -52,7 +52,7 @@
       "expiry": "2026-11-30T23:59:59.000Z",
       "description": "Experience cinema-grade entertainment with 4K QLED clarity and vibrant Dolby Vision colours.",
       "terms": "Valid on online prepaid orders. Limited period promotional offer.",
-      "clicks": 1425
+      "clicks": 1426
     },
     {
       "_id": "deal-2",
@@ -810,11 +810,11 @@
       "approvedBy": "ops.manager@wouchify.com",
       "approvedByName": "Operational Manager",
       "approvedByRole": "operational_manager",
-      "approvedAt": "2026-09-25T11:03:38.303Z",
+      "approvedAt": "2026-09-25T11:19:13.573Z",
       "opsManagerApproval": "Approved",
       "managerApproval": "Approved",
       "submissionStatus": "approved",
-      "updatedAt": "2026-09-25T11:03:38.303Z",
+      "updatedAt": "2026-09-25T11:19:13.573Z",
       "createdAt": "2026-09-25T11:02:49.989Z"
     },
     {
@@ -1455,11 +1455,11 @@
       "approvedBy": "ops.manager@wouchify.com",
       "approvedByName": "Operational Manager",
       "approvedByRole": "operational_manager",
-      "approvedAt": "2026-09-25T11:03:38.220Z",
+      "approvedAt": "2026-09-25T11:19:13.535Z",
       "opsManagerApproval": "Approved",
       "managerApproval": "Approved",
       "submissionStatus": "approved",
-      "updatedAt": "2026-09-25T11:03:38.253Z",
+      "updatedAt": "2026-09-25T11:19:13.551Z",
       "createdAt": "2026-09-25T11:02:49.956Z",
       "hideFromHome": true
     },
@@ -2628,6 +2628,70 @@
     }
   ],
   "submissions": [
+    {
+      "_id": "sub-1790335153566",
+      "id": "sub-1790335153566",
+      "status": "Approved",
+      "submittedAt": "2026-09-25T11:19:13.566Z",
+      "createdAt": "2026-09-25T11:19:13.566Z",
+      "updatedAt": "2026-09-25T11:19:13.573Z",
+      "submittedBy": "ops.manager@wouchify.com",
+      "submittedByName": "Operational Manager",
+      "entityType": "coupon",
+      "action": "create",
+      "title": "Flat ₹1,000 Off on Electronics QA",
+      "priority": "Normal",
+      "dataSnapshot": {
+        "code": "QAOFF1000",
+        "store": "Amazon",
+        "discount": "₹1,000 OFF",
+        "discountValue": 1000,
+        "minOrder": "Min ₹4,999",
+        "category": "Electronics",
+        "description": "Exclusive ₹1000 coupon for QA test",
+        "status": "pending"
+      },
+      "reviewedBy": "ops.manager@wouchify.com",
+      "reviewedByName": "Operational Manager",
+      "reviewedByRole": "operational_manager",
+      "approvedBy": "ops.manager@wouchify.com",
+      "approvedByName": "Operational Manager",
+      "approvedByRole": "operational_manager",
+      "reviewedAt": "2026-09-25T11:19:13.573Z",
+      "approvedAt": "2026-09-25T11:19:13.573Z"
+    },
+    {
+      "_id": "sub-1790335153497",
+      "id": "sub-1790335153497",
+      "status": "Approved",
+      "submittedAt": "2026-09-25T11:19:13.497Z",
+      "createdAt": "2026-09-25T11:19:13.497Z",
+      "updatedAt": "2026-09-25T11:19:13.535Z",
+      "submittedBy": "ops.manager@wouchify.com",
+      "submittedByName": "Operational Manager",
+      "entityType": "store",
+      "action": "create",
+      "title": "QA Puma Official Store",
+      "priority": "Normal",
+      "dataSnapshot": {
+        "name": "QA Puma Store",
+        "slug": "qa-puma-store",
+        "category": "Fashion",
+        "reward": "Upto 10% rewards",
+        "description": "Exclusive QA sneakers & sportswear collection",
+        "cardBg": "#FFE6D3",
+        "badgeBg": "#FFB67C",
+        "status": "pending"
+      },
+      "reviewedBy": "ops.manager@wouchify.com",
+      "reviewedByName": "Operational Manager",
+      "reviewedByRole": "operational_manager",
+      "approvedBy": "ops.manager@wouchify.com",
+      "approvedByName": "Operational Manager",
+      "approvedByRole": "operational_manager",
+      "reviewedAt": "2026-09-25T11:19:13.535Z",
+      "approvedAt": "2026-09-25T11:19:13.535Z"
+    },
     {
       "_id": "sub-1790334218284",
       "id": "sub-1790334218284",
