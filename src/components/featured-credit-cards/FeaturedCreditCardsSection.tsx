@@ -13,12 +13,33 @@ export const FeaturedCreditCardsSection: React.FC = () => {
   const [cards, setCards] = useState<any[]>(FEATURED_CREDIT_CARDS)
   const [activeIndex, setActiveIndex] = useState<number>(0)
 
-  useEffect(() => {
-    adminApi.getPublicCreditCards().then(data => {
+  const loadCards = async () => {
+    try {
+      const data = await adminApi.getCreditCards({ all: true })
       if (Array.isArray(data) && data.length > 0) {
-        const filtered = data.filter((c: any) => c.showOnHome !== false && (c.status === 'active' || c.status === 'featured' || !c.status))
-        if (filtered.length > 0) {
-          const merged = filtered.map((c: any, idx: number) => {
+        // Collect IDs/Banks of cards explicitly hidden
+        const hiddenBanks = new Set(
+          data
+            .filter((c: any) => c.showOnHome === false || c.isFeatured === false || c.sectionPlacement === 'none' || c.status === 'inactive')
+            .map((c: any) => (c.bank || c.cardName || c.name || c.id || '').toLowerCase().trim())
+        )
+
+        const activeLiveCards = data.filter((c: any) => 
+          c.showOnHome !== false && 
+          c.isFeatured !== false && 
+          c.sectionPlacement !== 'none' && 
+          c.status !== 'inactive'
+        )
+
+        // Filter default cards
+        const visibleDefaults = FEATURED_CREDIT_CARDS.filter(
+          (item) => !hiddenBanks.has((item.bank || '').toLowerCase().trim()) && 
+                    !hiddenBanks.has((item.heading || '').toLowerCase().trim()) && 
+                    !hiddenBanks.has(item.id.toLowerCase().trim())
+        )
+
+        if (activeLiveCards.length > 0) {
+          const merged = activeLiveCards.map((c: any, idx: number) => {
             const staticFallback = FEATURED_CREDIT_CARDS.find(fc => fc.id === c.id || fc.heading?.toLowerCase() === (c.cardName || c.name || '').toLowerCase()) || FEATURED_CREDIT_CARDS[idx % FEATURED_CREDIT_CARDS.length]
             const rawCardImg = c.imageUrl || c.cardImage
             const rawBankMark = c.bankLogoUrl || c.bankMark
@@ -34,9 +55,20 @@ export const FeaturedCreditCardsSection: React.FC = () => {
             }
           })
           setCards(merged)
+        } else {
+          setCards(visibleDefaults)
         }
       }
-    }).catch(console.warn)
+    } catch (err) {
+      console.warn('Could not load credit cards:', err)
+    }
+  }
+
+  useEffect(() => {
+    loadCards()
+    const handleUpdate = () => loadCards()
+    window.addEventListener('wouchify_credit_cards_updated', handleUpdate)
+    return () => window.removeEventListener('wouchify_credit_cards_updated', handleUpdate)
   }, [])
 
   useEffect(() => {

@@ -3,12 +3,87 @@ import { StoreCard } from './StoreCard'
 import { StoreSearch } from './StoreSearch'
 import { StoreCategoryFilter } from './StoreCategoryFilter'
 import { StoreAlphabetFilter } from './StoreAlphabetFilter'
-import { STORE_CATEGORIES, type StoreItem } from '../../data/storesHero'
+import { STORE_CATEGORIES, FAVOURITE_STORES, type StoreItem } from '../../data/storesHero'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
 import { adminApi } from '../../services/adminApi'
 import { getCached } from '../../services/dataCache'
 import { StoreCardSkeleton } from '../common/Skeletons'
 import './FavouriteStores.css'
+
+const normalizeStoreKey = (str?: string) => (str || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+
+const mergeWithMasterStores = (list: any[]): StoreItem[] => {
+  if (!Array.isArray(list) || list.length === 0) return FAVOURITE_STORES
+
+  const masterKeys = new Set<string>()
+  FAVOURITE_STORES.forEach(orig => {
+    masterKeys.add(normalizeStoreKey(orig.id))
+    masterKeys.add(normalizeStoreKey(orig.slug))
+    masterKeys.add(normalizeStoreKey(orig.name))
+  })
+
+  // Start with all 20 FAVOURITE_STORES to guarantee exact original Figma design & ordering
+  const mapped = FAVOURITE_STORES.map(orig => {
+    const origNormId = normalizeStoreKey(orig.id)
+    const origNormSlug = normalizeStoreKey(orig.slug)
+    const origNormName = normalizeStoreKey(orig.name)
+
+    const updated = list.find(s => {
+      const sId = normalizeStoreKey(s.id || s._id)
+      const sSlug = normalizeStoreKey(s.slug)
+      const sName = normalizeStoreKey(s.name)
+      return (
+        (sId && (sId === origNormId || sId === origNormSlug || sId === origNormName)) ||
+        (sSlug && (sSlug === origNormId || sSlug === origNormSlug || sSlug === origNormName)) ||
+        (sName && (sName === origNormId || sName === origNormSlug || sName === origNormName))
+      )
+    })
+
+    if (!updated) return orig
+    return {
+      ...orig,
+      name: updated.name || orig.name,
+      category: updated.category || orig.category,
+      reward: updated.reward || orig.reward,
+      description: updated.description || orig.description,
+      cardBg: updated.cardBg && updated.cardBg !== '#ECF4FF' ? updated.cardBg : orig.cardBg,
+      badgeBg: updated.badgeBg && updated.badgeBg !== '#D3E0F2' ? updated.badgeBg : orig.badgeBg,
+      logoPanelBg: updated.logoPanelBg || orig.logoPanelBg,
+      logo: orig.logo || updated.logo || updated.logoUrl,
+      status: updated.status || 'active'
+    }
+  })
+
+  // Only include genuinely new custom stores that do not match ANY of the 20 FAVOURITE_STORES
+  const extraStores: StoreItem[] = []
+  list.forEach((s: any) => {
+    const sId = normalizeStoreKey(s.id || s._id)
+    const sSlug = normalizeStoreKey(s.slug)
+    const sName = normalizeStoreKey(s.name)
+
+    const isMasterStore = (
+      (sId && masterKeys.has(sId)) ||
+      (sSlug && masterKeys.has(sSlug)) ||
+      (sName && masterKeys.has(sName))
+    )
+
+    if (!isMasterStore && (s.name || s.id)) {
+      extraStores.push({
+        id: s.id || s._id || `store-${Date.now()}`,
+        name: s.name || 'Store',
+        slug: s.slug || (s.name || '').toLowerCase().replace(/\s+/g, '-'),
+        logo: s.logo || s.logoUrl || '',
+        category: s.category || 'Fashion',
+        reward: s.reward || 'Upto 5% rewards',
+        description: s.description || `${s.name} online deals & cashback`,
+        cardBg: s.cardBg || '#FFE6D3',
+        badgeBg: s.badgeBg || '#FFB67C',
+      })
+    }
+  })
+
+  return [...mapped, ...extraStores].filter(s => (s as any).status !== 'inactive' && (s as any).status !== 'rejected')
+}
 
 export const FavouriteStores: React.FC = () => {
   const scale = useDesktopScale()
@@ -18,23 +93,10 @@ export const FavouriteStores: React.FC = () => {
   
   // Synchronously check cache
   const cachedData = getCached<any[]>('public:stores')
-  const initialStores = cachedData && Array.isArray(cachedData) ? cachedData
-    .filter((s: any) => s.status !== 'inactive' && s.status !== 'rejected')
-    .map((s: any) => ({
-      id: s._id || s.id || `store-${s.name}`,
-      name: s.name || 'Store',
-      slug: s.slug || (s.name || '').toLowerCase().replace(/\s+/g, '-'),
-      logo: s.logo || s.logoUrl || '',
-      category: s.category || 'Fashion',
-      reward: s.reward || 'Upto 5% rewards',
-      description: s.description || `${s.name} online deals & cashback`,
-      cardBg: s.cardBg || '#ECF4FF',
-      badgeBg: s.badgeBg || '#D3E0F2',
-      logoPanelBg: s.logoPanelBg
-    })) : []
+  const initialStores = cachedData && Array.isArray(cachedData) ? mergeWithMasterStores(cachedData) : FAVOURITE_STORES
 
   const [storesList, setStoresList] = useState<StoreItem[]>(initialStores)
-  const [loading, setLoading] = useState<boolean>(!cachedData)
+  const [loading, setLoading] = useState<boolean>(!cachedData && storesList.length === 0)
   const gridRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
   const [canvasHeight, setCanvasHeight] = useState<number>(1800)
@@ -43,22 +105,8 @@ export const FavouriteStores: React.FC = () => {
   const fetchLiveStores = useCallback(async () => {
     try {
       const fetched = await adminApi.getStores()
-      if (Array.isArray(fetched)) {
-        const mapped: StoreItem[] = fetched
-          .filter((s: any) => s.status !== 'inactive' && s.status !== 'rejected')
-          .map((s: any) => ({
-            id: s._id || s.id || `store-${s.name}`,
-            name: s.name || 'Store',
-            slug: s.slug || (s.name || '').toLowerCase().replace(/\s+/g, '-'),
-            logo: s.logo || s.logoUrl || '',
-            category: s.category || 'Fashion',
-            reward: s.reward || 'Upto 5% rewards',
-            description: s.description || `${s.name} online deals & cashback`,
-            cardBg: s.cardBg || '#ECF4FF',
-            badgeBg: s.badgeBg || '#D3E0F2',
-            logoPanelBg: s.logoPanelBg
-          }))
-        setStoresList(mapped)
+      if (Array.isArray(fetched) && fetched.length > 0) {
+        setStoresList(mergeWithMasterStores(fetched))
       }
     } catch (err) {
       console.error('Failed to auto-refresh stores:', err)

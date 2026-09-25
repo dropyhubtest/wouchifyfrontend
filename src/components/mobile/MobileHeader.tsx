@@ -4,6 +4,7 @@ import favoriteIcon from '../../assets/mobile/navigation/favorite.svg'
 import accountIcon from '../../assets/navbar/account.svg'
 import { NAV_LINKS, resolveActiveNav } from '../../data/navigation'
 import { SearchOverlay } from '../search/SearchOverlay'
+import { getWishlistCount } from '../../utils/wishlistManager'
 import './MobileHeader.css'
 
 export interface MobileHeaderProps {
@@ -16,7 +17,20 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ activeNav, variant =
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [userInfo, setUserInfo] = useState<{ name?: string; fullName?: string; email?: string } | null>(null)
+  const [wishlistCount, setWishlistCount] = useState<number>(() => getWishlistCount())
   const currentActiveNav = resolveActiveNav(activeNav)
+
+  useEffect(() => {
+    const handleWishlistChange = () => {
+      setWishlistCount(getWishlistCount())
+    }
+    window.addEventListener('wouchify_wishlist_updated', handleWishlistChange)
+    window.addEventListener('storage', handleWishlistChange)
+    return () => {
+      window.removeEventListener('wouchify_wishlist_updated', handleWishlistChange)
+      window.removeEventListener('storage', handleWishlistChange)
+    }
+  }, [])
 
   useEffect(() => {
     const raw = localStorage.getItem('userInfo')
@@ -103,8 +117,32 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ activeNav, variant =
               </button>
             )}
 
-            <a className="mobile-header__action-btn" href="/favorites" aria-label="View favourites">
+            <a className="mobile-header__action-btn" href="/favorites" aria-label="View favourites" style={{ position: 'relative' }}>
               <img src={favoriteIcon} alt="" aria-hidden="true" />
+              {wishlistCount > 0 && (
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: '-2px',
+                    right: '-2px',
+                    minWidth: '16px',
+                    height: '16px',
+                    padding: '0 3px',
+                    borderRadius: '999px',
+                    background: '#E31E25',
+                    color: '#FFFFFF',
+                    fontSize: '9px',
+                    fontWeight: '700',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 4px rgba(227, 30, 37, 0.4)',
+                    lineHeight: '1'
+                  }}
+                >
+                  {wishlistCount > 99 ? '99+' : wishlistCount}
+                </span>
+              )}
             </a>
 
           {variant !== 'minimal' && (

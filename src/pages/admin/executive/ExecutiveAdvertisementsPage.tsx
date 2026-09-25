@@ -648,7 +648,7 @@ export const ExecutiveAdvertisementsPage: React.FC = () => {
           store: newAd.advertiser,
           category: 'Advertisement Campaign',
           priority: 'Normal',
-          submittedBy: localStorage.getItem('staffUser') ? JSON.parse(localStorage.getItem('staffUser')!).email : 'executive@wouchify.com',
+          submittedBy: sessionStorage.getItem('staffUser') ? JSON.parse(sessionStorage.getItem('staffUser')!).email : (sessionStorage.getItem('adminUser') ? JSON.parse(sessionStorage.getItem('adminUser')!).email : 'executive@wouchify.com'),
           dataSnapshot: newAd
         }).catch(console.warn)
       }).catch(console.warn)

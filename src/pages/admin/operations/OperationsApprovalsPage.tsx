@@ -70,6 +70,10 @@ export interface ModerationItem {
   approvedByName?: string
   approvedByRole?: string
   approvedAt?: string
+  rawUpdatedAt?: string
+  rawSubmittedAt?: string
+  rawApprovedAt?: string
+  rawCreatedAt?: string
   dataSnapshot?: any
 }
 
@@ -90,6 +94,10 @@ export const OperationsApprovalsPage: React.FC = () => {
     submittedBy: sub.submittedBy || 'executive@wouchify.com',
     submittedByName: sub.submittedByName,
     submittedAt: sub.submittedAt,
+    rawUpdatedAt: sub.updatedAt,
+    rawSubmittedAt: sub.submittedAt,
+    rawApprovedAt: sub.approvedAt,
+    rawCreatedAt: sub.createdAt,
     price: sub.dataSnapshot?.price || '',
     originalPrice: sub.dataSnapshot?.originalPrice || '',
     discount: sub.dataSnapshot?.discount || '',
@@ -151,6 +159,10 @@ export const OperationsApprovalsPage: React.FC = () => {
             submittedBy: s.submittedBy || 'Content Executive',
             submittedByName: s.submittedByName,
             submittedAt: s.submittedAt ? new Date(s.submittedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : 'Recently',
+            rawUpdatedAt: s.updatedAt,
+            rawSubmittedAt: s.submittedAt,
+            rawApprovedAt: s.approvedAt,
+            rawCreatedAt: s.createdAt,
             reviewedBy: s.reviewedBy || s.approvedBy,
             reviewedByName: s.reviewedByName || s.approvedByName,
             reviewedByRole: s.reviewedByRole || s.approvedByRole,
@@ -218,7 +230,13 @@ export const OperationsApprovalsPage: React.FC = () => {
 
   const handleApproveOne = async (id: string, title: string) => {
     // Optimistic UI update: change state immediately for instant feedback
-    setItems(prev => prev.map(i => i.id === id ? { ...i, status: 'Approved' } : i))
+    const nowIso = new Date().toISOString()
+    setItems(prev => prev.map(i => i.id === id ? { 
+      ...i, 
+      status: 'Approved',
+      rawApprovedAt: nowIso,
+      rawUpdatedAt: nowIso
+    } : i))
     setSelectedIds(prev => prev.filter(selId => selId !== id))
     showToast(`Approved: "${title}"`)
 
@@ -230,7 +248,9 @@ export const OperationsApprovalsPage: React.FC = () => {
         approvedBy: opsReviewerMeta.reviewedBy,
         approvedByName: opsReviewerMeta.reviewedByName,
         approvedByRole: opsReviewerMeta.reviewedByRole,
-        approvedAt: new Date().toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })
+        approvedAt: new Date().toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' }),
+        rawApprovedAt: nowIso,
+        rawUpdatedAt: nowIso
       } : i))
       setSelectedIds(prev => prev.filter(selId => selId !== id))
       showToast(`Approved: "${title}"`)
@@ -264,10 +284,11 @@ export const OperationsApprovalsPage: React.FC = () => {
 
     const targetId = rejectingItem.id
     const note = rejectionReason
+    const nowIso = new Date().toISOString()
 
     // Optimistic UI update: update local status immediately
     setItems(prev => prev.map(item => 
-      item.id === targetId ? { ...item, status: 'Rejected', rejectionReason: note } : item
+      item.id === targetId ? { ...item, status: 'Rejected', rejectionReason: note, rawUpdatedAt: nowIso } : item
     ))
     setSelectedIds(prev => prev.filter(id => id !== targetId))
     showToast(`Rejected submission with feedback note`)
@@ -288,7 +309,8 @@ export const OperationsApprovalsPage: React.FC = () => {
   const handleBulkApprove = async () => {
     if (selectedIds.length === 0) return
     const idsToApprove = [...selectedIds]
-    setItems(prev => prev.map(item => idsToApprove.includes(item.id) ? { ...item, status: 'Approved' } : item))
+    const nowIso = new Date().toISOString()
+    setItems(prev => prev.map(item => idsToApprove.includes(item.id) ? { ...item, status: 'Approved', rawApprovedAt: nowIso, rawUpdatedAt: nowIso } : item))
     setSelectedIds([])
     showToast(`Bulk approved ${idsToApprove.length} submissions`)
 
@@ -300,7 +322,9 @@ export const OperationsApprovalsPage: React.FC = () => {
         approvedBy: opsReviewerMeta.reviewedBy,
         approvedByName: opsReviewerMeta.reviewedByName,
         approvedByRole: opsReviewerMeta.reviewedByRole,
-        approvedAt: new Date().toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })
+        approvedAt: new Date().toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' }),
+        rawApprovedAt: nowIso,
+        rawUpdatedAt: nowIso
       } : item))
       try { localStorage.setItem('wouchify_submissions_sync', Date.now().toString()) } catch {}
       window.dispatchEvent(new CustomEvent('wouchify_submissions_updated'))
@@ -326,7 +350,8 @@ export const OperationsApprovalsPage: React.FC = () => {
 
   const handleConfirmBulkReject = async (reason: string) => {
     const idsToReject = [...selectedIds]
-    setItems(prev => prev.map(item => idsToReject.includes(item.id) ? { ...item, status: 'Rejected', rejectionReason: reason } : item))
+    const nowIso = new Date().toISOString()
+    setItems(prev => prev.map(item => idsToReject.includes(item.id) ? { ...item, status: 'Rejected', rejectionReason: reason, rawUpdatedAt: nowIso } : item))
     setSelectedIds([])
     setBulkRejectOpen(false)
     showToast(`Rejected ${idsToReject.length} submissions`)
@@ -389,6 +414,10 @@ export const OperationsApprovalsPage: React.FC = () => {
       }
 
       return true
+    }).sort((a, b) => {
+      const timeA = new Date(a.rawUpdatedAt || a.rawApprovedAt || a.rawSubmittedAt || a.rawCreatedAt || 0).getTime()
+      const timeB = new Date(b.rawUpdatedAt || b.rawApprovedAt || b.rawSubmittedAt || b.rawCreatedAt || 0).getTime()
+      return timeB - timeA
     })
   }, [items, activeTab, filterType, filterExecutive, searchTerm])
 

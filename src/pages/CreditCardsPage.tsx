@@ -278,7 +278,7 @@ export const CreditCardsPage: React.FC = () => {
           } as React.CSSProperties}
         >
           {/* ── SEARCH BAR (Right Area Covered, Left Side Empty) ── */}
-          <section className="credit-cards-search-wrap" aria-label="Search Credit Cards">
+          <section id="credit-cards-grid" className="credit-cards-search-wrap" aria-label="Search Credit Cards">
             <div className="credit-cards-search-box">
               <input
                 type="text"

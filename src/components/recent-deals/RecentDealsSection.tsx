@@ -3,14 +3,9 @@ import { getPublicDeals } from '../../services/api'
 import { RECENT_DEALS } from '../../data/recentDeals'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
 import { adminApi } from '../../services/adminApi'
+import { getStoreLogo } from '../../data/dealsPage'
+import { filterRecentlyAddedDeals } from '../../utils/homepageSectionFilters'
 import './RecentDealsSection.css'
-
-const DEFAULT_CARD_POSITIONS = [
-  { left: 88, top: 122 },
-  { left: 530, top: 122 },
-  { left: 972, top: 122 },
-  { left: 1414, top: 122 }
-]
 
 export const RecentDealsSection: React.FC = () => {
   const sectionScale = useDesktopScale()
@@ -19,14 +14,13 @@ export const RecentDealsSection: React.FC = () => {
   useEffect(() => { 
     getPublicDeals().then(data => { 
       if (data && data.length > 0) {
-        const filtered = data.filter((d: any) => 
-          d.showOnHome !== false && 
-          d.sectionPlacement !== 'none' && 
-          (d.sectionPlacement === 'favourite' || d.sectionPlacement === 'both' || !d.sectionPlacement)
-        )
+        const filtered = filterRecentlyAddedDeals(data)
         if (filtered.length > 0) {
-          // Take top 4 deals to maintain exact 1-row reference canvas layout
-          setDeals(filtered.slice(0, 4))
+          const list = [...filtered]
+          if (list.length === 1) {
+            list.push(RECENT_DEALS[1])
+          }
+          setDeals(list)
         }
       } 
     }).catch(console.warn)
@@ -45,7 +39,7 @@ export const RecentDealsSection: React.FC = () => {
     >
       {/* 1920 x 482 Reference Canvas */}
       <div className="recent-deals-canvas">
-        {/* Section Header with Navy Accent */}
+        {/* Section Header with Navy Accent Circle */}
         <div className="recent-deals__header">
           <div className="recent-deals__heading-accent" aria-hidden="true" />
           <h2 className="recent-deals__title">Recently added Deals</h2>
@@ -56,43 +50,89 @@ export const RecentDealsSection: React.FC = () => {
           Latest Deals&gt;&gt;
         </a>
 
-        {/* Deal Cards Container */}
-        <div className="recent-deals__cards-container">
-          {deals.slice(0, 4).map((deal, idx) => {
-            const pos = DEFAULT_CARD_POSITIONS[idx] || DEFAULT_CARD_POSITIONS[0]
-            const calculatedLeft = deal.left !== undefined ? deal.left : pos.left
-            const calculatedTop = deal.top !== undefined ? deal.top : pos.top
-            const imageSrc = deal.image || deal.imageUrl || deal.thumbnail || 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600&auto=format&fit=crop&q=80'
+        {/* Deal Cards Scroll Viewport & Track */}
+        <div className="recent-deals__viewport">
+          <div className="recent-deals__track">
+            {deals.map((deal, idx) => {
+              const rawImg = deal.productImage || deal.image || deal.imageUrl || deal.thumbnail
+              const imageSrc = (rawImg && (rawImg.startsWith('http') || rawImg.startsWith('data:') || rawImg.startsWith('/')) && !rawImg.includes('banner_1') && !rawImg.includes('banner_2'))
+                ? rawImg 
+                : (idx === 0 
+                    ? 'https://m.media-amazon.com/images/I/51Q15648oYL._SL1000_.jpg' 
+                    : 'https://m.media-amazon.com/images/I/51Q15648oYL._SL1000_.jpg')
 
-            return (
-              <a
-                key={deal.id || `recent-deal-${idx}`}
-                onClick={() => adminApi.trackDealClick(deal.id)}
-                href={deal.ctaHref || deal.link || deal.href || `/deal/${deal.id || ''}`}
-                className="recent-deals__card"
-                style={{
-                  left: `${calculatedLeft}px`,
-                  top: `${calculatedTop}px`,
-                }}
-                aria-label={`View ${deal.name || deal.title || 'deal'}`}
-              >
-                <img
-                  src={imageSrc}
-                  alt={deal.alt || deal.name || deal.title || 'Deal'}
-                  className="recent-deals__image"
-                  width="422"
-                  height="261"
-                  onError={(e) => {
-                    const target = e.currentTarget
-                    const fallback = 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600&auto=format&fit=crop&q=80'
-                    if (target.src !== fallback) {
-                      target.src = fallback
-                    }
-                  }}
-                />
-              </a>
-            )
-          })}
+              const storeName = deal.store || deal.storeName || deal.merchant || 'Amazon'
+              const rawStoreLogo = deal.storeLogo || deal.logoUrl
+              const storeLogoSrc = (rawStoreLogo && (rawStoreLogo.startsWith('http') || rawStoreLogo.startsWith('data:') || rawStoreLogo.startsWith('/')))
+                ? rawStoreLogo
+                : getStoreLogo(storeName)
+
+              const rawPrice = deal.currentPrice ?? deal.price ?? deal.dealPrice ?? (idx === 0 ? '604' : '700')
+              const formattedPrice = String(rawPrice).replace(/[^0-9.]/g, '') || (idx === 0 ? '604' : '700')
+
+              const rawDiscount = deal.discount || deal.discountPercentage || '60'
+              const numDiscount = String(rawDiscount).replace(/[^0-9]/g, '') || '60'
+              const discountPillText = `Save ${numDiscount}%off`
+
+              const title = deal.title || deal.name || 'Milton Rapid Electric Kettle 1.8L | 1500 Watts | Stainless Steel Hot Water portable...'
+
+              return (
+                <a
+                  key={deal.id || `recent-deal-${idx}`}
+                  onClick={() => adminApi.trackDealClick(deal.id)}
+                  href={deal.ctaHref || deal.link || deal.href || `/deal/${deal.id || ''}`}
+                  className="recent-deals__card"
+                  aria-label={`View ${title}`}
+                >
+                  {/* Outer Grey Frame enclosing Inner Split Card */}
+                  <div className="recent-deals__inner-card">
+                    {/* Overlapping Discount Pill Badge centered across partition line */}
+                    <div className="recent-deals__discount-pill" aria-label={discountPillText}>
+                      {discountPillText}
+                    </div>
+
+                    {/* Left Column: Edge-to-edge filled product image */}
+                    <div className="recent-deals__media">
+                      <img
+                        src={imageSrc}
+                        alt={title}
+                        className="recent-deals__product-img"
+                        loading="lazy"
+                        onError={(e) => {
+                          const target = e.currentTarget
+                          target.src = 'https://m.media-amazon.com/images/I/51Q15648oYL._SL1000_.jpg'
+                        }}
+                      />
+                    </div>
+
+                    {/* Right Column: Silver/Light-Grey Background for Description & Info */}
+                    <div className="recent-deals__details">
+                      <div className="recent-deals__store-row">
+                        <img
+                          src={storeLogoSrc}
+                          alt={storeName}
+                          className="recent-deals__store-logo"
+                          onError={(e) => {
+                            const target = e.currentTarget
+                            target.src = getStoreLogo('Amazon')
+                          }}
+                        />
+                      </div>
+                      <h3 className="recent-deals__deal-title" title={title}>
+                        {title}
+                      </h3>
+                      <div className="recent-deals__price-wrapper">
+                        <span className="recent-deals__price">₹{formattedPrice}</span>
+                      </div>
+                      <div className="recent-deals__cta-wrapper">
+                        <span className="recent-deals__view-btn">View&gt;&gt;</span>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              )
+            })}
+          </div>
         </div>
       </div>
     </section>

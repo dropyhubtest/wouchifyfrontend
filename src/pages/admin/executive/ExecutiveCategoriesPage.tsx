@@ -473,7 +473,7 @@ export const ExecutiveCategoriesPage: React.FC = () => {
         title: formData.name.trim(),
         store: 'Directory',
         payload: payload,
-        submittedBy: typeof localStorage !== 'undefined' ? (JSON.parse(localStorage.getItem('staffUser') || '{}').email || 'executive@wouchify.com') : 'executive@wouchify.com'
+        submittedBy: typeof sessionStorage !== 'undefined' ? (JSON.parse(sessionStorage.getItem('staffUser') || sessionStorage.getItem('adminUser') || '{}').email || 'executive@wouchify.com') : 'executive@wouchify.com'
       })
       showNotification(`"${formData.name}" submitted for manager approval!`)
       setIsCreateModalOpen(false)

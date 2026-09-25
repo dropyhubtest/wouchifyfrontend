@@ -4,6 +4,7 @@ import { FooterSection } from '../components/footer'
 import { DealCard } from '../components/deals/DealCard'
 import { DEALS_CARD_ITEMS, type DealCardItem } from '../data/dealsPage'
 import { adminApi } from '../services/adminApi'
+import { isWishlisted, toggleWishlist } from '../utils/wishlistManager'
 import amazonLogo from '../assets/brand-logos/amazon-logo.png'
 import deal1 from '../assets/deals/deal1.png'
 import deal2 from '../assets/deals/deal2.png'
@@ -12,8 +13,13 @@ import './ProductDisplayPage.css'
 export const ProductDisplayPage: React.FC = () => {
   const [copied, setCopied] = useState(false)
   const [applied, setApplied] = useState(false)
+  const [shareToast, setShareToast] = useState(false)
+  const [userVote, setUserVote] = useState<'up' | 'down' | null>(null)
+  const [upvotes, setUpvotes] = useState<number>(48)
+  const [downvotes, setDownvotes] = useState<number>(2)
   const [liveProduct, setLiveProduct] = useState<any>(null)
   const [categoryDeals, setCategoryDeals] = useState<DealCardItem[]>([])
+  const [favorited, setFavorited] = useState<boolean>(false)
 
   const loadProductData = useCallback(async () => {
     try {
@@ -203,10 +209,77 @@ export const ProductDisplayPage: React.FC = () => {
     setTimeout(() => setApplied(false), 2500)
   }
 
-  const handleGrabDealClick = () => {
-    if (product.isLoot) {
-      adminApi.trackLootClick(product.id)
+  useEffect(() => {
+    if (product?.id) {
+      setFavorited(isWishlisted(product.id))
+    }
+  }, [product?.id])
+
+  useEffect(() => {
+    const handleSync = (e: any) => {
+      if (e.detail?.targetId === String(product?.id)) {
+        setFavorited(e.detail.added)
+      } else if (product?.id) {
+        setFavorited(isWishlisted(product.id))
+      }
+    }
+    window.addEventListener('wouchify_wishlist_updated', handleSync)
+    return () => window.removeEventListener('wouchify_wishlist_updated', handleSync)
+  }, [product?.id])
+
+  const handleToggleFavorite = () => {
+    if (!product) return
+    const cardItem: DealCardItem = {
+      id: product.id,
+      title: product.fullTitle,
+      category: product.category,
+      store: product.store,
+      storeLogo: product.storeLogo,
+      productImage: product.productImage,
+      price: product.price,
+      originalPrice: product.originalPrice,
+      discountPercentage: product.discount,
+      ctaText: 'GRAB DEAL',
+      ctaHref: `/product?id=${product.id}`
+    }
+    const added = toggleWishlist(cardItem)
+    setFavorited(added)
+  }
+
+  const handleShare = () => {
+    const url = window.location.href
+    if (navigator.share) {
+      navigator.share({
+        title: product.fullTitle,
+        text: `Check out this deal on Wouchify: ${product.fullTitle}`,
+        url
+      }).catch(() => {})
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(url)
+      setShareToast(true)
+      setTimeout(() => setShareToast(false), 2500)
+    }
+  }
+
+  const handleVote = (type: 'up' | 'down') => {
+    if (userVote === type) {
+      // Toggle off
+      setUserVote(null)
+      if (type === 'up') setUpvotes((v) => Math.max(0, v - 1))
+      if (type === 'down') setDownvotes((v) => Math.max(0, v - 1))
     } else {
+      if (userVote === 'up') setUpvotes((v) => Math.max(0, v - 1))
+      if (userVote === 'down') setDownvotes((v) => Math.max(0, v - 1))
+      setUserVote(type)
+      if (type === 'up') setUpvotes((v) => v + 1)
+      if (type === 'down') setDownvotes((v) => v + 1)
+    }
+  }
+
+  const handleGrabDealClick = () => {
+    if (product?.isLoot) {
+      adminApi.trackLootClick(product.id)
+    } else if (product?.id) {
       adminApi.trackDealClick(product.id)
     }
   }
@@ -221,7 +294,35 @@ export const ProductDisplayPage: React.FC = () => {
         {/* Left Column (Product Card with deep & inner shadows) */}
         <section className="product-display-showcase">
           <div className="product-showcase-card">
-            <div className="product-showcase-image-wrapper">
+            <div className="product-showcase-image-wrapper" style={{ position: 'relative' }}>
+              <button
+                type="button"
+                onClick={handleToggleFavorite}
+                aria-label={favorited ? 'Remove from wishlist' : 'Save to wishlist'}
+                title={favorited ? 'Saved in Wishlist' : 'Add to Wishlist'}
+                style={{
+                  position: 'absolute',
+                  top: '16px',
+                  right: '16px',
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '50%',
+                  background: 'rgba(255, 255, 255, 0.85)',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(0, 0, 0, 0.08)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  zIndex: 5,
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill={favorited ? '#E31E25' : 'none'} stroke={favorited ? '#E31E25' : '#1E1E1E'} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                </svg>
+              </button>
               <img
                 src={product.productImage}
                 alt={product.fullTitle}
@@ -387,16 +488,118 @@ export const ProductDisplayPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Red CTA Button */}
-          <a
-            href={product.ctaHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="product-details-grab-btn"
-            onClick={handleGrabDealClick}
+          {/* Red CTA Button & Actions Row */}
+          <div style={{ display: 'flex', gap: '14px', alignItems: 'center', width: '100%', flexWrap: 'wrap' }}>
+            <a
+              href={product.ctaHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="product-details-grab-btn"
+              onClick={handleGrabDealClick}
+              style={{ flex: 1, minWidth: '220px', margin: 0 }}
+            >
+              {product.ctaText}
+            </a>
+
+            <button
+              type="button"
+              onClick={handleShare}
+              title="Share Deal"
+              aria-label="Share this deal"
+              style={{
+                height: '52px',
+                padding: '0 20px',
+                borderRadius: '12px',
+                border: '1.5px solid #2F368C',
+                background: '#FFFFFF',
+                color: '#2F368C',
+                fontWeight: '700',
+                fontSize: '14px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="18" cy="5" r="3"/>
+                <circle cx="6" cy="12" r="3"/>
+                <circle cx="18" cy="19" r="3"/>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+              </svg>
+              <span>{shareToast ? 'Link Copied! ✓' : 'Share'}</span>
+            </button>
+          </div>
+
+          {/* Deal Helpful Feedback Bar */}
+          <div
+            style={{
+              marginTop: '16px',
+              padding: '14px 18px',
+              background: '#F8FAFC',
+              borderRadius: '14px',
+              border: '1px solid #E2E8F0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '12px'
+            }}
           >
-            {product.ctaText}
-          </a>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '14px', fontWeight: '600', color: '#1E293B' }}>
+                Did this deal work for you?
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <button
+                type="button"
+                onClick={() => handleVote('up')}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '999px',
+                  border: userVote === 'up' ? '1.5px solid #16A34A' : '1px solid #CBD5E1',
+                  background: userVote === 'up' ? '#DCFCE7' : '#FFFFFF',
+                  color: userVote === 'up' ? '#15803D' : '#475569',
+                  fontWeight: '600',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.18s ease'
+                }}
+              >
+                <span>👍</span>
+                <span>Yes ({upvotes})</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleVote('down')}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '999px',
+                  border: userVote === 'down' ? '1.5px solid #DC2626' : '1px solid #CBD5E1',
+                  background: userVote === 'down' ? '#FEE2E2' : '#FFFFFF',
+                  color: userVote === 'down' ? '#B91C1C' : '#475569',
+                  fontWeight: '600',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.18s ease'
+                }}
+              >
+                <span>👎</span>
+                <span>No ({downvotes})</span>
+              </button>
+            </div>
+          </div>
 
           {/* About the Product */}
           <div className="product-about-section">

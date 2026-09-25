@@ -3,14 +3,9 @@ import { getPublicDeals } from '../../services/api'
 import { TRENDING_DEALS } from '../../data/trendingDeals'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
 import { adminApi } from '../../services/adminApi'
+import { getStoreLogo } from '../../data/dealsPage'
+import { filterTrendingDeals } from '../../utils/homepageSectionFilters'
 import './TrendingDealsSection.css'
-
-const DEFAULT_TRENDING_POSITIONS = [
-  { left: 115, top: 180, badgeLeft: 55, badgeTop: 145 },
-  { left: 557, top: 180, badgeLeft: 497, badgeTop: 145 },
-  { left: 999, top: 180, badgeLeft: 939, badgeTop: 145 },
-  { left: 1441, top: 180, badgeLeft: 1381, badgeTop: 145 }
-]
 
 export const TrendingDealsSection: React.FC = () => {
   const sectionScale = useDesktopScale()
@@ -19,14 +14,13 @@ export const TrendingDealsSection: React.FC = () => {
   useEffect(() => { 
     getPublicDeals().then(data => { 
       if (data && data.length > 0) {
-        const filtered = data.filter((d: any) => 
-          d.showOnHome !== false && 
-          d.sectionPlacement !== 'none' && 
-          (d.sectionPlacement === 'best_selling' || d.sectionPlacement === 'both' || d.isBestSelling)
-        )
+        const filtered = filterTrendingDeals(data)
         if (filtered.length > 0) {
-          // Take top 4 deals to maintain exact 1-row reference canvas layout
-          setDeals(filtered.slice(0, 4))
+          const list = [...filtered]
+          while (list.length < 4 && list.length < TRENDING_DEALS.length) {
+            list.push(TRENDING_DEALS[list.length])
+          }
+          setDeals(list)
         }
       } 
     }).catch(console.warn)
@@ -57,60 +51,99 @@ export const TrendingDealsSection: React.FC = () => {
           People Are Grabbing - Trending Deals
         </span>
 
-        {/* Ranked Deal Cards Container */}
-        <div className="trending-deals__cards-container">
-          {deals.slice(0, 4).map((deal, idx) => {
-            const pos = DEFAULT_TRENDING_POSITIONS[idx] || DEFAULT_TRENDING_POSITIONS[0]
-            const rank = deal.rank || (idx + 1)
-            const calculatedLeft = deal.left !== undefined ? deal.left : pos.left
-            const calculatedTop = deal.top !== undefined ? deal.top : pos.top
-            const badgeLeft = deal.badgeLeft !== undefined ? deal.badgeLeft : pos.badgeLeft
-            const badgeTop = deal.badgeTop !== undefined ? deal.badgeTop : pos.badgeTop
-            const imageSrc = deal.image || deal.imageUrl || deal.thumbnail || 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=600&auto=format&fit=crop&q=80'
+        {/* Ranked Deal Cards Scroll Viewport & Track */}
+        <div className="trending-deals__viewport">
+          <div className="trending-deals__track">
+            {deals.map((deal, idx) => {
+              const rank = deal.rank || (idx + 1)
 
-            return (
-              <React.Fragment key={deal.id || `trending-deal-${idx}`}>
-                {/* Product Card */}
-                <a
-                  onClick={() => adminApi.trackDealClick(deal.id)}
-                  href={deal.ctaHref || deal.link || deal.href || `/deal/${deal.id || ''}`}
-                  className="trending-deals__card"
-                  style={{
-                    left: `${calculatedLeft}px`,
-                    top: `${calculatedTop}px`,
-                  }}
-                  aria-label={`View #${rank} ${deal.name || deal.title || 'deal'}`}
-                >
-                  <img
-                    src={imageSrc}
-                    alt={deal.alt || deal.name || deal.title || 'Trending Deal'}
-                    className="trending-deals__image"
-                    width="422"
-                    height="261"
-                    onError={(e) => {
-                      const target = e.currentTarget
-                      const fallback = 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=600&auto=format&fit=crop&q=80'
-                      if (target.src !== fallback) {
-                        target.src = fallback
-                      }
-                    }}
-                  />
-                </a>
+              const rawImg = deal.productImage || deal.image || deal.imageUrl || deal.thumbnail
+              const imageSrc = (rawImg && (rawImg.startsWith('http') || rawImg.startsWith('data:') || rawImg.startsWith('/')) && !rawImg.includes('banner_1') && !rawImg.includes('banner_2'))
+                ? rawImg
+                : (TRENDING_DEALS[idx]?.productImage || 'https://m.media-amazon.com/images/I/51Q15648oYL._SL1000_.jpg')
 
-                {/* Rank Badge */}
-                <div
-                  className="trending-deals__rank-badge"
-                  style={{
-                    left: `${badgeLeft}px`,
-                    top: `${badgeTop}px`,
-                  }}
-                  aria-hidden="true"
-                >
-                  #{rank}
+              const storeName = deal.store || deal.storeName || deal.merchant || 'Amazon'
+              const rawStoreLogo = deal.storeLogo || deal.logoUrl
+              const storeLogoSrc = (rawStoreLogo && (rawStoreLogo.startsWith('http') || rawStoreLogo.startsWith('data:') || rawStoreLogo.startsWith('/')))
+                ? rawStoreLogo
+                : getStoreLogo(storeName)
+
+              const rawPrice = deal.currentPrice ?? deal.price ?? deal.dealPrice ?? (idx === 0 ? '604' : '700')
+              const formattedPrice = String(rawPrice).replace(/[^0-9.]/g, '') || (idx === 0 ? '604' : '700')
+
+              const rawDiscount = deal.discount || deal.discountPercentage || '60'
+              const numDiscount = String(rawDiscount).replace(/[^0-9]/g, '') || '60'
+              const discountPillText = `Save ${numDiscount}%off`
+
+              const title = deal.title || deal.name || 'Milton Rapid Electric Kettle 1.8L | 1500 Watts | Stainless Steel Hot Water portable...'
+
+              return (
+                <div key={deal.id || `trending-deal-${idx}`} className="trending-deals__item-wrapper">
+                  {/* Product Card */}
+                  <a
+                    onClick={() => adminApi.trackDealClick(deal.id)}
+                    href={deal.ctaHref || deal.link || deal.href || `/deal/${deal.id || ''}`}
+                    className="trending-deals__card"
+                    aria-label={`View #${rank} ${title}`}
+                  >
+                    {/* Outer Grey Frame enclosing Inner Split Card */}
+                    <div className="trending-deals__inner-card">
+                      {/* Overlapping Discount Pill Badge centered across partition line */}
+                      <div className="trending-deals__discount-pill" aria-label={discountPillText}>
+                        {discountPillText}
+                      </div>
+
+                      {/* Left Column: Edge-to-edge filled product image */}
+                      <div className="trending-deals__media">
+                        <img
+                          src={imageSrc}
+                          alt={title}
+                          className="trending-deals__product-img"
+                          loading="lazy"
+                          onError={(e) => {
+                            const target = e.currentTarget
+                            target.src = 'https://m.media-amazon.com/images/I/51Q15648oYL._SL1000_.jpg'
+                          }}
+                        />
+                      </div>
+
+                      {/* Right Column: Silver/Light-Grey Background for Description & Info */}
+                      <div className="trending-deals__details">
+                        <div className="trending-deals__store-row">
+                          <img
+                            src={storeLogoSrc}
+                            alt={storeName}
+                            className="trending-deals__store-logo"
+                            onError={(e) => {
+                              const target = e.currentTarget
+                              target.src = getStoreLogo('Amazon')
+                            }}
+                          />
+                        </div>
+                        <h3 className="trending-deals__deal-title" title={title}>
+                          {title}
+                        </h3>
+                        <div className="trending-deals__price-wrapper">
+                          <span className="trending-deals__price">₹{formattedPrice}</span>
+                        </div>
+                        <div className="trending-deals__cta-wrapper">
+                          <span className="trending-deals__view-btn">View&gt;&gt;</span>
+                        </div>
+                      </div>
+                    </div>
+                  </a>
+
+                  {/* Rank Badge */}
+                  <div
+                    className="trending-deals__rank-badge"
+                    aria-hidden="true"
+                  >
+                    #{rank}
+                  </div>
                 </div>
-              </React.Fragment>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
       </div>
     </section>
@@ -118,3 +151,4 @@ export const TrendingDealsSection: React.FC = () => {
 }
 
 export default TrendingDealsSection
+

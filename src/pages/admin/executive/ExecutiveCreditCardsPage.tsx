@@ -908,12 +908,12 @@ const CardFormModal: React.FC<CardFormProps> = ({ editing, onClose, onSave }) =>
                 {/* Card Name & Tag Text */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: 10 }}>
                   <div className="form-group">
-                    <label>Card Name <span style={{ color: '#ef4444' }}>*</span></label>
-                    <input type="text" placeholder="e.g., HDFC Regalia Gold" value={form.cardName ?? ''} onChange={e => set('cardName', e.target.value)} />
+                    <label>Card Name <span style={{ color: '#ef4444' }}>*</span> <span style={{ fontSize: 11, color: '#64748b', fontWeight: 'normal' }}>(Max 50 chars)</span></label>
+                    <input type="text" placeholder="e.g., HDFC Regalia Gold" maxLength={50} value={form.cardName ?? ''} onChange={e => set('cardName', e.target.value)} />
                   </div>
                   <div className="form-group">
-                    <label>Tag / Badge Text</label>
-                    <input type="text" placeholder="e.g., HDFC Bank / TataNeu" value={form.tagText ?? ''} onChange={e => set('tagText', e.target.value)} />
+                    <label>Tag / Badge Text <span style={{ fontSize: 11, color: '#64748b', fontWeight: 'normal' }}>(Max 30 chars)</span></label>
+                    <input type="text" placeholder="e.g., HDFC Bank / TataNeu" maxLength={30} value={form.tagText ?? ''} onChange={e => set('tagText', e.target.value)} />
                   </div>
                 </div>
 
@@ -945,46 +945,46 @@ const CardFormModal: React.FC<CardFormProps> = ({ editing, onClose, onSave }) =>
                 {/* Key Benefit Label & Value */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: 10 }}>
                   <div className="form-group">
-                    <label>Benefit Label</label>
-                    <input type="text" placeholder="TOP BENEFIT" value={form.keyBenefitLabel ?? 'TOP BENEFIT'} onChange={e => set('keyBenefitLabel', e.target.value)} />
+                    <label>Benefit Label <span style={{ fontSize: 11, color: '#64748b', fontWeight: 'normal' }}>(Max 20 chars)</span></label>
+                    <input type="text" placeholder="TOP BENEFIT" maxLength={20} value={form.keyBenefitLabel ?? 'TOP BENEFIT'} onChange={e => set('keyBenefitLabel', e.target.value)} />
                   </div>
                   <div className="form-group">
-                    <label>Benefit Value (Main Offer)</label>
-                    <input type="text" placeholder="Upto 5% Cashback" value={form.welcomeOffer ?? ''} onChange={e => set('welcomeOffer', e.target.value)} />
+                    <label>Benefit Value (Main Offer) <span style={{ fontSize: 11, color: '#64748b', fontWeight: 'normal' }}>(Max 45 chars)</span></label>
+                    <input type="text" placeholder="Upto 5% Cashback" maxLength={45} value={form.welcomeOffer ?? ''} onChange={e => set('welcomeOffer', e.target.value)} />
                   </div>
                 </div>
 
                 {/* Rewards Label & Value */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: 10 }}>
                   <div className="form-group">
-                    <label>Rewards Label</label>
-                    <input type="text" placeholder="REWARDS" value={form.rewardsLabel ?? 'REWARDS'} onChange={e => set('rewardsLabel', e.target.value)} />
+                    <label>Rewards Label <span style={{ fontSize: 11, color: '#64748b', fontWeight: 'normal' }}>(Max 20 chars)</span></label>
+                    <input type="text" placeholder="REWARDS" maxLength={20} value={form.rewardsLabel ?? 'REWARDS'} onChange={e => set('rewardsLabel', e.target.value)} />
                   </div>
                   <div className="form-group">
-                    <label>Rewards Value</label>
-                    <input type="text" placeholder="Exclusive Rewards / Lifetime Free Offers" value={form.rewardRate ?? ''} onChange={e => set('rewardRate', e.target.value)} />
+                    <label>Rewards Value <span style={{ fontSize: 11, color: '#64748b', fontWeight: 'normal' }}>(Max 55 chars)</span></label>
+                    <input type="text" placeholder="Exclusive Rewards / Lifetime Free Offers" maxLength={55} value={form.rewardRate ?? ''} onChange={e => set('rewardRate', e.target.value)} />
                   </div>
                 </div>
 
                 {/* Partner Brands */}
                 <div className="form-group">
-                  <label>Partner Brands / Suited For <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>(comma-separated)</span></label>
-                  <input type="text" placeholder="Shopping, Travel, Dining or Amazon, Flipkart, Swiggy" value={form.partnerBrands ?? ''} onChange={e => set('partnerBrands', e.target.value)} />
+                  <label>Partner Brands / Suited For <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>(comma-separated, max 70 chars)</span></label>
+                  <input type="text" placeholder="Shopping, Travel, Dining or Amazon, Flipkart, Swiggy" maxLength={70} value={form.partnerBrands ?? ''} onChange={e => set('partnerBrands', e.target.value)} />
                 </div>
 
                 {/* Fees */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
                   <div className="form-group">
-                    <label>Annual Fee</label>
-                    <input type="text" placeholder="₹0 or ₹999" value={form.annualFee ?? ''} onChange={e => set('annualFee', e.target.value)} />
+                    <label>Annual Fee <span style={{ fontSize: 11, color: '#64748b', fontWeight: 'normal' }}>(Max 25 chars)</span></label>
+                    <input type="text" placeholder="₹0 or ₹999" maxLength={25} value={form.annualFee ?? ''} onChange={e => set('annualFee', e.target.value)} />
                   </div>
                   <div className="form-group">
-                    <label>Joining Fee</label>
-                    <input type="text" placeholder="₹0 or ₹999" value={form.joiningFee ?? ''} onChange={e => set('joiningFee', e.target.value)} />
+                    <label>Joining Fee <span style={{ fontSize: 11, color: '#64748b', fontWeight: 'normal' }}>(Max 25 chars)</span></label>
+                    <input type="text" placeholder="₹0 or ₹999" maxLength={25} value={form.joiningFee ?? ''} onChange={e => set('joiningFee', e.target.value)} />
                   </div>
                   <div className="form-group">
-                    <label>Fee Waiver</label>
-                    <input type="text" placeholder="Lifetime Free or Spend ₹1L/yr" value={form.feeWaiver ?? ''} onChange={e => set('feeWaiver', e.target.value)} />
+                    <label>Fee Waiver <span style={{ fontSize: 11, color: '#64748b', fontWeight: 'normal' }}>(Max 35 chars)</span></label>
+                    <input type="text" placeholder="Lifetime Free or Spend ₹1L/yr" maxLength={35} value={form.feeWaiver ?? ''} onChange={e => set('feeWaiver', e.target.value)} />
                   </div>
                 </div>
               </div>

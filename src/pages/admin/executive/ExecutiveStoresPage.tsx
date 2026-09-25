@@ -272,19 +272,21 @@ const StoreFormModal: React.FC<StoreFormModalProps> = ({ editing, onClose, onSav
                 {/* Row: Name + Slug */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <div className="form-group">
-                    <label>Store Name <span style={{ color: '#ef4444' }}>*</span></label>
+                    <label>Store Name <span style={{ color: '#ef4444' }}>*</span> <span style={{ fontSize: 11, color: '#64748b', fontWeight: 'normal' }}>(Max 40 chars)</span></label>
                     <input
                       type="text"
-                      placeholder="e.g., Amazon"
+                      placeholder="e.g., Amazon, Puma"
+                      maxLength={40}
                       value={form.name ?? ''}
                       onChange={e => set('name', e.target.value)}
                     />
                   </div>
                   <div className="form-group">
-                    <label>URL Slug</label>
+                    <label>URL Slug <span style={{ fontSize: 11, color: '#64748b', fontWeight: 'normal' }}>(Max 40 chars)</span></label>
                     <input
                       type="text"
                       placeholder="auto-generated"
+                      maxLength={40}
                       value={form.slug ?? ''}
                       onChange={e => set('slug', e.target.value)}
                     />
@@ -303,19 +305,21 @@ const StoreFormModal: React.FC<StoreFormModalProps> = ({ editing, onClose, onSav
 
                 {/* Reward + Description */}
                 <div className="form-group">
-                  <label>Reward / Offer Text</label>
+                  <label>Reward / Offer Text <span style={{ fontSize: 11, color: '#64748b', fontWeight: 'normal' }}>(Max 35 chars)</span></label>
                   <input
                     type="text"
                     placeholder="e.g., Upto 6.8% rewards"
+                    maxLength={35}
                     value={form.reward ?? ''}
                     onChange={e => set('reward', e.target.value)}
                   />
                 </div>
                 <div className="form-group">
-                  <label>Short Tagline / Description</label>
+                  <label>Short Tagline / Description <span style={{ fontSize: 11, color: '#64748b', fontWeight: 'normal' }}>(Max 60 chars - fits store card)</span></label>
                   <input
                     type="text"
                     placeholder="e.g., 5000+ Live deals & Coupons"
+                    maxLength={60}
                     value={form.description ?? ''}
                     onChange={e => set('description', e.target.value)}
                   />

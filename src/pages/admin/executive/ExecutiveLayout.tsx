@@ -15,7 +15,8 @@ import {
   LogOut,
   ExternalLink,
   Plus,
-  FileSpreadsheet, XCircle
+  FileSpreadsheet, XCircle,
+  Sliders
 } from 'lucide-react'
 import logo from '../../../assets/navbar/wouchify-logo.png'
 import './ExecutiveLayout.css'
@@ -30,8 +31,8 @@ export const ExecutiveLayout: React.FC<ExecutiveLayoutProps> = ({ children, acti
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [user, setUser] = useState<any>(() => {
     if (typeof window === 'undefined') return null
-    const staffToken = sessionStorage.getItem('staffToken') || localStorage.getItem('staffToken')
-    const staffUserStr = sessionStorage.getItem('staffUser') || localStorage.getItem('staffUser')
+    const staffToken = sessionStorage.getItem('staffToken')
+    const staffUserStr = sessionStorage.getItem('staffUser')
     if (staffToken && staffUserStr) {
       try {
         const parsed = JSON.parse(staffUserStr)
@@ -42,8 +43,8 @@ export const ExecutiveLayout: React.FC<ExecutiveLayoutProps> = ({ children, acti
         console.error('Failed to parse staff user', e)
       }
     }
-    const adminToken = sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken')
-    const adminUserStr = sessionStorage.getItem('adminUser') || localStorage.getItem('adminUser')
+    const adminToken = sessionStorage.getItem('adminToken')
+    const adminUserStr = sessionStorage.getItem('adminUser')
     if (adminToken && adminUserStr) {
       try {
         const parsed = JSON.parse(adminUserStr)
@@ -95,6 +96,7 @@ export const ExecutiveLayout: React.FC<ExecutiveLayoutProps> = ({ children, acti
     { id: 'coupons', label: 'Coupons', path: '/executive/coupons', icon: <Tag size={19} /> },
     { id: 'credit-cards', label: 'Credit Cards', path: '/executive/credit-cards', icon: <CreditCard size={19} /> },
     { id: 'categories', label: 'Categories', path: '/executive/categories', icon: <FolderTree size={19} /> },
+    { id: 'homepage-curation', label: 'Homepage Curation', path: '/executive/homepage-curation', icon: <Sliders size={19} /> },
     { id: 'advertisements', label: 'Advertisements', path: '/executive/advertisements', icon: <Megaphone size={19} /> },
     { id: 'verification', label: 'Link & Coupon Verification', path: '/executive/verification', icon: <ShieldCheck size={19} /> },
     { id: 'rejections', label: 'Rejection Inbox', path: '/executive/rejections', icon: <XCircle size={19} /> },

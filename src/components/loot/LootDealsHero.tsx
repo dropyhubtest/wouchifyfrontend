@@ -335,7 +335,7 @@ export const LootDealsHero: React.FC = () => {
 
           {/* Red CTA Pill Button */}
           <a href="#deals-favourite-stores" className={styles.ctaPill}>
-            Explore Coupons Now!!
+            Explore Loot Deals Now!!
           </a>
         </div>
 

@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { MobileHeader } from '../components/mobile/MobileHeader'
 import { MobileFooter } from '../components/mobile/MobileFooter'
 import { MobileDealCard } from '../components/mobile/MobileDealCard'
-import { DEALS_CARD_ITEMS, type DealCardItem } from '../data/dealsPage'
+import { type DealCardItem } from '../data/dealsPage'
+import { getWishlist, removeFromWishlist } from '../utils/wishlistManager'
 import accountCircleIcon from '../assets/profile/account_circle.png'
 import ordersIcon from '../assets/profile/orders.png'
 import favoriteIcon from '../assets/profile/favorite.png'
@@ -22,38 +23,31 @@ const NAV_PILLS = [
 
 export const MobileWishlistPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('')
-  const [wishlistItems, setWishlistItems] = useState<DealCardItem[]>(() => {
-    try {
-      const saved = localStorage.getItem('wouchify_wishlist')
-      if (saved) {
-        const parsed = JSON.parse(saved)
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed
-      }
-    } catch {
-      // fallback
-    }
-    return DEALS_CARD_ITEMS
-  })
-
+  const [wishlistItems, setWishlistItems] = useState<DealCardItem[]>(() => getWishlist())
   const [removingIds, setRemovingIds] = useState<string[]>([])
+
+  useEffect(() => {
+    const handleSync = () => {
+      setWishlistItems(getWishlist())
+    }
+    window.addEventListener('wouchify_wishlist_updated', handleSync)
+    window.addEventListener('storage', handleSync)
+    return () => {
+      window.removeEventListener('wouchify_wishlist_updated', handleSync)
+      window.removeEventListener('storage', handleSync)
+    }
+  }, [])
 
   const handleRemoveItem = (id: string, e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     setRemovingIds((prev) => [...prev, id])
     setTimeout(() => {
-      setWishlistItems((prev) => prev.filter((item) => item.id !== id))
+      removeFromWishlist(id)
+      setWishlistItems((prev) => prev.filter((item) => String(item.id) !== String(id)))
       setRemovingIds((prev) => prev.filter((itemId) => itemId !== id))
     }, 280)
   }
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('wouchify_wishlist', JSON.stringify(wishlistItems))
-    } catch {
-      // ignore
-    }
-  }, [wishlistItems])
 
   const filteredWishlist = useMemo(() => {
     if (!searchQuery.trim()) return wishlistItems

@@ -143,10 +143,17 @@ router.patch('/:id/status', async (req, res, next) => {
       if (!toggled) return res.status(404).json({ message: 'Deal not found' });
       return res.json(toggled);
     }
-    const deal = await Deal.findById(req.params.id);
-    if (!deal) return res.status(404).json({ message: 'Deal not found' });
+    const isObjectId = mongoose.Types.ObjectId.isValid(req.params.id);
+    const query = isObjectId ? { $or: [{ _id: req.params.id }, { id: req.params.id }] } : { id: req.params.id };
+    const deal = await Deal.findOne(query);
+    if (!deal) {
+      const toggled = store.toggleDealStatus(req.params.id);
+      if (toggled) return res.json(toggled);
+      return res.status(404).json({ message: 'Deal not found' });
+    }
     deal.status = deal.status === 'active' ? 'pending' : 'active';
     await deal.save();
+    store.toggleDealStatus(req.params.id);
     res.json(deal);
   } catch (err) { next(err); }
 });

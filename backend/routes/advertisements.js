@@ -50,8 +50,14 @@ router.get('/:id', async (req, res, next) => {
       if (!ad) return res.status(404).json({ message: 'Advertisement not found' });
       return res.json(ad);
     }
-    const ad = await Advertisement.findById(req.params.id);
-    if (!ad) return res.status(404).json({ message: 'Advertisement not found' });
+    const isObjectId = mongoose.Types.ObjectId.isValid(req.params.id);
+    const query = isObjectId ? { $or: [{ _id: req.params.id }, { id: req.params.id }] } : { id: req.params.id };
+    const ad = await Advertisement.findOne(query);
+    if (!ad) {
+      const memoryAd = store.getAdvertisementById(req.params.id);
+      if (memoryAd) return res.json(memoryAd);
+      return res.status(404).json({ message: 'Advertisement not found' });
+    }
     res.json(ad);
   } catch (err) { next(err); }
 });
@@ -133,11 +139,18 @@ router.patch('/:id/status', async (req, res, next) => {
       if (!updated) return res.status(404).json({ message: 'Advertisement not found' });
       return res.json(updated);
     }
-    const ad = await Advertisement.findById(req.params.id);
-    if (!ad) return res.status(404).json({ message: 'Advertisement not found' });
+    const isObjectId = mongoose.Types.ObjectId.isValid(req.params.id);
+    const query = isObjectId ? { $or: [{ _id: req.params.id }, { id: req.params.id }] } : { id: req.params.id };
+    const ad = await Advertisement.findOne(query);
+    if (!ad) {
+      const updated = store.toggleAdvertisementStatus(req.params.id, status);
+      if (updated) return res.json(updated);
+      return res.status(404).json({ message: 'Advertisement not found' });
+    }
 
     ad.status = status || (ad.status === 'active' ? 'inactive' : 'active');
     await ad.save();
+    store.toggleAdvertisementStatus(req.params.id, ad.status);
     res.json(ad);
   } catch (err) { next(err); }
 });

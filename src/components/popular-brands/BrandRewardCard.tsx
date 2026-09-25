@@ -2,6 +2,7 @@ import React from 'react'
 import rewardTicketIcon from '../../assets/brands/reward-ticket-w.png'
 import type { BrandRewardItem } from '../../data/popularBrands'
 import { getStoreLogo } from '../../data/dealsPage'
+import { adminApi } from '../../services/adminApi'
 import './BrandRewardCard.css'
 
 interface BrandRewardCardProps {
@@ -9,6 +10,9 @@ interface BrandRewardCardProps {
 }
 
 export const BrandRewardCard: React.FC<BrandRewardCardProps> = ({ brand }) => {
+  const handleClick = () => {
+    adminApi.trackStoreClick(brand.name).catch(() => {})
+  }
   const logoStyle: React.CSSProperties = brand.logoFrame
     ? {
         position: 'absolute',
@@ -61,6 +65,7 @@ export const BrandRewardCard: React.FC<BrandRewardCardProps> = ({ brand }) => {
     <a
       className="brand-reward-card"
       href={brand.href}
+      onClick={handleClick}
       aria-label={`View ${brand.name} offers`}
       style={cardCustomStyle}
     >

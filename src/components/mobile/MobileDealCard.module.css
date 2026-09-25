@@ -40,6 +40,35 @@
   pointer-events: none;
 }
 
+.wishlistBtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0;
+}
+
+.wishlistBtn:active {
+  transform: scale(1.15);
+}
+
+.wishlistBtn.isActive {
+  background: #FFFFFF;
+  box-shadow: 0 3px 10px rgba(227, 30, 37, 0.28);
+}
+
 /* 2. Description Card */
 .descriptionCard {
   width: 100%;

@@ -287,14 +287,16 @@ const CouponFormModal: React.FC<CouponFormProps> = ({ editing, onClose, onSave }
             <div className="form-step-pane">
               {/* Title */}
               <div className="form-group">
-                <label>Coupon Title <span style={{ color: '#ef4444' }}>*</span></label>
+                <label>Coupon Title <span style={{ color: '#ef4444' }}>*</span> <span style={{ fontSize: 11, color: '#64748b', fontWeight: 'normal' }}>(Max 60 chars)</span></label>
                 <input type="text" placeholder="e.g., Flat 50% Off on First Order"
+                  maxLength={60}
                   value={form.title ?? ''} onChange={e => set('title', e.target.value)} />
               </div>
 
               <div className="form-group">
-                <label>Description / Terms</label>
+                <label>Description / Terms <span style={{ fontSize: 11, color: '#64748b', fontWeight: 'normal' }}>(Max 120 chars)</span></label>
                 <textarea rows={2} placeholder="e.g., Valid for new users only. No minimum order."
+                  maxLength={120}
                   value={form.description ?? ''}
                   onChange={e => set('description', e.target.value)}
                   style={{ resize: 'vertical', fontFamily: 'inherit', fontSize: '0.9rem', padding: '8px 12px', borderRadius: 8, border: '1px solid #e2e8f0', outline: 'none', width: '100%' }}
@@ -328,14 +330,16 @@ const CouponFormModal: React.FC<CouponFormProps> = ({ editing, onClose, onSave }
               {/* Row: Code + Discount text + Discount value */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 120px', gap: 12 }}>
                 <div className="form-group">
-                  <label>Coupon Code <span style={{ color: '#ef4444' }}>*</span></label>
+                  <label>Coupon Code <span style={{ color: '#ef4444' }}>*</span> <span style={{ fontSize: 11, color: '#64748b', fontWeight: 'normal' }}>(Max 20 chars)</span></label>
                   <input type="text" placeholder="e.g., WELCOME50"
+                    maxLength={20}
                     value={form.code ?? ''} style={{ fontFamily: 'monospace', letterSpacing: '1px', textTransform: 'uppercase' }}
                     onChange={e => set('code', e.target.value.toUpperCase())} />
                 </div>
                 <div className="form-group">
-                  <label>Discount Label</label>
+                  <label>Discount Label <span style={{ fontSize: 11, color: '#64748b', fontWeight: 'normal' }}>(Max 25 chars)</span></label>
                   <input type="text" placeholder="e.g., 50% OFF"
+                    maxLength={25}
                     value={form.discount ?? ''} onChange={e => set('discount', e.target.value)} />
                 </div>
                 <div className="form-group">
@@ -348,13 +352,15 @@ const CouponFormModal: React.FC<CouponFormProps> = ({ editing, onClose, onSave }
               {/* Row: Min Order + Max Discount */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div className="form-group">
-                  <label>Min Order Requirement</label>
+                  <label>Min Order Requirement <span style={{ fontSize: 11, color: '#64748b', fontWeight: 'normal' }}>(Max 30 chars)</span></label>
                   <input type="text" placeholder="e.g., Min ₹999 or No minimum"
+                    maxLength={30}
                     value={form.minOrder ?? ''} onChange={e => set('minOrder', e.target.value)} />
                 </div>
                 <div className="form-group">
-                  <label>Max Discount Cap</label>
+                  <label>Max Discount Cap <span style={{ fontSize: 11, color: '#64748b', fontWeight: 'normal' }}>(Max 30 chars)</span></label>
                   <input type="text" placeholder="e.g., Max ₹300"
+                    maxLength={30}
                     value={form.maxDiscount ?? ''} onChange={e => set('maxDiscount', e.target.value)} />
                 </div>
               </div>

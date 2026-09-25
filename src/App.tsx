@@ -3,6 +3,8 @@ import { GoogleOAuthProvider } from '@react-oauth/google'
 import { useMediaQuery } from './hooks/useMediaQuery'
 import React, { Suspense } from 'react'
 
+
+
 const DesktopHomePage = React.lazy(() => import('./components/desktop/DesktopHomePage').then(module => ({ default: module.DesktopHomePage })))
 const MobileHomePage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileHomePage })))
 const MobileStoresPage = React.lazy(() => import('./components/mobile').then(module => ({ default: module.MobileStoresPage })))
@@ -82,6 +84,7 @@ const ExecutiveAdvertisementsPage = React.lazy(() => import('./pages/admin/execu
 const ExecutiveVerificationPage = React.lazy(() => import('./pages/admin/executive/ExecutiveVerificationPage').then(module => ({ default: module.ExecutiveVerificationPage })))
 const ExecutiveTicketsPage = React.lazy(() => import('./pages/admin/executive/ExecutiveTicketsPage').then(module => ({ default: module.ExecutiveTicketsPage })))
 const ExecutiveRejectionsPage = React.lazy(() => import('./pages/admin/executive/ExecutiveRejectionsPage').then(module => ({ default: module.ExecutiveRejectionsPage })))
+const HomepageCurationPage = React.lazy(() => import('./pages/admin/executive/HomepageCurationPage').then(module => ({ default: module.HomepageCurationPage })))
 
 const OperationsDashboardPage = React.lazy(() => import('./pages/admin/operations/OperationsDashboardPage').then(module => ({ default: module.OperationsDashboardPage })))
 const OperationsApprovalsPage = React.lazy(() => import('./pages/admin/operations/OperationsApprovalsPage').then(module => ({ default: module.OperationsApprovalsPage })))
@@ -181,6 +184,7 @@ function resolveCurrentPath(): string {
 
   // Manager and Staff pages
   if (
+    pathname === '/dashboard' ||
     pathname === '/manager/login' ||
     pathname === '/manager/dashboard' ||
     pathname === '/manager' ||
@@ -196,6 +200,7 @@ function resolveCurrentPath(): string {
     pathname === '/executive' ||
     pathname.startsWith('/executive/')
   ) {
+    if (pathname === '/dashboard') return '/manager/dashboard'
     if (pathname === '/admin/login') return '/manager/login'
     if (pathname === '/admin' || pathname === '/admin/dashboard') return '/manager/dashboard'
     if (pathname.startsWith('/admin/')) return pathname.replace('/admin', '/manager')
@@ -480,8 +485,8 @@ export default function App() {
 
   const checkExecutiveAuth = (): boolean => {
     if (typeof window === 'undefined') return false
-    const staffToken = sessionStorage.getItem('staffToken') || localStorage.getItem('staffToken')
-    const staffUserStr = sessionStorage.getItem('staffUser') || localStorage.getItem('staffUser')
+    const staffToken = localStorage.getItem('staffToken') || sessionStorage.getItem('staffToken')
+    const staffUserStr = localStorage.getItem('staffUser') || sessionStorage.getItem('staffUser')
     if (staffToken && staffUserStr) {
       try {
         const parsed = JSON.parse(staffUserStr)
@@ -490,8 +495,8 @@ export default function App() {
         }
       } catch {}
     }
-    const adminToken = sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken')
-    const adminUserStr = sessionStorage.getItem('adminUser') || localStorage.getItem('adminUser')
+    const adminToken = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken')
+    const adminUserStr = localStorage.getItem('adminUser') || sessionStorage.getItem('adminUser')
     if (adminToken && adminUserStr) {
       try {
         const parsed = JSON.parse(adminUserStr)
@@ -503,8 +508,8 @@ export default function App() {
 
   const checkOperationsAuth = (): boolean => {
     if (typeof window === 'undefined') return false
-    const staffToken = sessionStorage.getItem('staffToken') || localStorage.getItem('staffToken')
-    const staffUserStr = sessionStorage.getItem('staffUser') || localStorage.getItem('staffUser')
+    const staffToken = localStorage.getItem('staffToken') || sessionStorage.getItem('staffToken')
+    const staffUserStr = localStorage.getItem('staffUser') || sessionStorage.getItem('staffUser')
     if (staffToken && staffUserStr) {
       try {
         const parsed = JSON.parse(staffUserStr)
@@ -513,8 +518,8 @@ export default function App() {
         }
       } catch {}
     }
-    const adminToken = sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken')
-    const adminUserStr = sessionStorage.getItem('adminUser') || localStorage.getItem('adminUser')
+    const adminToken = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken')
+    const adminUserStr = localStorage.getItem('adminUser') || sessionStorage.getItem('adminUser')
     if (adminToken && adminUserStr) {
       try {
         const parsed = JSON.parse(adminUserStr)
@@ -526,16 +531,16 @@ export default function App() {
 
   const checkManagerAuth = (): boolean => {
     if (typeof window === 'undefined') return false
-    const adminToken = sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken')
-    const adminUserStr = sessionStorage.getItem('adminUser') || localStorage.getItem('adminUser')
+    const adminToken = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken')
+    const adminUserStr = localStorage.getItem('adminUser') || sessionStorage.getItem('adminUser')
     if (adminToken && adminUserStr) {
       try {
         const parsed = JSON.parse(adminUserStr)
         if (parsed && (parsed.role === 'admin' || parsed.role === 'manager')) return true
       } catch {}
     }
-    const staffToken = sessionStorage.getItem('staffToken') || localStorage.getItem('staffToken')
-    const staffUserStr = sessionStorage.getItem('staffUser') || localStorage.getItem('staffUser')
+    const staffToken = localStorage.getItem('staffToken') || sessionStorage.getItem('staffToken')
+    const staffUserStr = localStorage.getItem('staffUser') || sessionStorage.getItem('staffUser')
     if (staffToken && staffUserStr) {
       try {
         const parsed = JSON.parse(staffUserStr)
@@ -575,6 +580,7 @@ export default function App() {
       if (currentPath === '/executive/verification') return <ExecutiveVerificationPage />
       if (currentPath === '/executive/tickets') return <ExecutiveTicketsPage />
       if (currentPath === '/executive/rejections') return <ExecutiveRejectionsPage />
+      if (currentPath === '/executive/homepage-curation') return <HomepageCurationPage />
       return <ExecutiveDashboardPage />
     }
 
@@ -604,6 +610,7 @@ export default function App() {
         return <AdminLoginPage />
       }
       if (currentPath === '/manager/approvals') return <ManagerApprovalsPage />
+      if (currentPath === '/manager/homepage-curation') return <HomepageCurationPage />
       return <AdminDashboardPage />
     }
 

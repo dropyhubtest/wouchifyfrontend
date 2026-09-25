@@ -1,45 +1,62 @@
 import React, { useEffect, useState } from 'react'
 import { POPULAR_BRANDS_CAROUSEL, type BrandRewardItem } from '../../data/popularBrands'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
-import { fetchPopularBrands } from '../../utils/api'
 import { getStoreLogo } from '../../data/dealsPage'
 import { BrandRewardCard } from './BrandRewardCard'
 import './PopularBrandsSection.css'
+
+import { adminApi } from '../../services/adminApi'
 
 export const PopularBrandsSection: React.FC = () => {
   const sectionScale = useDesktopScale()
   const [displayBrands, setDisplayBrands] = useState<BrandRewardItem[]>(POPULAR_BRANDS_CAROUSEL)
 
-  useEffect(() => {
-    const loadBrands = async () => {
-      try {
-        const { data } = await fetchPopularBrands()
-        if (Array.isArray(data) && data.length > 0) {
-          // Merge live brands with the curated layout and high-res logos
-          const merged: BrandRewardItem[] = POPULAR_BRANDS_CAROUSEL.map((defaultItem) => {
-            const liveMatch = data.find((d: any) => 
-              d.name?.toLowerCase() === defaultItem.name?.toLowerCase() ||
-              d.slug === defaultItem.slug
-            )
-            if (liveMatch) {
-              return {
-                ...defaultItem,
-                name: liveMatch.name || defaultItem.name,
-                logoSrc: liveMatch.logoUrl && !liveMatch.logoUrl.includes('default-logo') 
-                  ? liveMatch.logoUrl 
-                  : defaultItem.logoSrc || getStoreLogo(liveMatch.name),
-                rewardValue: liveMatch.cashbackText || defaultItem.rewardValue,
-              }
+  const loadBrands = async () => {
+    try {
+      const stores = await adminApi.getStores({ all: true })
+      if (Array.isArray(stores) && stores.length > 0) {
+        // Collect names and slugs of stores/brands that are explicitly hidden from homepage
+        const hiddenSet = new Set(
+          stores
+            .filter((s: any) => s.showOnHome === false || s.sectionPlacement === 'none' || s.status === 'inactive')
+            .map((s: any) => (s.name || s.slug || '').toLowerCase().trim())
+        )
+
+        // Filter default static list
+        const visibleDefaults = POPULAR_BRANDS_CAROUSEL.filter(
+          (item) => !hiddenSet.has(item.name.toLowerCase().trim()) && !hiddenSet.has((item.slug || '').toLowerCase().trim())
+        )
+
+        // Merge live store info
+        const merged: BrandRewardItem[] = visibleDefaults.map((defaultItem) => {
+          const liveMatch = stores.find((d: any) => 
+            d.name?.toLowerCase().trim() === defaultItem.name?.toLowerCase().trim() ||
+            d.slug === defaultItem.slug
+          )
+          if (liveMatch) {
+            return {
+              ...defaultItem,
+              name: liveMatch.name || defaultItem.name,
+              logoSrc: liveMatch.logo && !liveMatch.logo.includes('default-logo') 
+                ? liveMatch.logo 
+                : defaultItem.logoSrc || getStoreLogo(liveMatch.name),
+              rewardValue: liveMatch.reward || defaultItem.rewardValue,
             }
-            return defaultItem
-          })
-          setDisplayBrands(merged)
-        }
-      } catch (err) {
-        console.warn('Could not sync live brands, using curated list:', err)
+          }
+          return defaultItem
+        })
+        setDisplayBrands(merged)
       }
+    } catch (err) {
+      console.warn('Could not sync live brands, using curated list:', err)
     }
+  }
+
+  useEffect(() => {
     loadBrands()
+    const handleUpdate = () => loadBrands()
+    window.addEventListener('wouchify_stores_updated', handleUpdate)
+    return () => window.removeEventListener('wouchify_stores_updated', handleUpdate)
   }, [])
 
   return (

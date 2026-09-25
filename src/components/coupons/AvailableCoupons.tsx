@@ -189,7 +189,7 @@ export const AvailableCoupons: React.FC = () => {
                     />
                   </div>
                   <div className={styles.discountRow}>
-                    <span className={styles.discountPercent}>{coupon.discount}</span>
+                    <span className={styles.discountPercent}>{String(coupon.discount || '20%').replace(/\s*off\b/gi, '').trim() || coupon.discount}</span>
                     <span className={styles.discountOff}>off</span>
                   </div>
                   <div className={styles.metaRow}>

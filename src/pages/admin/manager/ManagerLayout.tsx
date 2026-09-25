@@ -11,7 +11,8 @@ import {
   ChevronLeft, 
   ChevronRight, 
   LogOut,
-  Activity, Database
+  Activity, Database,
+  Sliders
 } from 'lucide-react'
 import logo from '../../../assets/navbar/wouchify-logo.png'
 import '../operations/OperationsLayout.css' // Reuse operations layout styles
@@ -35,8 +36,8 @@ export const ManagerLayout: React.FC<ManagerLayoutProps> = ({
   const mergedCounts = { ...liveCounts, ...pendingCounts }
   const [user, setUser] = useState<{ email: string; role: string } | null>(() => {
     if (typeof window === 'undefined') return null
-    const adminToken = sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken')
-    const adminUser = sessionStorage.getItem('adminUser') || localStorage.getItem('adminUser')
+    const adminToken = sessionStorage.getItem('adminToken')
+    const adminUser = sessionStorage.getItem('adminUser')
     if (adminToken && adminUser) {
       try {
         const parsed = JSON.parse(adminUser)
@@ -47,8 +48,8 @@ export const ManagerLayout: React.FC<ManagerLayoutProps> = ({
         console.error('Failed to parse admin user', e)
       }
     }
-    const staffToken = sessionStorage.getItem('staffToken') || localStorage.getItem('staffToken')
-    const staffUser = sessionStorage.getItem('staffUser') || localStorage.getItem('staffUser')
+    const staffToken = sessionStorage.getItem('staffToken')
+    const staffUser = sessionStorage.getItem('staffUser')
     if (staffToken && staffUser) {
       try {
         const parsed = JSON.parse(staffUser)
@@ -84,8 +85,9 @@ export const ManagerLayout: React.FC<ManagerLayoutProps> = ({
   useEffect(() => {
     const fetchLiveCounts = async () => {
       try {
+        const token = sessionStorage.getItem('staffToken') || sessionStorage.getItem('adminToken') || ''
         const [subs] = await Promise.all([
-          fetch('/api/submissions?status=Pending%20Approval', { headers: { Authorization: `Bearer ${sessionStorage.getItem('staffToken') || localStorage.getItem('staffToken') || sessionStorage.getItem('adminToken') || localStorage.getItem('adminToken') || 'dev-manager'}` } }).then(r => r.ok ? r.json() : []).catch(() => [])
+          fetch('/api/submissions?status=Pending%20Approval', { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : []).catch(() => [])
         ])
         const apprs = Array.isArray(subs) ? subs.filter((s: any) => s.status === 'Pending Approval' || s.status === 'Pending Review' || s.status === 'pending').length : 0
         setLiveCounts({ approvals: apprs })
@@ -159,6 +161,12 @@ export const ManagerLayout: React.FC<ManagerLayoutProps> = ({
       label: 'Staff Activity', 
       path: '/manager/staff-activity', 
       icon: <Activity size={20} /> 
+    },
+    {
+      id: 'homepage-curation',
+      label: 'Homepage Curation',
+      path: '/manager/homepage-curation',
+      icon: <Sliders size={20} />
     },
     {
       id: 'live-data',

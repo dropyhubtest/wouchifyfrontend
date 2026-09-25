@@ -2092,11 +2092,12 @@ export const ExecutiveDealsPage: React.FC = () => {
                     <select
                       value={form.sectionPlacement || (form.isBestSelling ? 'best_selling' : 'both')}
                       onChange={(e) => {
-                        const val = e.target.value as 'both' | 'favourite' | 'best_selling'
+                        const val = e.target.value as 'both' | 'favourite' | 'best_selling' | 'none'
                         setForm({
                           ...form,
                           sectionPlacement: val,
-                          isBestSelling: val === 'best_selling' || val === 'both'
+                          isBestSelling: val === 'best_selling' || val === 'both',
+                          showOnHome: val !== 'none'
                         })
                       }}
                       style={{
@@ -2111,11 +2112,12 @@ export const ExecutiveDealsPage: React.FC = () => {
                         backgroundColor: '#ffffff'
                       }}
                     >
-                      <option value="both">Both (Section 1 - Main Deals &amp; Section 2 - Best Selling Picks)</option>
-                      <option value="favourite">Section 1 (Main Deals / Favourite Stores Catalog Only)</option>
-                      <option value="best_selling">Section 2 (Best Selling Deals Picks Only)</option>
+                      <option value="both">🌟 Both Sections (Recently Added Deals &amp; Trending Best Sellers)</option>
+                      <option value="favourite">📌 Recently Added Deals (Homepage &amp; Deals Section 1)</option>
+                      <option value="best_selling">🔥 Trending Best Sellers (Homepage &amp; Deals Section 2)</option>
+                      <option value="none">📁 Deals Catalog Only (Not on Homepage)</option>
                     </select>
-                    <span className="field-hint">Choose whether this deal appears in Section 1, Section 2, or Both sections on the Deals storefront page.</span>
+                    <span className="field-hint">Choose which specific Homepage section (Recently Added, Trending Best Sellers, or Both) will display this deal.</span>
                   </div>
 
                   {/* Feature Checkbox Cards */}

@@ -70,6 +70,10 @@ export interface ModerationItem {
   approvedByName?: string
   approvedByRole?: string
   approvedAt?: string
+  rawUpdatedAt?: string
+  rawSubmittedAt?: string
+  rawApprovedAt?: string
+  rawCreatedAt?: string
   dataSnapshot?: any
 }
 
@@ -90,6 +94,10 @@ export const ManagerApprovalsPage: React.FC = () => {
     submittedBy: sub.submittedBy || 'executive@wouchify.com',
     submittedByName: sub.submittedByName,
     submittedAt: sub.submittedAt,
+    rawUpdatedAt: sub.updatedAt,
+    rawSubmittedAt: sub.submittedAt,
+    rawApprovedAt: sub.approvedAt,
+    rawCreatedAt: sub.createdAt,
     price: sub.dataSnapshot?.price || '',
     originalPrice: sub.dataSnapshot?.originalPrice || '',
     discount: sub.dataSnapshot?.discount || '',
@@ -151,6 +159,10 @@ export const ManagerApprovalsPage: React.FC = () => {
             submittedBy: s.submittedBy || 'Content Executive',
             submittedByName: s.submittedByName,
             submittedAt: s.submittedAt ? new Date(s.submittedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : 'Recently',
+            rawUpdatedAt: s.updatedAt,
+            rawSubmittedAt: s.submittedAt,
+            rawApprovedAt: s.approvedAt,
+            rawCreatedAt: s.createdAt,
             reviewedBy: s.reviewedBy || s.approvedBy,
             reviewedByName: s.reviewedByName || s.approvedByName,
             reviewedByRole: s.reviewedByRole || s.approvedByRole,
@@ -220,13 +232,16 @@ export const ManagerApprovalsPage: React.FC = () => {
   const handleApproveOne = async (id: string, title: string) => {
     try {
       await adminApi.approveSubmission(id, managerReviewerMeta)
+      const nowIso = new Date().toISOString()
       setItems(prev => prev.map(i => i.id === id ? { 
         ...i, 
         status: 'Approved',
         approvedBy: managerReviewerMeta.reviewedBy,
         approvedByName: managerReviewerMeta.reviewedByName,
         approvedByRole: managerReviewerMeta.reviewedByRole,
-        approvedAt: new Date().toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })
+        approvedAt: new Date().toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' }),
+        rawApprovedAt: nowIso,
+        rawUpdatedAt: nowIso
       } : i))
       setSelectedIds(prev => prev.filter(selId => selId !== id))
       showToast(`Approved: "${title}"`)
@@ -259,8 +274,14 @@ export const ManagerApprovalsPage: React.FC = () => {
 
     try {
       await adminApi.rejectSubmission(rejectingItem.id, rejectionReason)
+      const nowIso = new Date().toISOString()
       setItems(prev => prev.map(item => 
-        item.id === rejectingItem.id ? { ...item, status: 'Rejected', rejectionReason } : item
+        item.id === rejectingItem.id ? { 
+          ...item, 
+          status: 'Rejected', 
+          rejectionReason,
+          rawUpdatedAt: nowIso
+        } : item
       ))
       setSelectedIds(prev => prev.filter(id => id !== rejectingItem.id))
       showToast(`Rejected submission with feedback note`)
@@ -278,13 +299,16 @@ export const ManagerApprovalsPage: React.FC = () => {
     if (selectedIds.length === 0) return
     try {
       await adminApi.bulkApproveSubmissions(selectedIds, managerReviewerMeta)
+      const nowIso = new Date().toISOString()
       setItems(prev => prev.map(item => selectedIds.includes(item.id) ? { 
         ...item, 
         status: 'Approved',
         approvedBy: managerReviewerMeta.reviewedBy,
         approvedByName: managerReviewerMeta.reviewedByName,
         approvedByRole: managerReviewerMeta.reviewedByRole,
-        approvedAt: new Date().toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })
+        approvedAt: new Date().toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' }),
+        rawApprovedAt: nowIso,
+        rawUpdatedAt: nowIso
       } : item))
       showToast(`Bulk approved ${selectedIds.length} submissions`)
       setSelectedIds([])
@@ -312,7 +336,8 @@ export const ManagerApprovalsPage: React.FC = () => {
   const handleConfirmBulkReject = async (reason: string) => {
     try {
       await Promise.all(selectedIds.map(id => adminApi.rejectSubmission(id, reason)))
-      setItems(prev => prev.map(item => selectedIds.includes(item.id) ? { ...item, status: 'Rejected', rejectionReason: reason } : item))
+      const nowIso = new Date().toISOString()
+      setItems(prev => prev.map(item => selectedIds.includes(item.id) ? { ...item, status: 'Rejected', rejectionReason: reason, rawUpdatedAt: nowIso } : item))
       showToast(`Rejected ${selectedIds.length} submissions`)
       setSelectedIds([])
       setBulkRejectOpen(false)
@@ -371,6 +396,10 @@ export const ManagerApprovalsPage: React.FC = () => {
       }
 
       return true
+    }).sort((a, b) => {
+      const timeA = new Date(a.rawUpdatedAt || a.rawApprovedAt || a.rawSubmittedAt || a.rawCreatedAt || 0).getTime()
+      const timeB = new Date(b.rawUpdatedAt || b.rawApprovedAt || b.rawSubmittedAt || b.rawCreatedAt || 0).getTime()
+      return timeB - timeA
     })
   }, [items, activeTab, filterType, filterExecutive, searchTerm])
 

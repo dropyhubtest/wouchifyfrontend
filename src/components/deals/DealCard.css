@@ -53,6 +53,50 @@
   z-index: 2;
 }
 
+.deal-card__wishlist-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0;
+}
+
+.deal-card__wishlist-btn:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: scale(1.14);
+}
+
+.deal-card__wishlist-btn:hover svg {
+  stroke: #E31E25;
+}
+
+.deal-card__wishlist-btn.is-active {
+  background: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(227, 30, 37, 0.25);
+}
+
+.deal-card__wishlist-btn.is-active svg {
+  animation: wishlistHeartPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes wishlistHeartPop {
+  0% { transform: scale(0.7); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
 .deal-card__image {
   width: 100%;
   height: 100%;
@@ -303,6 +347,7 @@
   padding: 16px 18px 18px 18px;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   box-sizing: border-box;
   box-shadow:
     inset 0 6px 8px -2px rgba(0, 0, 0, 0.18),
@@ -319,7 +364,7 @@
 }
 
 .deal-card__content--horizontal .deal-card__store-row {
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .deal-card__content--horizontal .deal-card__store-left {
@@ -327,8 +372,8 @@
 }
 
 .deal-card__content--horizontal .deal-card__store-logo {
-  height: 32px;
-  max-width: 110px;
+  height: 36px;
+  max-width: 130px;
 }
 
 .deal-card__content--horizontal .deal-card__verified-badge {
@@ -346,21 +391,23 @@
   font-weight: 700;
   padding: 3px 14px 3px 18px;
   margin-left: -18px;
-  margin-top: 6px;
-  margin-bottom: 8px;
+  margin-top: 4px;
+  margin-bottom: 6px;
 }
 
 .deal-card__content--horizontal .deal-card__title {
   font-size: 14px;
   font-weight: 700;
   line-height: 1.35;
-  height: 38px;
-  margin: 0 0 8px 0;
+  height: auto;
+  min-height: 38px;
+  margin: 0 0 6px 0;
 }
 
 .deal-card__content--horizontal .deal-card__price-row {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   gap: 10px;
+  align-items: baseline;
 }
 
 .deal-card__content--horizontal .deal-card__price {

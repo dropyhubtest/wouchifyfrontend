@@ -4,6 +4,7 @@ import {
   type MobileRecentDealItem,
 } from '../../data/mobileRecentDeals'
 import { getPublicDeals } from '../../services/api'
+import { filterRecentlyAddedDeals } from '../../utils/homepageSectionFilters'
 import './MobileRecentDeals.css'
 
 interface MobileRecentDealCardProps {
@@ -33,11 +34,7 @@ export const MobileRecentDeals: React.FC = () => {
   useEffect(() => {
     getPublicDeals().then(data => {
       if (Array.isArray(data) && data.length > 0) {
-        const filtered = data.filter((d: any) => 
-          d.showOnHome !== false && 
-          d.sectionPlacement !== 'none' && 
-          (d.sectionPlacement === 'favourite' || d.sectionPlacement === 'both' || !d.sectionPlacement)
-        )
+        const filtered = filterRecentlyAddedDeals(data)
         if (filtered.length > 0) {
           const mapped: MobileRecentDealItem[] = filtered.map((d: any, idx: number) => ({
             id: d._id || d.id || `mobile-recent-${idx}`,

@@ -1975,15 +1975,16 @@ export const ExecutiveLootDealsPage: React.FC = () => {
 
                       {/* Granular Section Placement Dropdown */}
                       <div className="form-group" style={{ marginBottom: '14px' }}>
-                        <label>Storefront Section Placement <span className="required-star">*</span></label>
+                        <label>Storefront &amp; Homepage Section Placement <span className="required-star">*</span></label>
                         <select
                           value={form.sectionPlacement || (form.isBestSelling ? 'best_selling' : 'both')}
                           onChange={(e) => {
-                            const val = e.target.value as 'both' | 'favourite' | 'best_selling'
+                            const val = e.target.value as 'both' | 'favourite' | 'best_selling' | 'none'
                             setForm({
                               ...form,
                               sectionPlacement: val,
-                              isBestSelling: val === 'best_selling' || val === 'both'
+                              isBestSelling: val === 'best_selling' || val === 'both',
+                              showOnHome: val !== 'none'
                             })
                           }}
                           style={{
@@ -1998,11 +1999,12 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                             backgroundColor: '#ffffff'
                           }}
                         >
-                          <option value="both">Both (Section 1 - Main Loot Deals &amp; Section 2 - Best Selling Picks)</option>
-                          <option value="favourite">Section 1 (Main Loot Deals Search Catalog Only)</option>
-                          <option value="best_selling">Section 2 (Best Selling Loot Picks Only)</option>
+                          <option value="both">🌟 Both Sections (Flash Loot Deals &amp; Exclusive Loot Deals)</option>
+                          <option value="favourite">⚡ Flash Loot Deals (Homepage &amp; Loot Search Catalog)</option>
+                          <option value="best_selling">💎 Exclusive Loot Deals (Homepage &amp; Best Selling Picks)</option>
+                          <option value="none">📁 Loot Deals Catalog Only (Not on Homepage)</option>
                         </select>
-                        <span className="field-hint">Choose whether this loot deal appears in Section 1, Section 2, or Both sections on the Loot Deals storefront page.</span>
+                        <span className="field-hint">Choose which specific Homepage section (Flash Loot Deals, Exclusive Loot Deals, or Both) will display this deal.</span>
                       </div>
 
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>

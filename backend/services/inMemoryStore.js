@@ -37,9 +37,9 @@ let deals = [
     sectionPlacement: 'both',
     isFeatured: true,
     isVerified: true,
-    productImage: '/src/assets/deals/deal1.png',
-    image: '/src/assets/deals/deal1.png',
-    images: ['/src/assets/deals/deal1.png'],
+    productImage: 'https://m.media-amazon.com/images/I/51Q15648oYL._SL1000_.jpg',
+    image: 'https://m.media-amazon.com/images/I/51Q15648oYL._SL1000_.jpg',
+    images: ['https://m.media-amazon.com/images/I/51Q15648oYL._SL1000_.jpg'],
     ctaHref: '/stores#amazon',
     link: '/stores#amazon',
     badge: "Amazon's Choice",
@@ -950,7 +950,7 @@ let lootDeals = [
     isFeatured: false,
     isVerified: true,
     isBestSelling: false,
-    sectionPlacement: 'favourite',
+    sectionPlacement: 'both',
     clicks: 1980
   },
   {
@@ -996,7 +996,7 @@ let lootDeals = [
     isFeatured: false,
     isVerified: true,
     isBestSelling: false,
-    sectionPlacement: 'favourite',
+    sectionPlacement: 'both',
     clicks: 1420
   },
   {
@@ -1042,7 +1042,7 @@ let lootDeals = [
     isFeatured: false,
     isVerified: true,
     isBestSelling: false,
-    sectionPlacement: 'favourite',
+    sectionPlacement: 'both',
     clicks: 4320
   },
   {
@@ -2193,7 +2193,7 @@ module.exports = {
     if (filter.status && filter.status !== 'All') {
       result = result.filter(d => d.status && d.status.toLowerCase() === filter.status.toLowerCase());
     }
-    return result;
+    return result.sort((a, b) => new Date(b.createdAt || b.updatedAt || 0).getTime() - new Date(a.createdAt || a.updatedAt || 0).getTime());
   },
   addDeal: (item) => {
     const id = item.id ? String(item.id) : (item._id ? String(item._id) : `deal-${Date.now()}`);
@@ -2204,7 +2204,7 @@ module.exports = {
       submissionStatus: item.submissionStatus || 'pending_approval',
       opsManagerApproval: item.opsManagerApproval || 'Pending',
       managerApproval: item.managerApproval || 'Pending',
-      createdAt: new Date().toISOString(), 
+      createdAt: item.createdAt || new Date().toISOString(), 
       updatedAt: new Date().toISOString(), 
       ...item 
     };
@@ -2219,10 +2219,10 @@ module.exports = {
     return created;
   },
   updateDeal: (id, updates) => {
-    const target = String(id || '').trim();
+    const target = String(id || '').trim().toLowerCase();
     const idx = deals.findIndex(d => 
-      String(d._id) === target || 
-      String(d.id) === target || 
+      String(d._id).toLowerCase() === target || 
+      String(d.id).toLowerCase() === target || 
       (updates.name && d.name && d.name.toLowerCase().trim() === updates.name.toLowerCase().trim()) ||
       (updates.title && d.title && d.title.toLowerCase().trim() === updates.title.toLowerCase().trim())
     );
@@ -2232,14 +2232,14 @@ module.exports = {
     return deals[idx];
   },
   deleteDeal: (id) => {
-    const idx = deals.findIndex(d => d._id === id || String(d.id) === String(id));
+    const idx = deals.findIndex(d => String(d._id).toLowerCase() === String(id).toLowerCase() || String(d.id).toLowerCase() === String(id).toLowerCase());
     if (idx === -1) return false;
     deals.splice(idx, 1);
     saveToDisk();
     return true;
   },
   toggleDealStatus: (id) => {
-    const deal = deals.find(d => d._id === id || String(d.id) === String(id));
+    const deal = deals.find(d => String(d._id).toLowerCase() === String(id).toLowerCase() || String(d.id).toLowerCase() === String(id).toLowerCase());
     if (!deal) return null;
     deal.status = deal.status === 'active' ? 'pending' : 'active';
     deal.updatedAt = new Date().toISOString();
@@ -2247,7 +2247,7 @@ module.exports = {
     return deal;
   },
   incrementDealClicks: (id) => {
-    const deal = deals.find(d => d._id === String(id) || String(d.id) === String(id));
+    const deal = deals.find(d => String(d._id).toLowerCase() === String(id).toLowerCase() || String(d.id).toLowerCase() === String(id).toLowerCase());
     if (!deal) return null;
     deal.clicks = (deal.clicks || 0) + 1;
     deal.updatedAt = new Date().toISOString();
@@ -2267,7 +2267,7 @@ module.exports = {
     if (filter.status && filter.status !== 'All') {
       result = result.filter(c => c.status && c.status.toLowerCase() === filter.status.toLowerCase());
     }
-    return result;
+    return result.sort((a, b) => new Date(b.createdAt || b.updatedAt || 0).getTime() - new Date(a.createdAt || a.updatedAt || 0).getTime());
   },
   addCoupon: (item) => {
     const id = item.id ? String(item.id) : (item.code ? `coupon-${item.code.toLowerCase()}` : `coupon-${Date.now()}`);
@@ -2280,7 +2280,7 @@ module.exports = {
       status: 'active', 
       opsManagerApproval: 'Approved',
       managerApproval: 'Approved',
-      createdAt: new Date().toISOString(),
+      createdAt: item.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       ...item 
     };
@@ -2356,31 +2356,34 @@ module.exports = {
     if (filter.dealType && filter.dealType !== 'All') {
       result = result.filter(l => l.dealType === filter.dealType);
     }
-    return result;
+    return result.sort((a, b) => new Date(b.createdAt || b.updatedAt || 0).getTime() - new Date(a.createdAt || a.updatedAt || 0).getTime());
   },
   addLootDeal: (item) => {
     const id = `loot-${Date.now()}`;
-    const created = { _id: id, id, status: 'active', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), ...item };
+    const created = { _id: id, id, status: 'active', createdAt: item.createdAt || new Date().toISOString(), updatedAt: new Date().toISOString(), ...item };
     lootDeals.unshift(created);
     saveToDisk();
     return created;
   },
   updateLootDeal: (id, updates) => {
-    const idx = lootDeals.findIndex(l => l._id === id || l.id === id);
+    const target = String(id || '').trim().toLowerCase();
+    const idx = lootDeals.findIndex(l => String(l._id).toLowerCase() === target || String(l.id).toLowerCase() === target || (updates.title && l.title && l.title.toLowerCase().trim() === updates.title.toLowerCase().trim()));
     if (idx === -1) return null;
     lootDeals[idx] = { ...lootDeals[idx], ...updates, updatedAt: new Date().toISOString() };
     saveToDisk();
     return lootDeals[idx];
   },
   deleteLootDeal: (id) => {
-    const idx = lootDeals.findIndex(l => l._id === id || l.id === id);
+    const target = String(id || '').trim().toLowerCase();
+    const idx = lootDeals.findIndex(l => String(l._id).toLowerCase() === target || String(l.id).toLowerCase() === target);
     if (idx === -1) return false;
     lootDeals.splice(idx, 1);
     saveToDisk();
     return true;
   },
   toggleLootDealStatus: (id) => {
-    const loot = lootDeals.find(l => l._id === id || l.id === id);
+    const target = String(id || '').trim().toLowerCase();
+    const loot = lootDeals.find(l => String(l._id).toLowerCase() === target || String(l.id).toLowerCase() === target);
     if (!loot) return null;
     loot.status = loot.status === 'active' ? 'inactive' : 'active';
     loot.updatedAt = new Date().toISOString();
@@ -2388,7 +2391,8 @@ module.exports = {
     return loot;
   },
   incrementLootClicks: (id) => {
-    const loot = lootDeals.find(l => l._id === String(id) || String(l.id) === String(id));
+    const target = String(id || '').trim().toLowerCase();
+    const loot = lootDeals.find(l => String(l._id).toLowerCase() === target || String(l.id).toLowerCase() === target);
     if (!loot) return null;
     loot.clicks = (loot.clicks || 0) + 1;
     loot.updatedAt = new Date().toISOString();
@@ -2402,7 +2406,7 @@ module.exports = {
     if (filter.all !== 'true') {
       result = result.filter(s => (s.submissionStatus === undefined || s.submissionStatus === 'approved') && s.status !== 'pending' && s.status !== 'rejected' && s.opsManagerApproval !== 'Rejected');
     }
-    return result;
+    return result.sort((a, b) => new Date(b.createdAt || b.updatedAt || 0).getTime() - new Date(a.createdAt || a.updatedAt || 0).getTime());
   },
   addStore: (item) => {
     const id = Date.now().toString();
@@ -2411,7 +2415,7 @@ module.exports = {
       status: 'pending', 
       opsManagerApproval: 'Pending',
       managerApproval: 'Pending',
-      createdAt: new Date().toISOString(),
+      createdAt: item.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       ...item 
     };
@@ -2420,21 +2424,47 @@ module.exports = {
     return created;
   },
   updateStore: (id, updates) => {
-    const idx = stores.findIndex(s => s._id === id);
-    if (idx === -1) return null;
+    const target = String(id || '').trim().toLowerCase();
+    const idx = stores.findIndex(s => 
+      String(s._id).toLowerCase() === target || 
+      String(s.id).toLowerCase() === target || 
+      (s.slug && s.slug.toLowerCase() === target) || 
+      (s.name && s.name.toLowerCase().trim() === target) ||
+      (updates.name && s.name && s.name.toLowerCase().trim() === updates.name.toLowerCase().trim())
+    );
+    if (idx === -1) {
+      // If store is not yet in stores array (e.g. from static catalogue), add it with the updates
+      const newStore = {
+        _id: String(id),
+        id: String(id),
+        name: updates.name || id,
+        slug: updates.slug || String(id).toLowerCase(),
+        category: updates.category || 'Shopping',
+        showOnHome: updates.showOnHome !== undefined ? updates.showOnHome : true,
+        status: updates.status || 'active',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        ...updates
+      };
+      stores.unshift(newStore);
+      saveToDisk();
+      return newStore;
+    }
     stores[idx] = { ...stores[idx], ...updates, updatedAt: new Date().toISOString() };
     saveToDisk();
     return stores[idx];
   },
   deleteStore: (id) => {
-    const idx = stores.findIndex(s => s._id === id);
+    const target = String(id || '').trim().toLowerCase();
+    const idx = stores.findIndex(s => String(s._id).toLowerCase() === target || String(s.id).toLowerCase() === target || (s.name && s.name.toLowerCase().trim() === target));
     if (idx === -1) return false;
     stores.splice(idx, 1);
     saveToDisk();
     return true;
   },
   approveStore: (id, role) => {
-    const storeDoc = stores.find(s => s._id === id);
+    const target = String(id || '').trim().toLowerCase();
+    const storeDoc = stores.find(s => String(s._id).toLowerCase() === target || String(s.id).toLowerCase() === target);
     if (!storeDoc) return null;
     if (role === 'opsManager') storeDoc.opsManagerApproval = 'Approved';
     if (role === 'manager') storeDoc.managerApproval = 'Approved';
@@ -2445,7 +2475,8 @@ module.exports = {
     return storeDoc;
   },
   rejectStore: (id, role) => {
-    const storeDoc = stores.find(s => s._id === id);
+    const target = String(id || '').trim().toLowerCase();
+    const storeDoc = stores.find(s => String(s._id).toLowerCase() === target || String(s.id).toLowerCase() === target);
     if (!storeDoc) return null;
     if (role === 'opsManager') storeDoc.opsManagerApproval = 'Rejected';
     if (role === 'manager') storeDoc.managerApproval = 'Rejected';
@@ -2460,10 +2491,11 @@ module.exports = {
     if (filter.all !== 'true') {
       result = result.filter(c => (c.submissionStatus === undefined || c.submissionStatus === 'approved') && c.status !== 'pending' && c.status !== 'rejected' && c.opsManagerApproval !== 'Rejected');
     }
-    return result;
+    return result.sort((a, b) => new Date(b.createdAt || b.updatedAt || 0).getTime() - new Date(a.createdAt || a.updatedAt || 0).getTime());
   },
   getCategoryById: (id) => {
-    return categories.find(c => c._id === id || String(c.id) === String(id) || c.slug === id) || null;
+    const target = String(id || '').trim().toLowerCase();
+    return categories.find(c => String(c._id).toLowerCase() === target || String(c.id).toLowerCase() === target || (c.slug && c.slug.toLowerCase() === target)) || null;
   },
   addCategory: (item) => {
     const id = item.slug ? `cat-${item.slug}` : `cat-${Date.now()}`;
@@ -2473,23 +2505,25 @@ module.exports = {
       count: item.count || item.dealsCount || 0,
       dealsCount: item.dealsCount || item.count || 0,
       status: 'active',
-      createdAt: new Date().toISOString(),
+      createdAt: item.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       ...item
     };
-    categories.push(created);
+    categories.unshift(created);
     saveToDisk();
     return created;
   },
   updateCategory: (id, updates) => {
-    const idx = categories.findIndex(c => c._id === id || String(c.id) === String(id) || c.slug === id);
+    const target = String(id || '').trim().toLowerCase();
+    const idx = categories.findIndex(c => String(c._id).toLowerCase() === target || String(c.id).toLowerCase() === target || (c.slug && c.slug.toLowerCase() === target));
     if (idx === -1) return null;
     categories[idx] = { ...categories[idx], ...updates, updatedAt: new Date().toISOString() };
     saveToDisk();
     return categories[idx];
   },
   deleteCategory: (id) => {
-    const idx = categories.findIndex(c => c._id === id || String(c.id) === String(id) || c.slug === id);
+    const target = String(id || '').trim().toLowerCase();
+    const idx = categories.findIndex(c => String(c._id).toLowerCase() === target || String(c.id).toLowerCase() === target || (c.slug && c.slug.toLowerCase() === target));
     if (idx === -1) return false;
     categories.splice(idx, 1);
     saveToDisk();
@@ -2497,7 +2531,7 @@ module.exports = {
   },
 
   // Users
-  getUsers: () => [...users],
+  getUsers: () => [...users].sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()),
   addUser: (item) => {
     const id = Date.now().toString();
     const created = { _id: id, id: Date.now(), walletBalance: '₹0', totalCashback: '₹0', joinedDate: 'Today', status: 'active', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), ...item };
@@ -2506,21 +2540,24 @@ module.exports = {
     return created;
   },
   updateUser: (id, updates) => {
-    const idx = users.findIndex(u => u._id === id || String(u.id) === String(id));
+    const target = String(id || '').trim().toLowerCase();
+    const idx = users.findIndex(u => String(u._id).toLowerCase() === target || String(u.id).toLowerCase() === target);
     if (idx === -1) return null;
     users[idx] = { ...users[idx], ...updates, updatedAt: new Date().toISOString() };
     saveToDisk();
     return users[idx];
   },
   deleteUser: (id) => {
-    const idx = users.findIndex(u => u._id === id || String(u.id) === String(id));
+    const target = String(id || '').trim().toLowerCase();
+    const idx = users.findIndex(u => String(u._id).toLowerCase() === target || String(u.id).toLowerCase() === target);
     if (idx === -1) return false;
     users.splice(idx, 1);
     saveToDisk();
     return true;
   },
   toggleUserStatus: (id, status) => {
-    const user = users.find(u => u._id === id || String(u.id) === String(id));
+    const target = String(id || '').trim().toLowerCase();
+    const user = users.find(u => String(u._id).toLowerCase() === target || String(u.id).toLowerCase() === target);
     if (!user) return null;
     user.status = status || (user.status === 'active' ? 'suspended' : 'active');
     user.updatedAt = new Date().toISOString();
@@ -2529,7 +2566,7 @@ module.exports = {
   },
 
   // Transactions
-  getTransactions: () => [...transactions],
+  getTransactions: () => [...transactions].sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()),
   addTransaction: (item) => {
     const num = Math.floor(Math.random() * 9000 + 1000);
     const txnId = `TXN-${num}`;
@@ -2586,10 +2623,11 @@ module.exports = {
         (c.welcomeOffer && c.welcomeOffer.toLowerCase().includes(q))
       );
     }
-    return result;
+    return result.sort((a, b) => new Date(b.createdAt || b.updatedAt || 0).getTime() - new Date(a.createdAt || a.updatedAt || 0).getTime());
   },
   getCreditCardById: (id) => {
-    return creditCards.find(c => c._id === id || String(c.id) === String(id)) || null;
+    const target = String(id || '').trim().toLowerCase();
+    return creditCards.find(c => String(c._id).toLowerCase() === target || String(c.id).toLowerCase() === target) || null;
   },
   addCreditCard: (item) => {
     const id = item.id ? String(item.id) : `card-${Date.now()}`;
@@ -2606,7 +2644,7 @@ module.exports = {
       isVerified: true,
       applyCount: 0,
       viewCount: 0,
-      createdAt: new Date().toISOString(),
+      createdAt: item.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       ...item
     };
@@ -2615,21 +2653,46 @@ module.exports = {
     return created;
   },
   updateCreditCard: (id, updates) => {
-    const idx = creditCards.findIndex(c => c._id === id || String(c.id) === String(id));
-    if (idx === -1) return null;
+    const target = String(id || '').trim().toLowerCase();
+    const idx = creditCards.findIndex(c => 
+      String(c._id).toLowerCase() === target || 
+      String(c.id).toLowerCase() === target || 
+      (c.bank && c.bank.toLowerCase() === target) ||
+      (c.cardName && c.cardName.toLowerCase().includes(target))
+    );
+    if (idx === -1) {
+      // If card not in array (e.g. from static list), add it with updates
+      const newCard = {
+        _id: String(id),
+        id: String(id),
+        cardName: updates.cardName || id,
+        bank: updates.bank || 'Bank',
+        showOnHome: updates.showOnHome !== undefined ? updates.showOnHome : true,
+        isFeatured: updates.isFeatured !== undefined ? updates.isFeatured : true,
+        status: updates.status || 'active',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        ...updates
+      };
+      creditCards.unshift(newCard);
+      saveToDisk();
+      return newCard;
+    }
     creditCards[idx] = { ...creditCards[idx], ...updates, updatedAt: new Date().toISOString() };
     saveToDisk();
     return creditCards[idx];
   },
   deleteCreditCard: (id) => {
-    const idx = creditCards.findIndex(c => c._id === id || String(c.id) === String(id));
+    const target = String(id || '').trim().toLowerCase();
+    const idx = creditCards.findIndex(c => String(c._id).toLowerCase() === target || String(c.id).toLowerCase() === target);
     if (idx === -1) return false;
     creditCards.splice(idx, 1);
     saveToDisk();
     return true;
   },
   toggleCreditCardStatus: (id, newStatus) => {
-    const card = creditCards.find(c => c._id === id || String(c.id) === String(id));
+    const target = String(id || '').trim().toLowerCase();
+    const card = creditCards.find(c => String(c._id).toLowerCase() === target || String(c.id).toLowerCase() === target);
     if (!card) return null;
     if (newStatus) {
       card.status = newStatus;
@@ -2721,7 +2784,7 @@ module.exports = {
     if (filter.submissionStatus && filter.submissionStatus !== 'All') {
       result = result.filter(a => a.submissionStatus && a.submissionStatus.toLowerCase() === filter.submissionStatus.toLowerCase());
     }
-    return result;
+    return result.sort((a, b) => new Date(b.createdAt || b.updatedAt || 0).getTime() - new Date(a.createdAt || a.updatedAt || 0).getTime());
   },
   getAdvertisementById: (id) => {
     return advertisements.find(a => a._id === id || String(a.id) === String(id)) || null;
@@ -2731,7 +2794,7 @@ module.exports = {
     const created = {
       _id: id,
       id,
-      placement: 'sidebar',
+      placement: item.placement || 'homepage-banner-1713x685',
       status: 'active',
       submissionStatus: 'approved',
       impressions: 0,
@@ -2787,6 +2850,11 @@ module.exports = {
     if (filter.priority && filter.priority !== 'All') {
       result = result.filter(s => s.priority && s.priority.toLowerCase() === filter.priority.toLowerCase());
     }
+    result.sort((a, b) => {
+      const timeA = new Date(a.updatedAt || a.approvedAt || a.reviewedAt || a.submittedAt || a.createdAt || 0).getTime();
+      const timeB = new Date(b.updatedAt || b.approvedAt || b.reviewedAt || b.submittedAt || b.createdAt || 0).getTime();
+      return timeB - timeA;
+    });
     return result;
   },
   getSubmissionById: (id) => {
@@ -3119,6 +3187,11 @@ module.exports = {
       const qPri = filter.priority.toLowerCase();
       result = result.filter(s => s.priority && s.priority.toLowerCase() === qPri);
     }
+    result.sort((a, b) => {
+      const timeA = new Date(a.updatedAt || a.approvedAt || a.reviewedAt || a.submittedAt || a.createdAt || 0).getTime();
+      const timeB = new Date(b.updatedAt || b.approvedAt || b.reviewedAt || b.submittedAt || b.createdAt || 0).getTime();
+      return timeB - timeA;
+    });
     return result;
   },
   getSubmissionById: (id) => {

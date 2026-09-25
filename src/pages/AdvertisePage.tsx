@@ -139,7 +139,7 @@ export const AdvertisePage: React.FC = () => {
               href="mailto:hello@wouchify.com?subject=Wouchify%20Partnership%20Inquiry%20-%20Advertise%20With%20Us"
               className="advertise-partner-pill-btn"
             >
-              [Advertise With Us]
+              Advertise With Us &gt;&gt;
             </a>
           </div>
           <p className="advertise-section__text">

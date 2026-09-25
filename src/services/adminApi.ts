@@ -6,7 +6,7 @@ const getAuthHeaders = (): HeadersInit => {
   const path = typeof window !== 'undefined' ? window.location.pathname : '';
   const getItem = (key: string) => {
     if (typeof window === 'undefined') return null;
-    return sessionStorage.getItem(key) || localStorage.getItem(key);
+    return sessionStorage.getItem(key);
   };
 
   if (path.startsWith('/executive')) {
@@ -15,7 +15,7 @@ const getAuthHeaders = (): HeadersInit => {
     if (staffUser?.role === 'executive' && getItem('staffToken')) {
       token = getItem('staffToken') || '';
     } else {
-      token = getItem('adminToken') || getItem('executiveToken') || 'dev-executive-token';
+      token = getItem('adminToken') || '';
     }
   } else if (path.startsWith('/operations') || path.startsWith('/operational-manager')) {
     const staffUserStr = getItem('staffUser');
@@ -23,12 +23,12 @@ const getAuthHeaders = (): HeadersInit => {
     if (staffUser?.role === 'operational_manager' && getItem('staffToken')) {
       token = getItem('staffToken') || '';
     } else {
-      token = getItem('adminToken') || getItem('opsToken') || 'dev-ops-token';
+      token = getItem('adminToken') || '';
     }
   } else if (path.startsWith('/manager') || path.startsWith('/admin')) {
-    token = getItem('adminToken') || getItem('staffToken') || getItem('managerToken') || 'dev-admin-token';
+    token = getItem('adminToken') || getItem('staffToken') || '';
   } else {
-    token = getItem('staffToken') || getItem('adminToken') || getItem('managerToken') || '';
+    token = getItem('staffToken') || getItem('adminToken') || '';
   }
 
   return {

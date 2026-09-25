@@ -3,7 +3,6 @@ import wouchifyIcon from '../../assets/brand/wouchify-icon.png'
 import { TOP_STORES } from '../../data/topStores'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
 import { adminApi } from '../../services/adminApi'
-import { getPublicStores } from '../../services/api'
 import { getStoreLogo } from '../../data/dealsPage'
 import './TopStoresSection.css'
 
@@ -11,26 +10,49 @@ export const TopStoresSection: React.FC = () => {
   const sectionScale = useDesktopScale()
   const [stores, setStores] = useState<any[]>(TOP_STORES)
 
-  useEffect(() => {
-    getPublicStores().then(data => {
+  const loadStores = async () => {
+    try {
+      const data = await adminApi.getStores({ all: true })
       if (Array.isArray(data) && data.length > 0) {
-        const filtered = data.filter((s: any) => s.showOnHome !== false && (s.status === 'active' || !s.status))
-        if (filtered.length > 0) {
-          const merged = filtered.map((s: any, idx: number) => {
-            const staticFallback = TOP_STORES.find(ts => ts.id === s.id || ts.slug === s.slug) || TOP_STORES[idx % TOP_STORES.length]
+        const hiddenSet = new Set(
+          data
+            .filter((s: any) => s.showOnHome === false || s.sectionPlacement === 'none' || s.status === 'inactive')
+            .map((s: any) => (s.name || s.slug || '').toLowerCase().trim())
+        )
+
+        const visibleDefaults = TOP_STORES.filter(
+          (item) => !hiddenSet.has(item.name.toLowerCase().trim()) && !hiddenSet.has((item.slug || '').toLowerCase().trim())
+        )
+
+        const merged = visibleDefaults.map((staticFallback) => {
+          const liveMatch = data.find((s: any) =>
+            (s.name || '').toLowerCase().trim() === staticFallback.name.toLowerCase().trim() ||
+            s.slug === staticFallback.slug
+          )
+          if (liveMatch) {
             return {
               ...staticFallback,
-              id: s._id || s.id || staticFallback.id,
-              name: s.name || staticFallback.name,
-              rewardBadge: s.reward || staticFallback.rewardBadge,
-              logo: s.logo || staticFallback.logo,
-              href: s.href || staticFallback.href
+              id: liveMatch._id || liveMatch.id || staticFallback.id,
+              name: liveMatch.name || staticFallback.name,
+              rewardBadge: liveMatch.reward || staticFallback.rewardBadge,
+              logo: liveMatch.logo || staticFallback.logo,
+              href: liveMatch.href || staticFallback.href
             }
-          })
-          setStores(merged)
-        }
+          }
+          return staticFallback
+        })
+        setStores(merged)
       }
-    }).catch(console.warn)
+    } catch (err) {
+      console.warn('Could not sync live top stores:', err)
+    }
+  }
+
+  useEffect(() => {
+    loadStores()
+    const handleUpdate = () => loadStores()
+    window.addEventListener('wouchify_stores_updated', handleUpdate)
+    return () => window.removeEventListener('wouchify_stores_updated', handleUpdate)
   }, [])
 
   return (

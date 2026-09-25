@@ -111,13 +111,13 @@ export const HeroSection: React.FC = () => {
         <div className="hero-deal-chip hero-deal-chip-2">Instant Deals</div>
 
         {/* Primary CTA */}
-        <button
-          type="button"
+        <a
+          href="/deals"
           className="hero-primary-cta"
           aria-label="Explore Deals Now"
         >
           Explore Deals Now!!
-        </button>
+        </a>
 
         {/* Hero Visual Container & Person Animations */}
         <HeroVisual />
@@ -143,13 +143,13 @@ export const HeroSection: React.FC = () => {
         />
 
         {/* Callout: Grab Deal CTA */}
-        <button
-          type="button"
+        <a
+          href="/deals"
           className="hero-grab-deal-cta"
           aria-label="Grab Deal now"
         >
           Grab Deal now!!
-        </button>
+        </a>
 
         {/* Trust Statistics List */}
         <ul className="hero-trust-stats-list" aria-label="Trust Statistics">

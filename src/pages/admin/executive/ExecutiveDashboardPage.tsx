@@ -229,9 +229,11 @@ export const ExecutiveDashboardPage: React.FC = () => {
   }
 
   useEffect(() => {
-    const userData = localStorage.getItem('staffUser')
+    const userData = sessionStorage.getItem('staffUser') || sessionStorage.getItem('adminUser')
     if (userData) {
-      setUser(JSON.parse(userData))
+      try {
+        setUser(JSON.parse(userData))
+      } catch {}
     }
 
     loadLiveData()

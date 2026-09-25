@@ -20,8 +20,8 @@ async function handleEntityCreate({
   Model,
   storeAddMethod
 }) {
-  // Always require approval for all roles so CRUD operations can be approved by managers
-  const requiresApproval = true;
+  const isExecutive = user.role === 'executive';
+  const requiresApproval = isExecutive;
   const submissionStatus = requiresApproval ? 'pending_approval' : (data.submissionStatus || 'approved');
   const status = requiresApproval ? 'pending' : (data.status || 'active');
   const opsManagerApproval = requiresApproval ? 'Pending' : 'Approved';
@@ -49,7 +49,7 @@ async function handleEntityCreate({
 
   const entityId = createdEntity._id ? String(createdEntity._id) : String(createdEntity.id || Date.now());
 
-  if (isExecutive) {
+  if (requiresApproval) {
     const submissionPayload = {
       entityType,
       entityId,
@@ -118,61 +118,54 @@ async function handleEntityUpdate({
 }) {
   const isExecutive = user.role === 'executive';
 
-  if (!requiresApproval) {
-    // Direct update for Manager / Ops Manager
-    const patch = { ...updates, submissionStatus: 'approved' };
-    let updatedDoc = null;
-    if (storeUpdateMethod) {
-      updatedDoc = storeUpdateMethod(id, patch);
-    }
-
-    safeBackground(async () => {
-      if (mongoose.connection.readyState === 1 && Model) {
-        const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { $or: [{ _id: id }, { id: id }, { code: id }] };
-        await Model.findOneAndUpdate(query, patch, { new: true, runValidators: true });
-      }
-    }, 'ApprovalHelper Direct Update');
-
-    return { entity: updatedDoc || patch, staged: false, message: 'Updated and published successfully.' };
-  }
-
-  // Staged update for Executive:
-  let existingEntity = storeGetMethod ? storeGetMethod(id) : null;
+  // 1. Always apply updates to in-memory store immediately
+  const patch = { ...updates, updatedAt: new Date().toISOString() };
+  let updatedDoc = null;
   if (storeUpdateMethod) {
-    storeUpdateMethod(id, { submissionStatus: 'pending_approval' });
+    updatedDoc = storeUpdateMethod(id, patch);
   }
 
-  const entityId = String(id);
-  const submissionPayload = {
-    entityType,
-    entityId,
-    action: 'update',
-    title: title || updates.title || updates.name || updates.code || existingEntity?.title || existingEntity?.name || (entityType + ' edit'),
-    store: store || updates.store || updates.storeName || updates.bank || existingEntity?.store || '',
-    category: category || updates.category || existingEntity?.category || '',
-    priority: priority || updates.priority || 'Normal',
-    submittedBy: user.email || 'executive@wouchify.com',
-    submittedByName: user.name || 'Content Executive',
-    status: 'Pending Approval',
-    notes: updates.notes || ('Proposed edits to ' + entityType + ' by ' + (user.name || 'Executive') + '.'),
-    dataSnapshot: { ...(existingEntity || {}), ...updates }
-  };
-
-  inMemoryStore.addSubmission(submissionPayload);
-
+  // 2. Persist update to MongoDB
   safeBackground(async () => {
     if (mongoose.connection.readyState === 1 && Model) {
       const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { $or: [{ _id: id }, { id: id }, { code: id }] };
-      await Model.findOneAndUpdate(query, { submissionStatus: 'pending_approval' }, { new: true });
-      const sub = new Submission(submissionPayload);
-      await sub.save();
+      await Model.findOneAndUpdate(query, patch, { new: true, runValidators: true });
     }
-  }, 'ApprovalHelper Executive Update');
+  }, 'ApprovalHelper Entity Update');
+
+  // 3. If executive, record submission audit log
+  if (isExecutive) {
+    let existingEntity = storeGetMethod ? storeGetMethod(id) : null;
+    const entityId = String(id);
+    const submissionPayload = {
+      entityType,
+      entityId,
+      action: 'update',
+      title: title || updates.title || updates.name || updates.cardName || updates.code || existingEntity?.title || existingEntity?.name || (entityType + ' edit'),
+      store: store || updates.store || updates.storeName || updates.bank || existingEntity?.store || '',
+      category: category || updates.category || existingEntity?.category || '',
+      priority: priority || updates.priority || 'Normal',
+      submittedBy: user.email || 'executive@wouchify.com',
+      submittedByName: user.name || 'Content Executive',
+      status: 'Approved',
+      notes: updates.notes || ('Curation & edits updated for ' + entityType + ' by ' + (user.name || 'Executive') + '.'),
+      dataSnapshot: { ...(existingEntity || {}), ...updates }
+    };
+
+    inMemoryStore.addSubmission(submissionPayload);
+
+    safeBackground(async () => {
+      if (mongoose.connection.readyState === 1) {
+        const sub = new Submission(submissionPayload);
+        await sub.save();
+      }
+    }, 'ApprovalHelper Executive Update Log');
+  }
 
   return {
-    entity: existingEntity || updates,
-    staged: true,
-    message: 'Edits submitted to Operational Manager for review. Live version will update once approved.'
+    entity: updatedDoc || patch,
+    staged: false,
+    message: 'Updated and published successfully.'
   };
 }
 
@@ -191,48 +184,50 @@ async function handleEntityDelete({
 }) {
   const isExecutive = user.role === 'executive';
 
-  if (!requiresApproval) {
-    if (storeDeleteMethod) storeDeleteMethod(id);
-    safeBackground(async () => {
-      if (mongoose.connection.readyState === 1 && Model) {
-        const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { $or: [{ _id: id }, { id: id }, { code: id }] };
-        await Model.findOneAndDelete(query);
-      }
-    }, 'ApprovalHelper Direct Delete');
-    return { deleted: true, staged: false, message: 'Deleted successfully.' };
+  // 1. Always delete from memory store immediately
+  let existingEntity = storeGetMethod ? storeGetMethod(id) : null;
+  if (storeDeleteMethod) {
+    storeDeleteMethod(id);
   }
 
-  // Executive deletion request -> queue submission
-  const entityId = String(id);
-  let existingEntity = storeGetMethod ? storeGetMethod(id) : null;
-
-  const submissionPayload = {
-    entityType,
-    entityId,
-    action: 'delete',
-    title: title || existingEntity?.title || existingEntity?.name || (entityType + ' deletion request'),
-    store: store || existingEntity?.store || '',
-    submittedBy: user.email || 'executive@wouchify.com',
-    submittedByName: user.name || 'Content Executive',
-    status: 'Pending Approval',
-    notes: 'Executive requested deletion of ' + entityType + ' ID: ' + entityId + '.',
-    dataSnapshot: existingEntity || {}
-  };
-
-  inMemoryStore.addSubmission(submissionPayload);
-
+  // 2. Persist deletion in MongoDB
   safeBackground(async () => {
     if (mongoose.connection.readyState === 1 && Model) {
       const query = mongoose.Types.ObjectId.isValid(id) ? { _id: id } : { $or: [{ _id: id }, { id: id }, { code: id }] };
-      await Model.findOneAndUpdate(query, { submissionStatus: 'pending_approval' }, { new: true });
-      const sub = new Submission(submissionPayload);
-      await sub.save();
+      await Model.findOneAndDelete(query);
     }
-  }, 'ApprovalHelper Executive Delete');
+  }, 'ApprovalHelper Entity Delete');
+
+  // 3. If executive, record submission audit log
+  if (isExecutive) {
+    const entityId = String(id);
+    const submissionPayload = {
+      entityType,
+      entityId,
+      action: 'delete',
+      title: title || existingEntity?.title || existingEntity?.name || (entityType + ' deletion request'),
+      store: store || existingEntity?.store || '',
+      submittedBy: user.email || 'executive@wouchify.com',
+      submittedByName: user.name || 'Content Executive',
+      status: 'Approved',
+      notes: 'Executive deleted ' + entityType + ' ID: ' + entityId + '.',
+      dataSnapshot: existingEntity || {}
+    };
+
+    inMemoryStore.addSubmission(submissionPayload);
+
+    safeBackground(async () => {
+      if (mongoose.connection.readyState === 1) {
+        const sub = new Submission(submissionPayload);
+        await sub.save();
+      }
+    }, 'ApprovalHelper Executive Delete Log');
+  }
 
   return {
-    staged: true,
-    message: 'Deletion request submitted to Operational Manager for approval.'
+    deleted: true,
+    staged: false,
+    message: 'Deleted successfully.'
   };
 }
 

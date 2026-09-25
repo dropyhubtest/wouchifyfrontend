@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import logo from '../../assets/navbar/wouchify-logo.png'
-import favoriteIcon from '../../assets/mobile/navigation/favorite.svg'
 import { useDesktopScale } from '../../hooks/useDesktopScale'
 import { SearchOverlay } from '../search/SearchOverlay'
+import { getWishlistCount } from '../../utils/wishlistManager'
 import './Navbar.css'
 
 import { NAV_LINKS, resolveActiveNav } from '../../data/navigation'
@@ -19,9 +19,22 @@ export const Navbar: React.FC<NavbarProps> = ({ activeNav, transparent = false }
   // Auth state
   const [user, setUser] = useState<{ name?: string; fullName?: string; email?: string } | null>(null)
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const [wishlistCount, setWishlistCount] = useState<number>(() => getWishlistCount())
 
   // Scroll state for dynamic header transparency on pages with overlapping hero artwork
   const [isScrolled, setIsScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleWishlistChange = () => {
+      setWishlistCount(getWishlistCount())
+    }
+    window.addEventListener('wouchify_wishlist_updated', handleWishlistChange)
+    window.addEventListener('storage', handleWishlistChange)
+    return () => {
+      window.removeEventListener('wouchify_wishlist_updated', handleWishlistChange)
+      window.removeEventListener('storage', handleWishlistChange)
+    }
+  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -109,45 +122,102 @@ export const Navbar: React.FC<NavbarProps> = ({ activeNav, transparent = false }
             </ul>
           </nav>
 
-          {/* Header Actions: Search, Wishlist, Account */}
+          {/* Header Actions: Expandable Search, Wishlist, Wallet, Account */}
           <div className="navbar-actions">
-            {/* Search Button */}
-            <button
-              type="button"
-              className="navbar-action-tile search-overlay-trigger"
-              aria-label="Open Search"
-              onClick={() => setIsSearchOpen(true)}
+            {/* Expandable Hover Search Bar */}
+            <form
+              className="navbar-search-tile"
+              role="search"
+              onSubmit={(e) => {
+                e.preventDefault()
+                const input = e.currentTarget.querySelector('input') as HTMLInputElement
+                if (input && input.value.trim()) {
+                  window.location.href = `/deals?search=${encodeURIComponent(input.value.trim())}`
+                } else {
+                  setIsSearchOpen(true)
+                }
+              }}
             >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#1E1E1E"
-                strokeWidth="2.3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
+              <input
+                type="text"
+                className="navbar-search-input"
+                placeholder="Search deals, stores..."
+                aria-label="Search deals and stores"
+              />
+              <button
+                type="submit"
+                className="navbar-search-btn"
+                aria-label="Search"
+                onClick={(e) => {
+                  const form = e.currentTarget.closest('form')
+                  const input = form?.querySelector('input') as HTMLInputElement
+                  if (!input || !input.value.trim()) {
+                    setIsSearchOpen(true)
+                  }
+                }}
               >
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-            </button>
+                <svg
+                  width="19"
+                  height="19"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#1E1E1E"
+                  strokeWidth="2.3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+              </button>
+            </form>
 
             {/* Wishlist Button */}
             <a
               href="/favorites"
               className="navbar-action-tile wishlist-btn"
-              aria-label="Wishlist"
+              aria-label="Wishlist / Favorites"
+              style={{ position: 'relative' }}
             >
-              <img
-                src={favoriteIcon}
-                alt=""
+              <svg
+                width="19"
+                height="19"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#1E1E1E"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
                 aria-hidden="true"
-                className="action-icon-img"
-                width="18"
-                height="18"
-              />
+                className="action-icon-svg"
+              >
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+              </svg>
+              {wishlistCount > 0 && (
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: '-4px',
+                    right: '-4px',
+                    minWidth: '18px',
+                    height: '18px',
+                    padding: '0 4px',
+                    borderRadius: '999px',
+                    background: '#E31E25',
+                    color: '#FFFFFF',
+                    fontSize: '10px',
+                    fontWeight: '700',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 5px rgba(227, 30, 37, 0.4)',
+                    lineHeight: '1'
+                  }}
+                >
+                  {wishlistCount > 99 ? '99+' : wishlistCount}
+                </span>
+              )}
             </a>
 
             {/* Wallet Button */}

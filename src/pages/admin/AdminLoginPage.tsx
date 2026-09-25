@@ -28,10 +28,10 @@ export const AdminLoginPage: React.FC = () => {
         })
         const data = await response.json()
         if (response.ok) {
+          localStorage.setItem('adminToken', data.token)
+          localStorage.setItem('adminUser', JSON.stringify(data.user))
           sessionStorage.setItem('adminToken', data.token)
           sessionStorage.setItem('adminUser', JSON.stringify(data.user))
-          localStorage.removeItem('adminToken')
-          localStorage.removeItem('adminUser')
           loggedIn = true
         } else {
           throw new Error(data.message || 'Invalid credentials')
@@ -39,10 +39,10 @@ export const AdminLoginPage: React.FC = () => {
       } catch {
         // Backend unavailable or offline — use dev fallback credentials
         if (email === 'admin@wouchify.com' && password === 'admin123') {
+          localStorage.setItem('adminToken', 'dev-token-local')
+          localStorage.setItem('adminUser', JSON.stringify({ email, role: 'admin' }))
           sessionStorage.setItem('adminToken', 'dev-token-local')
           sessionStorage.setItem('adminUser', JSON.stringify({ email, role: 'admin' }))
-          localStorage.removeItem('adminToken')
-          localStorage.removeItem('adminUser')
           loggedIn = true
         } else {
           throw new Error('Invalid email or password. Please verify your credentials.')
@@ -50,8 +50,7 @@ export const AdminLoginPage: React.FC = () => {
       }
 
       if (loggedIn) {
-        window.history.pushState({}, '', '/manager/dashboard')
-        window.dispatchEvent(new PopStateEvent('popstate'))
+        window.location.href = '/manager/dashboard'
       }
     } catch (err: unknown) {
       if (err instanceof Error) {

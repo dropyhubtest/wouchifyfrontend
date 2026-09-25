@@ -4,6 +4,7 @@ import {
   type MobileTrendingDealItem,
 } from '../../data/mobileTrendingDeals'
 import { getPublicDeals } from '../../services/api'
+import { filterTrendingDeals } from '../../utils/homepageSectionFilters'
 import './MobileTrendingDeals.css'
 
 interface MobileTrendingDealCardProps {
@@ -33,11 +34,7 @@ export const MobileTrendingDeals: React.FC = () => {
   useEffect(() => {
     getPublicDeals().then(data => {
       if (Array.isArray(data) && data.length > 0) {
-        const filtered = data.filter((d: any) => 
-          d.showOnHome !== false && 
-          d.sectionPlacement !== 'none' && 
-          (d.sectionPlacement === 'best_selling' || d.sectionPlacement === 'both' || d.isBestSelling)
-        )
+        const filtered = filterTrendingDeals(data)
         if (filtered.length > 0) {
           const mapped: MobileTrendingDealItem[] = filtered.map((d: any, idx: number) => ({
             id: d._id || d.id || `mobile-trending-${idx}`,

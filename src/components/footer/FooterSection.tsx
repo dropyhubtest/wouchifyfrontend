@@ -254,8 +254,8 @@ export const FooterSection: React.FC = () => {
           <div>
             <p className="footer-mobile__col-title">Stay Updated</p>
             <ul className="footer-mobile__col-links">
-              <li><a href="#">Join our Telegram</a></li>
-              <li><a href="#">Follow on Instagram</a></li>
+              <li><a href="https://t.me/wouchify" target="_blank" rel="noopener noreferrer">Join our Telegram</a></li>
+              <li><a href="https://instagram.com/wouchify" target="_blank" rel="noopener noreferrer">Follow on Instagram</a></li>
             </ul>
           </div>
         </div>

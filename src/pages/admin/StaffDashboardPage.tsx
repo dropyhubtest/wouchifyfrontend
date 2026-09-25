@@ -8,8 +8,8 @@ export const StaffDashboardPage: React.FC = () => {
 
   useEffect(() => {
     // Check if logged in
-    const token = localStorage.getItem('staffToken')
-    const userData = localStorage.getItem('staffUser')
+    const token = sessionStorage.getItem('staffToken')
+    const userData = sessionStorage.getItem('staffUser')
     
     if (!token || !userData) {
       window.history.pushState({}, '', '/manager/login')

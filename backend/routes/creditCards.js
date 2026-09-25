@@ -141,11 +141,18 @@ router.patch('/:id/status', async (req, res, next) => {
       if (!updated) return res.status(404).json({ message: 'Credit Card not found' });
       return res.json(updated);
     }
-    const card = await CreditCard.findById(req.params.id);
-    if (!card) return res.status(404).json({ message: 'Credit Card not found' });
+    const isObjectId = mongoose.Types.ObjectId.isValid(req.params.id);
+    const query = isObjectId ? { $or: [{ _id: req.params.id }, { id: req.params.id }] } : { id: req.params.id };
+    const card = await CreditCard.findOne(query);
+    if (!card) {
+      const updated = store.toggleCreditCardStatus(req.params.id, status);
+      if (updated) return res.json(updated);
+      return res.status(404).json({ message: 'Credit Card not found' });
+    }
 
     card.status = status || (card.status === 'active' ? 'inactive' : 'active');
     await card.save();
+    store.toggleCreditCardStatus(req.params.id, card.status);
     res.json(card);
   } catch (err) { next(err); }
 });

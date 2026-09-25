@@ -101,7 +101,7 @@
 .nav-list {
   display: flex;
   align-items: center;
-  gap: clamp(10px, 1.8vw, 24px);
+  gap: clamp(18px, 2.5vw, 36px);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -121,7 +121,7 @@
   color: var(--color-navy, #282D78);
   text-decoration: none;
   white-space: nowrap;
-  letter-spacing: 0.2px;
+  letter-spacing: 0.3px;
   transition: color 0.2s ease;
 }
 
@@ -148,11 +148,81 @@
 .navbar-actions {
   display: flex;
   align-items: center;
-  gap: clamp(8px, 1vw, 14px);
+  gap: clamp(10px, 1.2vw, 18px);
   flex-shrink: 0;
 }
 
-/* White rounded rectangular tile for Search and Wishlist (38x38px, radius 8px) */
+/* Expandable Search Tile */
+.navbar-search-tile {
+  position: relative;
+  height: 38px;
+  width: 38px;
+  display: flex;
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  box-shadow: none;
+  overflow: hidden;
+  transition: width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.2s ease, box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.2s ease;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.navbar-search-tile:hover,
+.navbar-search-tile:focus-within {
+  width: 240px;
+  background: #FFFFFF;
+  border-color: #282D78;
+  box-shadow: 0 4px 14px rgba(40, 45, 120, 0.16);
+}
+
+.navbar-search-input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0 40px 0 14px;
+  font-family: var(--font-family-primary, 'Poppins', sans-serif);
+  font-size: 13px;
+  font-weight: 500;
+  color: #111827;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease 0.05s;
+  box-sizing: border-box;
+}
+
+.navbar-search-tile:hover .navbar-search-input,
+.navbar-search-tile:focus-within .navbar-search-input {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.navbar-search-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+  z-index: 2;
+}
+
+.navbar-search-btn:hover {
+  transform: scale(1.08);
+}
+
+/* Action tile for Wishlist (38x38px, radius 8px) */
 .navbar-action-tile {
   position: relative;
   width: 38px;
@@ -160,12 +230,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #FFFFFF;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: transparent;
+  border: 1px solid transparent;
   border-radius: 8px;
   cursor: pointer;
   padding: 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: none;
   transition: all 0.2s ease;
   box-sizing: border-box;
   text-decoration: none;
@@ -176,6 +246,7 @@
   background: #FFFFFF;
   transform: translateY(-1px);
   box-shadow: 0 3px 8px rgba(40, 45, 120, 0.15);
+  border-color: #282D78;
 }
 
 .navbar-action-tile:active {
@@ -187,9 +258,16 @@
   outline-offset: 2px;
 }
 
-.action-icon-img {
+.wishlist-btn:hover .action-icon-svg {
+  stroke: var(--color-red, #E31E25);
+  fill: rgba(227, 30, 37, 0.15);
+  transform: scale(1.08);
+  transition: all 0.2s ease;
+}
+
+.action-icon-svg {
   display: block;
-  object-fit: contain;
+  transition: all 0.2s ease;
 }
 
 /* ============================================================

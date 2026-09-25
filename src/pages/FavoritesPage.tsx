@@ -6,40 +6,33 @@ import { MobileFooter } from '../components/mobile/MobileFooter'
 import { DealCard } from '../components/deals/DealCard'
 import { ProfileSidebar } from '../components/profile/ProfileSidebar'
 import { useMediaQuery } from '../hooks/useMediaQuery'
-import { DEALS_CARD_ITEMS, type DealCardItem } from '../data/dealsPage'
+import { type DealCardItem } from '../data/dealsPage'
+import { getWishlist, removeFromWishlist } from '../utils/wishlistManager'
 import wishlistHeroBg from '../assets/wishlist/wishlist_hero.png'
 import './FavoritesPage.css'
 
 export const FavoritesPage: React.FC = () => {
   const isMobile = useMediaQuery('(max-width: 768px)')
-  const [wishlistItems, setWishlistItems] = useState<DealCardItem[]>(() => {
-    try {
-      const saved = localStorage.getItem('wouchify_wishlist')
-      if (saved) {
-        const parsed = JSON.parse(saved)
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed
-      }
-    } catch {
-      // fallback
-    }
-    return DEALS_CARD_ITEMS
-  })
-
+  const [wishlistItems, setWishlistItems] = useState<DealCardItem[]>(() => getWishlist())
   const [removingIds, setRemovingIds] = useState<string[]>([])
 
   useEffect(() => {
-    try {
-      localStorage.setItem('wouchify_wishlist', JSON.stringify(wishlistItems))
-    } catch {
-      // ignore
+    const handleSync = () => {
+      setWishlistItems(getWishlist())
     }
-  }, [wishlistItems])
+    window.addEventListener('wouchify_wishlist_updated', handleSync)
+    window.addEventListener('storage', handleSync)
+    return () => {
+      window.removeEventListener('wouchify_wishlist_updated', handleSync)
+      window.removeEventListener('storage', handleSync)
+    }
+  }, [])
 
   const handleRemoveItem = (id: string) => {
-    // Animate heart removal first, then transition card out
     setRemovingIds((prev) => [...prev, id])
     setTimeout(() => {
-      setWishlistItems((prev) => prev.filter((item) => item.id !== id))
+      removeFromWishlist(id)
+      setWishlistItems((prev) => prev.filter((item) => String(item.id) !== String(id)))
       setRemovingIds((prev) => prev.filter((itemId) => itemId !== id))
     }, 280)
   }

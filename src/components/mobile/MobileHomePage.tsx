@@ -17,7 +17,7 @@ export const MobileHomePage = () => {
   const handleSearchSubmit = (e: FormEvent) => {
     e.preventDefault()
     if (searchValue.trim()) {
-      console.log('Mobile Search for:', searchValue)
+      window.location.href = `/deals?search=${encodeURIComponent(searchValue.trim())}`
     }
   }
 

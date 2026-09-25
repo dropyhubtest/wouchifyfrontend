@@ -302,9 +302,13 @@ export const DealsHero: React.FC = () => {
           </h1>
 
           {/* Verified deals red sub-pill */}
-          <div className="deals-hero__verified-pill">
+          <a
+            href="#deals-favourite-stores"
+            className="deals-hero__verified-pill"
+            style={{ textDecoration: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
+          >
             {DEALS_HERO_DATA.subHeadingPill}
-          </div>
+          </a>
         </div>
       </div>
     </section>

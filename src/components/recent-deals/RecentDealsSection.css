@@ -108,58 +108,222 @@
 }
 
 /* ==========================================================================
-   3. Deal Cards Container & Outer Figma Frame (422 x 261 px)
-   Background: #F7F7F7, Padding: 12px, Shadow: 0 4px 4px rgba(0, 0, 0, 0.20)
+   3. Deal Cards Carousel Viewport & Track (422 x 261 px cards)
    ========================================================================== */
 
-.recent-deals__cards-container {
+.recent-deals__viewport {
   position: absolute;
-  inset: 0;
-  pointer-events: none;
+  left: 0;
+  top: 100px;
+  width: 1920px;
+  height: 310px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 12px 0 24px 0;
+  box-sizing: border-box;
   z-index: 1;
+  scroll-behavior: smooth;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.recent-deals__viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.recent-deals__track {
+  display: flex;
+  gap: 40px;
+  padding-left: 115px;
+  padding-right: 115px;
+  width: max-content;
 }
 
 .recent-deals__card {
-  position: absolute;
+  position: relative;
   width: 422px;
   height: 261px;
+  flex: 0 0 422px;
   display: flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  padding: 0;
-  background: #EFEFEF;
-  border-radius: 20px;
+  padding: 11px;
+  background: #EAEAEA;
+  border-radius: 26px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.10);
   cursor: pointer;
   text-decoration: none;
   pointer-events: auto;
-  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .recent-deals__card:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.18);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.16);
 }
 
 .recent-deals__card:focus-visible {
   outline: 3px solid var(--color-navy-dark);
   outline-offset: 4px;
-  border-radius: 20px;
+  border-radius: 26px;
 }
 
-.recent-deals__image {
+/* ==========================================================================
+   4. Inner Split Card (Left: White Media, Right: Silver Description Info)
+   ========================================================================== */
+
+.recent-deals__inner-card {
   width: 100%;
   height: 100%;
-  display: block;
-  object-fit: cover;
-  border-radius: 20px;
-  pointer-events: none;
-  user-select: none;
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  border-radius: 18px;
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  border: 1.5px solid #2B2B2B;
+  background: #EDEDED;
 }
 
-.recent-deals__card:hover .recent-deals__image {
+/* Discount Pill Badge overlapping exactly halfway across left and right sides */
+.recent-deals__discount-pill {
+  position: absolute;
+  top: 22px;
+  left: 48%;
+  transform: translateX(-50%);
+  background: #E31B23;
+  color: #FFFFFF;
+  font-family: var(--font-family-primary);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 14px;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(227, 27, 35, 0.45);
+  white-space: nowrap;
+  z-index: 10;
+  user-select: none;
+  letter-spacing: -0.2px;
+}
+
+/* Left: Full-height edge-to-edge filled container for product image */
+.recent-deals__media {
+  width: 48%;
+  height: 100%;
+  position: relative;
+  background: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-sizing: border-box;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.recent-deals__product-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  user-select: none;
+  pointer-events: none;
+  transition: transform 0.3s ease;
+}
+
+.recent-deals__card:hover .recent-deals__product-img {
   transform: scale(1.04);
 }
+
+/* Right: Silver / Light-Grey background for description & info */
+.recent-deals__details {
+  width: 52%;
+  height: 100%;
+  padding: 12px 14px 12px 12px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  background: #EDEDED;
+  position: relative;
+  z-index: 2;
+}
+
+.recent-deals__store-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  height: 28px;
+}
+
+.recent-deals__store-logo {
+  max-height: 28px;
+  max-width: 110px;
+  object-fit: contain;
+  display: block;
+}
+
+.recent-deals__deal-title {
+  margin: 14px 0 0 0;
+  font-family: var(--font-family-primary);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #111827;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recent-deals__price-wrapper {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.recent-deals__price {
+  font-family: var(--font-family-primary);
+  font-size: 38px;
+  font-weight: 900;
+  line-height: 1;
+  color: #000000;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+}
+
+.recent-deals__cta-wrapper {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  padding-bottom: 2px;
+}
+
+.recent-deals__view-btn {
+  background: #E31B23;
+  color: #FFFFFF;
+  font-family: var(--font-family-primary);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 18px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 8px rgba(227, 27, 35, 0.35);
+  transition: transform 0.2s ease, background 0.2s ease;
+  user-select: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.recent-deals__card:hover .recent-deals__view-btn {
+  background: #C81A1A;
+  transform: scale(1.04);
+}
+

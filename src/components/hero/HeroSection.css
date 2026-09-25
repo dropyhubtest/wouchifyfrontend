@@ -199,6 +199,7 @@
   line-height: 30px;
   border: none;
   cursor: pointer;
+  text-decoration: none;
   z-index: 2;
   transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
   box-shadow: 0 4px 14px rgba(42, 49, 137, 0.25);
@@ -304,6 +305,7 @@
   line-height: 1;
   border: none;
   cursor: pointer;
+  text-decoration: none;
   z-index: 3;
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.15);
   transition: transform 0.2s ease, opacity 0.2s ease;
