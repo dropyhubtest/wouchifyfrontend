@@ -4,6 +4,7 @@ import { FooterSection } from '../components/footer'
 import { CategoryHero, CategoryToolbar, CategorySidebar, CategoryDirectory } from '../components/categories'
 import { CATEGORY_DIRECTORY_ITEMS } from '../data/categoriesDirectoryData'
 import { useDesktopScale } from '../hooks/useDesktopScale'
+import { adminApi } from '../services/adminApi'
 import './CategoriesPage.css'
 
 export const CategoriesPage: React.FC = () => {
@@ -17,19 +18,28 @@ export const CategoriesPage: React.FC = () => {
   const [dbCategories, setDbCategories] = useState<any[]>([])
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/data/categories')
-      .then(res => res.json())
-      .then(data => {
-        const mapped = data.filter((c: any) => c.status !== 'inactive').map((c: any) => ({
-          id: c._id || c.id || c.slug,
-          name: c.name,
-          slug: c.slug,
-          image: c.image || 'https://via.placeholder.com/80?text=Cat',
-          letter: c.letter || c.name.charAt(0).toUpperCase()
-        }))
-        setDbCategories(mapped)
-      })
-      .catch(console.error)
+    const fetchCats = () => {
+      adminApi.getCategories({ status: 'active' })
+        .then((data: any) => {
+          if (Array.isArray(data)) {
+            const mapped = data.filter((c: any) => c.status !== 'inactive').map((c: any) => ({
+              id: c._id || c.id || c.slug,
+              name: c.name,
+              slug: c.slug,
+              image: c.image || c.logo || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=80&auto=format&fit=crop&q=80',
+              letter: c.letter || (c.name ? c.name.charAt(0).toUpperCase() : 'A')
+            }))
+            setDbCategories(mapped)
+          }
+        })
+        .catch(() => {
+          // Gracefully continue with static directory if API is unreachable
+        })
+    }
+
+    fetchCats()
+    window.addEventListener('wouchify_categories_updated', fetchCats)
+    return () => window.removeEventListener('wouchify_categories_updated', fetchCats)
   }, [])
 
   const filteredItems = useMemo(() => {
