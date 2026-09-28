@@ -14,7 +14,20 @@ router.get('/', async (req, res, next) => {
   const getFallback = () => {
     let memoryLoot = store.getLootDeals(req.query);
     if (all !== 'true') {
-      memoryLoot = memoryLoot.filter(l => l.submissionStatus !== 'pending_approval' && (l.status || 'active') === 'active');
+      const now = Date.now();
+      memoryLoot = memoryLoot.filter(l => {
+        if (l.submissionStatus === 'pending_approval') return false;
+        if ((l.status || 'active') !== 'active') return false;
+        if (l.publishAt) {
+          const pubTime = new Date(l.publishAt).getTime();
+          if (!isNaN(pubTime) && pubTime > now + 60000) return false;
+        }
+        if (l.expiresAt) {
+          const expTime = new Date(l.expiresAt).getTime();
+          if (!isNaN(expTime) && expTime < now) return false;
+        }
+        return true;
+      });
     }
     return memoryLoot;
   };
@@ -27,7 +40,7 @@ router.get('/', async (req, res, next) => {
       if (status && status !== 'All') query.status = status;
       if (submissionStatus && submissionStatus !== 'All') query.submissionStatus = submissionStatus;
     } else {
-      query.status = { $nin: ['inactive', 'rejected', 'expired'] };
+      query.status = { $nin: ['inactive', 'rejected', 'expired', 'pending'] };
       query.opsManagerApproval = { $ne: 'Rejected' };
       query.submissionStatus = { $nin: ['pending_approval', 'rejected'] };
     }

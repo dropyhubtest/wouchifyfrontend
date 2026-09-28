@@ -17,7 +17,16 @@ router.get('/', async (req, res, next) => {
       memoryStores = memoryStores.filter(s => s.status === status);
     }
     if (all !== 'true') {
-      memoryStores = memoryStores.filter(s => s.submissionStatus !== 'pending_approval' && s.opsManagerApproval !== 'Rejected');
+      const now = Date.now();
+      memoryStores = memoryStores.filter(s => {
+        if (s.submissionStatus === 'pending_approval') return false;
+        if (s.opsManagerApproval === 'Rejected') return false;
+        if (s.publishAt) {
+          const pubTime = new Date(s.publishAt).getTime();
+          if (!isNaN(pubTime) && pubTime > now + 60000) return false;
+        }
+        return true;
+      });
     }
     return memoryStores;
   };

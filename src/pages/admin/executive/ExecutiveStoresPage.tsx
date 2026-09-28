@@ -227,11 +227,19 @@ const StoreFormModal: React.FC<StoreFormModalProps> = ({ editing, onClose, onSav
     <div className="crud-modal-overlay">
       <div className="crud-modal" style={{ maxWidth: 880, width: '95vw' }}>
         {/* Header */}
-        <div className="modal-header">
-          <h3 className="modal-title">
-            <StoreIcon size={20} style={{ marginRight: 8 }} />
-            {editing ? 'Edit Store' : 'Add New Store'}
-          </h3>
+        <div className="modal-header" style={{ alignItems: 'flex-start' }}>
+          <div>
+            <h3 className="modal-title">
+              <StoreIcon size={20} style={{ marginRight: 8 }} />
+              {editing ? 'Edit Store' : 'Add New Store'}
+            </h3>
+            {!editing && (
+              <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                <button type="button" onClick={() => setForm({...EMPTY_FORM, name: 'Amazon', slug: 'amazon', category: 'General', reward: 'Up to 5% Cashback', description: 'World largest e-commerce platform', affiliateLink: 'https://amazon.in', cardBg: '#FFEDF8', badgeBg: '#FCA7E1'})} style={{ padding: '4px 8px', fontSize: '12px', background: '#e2e8f0', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer' }}>Fill Amazon</button>
+                <button type="button" onClick={() => setForm({...EMPTY_FORM, name: 'Flipkart', slug: 'flipkart', category: 'General', reward: 'Up to 4% Cashback', description: 'Big Billion Days special store', affiliateLink: 'https://flipkart.com', cardBg: '#E8F5FF', badgeBg: '#B3DCFA'})} style={{ padding: '4px 8px', fontSize: '12px', background: '#e2e8f0', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer' }}>Fill Flipkart</button>
+              </div>
+            )}
+          </div>
           <button className="modal-close" onClick={onClose}><X size={20} /></button>
         </div>
 

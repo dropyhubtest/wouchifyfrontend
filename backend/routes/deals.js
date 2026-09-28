@@ -21,7 +21,7 @@ router.get('/', async (req, res, next) => {
       if (status && status !== 'All') query.status = status;
       if (submissionStatus && submissionStatus !== 'All') query.submissionStatus = submissionStatus;
     } else {
-      query.status = { $nin: ['inactive', 'rejected', 'expired'] };
+      query.status = { $nin: ['inactive', 'rejected', 'expired', 'pending'] };
       query.opsManagerApproval = { $ne: 'Rejected' };
       query.submissionStatus = { $nin: ['pending_approval', 'rejected'] };
     }

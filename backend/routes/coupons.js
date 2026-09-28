@@ -37,7 +37,20 @@ router.get('/', async (req, res, next) => {
       memoryCoupons = memoryCoupons.filter(c => c.category && c.category.toLowerCase() === category.toLowerCase());
     }
     if (all !== 'true') {
-      memoryCoupons = memoryCoupons.filter(c => c.submissionStatus !== 'pending_approval' && c.opsManagerApproval !== 'Rejected');
+      const now = Date.now();
+      memoryCoupons = memoryCoupons.filter(c => {
+        if (c.submissionStatus === 'pending_approval') return false;
+        if (c.opsManagerApproval === 'Rejected') return false;
+        if (c.publishAt) {
+          const pubTime = new Date(c.publishAt).getTime();
+          if (!isNaN(pubTime) && pubTime > now + 60000) return false;
+        }
+        if (c.expiresAt) {
+          const expTime = new Date(c.expiresAt).getTime();
+          if (!isNaN(expTime) && expTime < now) return false;
+        }
+        return true;
+      });
     }
     return memoryCoupons;
   };

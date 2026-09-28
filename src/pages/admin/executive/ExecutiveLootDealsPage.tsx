@@ -66,6 +66,7 @@ export interface LootDeal {
   deliveryInfo?: string
   rating?: string
   postedAt: string
+  publishAt?: string
   expiresAt: string
   image: string
   images: string[]
@@ -186,6 +187,7 @@ export const ExecutiveLootDealsPage: React.FC = () => {
             deliveryInfo: d.deliveryInfo || 'Fast Delivery',
             rating: d.rating || '4.8 ★ (12k)',
             postedAt: d.postedAt || 'Today',
+            publishAt: d.publishAt || '',
             expiresAt: d.expiresAt || new Date(Date.now() + 86400000).toISOString().slice(0, 16),
             image: d.image || d.productImage || DEAL_PRODUCT_PRESETS[0]?.image || '',
             images: Array.isArray(d.images) && d.images.length > 0 ? d.images : [d.image || d.productImage || DEAL_PRODUCT_PRESETS[0]?.image || ''],
@@ -299,6 +301,7 @@ export const ExecutiveLootDealsPage: React.FC = () => {
     deliveryInfo: 'Fast Express Delivery',
     rating: '4.5 ★ (10k)',
     postedAt: `Today, ${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}`,
+    publishAt: '',
     expiresAt: new Date(Date.now() + 3600000 * 6).toISOString().slice(0, 16),
     image: DEAL_PRODUCT_PRESETS[0]?.image || '',
     images: [DEAL_PRODUCT_PRESETS[0]?.image || ''],
@@ -708,6 +711,8 @@ export const ExecutiveLootDealsPage: React.FC = () => {
         isBestSelling: Boolean(dealToSave.isBestSelling),
         showOnHome: Boolean(dealToSave.showOnHome !== false && dealToSave.sectionPlacement !== 'none'),
         sectionPlacement: dealToSave.sectionPlacement || (dealToSave.isBestSelling ? 'best_selling' : 'both'),
+        publishAt: dealToSave.publishAt,
+        expiresAt: dealToSave.expiresAt,
         image: dealToSave.image,
         priority: dealToSave.priority,
         code: dealToSave.code
@@ -730,6 +735,8 @@ export const ExecutiveLootDealsPage: React.FC = () => {
         isBestSelling: Boolean(dealToSave.isBestSelling),
         showOnHome: Boolean(dealToSave.showOnHome !== false && dealToSave.sectionPlacement !== 'none'),
         sectionPlacement: dealToSave.sectionPlacement || (dealToSave.isBestSelling ? 'best_selling' : 'both'),
+        publishAt: dealToSave.publishAt,
+        expiresAt: dealToSave.expiresAt,
         image: dealToSave.image,
         priority: dealToSave.priority,
         code: dealToSave.code
@@ -1597,6 +1604,12 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                   <p className="modal-subtitle" style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b' }}>
                     Configure pricing, partner store details, and flash drop settings.
                   </p>
+                  {!editingDeal && (
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                      <button type="button" onClick={() => setForm({...emptyLootDeal, title: 'Price Glitch: Samsung S23 Ultra', store: 'Amazon', brand: 'Samsung', category: 'Electronics', lootType: 'glitch', price: '₹10,999', originalPrice: '₹1,24,999', link: 'https://amazon.in/glitch', discountLabel: '90% OFF', stockClaimedPercent: 95})} style={{ padding: '4px 8px', fontSize: '12px', background: '#e2e8f0', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer' }}>Fill Glitch</button>
+                      <button type="button" onClick={() => setForm({...emptyLootDeal, title: 'Puma Sneakers under 99', store: 'Flipkart', brand: 'Puma', category: 'Fashion', lootType: 'under99', price: '₹99', originalPrice: '₹2,999', link: 'https://flipkart.com/puma', discountLabel: '96% OFF', stockClaimedPercent: 70})} style={{ padding: '4px 8px', fontSize: '12px', background: '#e2e8f0', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer' }}>Fill Under 99</button>
+                    </div>
+                  )}
                 </div>
                 <button className="modal-close" onClick={() => setIsModalOpen(false)}>
                   <X size={18} />
@@ -1902,7 +1915,18 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                         </div>
 
                         <div className="form-group">
-                          <label>Expiry Date & Time</label>
+                          <label>Schedule Go-Live Date</label>
+                          <input 
+                            type="datetime-local" 
+                            value={form.publishAt || ''}
+                            onChange={(e) => setForm({ ...form, publishAt: e.target.value })}
+                          />
+                          <span className="field-hint">Select a date & time to automatically publish this deal</span>
+                        </div>
+                      </div>
+
+                      <div className="form-group" style={{ marginTop: '12px' }}>
+                        <label>Expiry Date & Time</label>
                           <input 
                             type="datetime-local" 
                             value={form.expiresAt}
@@ -1921,7 +1945,6 @@ export const ExecutiveLootDealsPage: React.FC = () => {
                           <span className="field-hint">Offer end schedule for countdown timers</span>
                         </div>
                       </div>
-                    </div>
 
                     {/* Section 4: "Trick to Grab" (Instructions & Terms) */}
                     <div className="form-section">

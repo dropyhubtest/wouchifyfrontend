@@ -69,10 +69,14 @@ async function updateMongoEntityOnApproval(entityType, entityId, action, dataSna
   if (!Model) return;
 
   const nowIso = new Date();
+  const snapshot = dataSnapshot || {};
+  const publishAt = snapshot.publishAt;
+  const isScheduledFuture = publishAt && new Date(publishAt).getTime() > Date.now() + 60000;
+
   const updatePatch = { 
-    ...(dataSnapshot || {}),
+    ...snapshot,
     submissionStatus: 'approved', 
-    status: 'active',
+    status: isScheduledFuture ? 'scheduled' : 'active',
     opsManagerApproval: 'Approved',
     managerApproval: 'Approved',
     approvedBy: reviewer,
@@ -90,28 +94,28 @@ async function updateMongoEntityOnApproval(entityType, entityId, action, dataSna
   delete updatePatch.createdAt;
   delete updatePatch.__v;
 
-  const query = buildEntityQuery(entityId, dataSnapshot);
+  const query = buildEntityQuery(entityId, snapshot);
 
   try {
     if (action === 'delete') {
       await Model.findOneAndDelete(query);
     } else {
       const updated = await Model.findOneAndUpdate(query, updatePatch, { new: true, upsert: false });
-      if (!updated && action === 'create' && dataSnapshot) {
+      if (!updated && action === 'create' && snapshot) {
         const toCreate = new Model({
-          ...dataSnapshot,
+          ...snapshot,
           id: entityId || `entity-${Date.now()}`,
           submissionStatus: 'approved',
-          status: 'active',
+          status: isScheduledFuture ? 'scheduled' : 'active',
           opsManagerApproval: 'Approved',
           managerApproval: 'Approved',
           approvedBy: reviewer,
           approvedByName: reviewerName,
           approvedByRole: reviewerRole,
           approvedAt: nowIso,
-          submittedBy: submittedBy || dataSnapshot.submittedBy,
-          submittedByName: submittedByName || dataSnapshot.submittedByName,
-          submittedAt: submittedAt || dataSnapshot.submittedAt || nowIso
+          submittedBy: submittedBy || snapshot.submittedBy,
+          submittedByName: submittedByName || snapshot.submittedByName,
+          submittedAt: submittedAt || snapshot.submittedAt || nowIso
         });
         await toCreate.save();
       }

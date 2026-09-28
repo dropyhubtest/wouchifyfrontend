@@ -905,8 +905,8 @@ export const OperationsApprovalsPage: React.FC = () => {
                                 </span>
                               )}
                             </div>
-                            <span className={`priority-pill ${item.priority.toLowerCase()}`}>
-                              {item.priority}
+                            <span className={`priority-pill ${(item.priority || 'normal').toLowerCase()}`}>
+                              {item.priority || 'Normal'}
                             </span>
                           </div>
                         </td>

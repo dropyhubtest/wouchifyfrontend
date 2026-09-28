@@ -2182,10 +2182,22 @@ module.exports = {
   getDeals: (filter = {}) => {
     let result = [...deals];
     if (filter.all !== 'true') {
-      result = result.filter(d => 
-        (d.submissionStatus === undefined || d.submissionStatus === 'approved') && 
-        (d.status || 'active').toLowerCase() === 'active'
-      );
+      const now = Date.now();
+      result = result.filter(d => {
+        if ((d.submissionStatus !== undefined && d.submissionStatus !== 'approved')) return false;
+        if ((d.status || 'active').toLowerCase() !== 'active' && (d.status || '').toLowerCase() !== 'scheduled') return false;
+        // Scheduling: hide items whose publishAt is more than 60s in the future
+        if (d.publishAt) {
+          const pubTime = new Date(d.publishAt).getTime();
+          if (!isNaN(pubTime) && pubTime > now + 60000) return false;
+        }
+        // Expiry: hide expired items
+        if (d.expiresAt) {
+          const expTime = new Date(d.expiresAt).getTime();
+          if (!isNaN(expTime) && expTime < now) return false;
+        }
+        return true;
+      });
     }
     if (filter.category && filter.category !== 'All') {
       result = result.filter(d => d.category && d.category.toLowerCase() === filter.category.toLowerCase());
@@ -2259,7 +2271,23 @@ module.exports = {
   getCoupons: (filter = {}) => {
     let result = [...coupons];
     if (filter.all !== 'true') {
-      result = result.filter(c => (c.submissionStatus === undefined || c.submissionStatus === 'approved') && c.status !== 'pending' && c.status !== 'rejected' && c.opsManagerApproval !== 'Rejected');
+      const now = Date.now();
+      result = result.filter(c => {
+        if ((c.submissionStatus !== undefined && c.submissionStatus !== 'approved')) return false;
+        if (c.status === 'pending' || c.status === 'rejected' || c.status === 'inactive') return false;
+        if (c.opsManagerApproval === 'Rejected') return false;
+        // Scheduling: hide items whose publishAt is more than 60s in the future
+        if (c.publishAt) {
+          const pubTime = new Date(c.publishAt).getTime();
+          if (!isNaN(pubTime) && pubTime > now + 60000) return false;
+        }
+        // Expiry: hide expired items
+        if (c.expiresAt) {
+          const expTime = new Date(c.expiresAt).getTime();
+          if (!isNaN(expTime) && expTime < now) return false;
+        }
+        return true;
+      });
     }
     if (filter.store && filter.store !== 'All') {
       result = result.filter(c => c.store && c.store.toLowerCase() === filter.store.toLowerCase());
@@ -2351,7 +2379,22 @@ module.exports = {
   getLootDeals: (filter = {}) => {
     let result = [...lootDeals];
     if (filter.all !== 'true') {
-      result = result.filter(l => (l.submissionStatus === undefined || l.submissionStatus === 'approved') && l.status !== 'pending' && l.status !== 'rejected');
+      const now = Date.now();
+      result = result.filter(l => {
+        if ((l.submissionStatus !== undefined && l.submissionStatus !== 'approved')) return false;
+        if (l.status === 'pending' || l.status === 'rejected' || l.status === 'inactive') return false;
+        // Scheduling: hide items whose publishAt is more than 60s in the future
+        if (l.publishAt) {
+          const pubTime = new Date(l.publishAt).getTime();
+          if (!isNaN(pubTime) && pubTime > now + 60000) return false;
+        }
+        // Expiry: hide expired items
+        if (l.expiresAt) {
+          const expTime = new Date(l.expiresAt).getTime();
+          if (!isNaN(expTime) && expTime < now) return false;
+        }
+        return true;
+      });
     }
     if (filter.dealType && filter.dealType !== 'All') {
       result = result.filter(l => l.dealType === filter.dealType);
@@ -2404,7 +2447,18 @@ module.exports = {
   getStores: (filter = {}) => {
     let result = [...stores];
     if (filter.all !== 'true') {
-      result = result.filter(s => (s.submissionStatus === undefined || s.submissionStatus === 'approved') && s.status !== 'pending' && s.status !== 'rejected' && s.opsManagerApproval !== 'Rejected');
+      const now = Date.now();
+      result = result.filter(s => {
+        if ((s.submissionStatus !== undefined && s.submissionStatus !== 'approved')) return false;
+        if (s.status === 'pending' || s.status === 'rejected' || s.status === 'inactive') return false;
+        if (s.opsManagerApproval === 'Rejected') return false;
+        // Scheduling: hide stores whose publishAt is more than 60s in the future
+        if (s.publishAt) {
+          const pubTime = new Date(s.publishAt).getTime();
+          if (!isNaN(pubTime) && pubTime > now + 60000) return false;
+        }
+        return true;
+      });
     }
     return result.sort((a, b) => new Date(b.createdAt || b.updatedAt || 0).getTime() - new Date(a.createdAt || a.updatedAt || 0).getTime());
   },
@@ -2916,10 +2970,19 @@ module.exports = {
     if (sub.entityType && sub.entityId) {
       const entType = sub.entityType;
       const entId = sub.entityId;
+
+      // Determine the correct live status: if publishAt is in the future, keep as 'active'
+      // but publishAt filter will hide it from public until the time arrives
+      const snapshot = sub.dataSnapshot || {};
+      const publishAt = snapshot.publishAt;
+      const isScheduledFuture = publishAt && new Date(publishAt).getTime() > Date.now() + 60000;
+
       const patch = { 
-        ...(sub.dataSnapshot || {}),
+        ...snapshot,
         submissionStatus: 'approved', 
-        status: 'active' 
+        status: isScheduledFuture ? 'scheduled' : 'active',
+        opsManagerApproval: 'Approved',
+        managerApproval: 'Approved'
       };
       delete patch._id;
       delete patch.id;

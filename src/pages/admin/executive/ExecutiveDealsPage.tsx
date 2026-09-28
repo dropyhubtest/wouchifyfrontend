@@ -73,6 +73,7 @@ export interface Deal {
   showOnHome?: boolean
   sectionPlacement?: 'favourite' | 'best_selling' | 'both' | 'none'
   postedAt: string
+  publishAt?: string
   expiresAt: string
   description: string
   terms?: string
@@ -199,6 +200,7 @@ export const ExecutiveDealsPage: React.FC = () => {
           isFeatured: Boolean(d.isFeatured),
           isVerified: Boolean(d.isVerified ?? true),
           postedAt: d.createdAt ? new Date(d.createdAt).toLocaleDateString('en-IN') : (d.postedAt || 'Recently'),
+          publishAt: d.publishAt || '',
           expiresAt: d.expiry || d.expiresAt || '',
           description: d.description || 'Handpicked verified e-commerce deal.',
           terms: d.terms || '',
@@ -285,6 +287,7 @@ export const ExecutiveDealsPage: React.FC = () => {
     isVerified: true,
     showOnHome: true,
     postedAt: `Today, ${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}`,
+    publishAt: '',
     expiresAt: new Date(Date.now() + 86400000 * 5).toISOString().slice(0, 16),
     description: '',
     terms: 'Valid on select variants. Cannot be combined with other ongoing promotions.',
@@ -749,6 +752,7 @@ export const ExecutiveDealsPage: React.FC = () => {
         sectionPlacement: dealToSave.sectionPlacement || (dealToSave.isBestSelling ? 'best_selling' : 'favourite'),
         isFeatured: Boolean(dealToSave.isFeatured),
         isVerified: Boolean(dealToSave.isVerified),
+        publishAt: dealToSave.publishAt,
         expiry: dealToSave.expiresAt,
         expiresAt: dealToSave.expiresAt,
         description: dealToSave.description,
@@ -794,6 +798,7 @@ export const ExecutiveDealsPage: React.FC = () => {
         sectionPlacement: dealToSave.sectionPlacement || (dealToSave.isBestSelling ? 'best_selling' : 'favourite'),
         isFeatured: Boolean(dealToSave.isFeatured),
         isVerified: Boolean(dealToSave.isVerified),
+        publishAt: dealToSave.publishAt,
         expiry: dealToSave.expiresAt,
         expiresAt: dealToSave.expiresAt,
         description: dealToSave.description,
@@ -1717,6 +1722,13 @@ export const ExecutiveDealsPage: React.FC = () => {
                   <p className="modal-subtitle">
                     Enter pricing, partner store details, and product information.
                   </p>
+                  {!editingDeal && (
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                      <button type="button" onClick={() => setForm({...emptyDeal, title: 'Apple iPhone 15 Pro (128 GB)', store: 'Amazon', brand: 'Apple', category: 'Electronics', price: '₹1,25,900', originalPrice: '₹1,34,900', link: 'https://amazon.in/iphone'})} style={{ padding: '4px 8px', fontSize: '12px', background: '#e2e8f0', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer' }}>Fill Mobile</button>
+                      <button type="button" onClick={() => setForm({...emptyDeal, title: 'Nike Air Max 2023', store: 'Myntra', brand: 'Nike', category: 'Fashion', price: '₹4,999', originalPrice: '₹9,995', link: 'https://myntra.com/nike'})} style={{ padding: '4px 8px', fontSize: '12px', background: '#e2e8f0', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer' }}>Fill Fashion</button>
+                      <button type="button" onClick={() => setForm({...emptyDeal, title: 'Sony WH-1000XM5 Headphones', store: 'Flipkart', brand: 'Sony', category: 'Electronics', price: '₹24,990', originalPrice: '₹34,990', link: 'https://flipkart.com/sony'})} style={{ padding: '4px 8px', fontSize: '12px', background: '#e2e8f0', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer' }}>Fill Audio</button>
+                    </div>
+                  )}
                 </div>
                 <button className="modal-close" onClick={() => setIsModalOpen(false)} title="Close">
                   <X size={18} />
@@ -2068,7 +2080,18 @@ export const ExecutiveDealsPage: React.FC = () => {
                     </div>
 
                     <div className="form-group">
-                      <label>Expiry Date & Time</label>
+                      <label>Schedule Go-Live Date</label>
+                      <input 
+                        type="datetime-local" 
+                        value={form.publishAt || ''}
+                        onChange={(e) => setForm({ ...form, publishAt: e.target.value })}
+                      />
+                      <span className="field-hint">Select a date & time to automatically publish this deal</span>
+                    </div>
+                  </div>
+
+                  <div className="form-group" style={{ marginTop: '12px' }}>
+                    <label>Expiry Date & Time</label>
                       <input 
                         type="datetime-local" 
                         value={form.expiresAt}
@@ -2084,7 +2107,6 @@ export const ExecutiveDealsPage: React.FC = () => {
                       </div>
                       <span className="field-hint">Offer end schedule for countdown timers & automatic deal expiration</span>
                     </div>
-                  </div>
 
                   {/* Granular Section Placement Dropdown */}
                   <div className="form-group" style={{ marginTop: '14px' }}>

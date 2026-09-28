@@ -56,6 +56,7 @@ interface Coupon {
   showOnHome?: boolean
   telegramAlert: boolean
   startDate: string
+  publishAt?: string
   expiryDate: string
   usageCount: number
   totalUses: number         // cap (0 = unlimited)
@@ -123,6 +124,7 @@ const EMPTY_FORM: Partial<Coupon> = {
   affiliateLink: '', status: 'active', isExclusive: false, isFeatured: false,
   isVerified: true, showOnHome: true, telegramAlert: false,
   startDate: new Date().toISOString().split('T')[0],
+  publishAt: '',
   expiryDate: '', usageCount: 0, totalUses: 0,
 }
 
@@ -233,6 +235,7 @@ const CouponFormModal: React.FC<CouponFormProps> = ({ editing, onClose, onSave }
       showOnHome: form.showOnHome !== false,
       telegramAlert: form.telegramAlert ?? false,
       startDate: form.startDate ?? now,
+      publishAt: form.publishAt ?? '',
       expiryDate: form.expiryDate!,
       usageCount: editing?.usageCount ?? 0,
       totalUses: Number(form.totalUses ?? 0),
@@ -245,11 +248,19 @@ const CouponFormModal: React.FC<CouponFormProps> = ({ editing, onClose, onSave }
   return (
     <div className="crud-modal-overlay">
       <div className="crud-modal" style={{ maxWidth: 780, width: '95vw' }}>
-        <div className="modal-header">
-          <h3 className="modal-title">
-            <Ticket size={20} style={{ marginRight: 8, color: typeColor }} />
-            {editing ? 'Edit Coupon' : 'Add New Coupon'}
-          </h3>
+        <div className="modal-header" style={{ alignItems: 'flex-start' }}>
+          <div>
+            <h3 className="modal-title">
+              <Ticket size={20} style={{ marginRight: 8, color: typeColor }} />
+              {editing ? 'Edit Coupon' : 'Add New Coupon'}
+            </h3>
+            {!editing && (
+              <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                <button type="button" onClick={() => setForm({...EMPTY_FORM, title: 'Flat 50% OFF', code: 'FLAT50', discount: '50% OFF', discountValue: 50, couponType: 'percent', expiryDate: new Date(Date.now() + 86400000*30).toISOString().split('T')[0]})} style={{ padding: '4px 8px', fontSize: '12px', background: '#e2e8f0', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer' }}>Fill 50% OFF</button>
+                <button type="button" onClick={() => setForm({...EMPTY_FORM, title: 'BOGO on Shirts', code: 'BUY1GET1', discount: 'BOGO', discountValue: 0, couponType: 'bogo', expiryDate: new Date(Date.now() + 86400000*15).toISOString().split('T')[0]})} style={{ padding: '4px 8px', fontSize: '12px', background: '#e2e8f0', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer' }}>Fill BOGO</button>
+              </div>
+            )}
+          </div>
           <button className="modal-close" onClick={onClose}><X size={20} /></button>
         </div>
 
@@ -376,10 +387,14 @@ const CouponFormModal: React.FC<CouponFormProps> = ({ editing, onClose, onSave }
               </div>
 
               {/* Row: Start + Expiry + Status + Cap */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: 12 }}>
                 <div className="form-group">
                   <label>Start Date</label>
                   <input type="date" value={form.startDate ?? ''} onChange={e => set('startDate', e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label>Schedule Go-Live Date</label>
+                  <input type="datetime-local" value={form.publishAt ?? ''} onChange={e => set('publishAt', e.target.value)} />
                 </div>
                 <div className="form-group">
                   <label style={{ fontWeight: 800, color: '#dc2626' }}>Expiry Date *</label>
@@ -530,6 +545,7 @@ export const ExecutiveCouponsPage: React.FC = () => {
           showOnHome: Boolean(c.showOnHome !== false),
           telegramAlert: Boolean(c.telegramAlert),
           startDate: c.startDate || new Date().toISOString().slice(0, 10),
+          publishAt: c.publishAt || '',
           expiryDate: c.expiry || c.expiryDate || new Date(Date.now() + 86400000 * 30).toISOString().slice(0, 10),
           usageCount: c.usageCount || 0,
           totalUses: c.usageLimit || 5000,
