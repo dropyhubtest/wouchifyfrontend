@@ -1,5 +1,22 @@
 {
-  "deals": [],
+  "deals": [
+    {
+      "_id": "test-deal-123",
+      "id": "test-deal-123",
+      "status": "active",
+      "submissionStatus": "approved",
+      "opsManagerApproval": "Approved",
+      "managerApproval": "Approved",
+      "createdAt": "2026-09-30T08:40:37.898Z",
+      "updatedAt": "2026-09-30T08:40:37.903Z",
+      "name": "Test Executive Deal",
+      "category": "Electronics",
+      "approvedBy": "manager@wouchify.com",
+      "approvedByName": "Manager",
+      "approvedByRole": "Manager",
+      "approvedAt": "2026-09-30T08:40:37.903Z"
+    }
+  ],
   "coupons": [],
   "lootDeals": [],
   "stores": [
@@ -1190,6 +1207,32 @@
     }
   ],
   "submissions": [
+    {
+      "_id": "sub-123",
+      "id": "sub-123",
+      "status": "Approved",
+      "submittedAt": "2026-09-30T08:40:37.901Z",
+      "createdAt": "2026-09-30T08:40:37.901Z",
+      "updatedAt": "2026-09-30T08:40:37.903Z",
+      "entityType": "deal",
+      "entityId": "test-deal-123",
+      "action": "create",
+      "dataSnapshot": {
+        "_id": "test-deal-123",
+        "name": "Test Executive Deal",
+        "category": "Electronics",
+        "status": "pending",
+        "submissionStatus": "pending_approval"
+      },
+      "reviewedBy": "manager@wouchify.com",
+      "reviewedByName": "Manager",
+      "reviewedByRole": "Manager",
+      "approvedBy": "manager@wouchify.com",
+      "approvedByName": "Manager",
+      "approvedByRole": "Manager",
+      "reviewedAt": "2026-09-30T08:40:37.903Z",
+      "approvedAt": "2026-09-30T08:40:37.903Z"
+    },
     {
       "_id": "sub-1790578634594",
       "id": "sub-1790578634594",

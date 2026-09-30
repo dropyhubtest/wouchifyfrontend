@@ -104,7 +104,7 @@ export const FavouriteStores: React.FC = () => {
 
   const fetchLiveStores = useCallback(async () => {
     try {
-      const fetched = await adminApi.getStores()
+      const fetched = await adminApi.getPublicStores()
       if (Array.isArray(fetched) && fetched.length > 0) {
         setStoresList(mergeWithMasterStores(fetched))
       }

@@ -13,7 +13,7 @@ export const PopularBrandsSection: React.FC = () => {
 
   const loadBrands = async () => {
     try {
-      const stores = await adminApi.getStores({ all: true })
+      const stores = await adminApi.getPublicStores({ all: true })
       if (Array.isArray(stores) && stores.length > 0) {
         // Collect names and slugs of stores/brands that are explicitly hidden from homepage
         const hiddenSet = new Set(

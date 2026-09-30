@@ -34,10 +34,10 @@ export const MobileBrandPage: React.FC<MobileBrandPageProps> = ({ brandSlug = 'a
   const loadBrandData = useCallback(async () => {
     try {
       const [stores, deals, loots, coupons] = await Promise.all([
-        adminApi.getStores(),
-        adminApi.getDeals(),
-        adminApi.getLootDeals(),
-        adminApi.getCoupons()
+        adminApi.getPublicStores(),
+        adminApi.getPublicDeals(),
+        adminApi.getPublicLootDeals(),
+        adminApi.getPublicCoupons()
       ]);
 
       const targetSlug = brandSlug.toLowerCase();

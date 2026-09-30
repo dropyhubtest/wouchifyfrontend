@@ -38,7 +38,7 @@ export const BestSellingDeals: React.FC<BestSellingDealsProps> = ({
     const fetchBestSellingDeals = async () => {
       try {
         if (dataSource === 'loot') {
-          const res = await adminApi.getLootDeals()
+          const res = await adminApi.getPublicLootDeals()
           if (!isMounted) return
           if (Array.isArray(res)) {
             const normalized = res.map((l: any, idx: number) => normalizeLootToCard(l, idx))
@@ -49,7 +49,7 @@ export const BestSellingDeals: React.FC<BestSellingDealsProps> = ({
             setBestDeals(featured.length > 0 ? featured : activeDeals.slice(0, 4))
           }
         } else {
-          const res = await adminApi.getDeals()
+          const res = await adminApi.getPublicDeals()
           if (!isMounted) return
           if (Array.isArray(res)) {
             const normalized = res.map((d: any, idx: number) => normalizeDealToCard(d, idx))

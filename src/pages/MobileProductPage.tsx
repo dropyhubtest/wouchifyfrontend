@@ -22,8 +22,8 @@ export const MobileProductPage: React.FC = () => {
       const targetId = urlParams.get('id') || urlParams.get('product') || 'deal-1'
 
       const [dealsRes, lootsRes] = await Promise.all([
-        adminApi.getDeals(),
-        adminApi.getLootDeals()
+        adminApi.getPublicDeals(),
+        adminApi.getPublicLootDeals()
       ])
 
       const foundDeal = dealsRes.find((d: any) => String(d.id || d._id) === String(targetId))

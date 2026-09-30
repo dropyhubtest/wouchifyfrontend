@@ -12,7 +12,7 @@ export const TopStoresSection: React.FC = () => {
 
   const loadStores = async () => {
     try {
-      const data = await adminApi.getStores({ all: true })
+      const data = await adminApi.getPublicStores({ all: true })
       if (Array.isArray(data) && data.length > 0) {
         const hiddenSet = new Set(
           data

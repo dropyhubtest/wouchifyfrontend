@@ -22,7 +22,7 @@ export const BrandsDirectoryPage: React.FC = () => {
   const [liveBrands, setLiveBrands] = useState<any[]>([])
 
   useEffect(() => {
-    adminApi.getStores().then((stores) => {
+    adminApi.getPublicStores().then((stores) => {
       // Map live stores/brands to match the format expected by the directory
       const mappedBrands = stores.map((s: any) => ({
         id: s.id || s._id || s.slug,

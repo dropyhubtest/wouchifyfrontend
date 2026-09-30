@@ -120,10 +120,10 @@ export const CategoryDetailPage: React.FC<CategoryDetailPageProps> = ({ category
       const catSlug = (category.slug || '').toLowerCase()
 
       const [dealsRes, lootsRes, couponsRes, storesRes, catsRes] = await Promise.all([
-        adminApi.getDeals().catch(() => []),
-        adminApi.getLootDeals().catch(() => []),
-        adminApi.getCoupons().catch(() => []),
-        adminApi.getStores().catch(() => []),
+        adminApi.getPublicDeals().catch(() => []),
+        adminApi.getPublicLootDeals().catch(() => []),
+        adminApi.getPublicCoupons().catch(() => []),
+        adminApi.getPublicStores().catch(() => []),
         adminApi.getCategories().catch(() => [])
       ])
 

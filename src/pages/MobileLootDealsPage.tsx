@@ -72,7 +72,7 @@ export const MobileLootDealsPage: React.FC = () => {
     let isMounted = true
     const fetchLoot = async () => {
       try {
-        const res = await adminApi.getLootDeals()
+        const res = await adminApi.getPublicLootDeals()
         if (!isMounted) return
         if (Array.isArray(res) && res.length > 0) {
           const normalized = res

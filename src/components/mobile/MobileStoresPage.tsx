@@ -64,7 +64,7 @@ export const MobileStoresPage: React.FC = () => {
 
   const fetchLiveStores = async () => {
     try {
-      const fetched = await adminApi.getStores()
+      const fetched = await adminApi.getPublicStores()
       if (Array.isArray(fetched)) {
         const mapped: StoreItem[] = fetched
           .filter((s: any) => s.status !== 'inactive' && s.status !== 'rejected')

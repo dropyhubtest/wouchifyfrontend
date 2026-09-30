@@ -61,7 +61,7 @@ export const DealsFavouriteStores: React.FC<DealsFavouriteStoresProps> = ({
     const fetchLiveItems = async () => {
       try {
         if (dataSource === 'loot') {
-          const res = await adminApi.getLootDeals()
+          const res = await adminApi.getPublicLootDeals()
           if (!isMounted) return
           if (Array.isArray(res)) {
             const normalized = res
@@ -70,7 +70,7 @@ export const DealsFavouriteStores: React.FC<DealsFavouriteStoresProps> = ({
             setDealsList(normalized)
           }
         } else {
-          const res = await adminApi.getDeals()
+          const res = await adminApi.getPublicDeals()
           if (!isMounted) return
           if (Array.isArray(res)) {
             const normalized = res
