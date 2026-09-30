@@ -10,6 +10,7 @@ import { STORE_CATEGORIES } from '../data/storesHero'
 import { SUBCATEGORIES_DATA } from '../data/subcategoriesData'
 import type { SubcategoryItem } from '../data/subcategoriesData'
 import { useDesktopScale } from '../hooks/useDesktopScale'
+import { adminApi } from '../services/adminApi'
 import './SubCategoriesPage.css'
 
 export const SubCategoriesPage: React.FC = () => {
@@ -20,10 +21,46 @@ export const SubCategoriesPage: React.FC = () => {
   const [activeLetter, setActiveLetter] = useState<string | null>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
   const [canvasHeight, setCanvasHeight] = useState<number>(8500)
+  const [dbSubcategories, setDbSubcategories] = useState<any[]>([])
 
-  // Live-filter 114 subcategories by search query and letter
+  useEffect(() => {
+    const fetchCats = () => {
+      adminApi.getCategories({ status: 'active' })
+        .then((data: any) => {
+          if (Array.isArray(data)) {
+            // Include items that are subcategories or similar based on your data structure
+            const mapped = data.filter((c: any) => c.status !== 'inactive').map((c: any) => ({
+              id: c._id || c.id || c.slug,
+              name: c.name,
+              slug: c.slug,
+              logo: c.image || c.logo || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=80&auto=format&fit=crop&q=80',
+              letter: c.letter || (c.name ? c.name.charAt(0).toUpperCase() : 'A'),
+              searchTerms: [c.name, c.slug]
+            }))
+            setDbSubcategories(mapped)
+          }
+        })
+        .catch(() => {})
+    }
+
+    fetchCats()
+    window.addEventListener('wouchify_categories_updated', fetchCats)
+    return () => window.removeEventListener('wouchify_categories_updated', fetchCats)
+  }, [])
+
+  // Live-filter subcategories by search query and letter
   const filteredSubcategories = useMemo(() => {
-    return SUBCATEGORIES_DATA.filter((item) => {
+    const allItems = [...SUBCATEGORIES_DATA]
+    dbSubcategories.forEach(dbItem => {
+      const existingIdx = allItems.findIndex(i => i.slug === dbItem.slug)
+      if (existingIdx >= 0) {
+        allItems[existingIdx] = { ...allItems[existingIdx], ...dbItem }
+      } else {
+        allItems.push(dbItem as SubcategoryItem)
+      }
+    })
+
+    return allItems.filter((item) => {
       // Letter filter if selected
       if (activeLetter && item.letter.toUpperCase() !== activeLetter.toUpperCase()) {
         return false

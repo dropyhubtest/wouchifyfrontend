@@ -8,8 +8,7 @@ import { StoreSearch } from '../components/stores/StoreSearch'
 import { StoreCategoryFilter } from '../components/stores/StoreCategoryFilter'
 import { StoreAlphabetFilter } from '../components/stores/StoreAlphabetFilter'
 import { STORE_CATEGORIES } from '../data/storesHero'
-import { STORES_DIRECTORY_DATA } from '../data/storesDirectoryData'
-import type { DirectoryStore } from '../data/storesDirectoryData'
+import { adminApi } from '../services/adminApi'
 import { useDesktopScale } from '../hooks/useDesktopScale'
 import './StoresDirectoryPage.css'
 
@@ -20,10 +19,29 @@ export const StoresDirectoryPage: React.FC = () => {
   const [selectedStoreCategory, setSelectedStoreCategory] = useState('All Stores')
   const canvasRef = useRef<HTMLDivElement>(null)
   const [canvasHeight, setCanvasHeight] = useState<number>(0)
+  const [liveStores, setLiveStores] = useState<any[]>([])
 
-  // Filter 61 Figma stores based on search query and active letter
+  useEffect(() => {
+    adminApi.getStores().then((stores) => {
+      // Map live stores to match the format expected by the directory
+      const mappedStores = stores.map((s: any) => ({
+        id: s.id || s._id || s.slug,
+        name: s.name,
+        slug: s.slug,
+        logo: s.logo || s.logoUrl,
+        letter: s.name ? s.name.charAt(0).toUpperCase() : '#',
+        destinationHref: `/brands/${s.slug}`,
+        searchTerms: [s.category, s.name]
+      }))
+      setLiveStores(mappedStores)
+    }).catch(err => {
+      console.warn('Failed to fetch stores', err)
+    })
+  }, [])
+
+  // Filter stores based on search query and active letter
   const filteredStores = useMemo(() => {
-    let result = STORES_DIRECTORY_DATA
+    let result = liveStores
 
     // Search query filter (matches name and searchTerms)
     if (searchQuery.trim()) {
@@ -31,7 +49,7 @@ export const StoresDirectoryPage: React.FC = () => {
       result = result.filter(
         (store) =>
           store.name.toLowerCase().includes(q) ||
-          store.searchTerms?.some((term) => term.toLowerCase().includes(q))
+          store.searchTerms?.some((term: string) => term?.toLowerCase().includes(q))
       )
     }
 
@@ -43,9 +61,9 @@ export const StoresDirectoryPage: React.FC = () => {
     return result
   }, [searchQuery, activeLetter])
 
-  // Group filtered stores by letter (Only non-empty Figma groups are created)
+  // Group filtered stores by letter
   const letterGroups = useMemo(() => {
-    const map = new Map<string, DirectoryStore[]>()
+    const map = new Map<string, any[]>()
 
     for (const store of filteredStores) {
       const letter = store.letter.toUpperCase()

@@ -19,7 +19,7 @@ interface MobileBrandPageProps {
 }
 
 export const MobileBrandPage: React.FC<MobileBrandPageProps> = ({ brandSlug = 'amazon' }) => {
-  const staticBrand = getBrandData(brandSlug) || getBrandData('amazon')
+  const staticBrand = getBrandData(brandSlug)
   
   const [liveStore, setLiveStore] = useState<any>(null)
   const [liveDeals, setLiveDeals] = useState<any[]>([])
@@ -28,8 +28,8 @@ export const MobileBrandPage: React.FC<MobileBrandPageProps> = ({ brandSlug = 'a
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
 
   const brandName = liveStore?.name || staticBrand?.name || brandSlug.charAt(0).toUpperCase() + brandSlug.slice(1)
-  const brandLogo = liveStore?.logo || staticBrand?.logoSrc || amazonLogo
-  const rewardText = liveStore?.reward || (staticBrand ? `Up to ${staticBrand.rewardValue} rewards` : 'Up to 6.2% rewards')
+  const brandLogo = liveStore?.logo || staticBrand?.logoSrc || ''
+  const rewardText = liveStore?.reward || (staticBrand ? `Up to ${staticBrand.rewardValue} rewards` : '')
 
   const loadBrandData = useCallback(async () => {
     try {
@@ -70,10 +70,10 @@ export const MobileBrandPage: React.FC<MobileBrandPageProps> = ({ brandSlug = 'a
           category: d.category || 'DEALS',
           store: d.store || brandName,
           storeLogo: brandLogo,
-          productImage: d.image || d.productImage || DEALS_CARD_ITEMS[0]?.productImage,
-          price: d.price ? `₹${d.price.toString().replace(/[^0-9]/g, '')}` : '₹999',
+          productImage: d.image || d.productImage || '',
+          price: d.price ? `₹${d.price.toString().replace(/[^0-9]/g, '')}` : '',
           originalPrice: d.originalPrice ? `₹${d.originalPrice.toString().replace(/[^0-9]/g, '')}` : undefined,
-          discountPercentage: d.discount || '20% OFF',
+          discountPercentage: d.discount || '',
           ctaText: 'GRAB DEAL',
           ctaHref: `/product?id=${d.id || d._id}`
         })),
@@ -83,10 +83,10 @@ export const MobileBrandPage: React.FC<MobileBrandPageProps> = ({ brandSlug = 'a
           category: l.category || 'LOOT',
           store: l.storeName || brandName,
           storeLogo: brandLogo,
-          productImage: l.image || l.productImage || DEALS_CARD_ITEMS[1]?.productImage,
-          price: l.currentPrice ? `₹${l.currentPrice.toString().replace(/[^0-9]/g, '')}` : '₹499',
+          productImage: l.image || l.productImage || '',
+          price: l.currentPrice ? `₹${l.currentPrice.toString().replace(/[^0-9]/g, '')}` : '',
           originalPrice: l.originalPrice ? `₹${l.originalPrice.toString().replace(/[^0-9]/g, '')}` : undefined,
-          discountPercentage: l.discount || '50% OFF',
+          discountPercentage: l.discount || '',
           ctaText: 'GRAB LOOT',
           ctaHref: l.href || `/product?id=${l.id || l._id}`
         }))
@@ -127,8 +127,7 @@ export const MobileBrandPage: React.FC<MobileBrandPageProps> = ({ brandSlug = 'a
 
   // Display deals
   const displayDeals: DealCardItem[] = useMemo(() => {
-    if (liveDeals.length > 0) return liveDeals;
-    return DEALS_CARD_ITEMS.slice(0, 4);
+    return liveDeals;
   }, [liveDeals]);
 
   const filteredDeals = useMemo(() => {
@@ -143,8 +142,8 @@ export const MobileBrandPage: React.FC<MobileBrandPageProps> = ({ brandSlug = 'a
     return displayDeals
   }, [displayDeals, activeFilter])
 
-  const showCouponsSection = activeFilter === 'All' || activeFilter === 'Coupons'
-  const showDealsSection = activeFilter === 'All' || activeFilter === 'Deals' || activeFilter === 'Loot' || activeFilter === '25%+'
+  const showCouponsSection = (activeFilter === 'All' || activeFilter === 'Coupons') && liveCoupons.length > 0
+  const showDealsSection = (activeFilter === 'All' || activeFilter === 'Deals' || activeFilter === 'Loot' || activeFilter === '25%+') && filteredDeals.length > 0
 
   // SVG Ticket Path for Mobile (390 x 190) with 4 notch cutouts and rounded corners
   const ticketPath = `
@@ -229,16 +228,10 @@ export const MobileBrandPage: React.FC<MobileBrandPageProps> = ({ brandSlug = 'a
               <h2 className="mobile-brand__section-title">Available Coupons</h2>
             </div>
 
-            {/* Render dynamic coupons or default ticket */}
-            {(liveCoupons.length > 0 ? liveCoupons : [{
-              id: 'default-mobile-coupon',
-              code: `${brandName.toUpperCase().replace(/[^A-Z0-9]/g, '') || 'WOUCH'}10`,
-              discount: '10% Off',
-              expiry: '3 days',
-              minOrder: '499'
-            }]).map((cpn: any, idx: number) => {
-              const code = (cpn.code || `${brandName.toUpperCase()}10`).toUpperCase();
-              const discountVal = (cpn.discount || '10%').replace(/off/i, '').trim();
+            {/* Render dynamic coupons only */}
+            {liveCoupons.map((cpn: any, idx: number) => {
+              const code = (cpn.code || '').toUpperCase();
+              const discountVal = (cpn.discount || '').replace(/off/i, '').trim();
               const isCopied = copiedCode === code;
 
               return (

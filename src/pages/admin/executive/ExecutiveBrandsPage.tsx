@@ -780,7 +780,7 @@ const StoreGridCard: React.FC<{
    Main Page
    ============================================================ */
 
-export const ExecutiveStoresPage: React.FC = () => {
+export const ExecutiveBrandsPage: React.FC = () => {
   const [stores, setStores] = useState<ManagedStore[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')

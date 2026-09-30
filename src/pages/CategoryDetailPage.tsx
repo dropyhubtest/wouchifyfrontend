@@ -213,10 +213,26 @@ export const CategoryDetailPage: React.FC<CategoryDetailPageProps> = ({ category
 
   const categoryItems = useMemo(() => {
     const q = category.slug.toLowerCase()
-    return CATEGORY_DIRECTORY_ITEMS.filter(
+    const allItems = [...CATEGORY_DIRECTORY_ITEMS]
+    dbCategories.forEach(dbItem => {
+      const existingIdx = allItems.findIndex(i => i.slug === dbItem.slug)
+      if (existingIdx >= 0) {
+        allItems[existingIdx] = { ...allItems[existingIdx], ...dbItem }
+      } else {
+        allItems.push({
+          id: dbItem._id || dbItem.id || dbItem.slug,
+          name: dbItem.name,
+          slug: dbItem.slug,
+          image: dbItem.image || dbItem.logo || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=80&auto=format&fit=crop&q=80',
+          letter: dbItem.letter || (dbItem.name ? dbItem.name.charAt(0).toUpperCase() : 'A')
+        } as any)
+      }
+    })
+    
+    return allItems.filter(
       (item) => item.slug.includes(q) || item.name.toLowerCase().includes(q)
     )
-  }, [category.slug])
+  }, [category.slug, dbCategories])
 
   const handleCopyCode = (code: string, id?: string | number) => {
     navigator.clipboard.writeText(code).catch(() => {})

@@ -77,6 +77,7 @@ const ExecutiveBulkUploadPage = React.lazy(() => import('./pages/admin/executive
 const ExecutiveDealsPage = React.lazy(() => import('./pages/admin/executive/ExecutiveDealsPage').then(module => ({ default: module.ExecutiveDealsPage })))
 const ExecutiveLootDealsPage = React.lazy(() => import('./pages/admin/executive/ExecutiveLootDealsPage').then(module => ({ default: module.ExecutiveLootDealsPage })))
 const ExecutiveStoresPage = React.lazy(() => import('./pages/admin/executive/ExecutiveStoresPage').then(module => ({ default: module.ExecutiveStoresPage })))
+const ExecutiveBrandsPage = React.lazy(() => import('./pages/admin/executive/ExecutiveBrandsPage').then(module => ({ default: module.ExecutiveBrandsPage })))
 const ExecutiveCouponsPage = React.lazy(() => import('./pages/admin/executive/ExecutiveCouponsPage').then(module => ({ default: module.ExecutiveCouponsPage })))
 const ExecutiveCreditCardsPage = React.lazy(() => import('./pages/admin/executive/ExecutiveCreditCardsPage').then(module => ({ default: module.ExecutiveCreditCardsPage })))
 const ExecutiveCategoriesPage = React.lazy(() => import('./pages/admin/executive/ExecutiveCategoriesPage').then(module => ({ default: module.ExecutiveCategoriesPage })))
@@ -573,6 +574,7 @@ export default function App() {
       if (currentPath === '/executive/deals') return <ExecutiveDealsPage />
       if (currentPath === '/executive/loot-deals') return <ExecutiveLootDealsPage />
       if (currentPath === '/executive/stores') return <ExecutiveStoresPage />
+      if (currentPath === '/executive/brands') return <ExecutiveBrandsPage />
       if (currentPath === '/executive/coupons') return <ExecutiveCouponsPage />
       if (currentPath === '/executive/credit-cards') return <ExecutiveCreditCardsPage />
       if (currentPath === '/executive/categories') return <ExecutiveCategoriesPage />
