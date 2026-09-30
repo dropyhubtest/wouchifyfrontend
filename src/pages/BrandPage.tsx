@@ -7,14 +7,14 @@ import { useDesktopScale } from '../hooks/useDesktopScale'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import { MobileBrandPage } from './MobileBrandPage'
 import { getBrandData } from '../data/brandDeals'
-import { DEALS_CARD_ITEMS, type DealCardItem } from '../data/dealsPage'
+import { type DealCardItem } from '../data/dealsPage'
 import { adminApi } from '../services/adminApi'
 
 import watermarkMain from '../assets/hero/hero-watermark-main.png'
 import watermarkMainState2 from '../assets/hero/hero-watermark-main-state-2.png'
 import watermarkSecondary from '../assets/hero/hero-watermark-secondary.png'
 import watermarkSecondaryState2 from '../assets/hero/hero-watermark-secondary-state-2.png'
-import amazonLogo from '../assets/brand-logos/amazon-logo.png'
+
 import amazonCouponLogo from '../assets/coupons/amazon.png'
 import amazonHeroArtwork from '../assets/brands-inner/amazon-hero.png'
 

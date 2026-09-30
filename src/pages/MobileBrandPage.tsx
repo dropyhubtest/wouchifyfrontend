@@ -2,11 +2,11 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import { MobileHeader } from '../components/mobile/MobileHeader'
 import { MobileFooter } from '../components/mobile/MobileFooter'
 import { MobileDealCard } from '../components/mobile/MobileDealCard'
-import { DEALS_CARD_ITEMS, type DealCardItem } from '../data/dealsPage'
+import { type DealCardItem } from '../data/dealsPage'
 import { getBrandData } from '../data/brandDeals'
 import { adminApi } from '../services/adminApi'
 
-import amazonLogo from '../assets/brand-logos/amazon-logo.png'
+
 import amazonCouponLogo from '../assets/coupons/amazon.png'
 
 import './MobileBrandPage.css'
